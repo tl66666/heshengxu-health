@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>禾伴 · AI 健康管家 Demo</title>
+  <meta name="description" content="禾伴 —— 长期陪伴型 AI 健康管家产品 Demo：健康画像、AI 咨询、养生计划、健康数据与周报。">
+  <link rel="icon" href="assets/avatar.jpg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="phone" id="app">
+
+    <!-- ============ 建档 / 欢迎 ============ -->
+    <section class="view view-onboarding active" id="view-onboarding">
+      <!-- 欢迎屏 -->
+      <div class="ob-screen ob-welcome" data-ob="0">
+        <div class="ob-hero">
+          <img src="assets/hero.jpg" alt="清晨森林中舒展身体的人">
+          <div class="ob-hero-mask"></div>
+        </div>
+        <div class="ob-welcome-body">
+          <div class="ob-bubble">
+            <img class="avatar-sm" src="assets/avatar.jpg" alt="小禾">
+            <p>你好，我是<strong>小禾</strong>，你的 AI 健康管家。花 2 分钟让我认识你，之后的每一条建议都会为你量身定制。</p>
+          </div>
+          <h1 class="ob-title">禾伴</h1>
+          <p class="ob-sub">长期陪伴你的 AI 健康管家</p>
+          <button class="btn-primary" id="ob-start">开始我的健康建档</button>
+          <button class="btn-ghost" id="ob-skip">先随便逛逛</button>
+          <p class="ob-disclaimer">禾伴提供健康管理与生活方式建议，不能替代医生诊疗</p>
+        </div>
+      </div>
+
+      <!-- 第 1 步：基础信息 -->
+      <div class="ob-screen" data-ob="1">
+        <div class="ob-head">
+          <div class="ob-progress"><span style="width:33%"></span></div>
+          <h2>先认识一下你</h2>
+          <p class="ob-tip">基础信息用于计算身体指标</p>
+        </div>
+        <div class="ob-body">
+          <div class="field">
+            <label>年龄段</label>
+            <div class="chips" data-field="age">
+              <button class="chip" data-value="18-25">18-25 岁</button>
+              <button class="chip" data-value="26-35">26-35 岁</button>
+              <button class="chip" data-value="36-45">36-45 岁</button>
+              <button class="chip" data-value="46-60">46-60 岁</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>性别</label>
+            <div class="chips" data-field="gender">
+              <button class="chip" data-value="female">女</button>
+              <button class="chip" data-value="male">男</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>身高 <b id="h-val">168</b> cm</label>
+            <input type="range" id="height" min="145" max="200" value="168">
+          </div>
+          <div class="field">
+            <label>体重 <b id="w-val">62</b> kg</label>
+            <input type="range" id="weight" min="40" max="120" value="62">
+          </div>
+        </div>
+        <div class="ob-foot">
+          <button class="btn-primary ob-next" data-next="2">下一步</button>
+        </div>
+      </div>
+
+      <!-- 第 2 步：生活习惯 -->
+      <div class="ob-screen" data-ob="2">
+        <div class="ob-head">
+          <div class="ob-progress"><span style="width:66%"></span></div>
+          <h2>你的日常节奏</h2>
+          <p class="ob-tip">生活习惯决定画像的准确度</p>
+        </div>
+        <div class="ob-body">
+          <div class="field">
+            <label>作息</label>
+            <div class="chips" data-field="sleep">
+              <button class="chip" data-value="规律作息">规律作息</button>
+              <button class="chip" data-value="经常熬夜">经常熬夜</button>
+              <button class="chip" data-value="作息不定">作息不定</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>饮食</label>
+            <div class="chips" data-field="diet">
+              <button class="chip" data-value="清淡均衡">清淡均衡</button>
+              <button class="chip" data-value="外卖为主">外卖为主</button>
+              <button class="chip" data-value="口味偏油">口味偏油</button>
+              <button class="chip" data-value="应酬较多">应酬较多</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>运动</label>
+            <div class="chips" data-field="sport">
+              <button class="chip" data-value="规律运动">规律运动</button>
+              <button class="chip" data-value="偶尔活动">偶尔活动</button>
+              <button class="chip" data-value="几乎不动">几乎不动</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>工作状态</label>
+            <div class="chips" data-field="work">
+              <button class="chip" data-value="久坐办公">久坐办公</button>
+              <button class="chip" data-value="经常走动">经常走动</button>
+              <button class="chip" data-value="体力劳动">体力劳动</button>
+            </div>
+          </div>
+        </div>
+        <div class="ob-foot">
+          <button class="btn-ghost ob-prev" data-prev="1">上一步</button>
+          <button class="btn-primary ob-next" data-next="3">下一步</button>
+        </div>
+      </div>
+
+      <!-- 第 3 步：健康目标 -->
+      <div class="ob-screen" data-ob="3">
+        <div class="ob-head">
+          <div class="ob-progress"><span style="width:100%"></span></div>
+          <h2>最想改善什么</h2>
+          <p class="ob-tip">可多选，小禾会按此安排优先级</p>
+        </div>
+        <div class="ob-body">
+          <div class="field">
+            <label>健康目标（可多选）</label>
+            <div class="chips" data-field="goals" data-multi="1">
+              <button class="chip" data-value="改善睡眠">改善睡眠</button>
+              <button class="chip" data-value="减脂塑形">减脂塑形</button>
+              <button class="chip" data-value="提升精力">提升精力</button>
+              <button class="chip" data-value="缓解压力">缓解压力</button>
+              <button class="chip" data-value="调理肠胃">调理肠胃</button>
+              <button class="chip" data-value="增强免疫">增强免疫</button>
+            </div>
+          </div>
+        </div>
+        <div class="ob-foot">
+          <button class="btn-ghost ob-prev" data-prev="2">上一步</button>
+          <button class="btn-primary" id="ob-generate">生成我的健康画像</button>
+        </div>
+      </div>
+
+      <!-- 生成中 -->
+      <div class="ob-screen" data-ob="4">
+        <div class="ob-loading">
+          <img src="assets/avatar.jpg" alt="小禾" class="ob-loading-avatar">
+          <p class="ob-loading-text">小禾正在分析你的情况<span class="dots"><i>.</i><i>.</i><i>.</i></span></p>
+        </div>
+      </div>
+
+      <!-- 画像结果 -->
+      <div class="ob-screen" data-ob="5">
+        <div class="ob-head">
+          <h2>你的健康画像</h2>
+          <p class="ob-tip">由小禾根据你填写的信息生成</p>
+        </div>
+        <div class="ob-body">
+          <div class="card profile-card">
+            <div class="profile-bmi">
+              <div class="bmi-num" id="bmi-num">22.0</div>
+              <div class="bmi-label">BMI · <span id="bmi-tag">标准</span></div>
+            </div>
+            <div class="profile-tags" id="profile-tags"></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">小禾的建议</h3>
+            <ul class="advice-list" id="advice-list"></ul>
+          </div>
+        </div>
+        <div class="ob-foot">
+          <button class="btn-primary" id="ob-done">生成我的 7 日计划，进入首页</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 首页 ============ -->
+    <section class="view" id="view-home">
+      <header class="home-head">
+        <div>
+          <h1 id="greeting">早上好</h1>
+          <p class="date" id="today-date"></p>
+        </div>
+        <button class="assistant-entry" id="entry-chat">
+          <img src="assets/avatar.jpg" alt="小禾">
+          <span>AI 健康管家</span>
+        </button>
+      </header>
+
+      <div class="card status-card">
+        <h3 class="card-title">今日健康状态</h3>
+        <div class="status-flex">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 120 120" class="ring">
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-val" id="ring-val" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="ring-text"><b id="score-num">85</b><span>分</span></div>
+          </div>
+          <div class="status-bars">
+            <div class="bar-row"><span class="bar-name">睡眠</span><div class="bar"><i class="bar-fill blue" style="width:88%"></i></div><span class="bar-val">7.5/8 小时</span></div>
+            <div class="bar-row"><span class="bar-name">饮食</span><div class="bar"><i class="bar-fill" style="width:72%"></i></div><span class="bar-val">1800/2000 大卡</span></div>
+            <div class="bar-row"><span class="bar-name">运动</span><div class="bar"><i class="bar-fill" style="width:50%"></i></div><span class="bar-val">30/60 分钟</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h3 class="card-title">今日任务</h3>
+          <span class="task-progress" id="task-progress">0/4</span>
+        </div>
+        <ul class="task-list" id="home-tasks"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h3 class="card-title">健康知识</h3>
+          <span class="link-more">查看全部</span>
+        </div>
+        <div class="kb-list">
+          <button class="kb-item" data-kb="water">
+            <span class="kb-tag tag-diet">饮食养生</span>
+            <b>夏秋交替补水：少量多次温水更易吸收</b>
+            <p>小禾总结：每次 150-200ml，晨起与餐前半小时最佳。</p>
+          </button>
+          <button class="kb-item" data-kb="sit">
+            <span class="kb-tag tag-sport">运动健康</span>
+            <b>久坐 1 小时，用 3 分钟换颈椎轻松</b>
+            <p>小禾总结：颈肩环绕 + 靠墙站立法，办公室即可完成。</p>
+          </button>
+          <button class="kb-item" data-kb="solar">
+            <span class="kb-tag tag-trad">传统养生</span>
+            <b>处暑将至：早睡早起，饮食宜润不宜燥</b>
+            <p>小禾总结：银耳、梨、百合正当季，少食辛辣。</p>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI 咨询 ============ -->
+    <section class="view" id="view-chat">
+      <header class="chat-head">
+        <img src="assets/avatar.jpg" alt="小禾" class="avatar-sm">
+        <div class="chat-head-info">
+          <b>小禾</b>
+          <span class="online"><i></i>在线</span>
+        </div>
+      </header>
+
+      <div class="chat-profile" id="chat-profile">
+        <div class="chat-profile-head">
+          <b>健康画像</b>
+          <span class="chat-profile-toggle" id="profile-toggle">收起</span>
+        </div>
+        <div class="chat-profile-tags" id="chat-profile-tags"></div>
+      </div>
+
+      <div class="chat-body" id="chat-body"></div>
+
+      <div class="quick-pills" id="quick-pills">
+        <button class="pill">最近睡不好怎么办？</button>
+        <button class="pill">外卖怎么吃更健康？</button>
+        <button class="pill">久坐族怎么缓解颈椎？</button>
+        <button class="pill">我感觉胸痛，是什么病？</button>
+      </div>
+
+      <footer class="chat-input-bar">
+        <button class="icon-btn" id="mic-btn" title="语音输入（演示）">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <input type="text" id="chat-input" placeholder="输入你的问题…" autocomplete="off">
+        <button class="send-btn" id="send-btn" title="发送">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </button>
+      </footer>
+      <p class="chat-disclaimer">小禾提供的是健康管理与生活方式建议，不能替代医生诊疗</p>
+    </section>
+
+    <!-- ============ 计划 ============ -->
+    <section class="view" id="view-plan">
+      <header class="page-head">
+        <h1>养生计划</h1>
+        <p class="page-sub" id="plan-week-label"></p>
+      </header>
+
+      <div class="card streak-card">
+        <div class="streak-num">6<small> 天</small></div>
+        <div>
+          <b>连续打卡</b>
+          <p>再坚持 1 天，解锁「七日如新」里程碑</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="week-strip" id="week-strip"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">今日计划</h3>
+        <div class="plan-group"><h4>早晨</h4><ul class="task-list" id="plan-tasks-morning"></ul></div>
+        <div class="plan-group"><h4>中午</h4><ul class="task-list" id="plan-tasks-noon"></ul></div>
+        <div class="plan-group"><h4>晚上</h4><ul class="task-list" id="plan-tasks-night"></ul></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">本月完成情况</h3>
+        <div class="month-grid" id="month-grid"></div>
+        <div class="month-legend">
+          <span><i class="dot-full"></i>全部完成</span>
+          <span><i class="dot-part"></i>部分完成</span>
+          <span><i class="dot-none"></i>未完成</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 数据 ============ -->
+    <section class="view" id="view-data">
+      <header class="page-head">
+        <h1>健康数据</h1>
+        <p class="page-sub">每周日更新综合评分</p>
+      </header>
+
+      <div class="card score-card">
+        <div class="ring-wrap big">
+          <svg viewBox="0 0 120 120" class="ring">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-val" id="ring-val-big" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="ring-text"><b>85</b><span>分</span></div>
+        </div>
+        <div class="score-dims">
+          <div class="dim-row"><span>睡眠</span><i class="stars" data-stars="4"></i></div>
+          <div class="dim-row"><span>饮食</span><i class="stars" data-stars="3"></i></div>
+          <div class="dim-row"><span>运动</span><i class="stars" data-stars="4"></i></div>
+          <div class="dim-row"><span>情绪</span><i class="stars" data-stars="4"></i></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">近 7 日评分趋势</h3>
+        <svg class="trend" id="trend-chart" viewBox="0 0 320 130" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div class="card report-card">
+        <div class="card-title-row">
+          <h3 class="card-title">本周健康报告</h3>
+          <span class="report-by">由小禾生成</span>
+        </div>
+        <div class="report-block good">
+          <b>你的优势</b>
+          <p>睡眠时长连续 5 天达标，晨起拉伸完成率 100%，作息正在形成稳定节奏。</p>
+        </div>
+        <div class="report-block improve">
+          <b>需要改善</b>
+          <p>周三、周五外卖偏油，蔬菜摄入不足；有 2 天饮水未达 1500ml。</p>
+        </div>
+        <div class="report-block next">
+          <b>下周建议</b>
+          <p>把 2 顿外卖替换为轻食套餐；上午 10 点加一杯水；周三安排一次 20 分钟快走。</p>
+        </div>
+        <button class="btn-primary btn-block" id="accept-plan">接受下周调整建议</button>
+      </div>
+    </section>
+
+    <!-- ============ 我的 ============ -->
+    <section class="view" id="view-me">
+      <header class="page-head">
+        <h1>我的</h1>
+      </header>
+      <div class="card me-card">
+        <img src="assets/avatar.jpg" alt="小禾" class="me-avatar">
+        <div class="me-info">
+          <b id="me-title">我的健康档案</b>
+          <p id="me-summary">完成建档后，这里会展示你的画像摘要</p>
+        </div>
+        <button class="btn-ghost btn-sm" id="rebuild-btn">重新建档</button>
+      </div>
+      <div class="card menu-card">
+        <button class="menu-item" data-menu="我的收藏">我的收藏<span>›</span></button>
+        <button class="menu-item" data-menu="提醒设置">提醒设置<span>›</span></button>
+        <button class="menu-item" data-menu="隐私与数据">隐私与数据<span>›</span></button>
+        <button class="menu-item" data-menu="意见反馈">意见反馈<span>›</span></button>
+        <button class="menu-item" data-menu="关于禾伴">关于禾伴<span>›</span></button>
+      </div>
+      <div class="me-disclaimer">
+        禾伴定位为健康管理与生活方式建议工具，不提供疾病诊断、用药指导等医疗服务。如有不适，请及时就医。
+      </div>
+    </section>
+
+    <!-- ============ 底部导航 ============ -->
+    <nav class="tabbar" id="tabbar">
+      <button class="tab active" data-view="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+        <span>首页</span>
+      </button>
+      <button class="tab" data-view="data">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>
+        <span>数据</span>
+      </button>
+      <button class="tab tab-center" data-view="chat">
+        <span class="tab-center-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>
+        </span>
+        <span>咨询</span>
+      </button>
+      <button class="tab" data-view="plan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        <span>计划</span>
+      </button>
+      <button class="tab" data-view="me">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
+        <span>我的</span>
+      </button>
+    </nav>
+
+    <!-- 小禾 toast -->
+    <div class="toast" id="toast">
+      <img src="assets/avatar.jpg" alt="">
+      <span id="toast-text"></span>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
