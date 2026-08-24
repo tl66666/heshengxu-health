@@ -4,7 +4,16 @@
 
 “和生序”取“和身心、生息、循其序”之意：不追求极端的改变，而是通过持续记录、理解变化和小步行动，让健康回到每个人自己的节律。品牌主张：**让健康回到自己的节律。**
 
-当前仓库已完成阶段 0 工程底座，正在实施阶段 1 建档闭环。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
+当前仓库已完成阶段 0 工程底座和阶段 1 建档闭环，正在进入健康首页与每日记录开发。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
+
+## 小程序快速开始
+
+```powershell
+pnpm install
+./scripts/build-mini.ps1
+```
+
+构建完成后，在微信开发者工具中导入 `apps/mini`。如果提示找不到 `app.json`，说明导入了错误目录；请先运行构建脚本，或直接导入 `apps/mini/dist/build/mp-weixin`。
 
 ## 仓库结构
 
@@ -30,6 +39,8 @@ npx serve prototypes/web-demo
 - [阶段 0 实施计划](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
 - [阶段 1 建档设计](docs/superpowers/specs/2026-08-24-stage-1-onboarding-design.md)
 - [阶段 1 建档实施计划](docs/superpowers/plans/2026-08-24-stage-1-onboarding.md)
+- [项目结构规范](docs/engineering/project-structure.md)
+- [微信小程序导入架构决策](docs/architecture/adr-003-mini-program-import.md)
 
 ## 健康与 AI 边界
 

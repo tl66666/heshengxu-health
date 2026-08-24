@@ -1,0 +1,17 @@
+{
+  "description": "和生序健康管理小程序",
+  "packOptions": { "ignore": [] },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "minified": true,
+    "postcss": true,
+    "minifyWXSS": true,
+    "minifyWXML": true
+  },
+  "compileType": "miniprogram",
+  "projectname": "heshengxu-health",
+  "miniprogramRoot": "dist/build/mp-weixin/",
+  "appid": "",
+  "condition": {}
+}

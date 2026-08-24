@@ -1,5 +1,5 @@
 {
-  "name": "heban-health",
+  "name": "heshengxu-health",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.9.0",
@@ -8,6 +8,7 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
+    "build:mini": "pnpm --filter @heban/mini build:mp-weixin",
     "format": "prettier . --check",
     "format:write": "prettier . --write",
     "lint": "eslint .",

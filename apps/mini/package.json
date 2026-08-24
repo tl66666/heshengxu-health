@@ -6,6 +6,7 @@
   "scripts": {
     "dev:mp-weixin": "uni -p mp-weixin",
     "build:mp-weixin": "uni build -p mp-weixin",
+    "build:mp-weixin:check": "pnpm build:mp-weixin && node ../../scripts/verify-mini-build.mjs",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit"
   },
