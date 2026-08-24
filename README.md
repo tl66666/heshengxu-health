@@ -1,42 +1,32 @@
-# 禾伴 · AI 健康管家 Demo
+# 禾伴健康
 
-长期陪伴型 AI 健康管理养生知识平台 —— 前端交互原型（纯静态，无后端依赖）。
+面向微信小程序优先、可扩展到 App 的 AI 健康管理平台。
 
-**在线预览**：https://tl66666.github.io/heban-ai-health-demo/
+当前仓库处于阶段 0：工程底座建设。生产代码尚未开始实现，根目录的静态页面已被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
 
-## Demo 内容
+## 仓库结构
 
-- **健康建档**：3 步表单 → 模拟 AI 生成个人健康画像（BMI、特点标签、个性化建议）
-- **首页**：按时段问候、今日健康状态评分环、今日任务打卡（联动评分）、健康知识推荐
-- **AI 咨询**：模拟对话引擎，演示意图识别（睡眠 / 饮食 / 运动 / 情绪 / 节气）、知识来源标注，以及医疗风险三级拦截（求诊断 / 用药类问题触发安全话术并引导就医）
-- **养生计划**：连续打卡、周视图、月完成日历、分时段任务
-- **健康数据**：综合评分、维度星级、7 日趋势图、AI 本周健康报告
-- **我的**：档案摘要、设置入口、免责声明
-
-> Demo 定位：产品第一阶段 PRD 的配套交互原型，所有数据为模拟数据。
-> 本产品仅提供健康管理与生活方式建议，不提供医疗诊断服务。
-
-## 本地运行
-
-无需构建，直接用浏览器打开 `index.html` 即可；或启动任意静态服务器：
-
-```bash
-npx serve .
+```text
+apps/                 # 后续的 uni-app 小程序与 NestJS API
+packages/             # 跨端 contracts、领域规则和共享配置
+prototypes/web-demo/  # 当前静态 Demo，仅用于产品与设计讨论
+infra/                # 本地 Docker 与部署基础设施
+docs/                 # 产品、架构、工程规范和实施计划
 ```
 
-## 技术说明
+## 运行原型
 
-- 纯 HTML / CSS / 原生 JavaScript，零依赖、零构建
-- 移动端优先设计，桌面浏览时以手机壳样式居中展示
-- 建档数据与当日打卡状态存于 `localStorage`
-
-## 目录结构
-
+```powershell
+node --test prototypes/web-demo/profile-utils.test.cjs
+npx serve prototypes/web-demo
 ```
-├── index.html      # 全部页面结构（单页六视图）
-├── styles.css      # 视觉样式（自然绿 + 浅蓝 + 米白）
-├── app.js          # 交互逻辑与模拟 AI 引擎
-└── assets/         # 插画与角色形象
-    ├── hero.jpg
-    └── avatar.jpg
-```
+
+## 文档入口
+
+- [产品蓝图](docs/superpowers/specs/2026-08-24-heban-health-platform-design.md)
+- [产品范围取舍](docs/superpowers/specs/2026-08-24-product-scope-after-mint-benchmark.md)
+- [阶段 0 实施计划](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
+
+## 健康与 AI 边界
+
+禾伴提供健康管理与生活方式建议，不提供疾病诊断、处方、药物剂量或替代线下就医的判断。所有生产 AI 能力必须经过服务端风险拦截、输出校验与审计后才能上线。

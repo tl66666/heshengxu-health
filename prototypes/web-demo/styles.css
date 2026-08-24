@@ -369,6 +369,47 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 6px 4px calc(8px + env(safe-area-inset-bottom));
   z-index: 20;
 }
+.tabbar.is-locked { display: none; pointer-events: none; }
+
+.bmi-live {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center;
+  padding: 15px 16px; border: 1px solid #d7ead9; border-radius: 14px;
+  background: var(--green-soft);
+}
+.bmi-live-label { display: block; color: var(--muted); font-size: .76rem; margin-bottom: 2px; }
+.bmi-live strong { color: var(--green); font-size: 1.8rem; line-height: 1; }
+.bmi-live-tag { padding: 6px 11px; border-radius: 99px; font-size: .78rem; font-weight: 700; }
+.bmi-live-tag.low { background: #fff2cf; color: #9b6f10; }
+.bmi-live-tag.normal { background: #dff0e2; color: #287044; }
+.bmi-live-tag.high { background: #fff0df; color: #ad6421; }
+.bmi-live-tag.very-high { background: #f9e2e1; color: #a94f4a; }
+.bmi-live p { grid-column: 1 / -1; color: var(--ink); font-size: .8rem; line-height: 1.55; }
+
+.record-banner {
+  display: block; width: calc(100% - 32px); padding: 0; text-align: left; color: var(--ink);
+  cursor: pointer; font-family: var(--font);
+}
+.record-banner:active { transform: scale(.985); }
+
+.chat-welcome { margin: auto 0; padding: 8px 28px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 7px; color: var(--muted); }
+.chat-welcome img { width: 144px; height: 144px; object-fit: cover; border-radius: 50%; mix-blend-mode: multiply; }
+.chat-welcome b { color: var(--ink); font-size: 1rem; }
+.chat-welcome span { font-size: .82rem; line-height: 1.5; }
+
+.program-section { margin: 18px 16px; }
+.section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin: 0 2px 10px; }
+.section-head h3 { font-size: 1rem; }
+.section-head p { margin-top: 3px; color: var(--muted); font-size: .75rem; line-height: 1.45; }
+.section-head > span { flex: none; padding: 4px 8px; color: var(--green); background: var(--green-soft); border-radius: 5px; font-size: .7rem; font-weight: 700; }
+.program-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.program-tile { position: relative; height: 112px; overflow: hidden; padding: 0; border: 1px solid var(--rule); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; font-family: var(--font); text-align: left; box-shadow: 0 5px 14px rgba(40, 73, 49, .05); }
+.program-tile:last-child { grid-column: 1 / -1; }
+.program-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.program-tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 38%, rgba(20, 52, 32, .68)); }
+.program-tile span { position: absolute; z-index: 1; left: 11px; bottom: 9px; color: #fff; font-size: .82rem; font-weight: 700; }
+.program-tile.on { border: 2px solid var(--green); }
+.program-tile.on::before { content: ""; position: absolute; z-index: 2; right: 8px; top: 8px; width: 10px; height: 10px; border: 3px solid #fff; border-radius: 50%; background: var(--green); box-shadow: 0 1px 6px rgba(0,0,0,.2); }
+#view-data { background-color: var(--bg); background-image: url("assets/generated/leaf-corner-decoration.png"); background-repeat: no-repeat; background-position: right top; background-size: 100% auto; }
 .tab {
   border: none; background: none; cursor: pointer; color: var(--muted);
   display: flex; flex-direction: column; align-items: center; gap: 3px;

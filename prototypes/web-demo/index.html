@@ -64,6 +64,14 @@
             <label>体重 <b id="w-val">62</b> kg</label>
             <input type="range" id="weight" min="40" max="120" value="62">
           </div>
+          <div class="bmi-live" id="bmi-live" aria-live="polite">
+            <div>
+              <span class="bmi-live-label">当前 BMI</span>
+              <strong id="bmi-live-value">22.0</strong>
+            </div>
+            <span class="bmi-live-tag normal" id="bmi-live-tag">正常</span>
+            <p id="bmi-live-advice">你的身高体重处于较舒适的范围，继续保持规律作息和均衡饮食。</p>
+          </div>
         </div>
         <div class="ob-foot">
           <button class="btn-primary ob-next" data-next="2">下一步</button>
@@ -217,6 +225,15 @@
         </div>
       </div>
 
+      <button class="feature-banner record-banner" id="entry-record">
+        <img src="assets/generated/record-desk-banner.png" alt="小禾整理今日健康记录">
+        <span class="feature-banner-copy">
+          <span class="eyebrow">快速记录</span>
+          <strong>把今天的感受记下来</strong>
+          <span>饮食、体重、睡眠和心情，都能成为下一次建议的依据。</span>
+        </span>
+      </button>
+
       <div class="card">
         <div class="card-title-row">
           <h3 class="card-title">今日任务</h3>
@@ -268,7 +285,13 @@
         <div class="chat-profile-tags" id="chat-profile-tags"></div>
       </div>
 
-      <div class="chat-body" id="chat-body"></div>
+      <div class="chat-body" id="chat-body">
+        <div class="chat-welcome" id="chat-welcome">
+          <img src="assets/75ee009a8289f5615070cf4442610ba6.jpg" alt="小禾健康陪伴形象">
+          <b>今天想从哪里开始照顾自己？</b>
+          <span>可以问饮食、体重、睡眠、运动或情绪。</span>
+        </div>
+      </div>
 
       <div class="quick-pills" id="quick-pills">
         <button class="pill">最近睡不好怎么办？</button>
@@ -308,6 +331,20 @@
       <div class="card">
         <div class="week-strip" id="week-strip"></div>
       </div>
+
+      <section class="program-section" aria-label="健康管理方案">
+        <div class="section-head">
+          <div><h3>我的健康方案</h3><p>按目标选择一个重点，其他习惯仍会被温和照顾。</p></div>
+          <span>可叠加</span>
+        </div>
+        <div class="program-grid">
+          <button class="program-tile on" data-program="weight"><img src="assets/generated/program-weight.png" alt="减脂与体重管理"><span>减脂与体重</span></button>
+          <button class="program-tile" data-program="sleep"><img src="assets/generated/program-sleep.png" alt="睡眠与精力恢复"><span>睡眠与精力</span></button>
+          <button class="program-tile" data-program="mood"><img src="assets/generated/program-mood.png" alt="压力与情绪调节"><span>压力与情绪</span></button>
+          <button class="program-tile" data-program="metabolic"><img src="assets/generated/program-metabolic.png" alt="代谢管理"><span>代谢管理</span></button>
+          <button class="program-tile" data-program="digestive"><img src="assets/generated/program-digestive.png" alt="肠胃生活方式管理"><span>肠胃生活方式</span></button>
+        </div>
+      </section>
 
       <div class="card">
         <h3 class="card-title">今日计划</h3>
@@ -411,7 +448,7 @@
     </section>
 
     <!-- ============ 底部导航 ============ -->
-    <nav class="tabbar" id="tabbar">
+    <nav class="tabbar is-locked" id="tabbar">
       <button class="tab active" data-view="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
         <span>首页</span>
@@ -443,6 +480,7 @@
     </div>
   </div>
 
+  <script src="profile-utils.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

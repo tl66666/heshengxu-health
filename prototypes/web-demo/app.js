@@ -2,6 +2,7 @@
 (function () {
   "use strict";
 
+  var ProfileUtils = window.HebanProfileUtils;
   var LS_PROFILE = "heban_profile";
   var LS_TASKS = "heban_tasks";
   var CIRC = 326.7;
@@ -58,8 +59,14 @@
     toast._t = setTimeout(function () { el.classList.remove("show"); }, 2600);
   }
 
+  function setAppLocked(locked) {
+    $("#tabbar").classList.toggle("is-locked", locked);
+    $("#app").classList.toggle("onboarding-locked", locked);
+  }
+
   /* ---------------- 视图切换 ---------------- */
   function showView(name) {
+    if (ProfileUtils.shouldLockApp(state.profile) && name !== "onboarding") return;
     $$(".view").forEach(function (v) { v.classList.remove("active"); });
     $("#view-" + name).classList.add("active");
     $$(".tab").forEach(function (t) {
@@ -80,7 +87,23 @@
     $$(".ob-screen").forEach(function (s) {
       s.classList.toggle("active", s.dataset.ob === String(n));
     });
+    if (String(n) === "1") updateBmiPreview();
     window.scrollTo(0, 0);
+  }
+
+  function updateBmiPreview() {
+    var bmi = ProfileUtils.calculateBmi(obData.height, obData.weight);
+    var category = ProfileUtils.classifyBmi(bmi);
+    var advice = {
+      low: "可以关注规律饮食和足够能量摄入，让身体慢慢回到更舒适的节奏。",
+      normal: "你的身高体重处于较舒适的范围，继续保持规律作息和均衡饮食。",
+      high: "建议从饮食结构和日常活动两侧循序调整，不需要急于求成。",
+      "very-high": "建议以温和、持续的方式调整，必要时可咨询专业人士。"
+    };
+    $("#bmi-live-value").textContent = bmi.toFixed(1);
+    $("#bmi-live-tag").textContent = category.label;
+    $("#bmi-live-tag").className = "bmi-live-tag " + category.tone;
+    $("#bmi-live-advice").textContent = advice[category.tone];
   }
 
   $$(".chips").forEach(function (group) {
@@ -105,10 +128,12 @@
   $("#height").addEventListener("input", function () {
     obData.height = +this.value;
     $("#h-val").textContent = this.value;
+    updateBmiPreview();
   });
   $("#weight").addEventListener("input", function () {
     obData.weight = +this.value;
     $("#w-val").textContent = this.value;
+    updateBmiPreview();
   });
 
   $$(".ob-next").forEach(function (b) {
@@ -141,8 +166,8 @@
     if (d.sleep === "规律作息" && d.diet === "清淡均衡") tags.push("基础习惯良好");
     if (tags.length === 0) tags.push("生活状态均衡");
 
-    var bmi = d.weight / Math.pow(d.height / 100, 2);
-    var bmiTag = bmi < 18.5 ? "偏瘦" : bmi < 24 ? "标准" : bmi < 28 ? "偏重" : "肥胖";
+    var bmi = ProfileUtils.calculateBmi(d.height, d.weight);
+    var bmiTag = ProfileUtils.classifyBmi(bmi).label;
 
     if (tags.indexOf("睡眠规律待改善") >= 0 || tags.indexOf("作息节律不稳定") >= 0) {
       advice.push("固定起床时间，睡前 1 小时远离手机屏幕，两周内把入睡时间提前 30 分钟");
@@ -199,6 +224,7 @@
   });
 
   function enterApp() {
+    setAppLocked(false);
     applyProfileEverywhere();
     showView("home");
   }
@@ -270,6 +296,17 @@
   });
 
   $("#entry-chat").addEventListener("click", function () { showView("chat"); });
+  $("#entry-record").addEventListener("click", function () {
+    showView("chat");
+    setTimeout(function () { sendUserMessage("我想记录一下今天的饮食、睡眠和心情"); }, 120);
+  });
+
+  $$(".program-tile").forEach(function (tile) {
+    tile.addEventListener("click", function () {
+      tile.classList.toggle("on");
+      toast(tile.classList.contains("on") ? "已加入本周关注方案" : "已从本周关注方案移除");
+    });
+  });
 
   /* 知识条目 → 带进问题的咨询页 */
   $$(".kb-item").forEach(function (kb) {
@@ -293,6 +330,8 @@
   }
 
   function addMsg(role, html, srcTitle) {
+    var welcome = $("#chat-welcome");
+    if (welcome) welcome.remove();
     var wrap = document.createElement("div");
     wrap.className = "msg " + role;
     var avatar = role === "ai" ? '<img class="msg-avatar" src="assets/avatar.jpg" alt="小禾">' : "";
@@ -514,6 +553,8 @@
   });
   $("#rebuild-btn").addEventListener("click", function () {
     localStorage.removeItem(LS_PROFILE);
+    state.profile = null;
+    setAppLocked(true);
     obShow(0);
     showView("onboarding");
   });
@@ -529,6 +570,7 @@
   if (state.profile) {
     enterApp();
   } else {
+    setAppLocked(true);
     obShow(0);
   }
 
