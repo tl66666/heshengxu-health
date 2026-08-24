@@ -12,6 +12,7 @@
     "openapi:generate": "node --experimental-strip-types src/openapi.ts"
   },
   "dependencies": {
+    "@heban/domain": "workspace:*",
     "@nestjs/common": "^11.2.1",
     "@nestjs/core": "^11.2.1",
     "@nestjs/platform-express": "^11.2.1",

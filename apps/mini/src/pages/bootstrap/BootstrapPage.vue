@@ -6,6 +6,44 @@
   </view>
 </template>
 
+<script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app';
+import { createApiClient } from '../../services/api-client.js';
+import { onboardingState } from '../../stores/onboarding.js';
+
+onShow(async () => {
+  const client = createApiClient({
+    baseUrl: 'http://localhost:3000/api/v1',
+    request: ({ url, method, data }) =>
+      new Promise((resolve, reject) => {
+        uni.request({
+          url,
+          method,
+          data: data as Record<string, unknown>,
+          header: { Authorization: 'Bearer dev-mini-user' },
+          success: (response) => resolve({ statusCode: response.statusCode, data: response.data as never }),
+          fail: reject,
+        });
+      }),
+  });
+  try {
+    const profile = await client.get<{
+      heightCm: number | null;
+      weightKg: number | null;
+      primaryGoal?: string | null;
+    }>('/health-profiles/me');
+    if (profile.heightCm && profile.weightKg && profile.primaryGoal) {
+      onboardingState.completed.value = true;
+      uni.redirectTo({ url: '/pages/home/HomePage' });
+      return;
+    }
+  } catch {
+    // The onboarding page remains available when the local API is offline.
+  }
+  uni.redirectTo({ url: '/pages/onboarding/OnboardingPage' });
+});
+</script>
+
 <style scoped>
 .bootstrap-page {
   display: flex;

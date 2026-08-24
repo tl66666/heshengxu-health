@@ -15,4 +15,24 @@ describe('createApiClient', () => {
 
     await expect(client.get('/health-profiles/me')).rejects.toThrow('UNAUTHENTICATED [r1]');
   });
+
+  it('sends a JSON PUT body for profile updates', async () => {
+    let captured: unknown;
+    const client = createApiClient({
+      baseUrl: 'https://example.test/api/v1',
+      request: async (request) => {
+        captured = request;
+        return { statusCode: 200, data: { data: { saved: true } } } as never;
+      },
+    });
+
+    await expect(client.update('/health-profiles/me', { heightCm: 168 })).resolves.toEqual({
+      saved: true,
+    });
+    expect(captured).toEqual({
+      url: 'https://example.test/api/v1/health-profiles/me',
+      method: 'PUT',
+      data: { heightCm: 168 },
+    });
+  });
 });

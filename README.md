@@ -4,7 +4,7 @@
 
 “和生序”取“和身心、生息、循其序”之意：不追求极端的改变，而是通过持续记录、理解变化和小步行动，让健康回到每个人自己的节律。品牌主张：**让健康回到自己的节律。**
 
-当前仓库处于阶段 0：工程底座建设。生产代码尚未开始实现，根目录的静态页面已被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
+当前仓库已完成阶段 0 工程底座，正在实施阶段 1 建档闭环。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
 
 ## 仓库结构
 
@@ -28,6 +28,8 @@ npx serve prototypes/web-demo
 - [产品蓝图](docs/superpowers/specs/2026-08-24-heban-health-platform-design.md)
 - [产品范围取舍](docs/superpowers/specs/2026-08-24-product-scope-after-mint-benchmark.md)
 - [阶段 0 实施计划](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
+- [阶段 1 建档设计](docs/superpowers/specs/2026-08-24-stage-1-onboarding-design.md)
+- [阶段 1 建档实施计划](docs/superpowers/plans/2026-08-24-stage-1-onboarding.md)
 
 ## 健康与 AI 边界
 

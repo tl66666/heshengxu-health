@@ -5,6 +5,14 @@
       "style": {
         "navigationBarTitleText": "和生序"
       }
+    },
+    {
+      "path": "pages/onboarding/OnboardingPage",
+      "style": { "navigationBarTitleText": "开始了解自己" }
+    },
+    {
+      "path": "pages/home/HomePage",
+      "style": { "navigationBarTitleText": "和生序" }
     }
   ],
   "globalStyle": {

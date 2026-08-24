@@ -7,7 +7,9 @@ import { ApiExceptionFilter } from './common/http/api-exception.filter.js';
 export async function createApp() {
   const app = await NestFactory.create(AppModule, { logger: false });
   app.use(requestIdMiddleware);
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }),
+  );
   app.useGlobalFilters(new ApiExceptionFilter());
   app.setGlobalPrefix('api/v1', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
