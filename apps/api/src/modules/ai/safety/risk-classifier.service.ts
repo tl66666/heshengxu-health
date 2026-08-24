@@ -13,7 +13,7 @@ export class RiskClassifierService {
     if (/(自杀|自残|不想活|伤害自己)/u.test(message)) {
       return { decision: 'block', reason: 'self_harm' };
     }
-    if (/(处方|剂量|停药|诊断|开什么药|增加剂量)/u.test(message)) {
+    if (/(处方|剂量|停药|停用|诊断|开什么药|增加剂量)/u.test(message)) {
       return { decision: 'block', reason: 'medication_or_diagnosis' };
     }
     return { decision: 'allow' };
