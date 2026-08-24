@@ -27,15 +27,20 @@ docker compose --env-file .env -f infra/docker/docker-compose.yml down
 ```powershell
 pnpm check
 pnpm test
+pnpm --filter @heban/api test:e2e
+pnpm --filter @heban/api openapi:generate
+pnpm --filter @heban/api build
+pnpm --filter @heban/mini typecheck
+pnpm --filter @heban/mini build:mp-weixin
 ```
 
-API 和小程序加入后，再按阶段 0 实施计划执行其专用测试、OpenAPI 生成与构建命令。
+微信小程序构建产物在 `apps/mini/dist/build/mp-weixin`，可在微信开发者工具中导入预览。开发环境不填微信 AppSecret，真实微信登录会在后续身份接入阶段实现。
 
 ## 当前阶段 0 验收状态
 
-已完成：Docker PostgreSQL/Redis 健康检查、共享 BMI 规则、API 健康端点、档案授权边界、AI 输入/输出安全规则、API 请求层测试。
+已完成：Docker PostgreSQL/Redis 健康检查、共享 BMI 规则、API 健康端点、档案授权边界、AI 输入/输出安全规则与隐私审计、OpenAPI、uni-app 小程序工程壳、API 请求层测试、微信小程序构建。
 
-暂缓：Prisma 引擎下载与 PostgreSQL migration、正式 uni-app 编译插件和微信小程序构建。两项均受本机 npm 二进制/大型依赖下载超时影响，代码边界已保留但未宣称完成。
+暂缓：Prisma 引擎下载与 PostgreSQL migration。此前本机下载 Prisma 二进制持续超时，因此当前健康档案仍使用内存仓储；数据库容器已经就绪，但不能把它视为已完成持久化。
 
 OpenAPI 生成：
 

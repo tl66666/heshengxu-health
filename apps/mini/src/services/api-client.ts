@@ -1,8 +1,4 @@
-type ApiFailure = {
-  error: { code: string; message: string; requestId: string };
-};
-
-type ApiSuccess<T> = { data: T };
+import type { ApiFailure, ApiSuccess } from '../../../../packages/contracts/src/index.js';
 
 type ApiResponse<T> = {
   statusCode: number;

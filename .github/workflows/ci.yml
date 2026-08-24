@@ -21,3 +21,5 @@ jobs:
       - run: pnpm check
       - run: pnpm test
       - run: pnpm --filter @heban/api build
+      - run: pnpm --filter @heban/mini typecheck
+      - run: pnpm --filter @heban/mini build:mp-weixin

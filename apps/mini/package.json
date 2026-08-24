@@ -4,6 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@heban/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "3.4.31",
+    "@dcloudio/uni-app": "3.0.0-5020420260813003",
+    "@dcloudio/uni-mp-weixin": "^3.0.0-5020420260813003",
+    "@dcloudio/vite-plugin-uni": "3.0.0-5020420260813003",
+    "typescript": "5.9.3",
+    "vite": "5.2.8",
+    "vitest": "4.1.11",
+    "vue": "3.4.21",
+    "vue-tsc": "3.3.11"
   }
 }

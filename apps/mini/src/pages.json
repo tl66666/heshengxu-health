@@ -1,0 +1,15 @@
+{
+  "pages": [
+    {
+      "path": "pages/bootstrap/BootstrapPage",
+      "style": {
+        "navigationBarTitleText": "禾伴"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#F7FBF8",
+    "backgroundColor": "#F7FBF8"
+  }
+}
