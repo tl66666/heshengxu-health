@@ -1,0 +1,19 @@
+# Local brainstorming artifacts
+.superpowers/
+
+# Local dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and operating system files
+.idea/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
