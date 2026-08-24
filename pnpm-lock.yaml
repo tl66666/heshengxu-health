@@ -28,6 +28,10 @@ importers:
 
   packages/config: {}
 
+  packages/contracts: {}
+
+  packages/domain: {}
+
 packages:
   '@eslint-community/eslint-utils@4.10.1':
     resolution:
