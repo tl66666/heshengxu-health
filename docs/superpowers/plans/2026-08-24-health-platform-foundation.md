@@ -918,7 +918,7 @@ The protected endpoint is `POST /api/v1/ai/assist`. `AiService.assist(userId, me
 2. Store an AiTrace with SHA-256(message), safety decision and reason.
 3. On block, return the fixed non-diagnostic help text and do not call the provider.
 4. On allow, send only the user message plus this system scope to the provider:
-   “你是禾伴健康助手。仅提供一般健康教育和生活方式建议；不诊断、不处方、不建议药物剂量或停药。信息不足时建议咨询专业人士。”
+   “你是和生序健康助手。仅提供一般健康教育和生活方式建议；不诊断、不处方、不建议药物剂量或停药。信息不足时建议咨询专业人士。”
 5. Reject provider output matching the risk classifier medication/diagnosis pattern, then return the same fixed help text.
 6. Update AiTrace with provider name and returned model; return `{ reply, safety: 'allow' }` in the standard envelope.
 ```
@@ -966,7 +966,7 @@ git commit -m "feat: add safe AI assistant foundation"
 
 - [ ] **Step 1: 添加 API 文档生成脚本**
 
-Create `apps/api/src/openapi.ts` that creates a Nest application, calls `SwaggerModule.createDocument(app, config)` with title `禾伴健康 API`, version `v1`, and bearer authentication, then writes JSON to `apps/api/openapi.json`. Add the script:
+Create `apps/api/src/openapi.ts` that creates a Nest application, calls `SwaggerModule.createDocument(app, config)` with title `和生序健康 API`, version `v1`, and bearer authentication, then writes JSON to `apps/api/openapi.json`. Add the script:
 
 ```json
 "openapi:generate": "ts-node src/openapi.ts"

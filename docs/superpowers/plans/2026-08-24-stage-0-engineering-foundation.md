@@ -439,7 +439,7 @@ API client 用 `uni.request`，base URL 只读取 `VITE_API_BASE_URL`，只依�
 
 - [ ] **Step 4: 生成 OpenAPI 与 CI**
 
-`openapi.ts` 输出 `apps/api/openapi.json`，标题为“禾伴健康 API”、版本 `v1`、声明 bearer authentication，包含 `/health` 和 `/api/v1/health-profiles/me`。
+`openapi.ts` 输出 `apps/api/openapi.json`，标题为“和生序健康 API”、版本 `v1`、声明 bearer authentication，包含 `/health` 和 `/api/v1/health-profiles/me`。
 
 `.github/workflows/ci.yml` 使用 Node 20 和 pnpm 9.15.4，在 pull request 与 main push 上执行：
 

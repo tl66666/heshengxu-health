@@ -1,4 +1,4 @@
-/* 禾伴 Demo — 纯前端交互原型，数据均为演示用模拟数据 */
+/* 和生序 Demo — 纯前端交互原型，数据均为演示用模拟数据 */
 (function () {
   "use strict";
 
@@ -148,7 +148,7 @@
     state.profile = buildProfile({ age: "26-35", gender: "female", height: 168, weight: 62, sleep: "经常熬夜", diet: "外卖为主", sport: "偶尔活动", work: "久坐办公", goals: ["改善睡眠"] });
     saveProfile();
     enterApp();
-    toast("小禾为你准备了一份示例画像，随时可重新建档");
+    toast("序序为你准备了一份示例画像，随时可重新建档");
   });
 
   /* 画像生成逻辑：由选择推导标签与建议 */
@@ -290,7 +290,7 @@
     saveTasks();
     renderTasks();
     if (t.done) {
-      var praise = ["做得好，身体正在记住这个习惯", "又完成一件，今天很稳", "小禾为你记录下了这一刻"];
+      var praise = ["做得好，身体正在记住这个习惯", "又完成一件，今天很稳", "序序为你记录下了这一刻"];
       toast(praise[Math.floor(Math.random() * praise.length)]);
     }
   });
@@ -334,7 +334,7 @@
     if (welcome) welcome.remove();
     var wrap = document.createElement("div");
     wrap.className = "msg " + role;
-    var avatar = role === "ai" ? '<img class="msg-avatar" src="assets/avatar.jpg" alt="小禾">' : "";
+    var avatar = role === "ai" ? '<img class="msg-avatar" src="assets/avatar.jpg" alt="序序">' : "";
     var src = "";
     if (srcTitle) {
       src = '<div class="src-card"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg><span>知识来源 · 《' + srcTitle + '》</span></div>';
@@ -580,7 +580,7 @@
       if (t.dataset.view === "chat" && !welcomed) {
         welcomed = true;
         setTimeout(function () {
-          addMsg("ai", "你好呀，我是小禾。今天感觉怎么样？\n睡眠、饮食、运动、情绪上的问题都可以问我，我会结合你的健康画像来回答。");
+          addMsg("ai", "你好呀，我是序序。今天感觉怎么样？\n睡眠、饮食、运动、情绪上的问题都可以问我，我会结合你的健康画像来回答。");
         }, 350);
       }
     });

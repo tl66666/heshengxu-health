@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 const document = {
   openapi: '3.0.0',
-  info: { title: '禾伴健康 API', version: 'v1' },
+  info: { title: '和生序健康 API', version: 'v1' },
   servers: [{ url: '/api/v1' }],
   components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
   paths: {
