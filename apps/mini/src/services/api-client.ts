@@ -1,0 +1,28 @@
+type ApiFailure = {
+  error: { code: string; message: string; requestId: string };
+};
+
+type ApiSuccess<T> = { data: T };
+
+type ApiResponse<T> = {
+  statusCode: number;
+  data: ApiSuccess<T> | ApiFailure;
+};
+
+type ApiTransport = <T>(request: { url: string; method: 'GET' }) => Promise<ApiResponse<T>>;
+
+export function createApiClient({ baseUrl, request }: { baseUrl: string; request: ApiTransport }) {
+  return {
+    async get<T>(path: string): Promise<T> {
+      const response = await request<T>({ url: `${baseUrl}${path}`, method: 'GET' });
+      if (response.statusCode >= 200 && response.statusCode < 300 && 'data' in response.data) {
+        return response.data.data;
+      }
+
+      const failure = response.data as ApiFailure;
+      throw new Error(
+        `${failure.error.code} [${failure.error.requestId}]: ${failure.error.message}`,
+      );
+    },
+  };
+}

@@ -66,6 +66,8 @@ importers:
         specifier: ^7.2.2
         version: 7.2.2
 
+  apps/mini: {}
+
   packages/config: {}
 
   packages/contracts: {}
