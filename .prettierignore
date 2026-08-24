@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+prototypes/
+docs/
+apps/api/openapi.json
+*.png
+*.jpg
