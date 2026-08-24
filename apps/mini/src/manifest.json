@@ -1,0 +1,15 @@
+{
+  "name": "禾伴",
+  "appid": "__UNI__HEBAN",
+  "description": "禾伴健康管理小程序",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false
+    },
+    "usingComponents": true
+  }
+}

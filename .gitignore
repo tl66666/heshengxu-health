@@ -5,6 +5,7 @@
 node_modules/
 dist/
 coverage/
+apps/mini/package-lock.json
 
 # Local configuration and secrets
 .env
