@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
