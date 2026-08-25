@@ -32,7 +32,7 @@
       >
       <view v-if="experience.tasks.length" class="tasks"
         ><button v-for="task in experience.tasks" :key="task.id" class="task" @tap="go(task.route)">
-          <view class="task-dot" /><view
+          <view class="task-dot" /><view class="task-copy"
             ><text>{{ task.title }}</text
             ><text>{{ task.subtitle }}</text></view
           ><text>›</text>
@@ -196,7 +196,7 @@ onShow(() => {
   border: 2rpx solid #70a77d;
   border-radius: 50%;
 }
-.task view {
+.task-copy {
   flex: 1;
 }
 .task view text {
