@@ -1,5 +1,6 @@
 # Local brainstorming artifacts
 .superpowers/
+.worktrees/
 
 # Local dependencies and build output
 node_modules/
