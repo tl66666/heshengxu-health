@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service.js';
 import type { AiTrace, AiTraceRepository } from './ai-audit.service.js';
 
 @Injectable()
 export class PrismaAiTraceRepository implements AiTraceRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async save(trace: AiTrace): Promise<void> {
     await this.prisma.aiTrace.create({

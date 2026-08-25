@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { selectDailyAction } from '@heban/domain';
 import { HealthProfileService } from '../health-profile/health-profile.service.js';
 import { HealthPlansService } from '../health-plans/health-plans.service.js';
@@ -7,9 +7,9 @@ import { HealthRecordsService } from '../health-records/health-records.service.j
 @Injectable()
 export class DailyHomeService {
   constructor(
-    private readonly profiles: HealthProfileService,
-    private readonly plans: HealthPlansService,
-    private readonly records: HealthRecordsService,
+    @Inject(HealthProfileService) private readonly profiles: HealthProfileService,
+    @Inject(HealthPlansService) private readonly plans: HealthPlansService,
+    @Inject(HealthRecordsService) private readonly records: HealthRecordsService,
   ) {}
 
   async getToday(userId: string, date: string) {

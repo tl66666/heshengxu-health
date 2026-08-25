@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service.js';
 import type {
   CreateActivityRecordDto,
@@ -20,7 +20,7 @@ type TodayRecords = {
 
 @Injectable()
 export class HealthRecordsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async createWeight(userId: string, dto: CreateWeightRecordDto) {
     await this.ensureUser(userId);

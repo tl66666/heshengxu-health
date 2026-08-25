@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service.js';
 import type { SaveCurrentPlanDto, UpdatePlanTaskDto } from './health-plans.dto.js';
 
@@ -7,7 +7,7 @@ type PlanTaskAction = 'record_weight' | 'record_meal' | 'walk_15_minutes' | 'rec
 
 @Injectable()
 export class HealthPlansService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async saveCurrent(userId: string, dto: SaveCurrentPlanDto) {
     this.assertPlanShape(dto);

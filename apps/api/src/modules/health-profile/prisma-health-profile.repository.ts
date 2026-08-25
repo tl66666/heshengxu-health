@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service.js';
 import type {
   HealthProfile,
@@ -8,7 +8,7 @@ import type {
 
 @Injectable()
 export class PrismaHealthProfileRepository implements HealthProfileRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findOrCreateForUser(userId: string): Promise<HealthProfile> {
     await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
