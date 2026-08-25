@@ -30,12 +30,14 @@
       </view>
     </view>
     <text class="foot">和生序提供健康管理参考，不提供疾病诊断或治疗建议。</text>
+    <MiniTabBar active="me" />
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 
 const date = localDate();

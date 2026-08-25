@@ -12,6 +12,11 @@ const required = [
   'App.wxml',
   'pages/onboarding/OnboardingPage.js',
   'pages/home/HomePage.js',
+  'pages/records/RecordsPage.js',
+  'pages/plan/PlanPage.js',
+  'pages/xuxu/XuxuPage.js',
+  'pages/me/MePage.js',
+  'components/MiniTabBar.js',
 ];
 const missing = required.filter((file) => !existsSync(resolve(root, file)));
 

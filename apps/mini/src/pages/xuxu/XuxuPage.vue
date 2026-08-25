@@ -15,11 +15,13 @@
         <text>如果出现持续不适或紧急症状，请及时联系医生或当地急救服务。</text>
       </view>
     </view>
+    <MiniTabBar active="xuxu" />
   </view>
 </template>
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 import XuxuChatComposer from '../../components/XuxuChatComposer.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 

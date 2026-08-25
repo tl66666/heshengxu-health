@@ -76,6 +76,7 @@
         message="每完成一件小事，都会让之后的回顾更了解你的真实节律。"
       />
     </template>
+    <MiniTabBar active="plan" />
   </view>
 </template>
 
@@ -83,6 +84,7 @@
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import IllustratedHero from '../../components/IllustratedHero.vue';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 import XuxuHint from '../../components/XuxuHint.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { planPresentation } from '../../features/health-loop/plan-presentation.js';
