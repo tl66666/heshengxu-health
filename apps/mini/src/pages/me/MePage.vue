@@ -1,6 +1,6 @@
 <template>
   <view class="page"
-    ><image
+    ><MiniTabBar active="me" /> ><image
       class="leaf"
       src="/static/illustrations/leaf-corner-decoration.png"
       mode="aspectFill"
@@ -37,6 +37,7 @@
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 const date = localDate();
 const displayName = computed(() => healthLoopState.today.value?.displayName || '健康管理者');
 const profileText = computed(() =>

@@ -1,6 +1,6 @@
 <template>
   <view class="page"
-    ><view class="welcome"
+    ><MiniTabBar active="xuxu" /> ><view class="welcome"
       ><image
         class="welcome-art"
         src="/static/illustrations/xuxu-ai-empty.png"
@@ -42,6 +42,7 @@
 import { ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import XuxuHint from '../../components/XuxuHint.vue';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 const date = localDate();
 const today = healthLoopState.today;

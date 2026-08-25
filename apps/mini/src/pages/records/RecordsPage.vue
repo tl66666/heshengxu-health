@@ -104,6 +104,7 @@
         >今天还没有记录</text
       ><text>从一件最容易的小事开始就好。</text></view
     >
+    <MiniTabBar active="records" />
   </view>
 </template>
 
@@ -116,6 +117,7 @@ import type {
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import XuxuHint from '../../components/XuxuHint.vue';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 import { recordPresentation } from '../../features/health-loop/record-presentation.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 

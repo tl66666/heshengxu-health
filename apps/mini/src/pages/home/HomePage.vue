@@ -72,6 +72,7 @@
       ><text>检查服务连接后，再试一次就好。</text><button @tap="load">重新加载</button></view
     >
     <view v-else class="loading">正在准备今天的节律...</view>
+    <MiniTabBar active="home" />
   </view>
 </template>
 
@@ -80,6 +81,7 @@ import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import IllustratedHero from '../../components/IllustratedHero.vue';
 import XuxuHint from '../../components/XuxuHint.vue';
+import MiniTabBar from '../../components/MiniTabBar.vue';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { onboardingState } from '../../stores/onboarding.js';
@@ -103,8 +105,13 @@ function load() {
   if (onboardingState.completed.value) healthLoopState.loadToday(date);
 }
 function go(url: string) {
-  if (url.startsWith('/pages/plan/')) uni.switchTab({ url });
+  if (isTabPath(url)) uni.switchTab({ url: url.split('?')[0] || url });
   else uni.navigateTo({ url });
+}
+function isTabPath(url: string) {
+  return ['/pages/home/', '/pages/records/', '/pages/xuxu/', '/pages/plan/', '/pages/me/'].some(
+    (prefix) => url.startsWith(prefix),
+  );
 }
 function toPlan() {
   today.value?.activePlan
