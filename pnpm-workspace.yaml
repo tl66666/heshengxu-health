@@ -1,3 +1,16 @@
 packages:
   - apps/*
   - packages/*
+
+# pnpm 11 blocks dependency install scripts until they are explicitly reviewed.
+# Prisma generates the database client and esbuild is required by the mini-program build.
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
+
+# These polyfills are transitive dependencies and do not need install-time scripts here.
+ignoredBuiltDependencies:
+  - core-js
+  - core-js-pure
