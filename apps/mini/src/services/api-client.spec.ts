@@ -35,4 +35,23 @@ describe('createApiClient', () => {
       data: { heightCm: 168 },
     });
   });
+
+  it('sends POST and PATCH requests with the supplied body', async () => {
+    const requests: unknown[] = [];
+    const client = createApiClient({
+      baseUrl: 'https://example.test/api/v1',
+      request: async (request) => {
+        requests.push(request);
+        return { statusCode: 200, data: { data: { ok: true } } } as never;
+      },
+    });
+
+    await client.post('/health-records/weights', { valueKg: 61.8 });
+    await client.patch('/health-plans/tasks/task-1', { status: 'completed' });
+
+    expect(requests).toEqual([
+      { url: 'https://example.test/api/v1/health-records/weights', method: 'POST', data: { valueKg: 61.8 } },
+      { url: 'https://example.test/api/v1/health-plans/tasks/task-1', method: 'PATCH', data: { status: 'completed' } },
+    ]);
+  });
 });

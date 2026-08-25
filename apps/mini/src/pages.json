@@ -13,8 +13,38 @@
     {
       "path": "pages/home/HomePage",
       "style": { "navigationBarTitleText": "和生序" }
+    },
+    {
+      "path": "pages/records/RecordsPage",
+      "style": { "navigationBarTitleText": "记录" }
+    },
+    {
+      "path": "pages/xuxu/XuxuPage",
+      "style": { "navigationBarTitleText": "序序" }
+    },
+    {
+      "path": "pages/plan/PlanPage",
+      "style": { "navigationBarTitleText": "我的计划" }
+    },
+    {
+      "path": "pages/me/MePage",
+      "style": { "navigationBarTitleText": "我的" }
+    },
+    {
+      "path": "pages/plan-setup/PlanSetupPage",
+      "style": { "navigationBarTitleText": "设置计划" }
     }
   ],
+  "tabBar": {
+    "custom": true,
+    "list": [
+      { "pagePath": "pages/home/HomePage", "text": "首页" },
+      { "pagePath": "pages/records/RecordsPage", "text": "记录" },
+      { "pagePath": "pages/xuxu/XuxuPage", "text": "序序" },
+      { "pagePath": "pages/plan/PlanPage", "text": "计划" },
+      { "pagePath": "pages/me/MePage", "text": "我的" }
+    ]
+  },
   "globalStyle": {
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#F7FBF8",

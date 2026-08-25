@@ -96,7 +96,7 @@ async function save() {
         new Promise((resolve, reject) => {
           uni.request({
             url,
-            method,
+          method: method as never,
             data: data as Record<string, unknown>,
             header: { Authorization: 'Bearer dev-mini-user' },
             success: (response) => resolve({ statusCode: response.statusCode, data: response.data as never }),
@@ -112,7 +112,7 @@ async function save() {
       primaryGoal: form.primaryGoal,
     });
     onboardingState.completed.value = true;
-    uni.redirectTo({ url: '/pages/home/HomePage' });
+    uni.switchTab({ url: '/pages/home/HomePage' });
   } finally {
     saving.value = false;
   }
