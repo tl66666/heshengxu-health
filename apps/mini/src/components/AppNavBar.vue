@@ -10,10 +10,19 @@
 <script setup lang="ts">
 import { ordinaryBackTarget } from './navigation.js';
 
-const props = defineProps<{ title: string; route: string; closeLabel?: string }>();
-const emit = defineEmits<{ close: [] }>();
+const props = defineProps<{
+  title: string;
+  route: string;
+  closeLabel?: string;
+  backMode?: 'navigate' | 'emit';
+}>();
+const emit = defineEmits<{ close: []; back: [] }>();
 
 function back() {
+  if (props.backMode === 'emit') {
+    emit('back');
+    return;
+  }
   const pages = getCurrentPages();
   if (pages.length > 1) {
     uni.navigateBack();

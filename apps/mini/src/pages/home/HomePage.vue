@@ -27,6 +27,11 @@
         action="听序序说"
         @tap="toXuxu"
       />
+      <button class="chat-entry" @tap="toXuxu">
+        <image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+        <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
+        <text class="chat-entry-arrow">进入</text>
+      </button>
       <view class="section-head"
         ><text>今天只做这几件小事</text><text>{{ experience.tasks.length }} 件待完成</text></view
       >
@@ -166,6 +171,44 @@ onShow(() => {
 }
 .hint {
   margin-top: 18rpx;
+}
+.chat-entry {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  width: 100%;
+  margin-top: 16rpx;
+  padding: 14rpx 16rpx;
+  border: 2rpx solid #e7dfba;
+  border-radius: 18rpx;
+  text-align: left;
+  background: #fffbed;
+}
+.chat-entry image {
+  width: 64rpx;
+  height: 64rpx;
+  flex: none;
+  border: 3rpx solid #f0da8c;
+  border-radius: 50%;
+}
+.chat-entry view {
+  flex: 1;
+}
+.chat-entry view text {
+  display: block;
+  color: #5d563e;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+.chat-entry view text:last-child {
+  margin-top: 5rpx;
+  color: #8a8060;
+  font-size: 20rpx;
+  font-weight: 400;
+}
+.chat-entry-arrow {
+  color: #8b7d4b;
+  font-size: 22rpx;
 }
 .section-head {
   display: flex;

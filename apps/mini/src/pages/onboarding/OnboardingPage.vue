@@ -1,10 +1,11 @@
 <template>
   <view class="page">
     <AppNavBar
-      v-if="step === 0"
       title="开始了解自己"
       close-label="退出"
       route="/pages/onboarding/OnboardingPage"
+      back-mode="emit"
+      @back="back"
       @close="exitOnboarding"
     />
     <template v-if="step === 0">
