@@ -1,0 +1,21 @@
+import { describe, expect, it } from 'vitest';
+import { isTabRoute, ordinaryBackTarget, shouldConfirmOnboardingExit } from './navigation.js';
+
+describe('navigation contracts', () => {
+  it('recognizes tab routes even when a query selects a record type', () => {
+    expect(isTabRoute('/pages/records/RecordsPage?type=sleep')).toBe(true);
+    expect(isTabRoute('/pages/plan-setup/PlanSetupPage')).toBe(false);
+  });
+
+  it('returns a safe back target for ordinary pages', () => {
+    expect(ordinaryBackTarget('/pages/plan-setup/PlanSetupPage')).toBe('/pages/plan/PlanPage');
+    expect(ordinaryBackTarget('/pages/onboarding/OnboardingPage')).toBe(
+      '/pages/bootstrap/BootstrapPage',
+    );
+  });
+
+  it('only confirms exit from the first onboarding step', () => {
+    expect(shouldConfirmOnboardingExit(0)).toBe(true);
+    expect(shouldConfirmOnboardingExit(2)).toBe(false);
+  });
+});

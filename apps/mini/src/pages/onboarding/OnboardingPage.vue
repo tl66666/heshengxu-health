@@ -1,5 +1,12 @@
 <template>
   <view class="page">
+    <AppNavBar
+      v-if="step === 0"
+      title="开始了解自己"
+      close-label="退出"
+      route="/pages/onboarding/OnboardingPage"
+      @close="exitOnboarding"
+    />
     <template v-if="step === 0">
       <image class="welcome-art" src="/static/illustrations/hero.jpg" mode="aspectFill" />
       <view class="welcome-copy">
@@ -111,7 +118,7 @@
             :class="['goal', { selected: form.primaryGoal === item.value }]"
             @tap="form.primaryGoal = item.value"
           >
-            <text>{{ item.icon }}</text
+            <icon type="info_circle" size="18" class="goal-icon" />
             ><text>{{ item.label }}</text
             ><text class="arrow">›</text>
           </button></view
@@ -143,6 +150,8 @@ import { computed, ref } from 'vue';
 import { createApiClient } from '../../services/api-client.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { canAdvanceOnboarding, onboardingProgress } from './onboarding-flow.js';
+import AppNavBar from '../../components/AppNavBar.vue';
+import { shouldConfirmOnboardingExit } from '../../components/navigation.js';
 
 const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(onboardingState.step.value);
@@ -189,6 +198,18 @@ const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, fo
 function back() {
   step.value -= 1;
   onboardingState.step.value = step.value;
+}
+function exitOnboarding() {
+  if (!shouldConfirmOnboardingExit(step.value)) return;
+  uni.showModal({
+    title: '退出建档？',
+    content: '已填写的内容不会保存，之后仍可以重新开始。',
+    confirmText: '退出',
+    cancelText: '继续填写',
+    success: ({ confirm }) => {
+      if (confirm) uni.redirectTo({ url: '/pages/bootstrap/BootstrapPage' });
+    },
+  });
 }
 function setHeight(event: { detail: { value: number } }) {
   form.heightCm = String(event.detail.value);

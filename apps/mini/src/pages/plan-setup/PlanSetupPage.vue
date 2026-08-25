@@ -1,6 +1,9 @@
 <template>
   <view class="page"
-    ><text class="eyebrow">从一个方向开始</text><text class="title">设置我的健康计划</text
+    ><AppNavBar title="设置健康计划" route="/pages/plan-setup/PlanSetupPage" /> ><text
+      class="eyebrow"
+      >从一个方向开始</text
+    ><text class="title">设置我的健康计划</text
     ><text class="hint">之后随时可以调整，不需要一次决定全部。</text
     ><view class="cards"
       ><button :class="['choice', { selected: kind === 'weight' }]" @tap="kind = 'weight'">
@@ -33,6 +36,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
+import AppNavBar from '../../components/AppNavBar.vue';
 import type {
   PlanKind,
   WeightDirection,

@@ -7,7 +7,7 @@
       :class="{ active: active === item.key }"
       @tap="switchTab(item.path)"
     >
-      <text class="icon">{{ item.icon }}</text>
+      <icon class="native-icon" :type="item.icon" size="23" />
       <text>{{ item.label }}</text>
     </button>
     <button
@@ -27,7 +27,7 @@
       :class="{ active: active === item.key }"
       @tap="switchTab(item.path)"
     >
-      <text class="icon">{{ item.icon }}</text>
+      <icon class="native-icon" :type="item.icon" size="23" />
       <text>{{ item.label }}</text>
     </button>
   </view>
@@ -37,10 +37,10 @@
 defineProps<{ active: 'home' | 'records' | 'xuxu' | 'plan' | 'me' }>();
 
 const items = [
-  { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: '⌂' },
-  { key: 'records', path: '/pages/records/RecordsPage', label: '记录', icon: '◷' },
-  { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: '▦' },
-  { key: 'me', path: '/pages/me/MePage', label: '我的', icon: '●' },
+  { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: 'info_circle' },
+  { key: 'records', path: '/pages/records/RecordsPage', label: '记录', icon: 'waiting' },
+  { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: 'success_no_circle' },
+  { key: 'me', path: '/pages/me/MePage', label: '我的', icon: 'clear' },
 ] as const;
 const xuxu = { path: '/pages/xuxu/XuxuPage' };
 
@@ -80,25 +80,15 @@ function switchTab(url: string) {
   font-size: 20rpx;
   line-height: 1;
 }
-.icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48rpx;
-  height: 42rpx;
-  border-radius: 15rpx;
-  color: #6f8777;
-  background: #f1f7f0;
-  font-size: 29rpx;
-  line-height: 1;
+.native-icon {
+  opacity: 0.65;
+}
+.active .native-icon {
+  opacity: 1;
 }
 .active {
   color: #28744d;
   font-weight: 700;
-}
-.active .icon {
-  color: #2e7d4f;
-  background: #e4f2e5;
 }
 .tab--xuxu {
   transform: translateY(-34rpx);

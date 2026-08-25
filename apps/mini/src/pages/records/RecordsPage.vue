@@ -16,7 +16,7 @@
         :class="['tab', { active: activeType === item.type }]"
         @tap="activeType = item.type"
       >
-        {{ item.icon }} {{ item.label }}
+        {{ item.label }}
       </button></view
     >
     <XuxuHint
