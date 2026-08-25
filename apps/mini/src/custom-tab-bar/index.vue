@@ -57,17 +57,18 @@ function go(path: string) {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   align-items: end;
-  height: 116rpx;
+  height: 118rpx;
   padding: 10rpx 10rpx env(safe-area-inset-bottom);
   box-sizing: content-box;
-  background: #fbfdf9;
+  background: rgba(251, 253, 249, 0.98);
   border-top: 1rpx solid #e2ece2;
+  box-shadow: 0 -8rpx 24rpx rgba(47, 79, 55, 0.06);
 }
 .tab,
 .xuxu {
   display: flex;
   min-width: 0;
-  height: 88rpx;
+  height: 94rpx;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -80,12 +81,24 @@ function go(path: string) {
   line-height: 1;
 }
 .icon {
-  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 42rpx;
+  border-radius: 15rpx;
+  color: #6f8777;
+  background: #f1f7f0;
+  font-size: 29rpx;
   line-height: 1;
 }
 .active {
   color: #28744d;
   font-weight: 700;
+}
+.active .icon {
+  color: #2e7d4f;
+  background: #e4f2e5;
 }
 .xuxu {
   transform: translateY(-34rpx);
@@ -99,7 +112,7 @@ function go(path: string) {
   border-radius: 50%;
   box-sizing: border-box;
   background: #fffdf1;
-  box-shadow: 0 5rpx 13rpx rgba(90, 74, 27, 0.16);
+  box-shadow: 0 8rpx 18rpx rgba(90, 74, 27, 0.16);
 }
 .xuxu-orbit image {
   width: 100%;

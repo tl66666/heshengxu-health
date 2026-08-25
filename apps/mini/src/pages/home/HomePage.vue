@@ -66,7 +66,12 @@
         ><text>›</text>
       </button>
     </template>
-    <view v-else class="loading">暂时无法加载今日状态</view>
+    <view v-else-if="error" class="load-failed"
+      ><image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFill" /><text
+        >今天的状态还没加载出来</text
+      ><text>检查服务连接后，再试一次就好。</text><button @tap="load">重新加载</button></view
+    >
+    <view v-else class="loading">正在准备今天的节律...</view>
   </view>
 </template>
 
@@ -79,7 +84,7 @@ import { deriveDailyExperience } from '../../features/health-loop/daily-experien
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { onboardingState } from '../../stores/onboarding.js';
 
-const { today, loading } = healthLoopState;
+const { today, loading, error } = healthLoopState;
 const date = localDate();
 const greeting =
   new Date().getHours() < 12 ? '早上好' : new Date().getHours() < 18 ? '下午好' : '晚上好';
@@ -281,5 +286,40 @@ onShow(() => {
   color: #70897a;
   text-align: center;
   font-size: 27rpx;
+}
+.load-failed {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 110rpx 32rpx;
+  text-align: center;
+}
+.load-failed image {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 50%;
+}
+.load-failed text {
+  display: block;
+  margin-top: 18rpx;
+  color: #466a52;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.load-failed text:nth-of-type(2) {
+  margin-top: 8rpx;
+  color: #7a9080;
+  font-size: 22rpx;
+  font-weight: 400;
+}
+.load-failed button {
+  width: 230rpx;
+  height: 70rpx;
+  margin-top: 24rpx;
+  border-radius: 35rpx;
+  color: #fff;
+  background: #2e7d4f;
+  font-size: 24rpx;
+  line-height: 70rpx;
 }
 </style>

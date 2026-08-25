@@ -1,10 +1,19 @@
 <template>
   <view class="page"
     ><view class="welcome"
-      ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><text class="eyebrow"
-        >你好，我是序序</text
-      ><text class="title">今天想从哪里开始照顾自己？</text
-      ><text class="hint">我会结合你已记录的信息，给出健康管理参考，不替代医生诊疗。</text></view
+      ><image
+        class="welcome-art"
+        src="/static/illustrations/xuxu-ai-empty.png"
+        mode="aspectFill"
+      /><view class="welcome-copy"
+        ><view class="identity"
+          ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><text
+            >序序</text
+          ></view
+        ><text class="eyebrow">你好，我是序序</text
+        ><text class="title">今天想从哪里开始照顾自己？</text
+        ><text class="hint">我会结合你已记录的信息，给出健康管理参考，不替代医生诊疗。</text></view
+      ></view
     ><view class="current"
       ><text class="label">我看到的今天</text
       ><text>{{
@@ -21,6 +30,11 @@
       </button></view
     ><view v-if="answer" class="answer"
       ><XuxuHint :message="answer" /><button @tap="answer = ''">收起</button></view
+    ><view class="safety"
+      ><image src="/static/illustrations/xuxu-safe-support.png" mode="aspectFill" /><view
+        ><text>需要专业帮助时</text
+        ><text>如果出现持续不适或紧急症状，请及时联系医生或当地急救服务。</text></view
+      ></view
     ></view
   >
 </template>
@@ -74,16 +88,35 @@ onShow(() => healthLoopState.loadToday(date));
   color: #1d3d2a;
 }
 .welcome {
-  padding: 30rpx 24rpx;
+  position: relative;
+  overflow: hidden;
   border: 2rpx solid #eadfb8;
   border-radius: 22rpx;
   background: #fffbed;
-  text-align: center;
 }
-.welcome image {
-  width: 154rpx;
-  height: 154rpx;
-  border: 5rpx solid #f1de9c;
+.welcome-art {
+  width: 100%;
+  height: 250rpx;
+}
+.welcome-copy {
+  padding: 0 24rpx 28rpx;
+  text-align: left;
+}
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: -28rpx;
+  position: relative;
+  z-index: 1;
+  color: #6a5b3d;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.identity image {
+  width: 66rpx;
+  height: 66rpx;
+  border: 4rpx solid #fffbed;
   border-radius: 50%;
   background: #fff9df;
 }
@@ -100,7 +133,7 @@ onShow(() => healthLoopState.loadToday(date));
 }
 .title {
   margin-top: 9rpx;
-  font-size: 37rpx;
+  font-size: 36rpx;
   font-weight: 700;
 }
 .hint {
@@ -180,5 +213,37 @@ onShow(() => healthLoopState.loadToday(date));
   color: #62816d;
   background: transparent;
   font-size: 22rpx;
+}
+.safety {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-top: 28rpx;
+  padding: 14rpx 16rpx;
+  border: 2rpx solid #e0e9e0;
+  border-radius: 16rpx;
+  background: #f5f9f4;
+}
+.safety image {
+  width: 78rpx;
+  height: 78rpx;
+  flex: none;
+  border-radius: 14rpx;
+}
+.safety view {
+  min-width: 0;
+}
+.safety text {
+  display: block;
+  color: #4b6f55;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.safety text:last-child {
+  margin-top: 5rpx;
+  color: #788e7e;
+  font-size: 20rpx;
+  font-weight: 400;
+  line-height: 1.45;
 }
 </style>

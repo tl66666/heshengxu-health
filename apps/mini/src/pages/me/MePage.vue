@@ -1,5 +1,12 @@
 <template>
   <view class="page"
+    ><image
+      class="leaf"
+      src="/static/illustrations/leaf-corner-decoration.png"
+      mode="aspectFill"
+    /><view class="page-head"
+      ><text class="eyebrow">我的节律</text
+      ><text class="title">照顾好自己，也照顾好生活</text></view
     ><view class="profile"
       ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><view
         ><text>{{ displayName }}</text
@@ -33,7 +40,11 @@ import { healthLoopState } from '../../features/health-loop/health-loop.store.js
 const date = localDate();
 const displayName = computed(() => healthLoopState.today.value?.displayName || '健康管理者');
 const profileText = computed(() =>
-  healthLoopState.today.value?.activePlan?.kind === 'sleep' ? '睡眠与精力计划' : '体重管理计划',
+  healthLoopState.today.value?.activePlan
+    ? healthLoopState.today.value.activePlan.kind === 'sleep'
+      ? '睡眠与精力计划'
+      : '体重管理计划'
+    : '还没有设置计划',
 );
 const healthItems = [
   {
@@ -65,13 +76,47 @@ onShow(() => healthLoopState.loadToday(date));
 </script>
 <style scoped>
 .page {
+  position: relative;
+  overflow: hidden;
   min-height: 100vh;
   box-sizing: border-box;
   padding: 48rpx 32rpx 166rpx;
   background: #f7fbf8;
   color: #1d3d2a;
 }
+.leaf {
+  position: absolute;
+  top: -120rpx;
+  right: -180rpx;
+  width: 520rpx;
+  height: 520rpx;
+  opacity: 0.42;
+  pointer-events: none;
+}
+.page-head {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 24rpx;
+}
+.eyebrow,
+.title {
+  display: block;
+}
+.eyebrow {
+  color: #6a9275;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.title {
+  margin-top: 8rpx;
+  color: #254735;
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
 .profile {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 20rpx;

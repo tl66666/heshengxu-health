@@ -25,11 +25,12 @@ defineEmits<{ action: [] }>();
 <style scoped>
 .hero {
   position: relative;
-  height: 290rpx;
+  height: 312rpx;
   overflow: hidden;
   border: 2rpx solid #d9e8da;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
   background: #e7f2e6;
+  box-shadow: 0 10rpx 26rpx rgba(46, 125, 79, 0.08);
 }
 .hero image,
 .wash {
@@ -51,7 +52,7 @@ defineEmits<{ action: [] }>();
   top: 28rpx;
   left: 26rpx;
   z-index: 1;
-  max-width: 390rpx;
+  width: 53%;
 }
 .eyebrow,
 .title,
@@ -66,7 +67,7 @@ defineEmits<{ action: [] }>();
 .title {
   margin-top: 8rpx;
   color: #1d3d2a;
-  font-size: 37rpx;
+  font-size: 36rpx;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -77,6 +78,7 @@ defineEmits<{ action: [] }>();
   line-height: 1.5;
 }
 .action {
+  display: inline-block;
   width: auto;
   height: 54rpx;
   margin: 16rpx 0 0;
@@ -86,5 +88,6 @@ defineEmits<{ action: [] }>();
   background: #2e7d4f;
   font-size: 22rpx;
   line-height: 54rpx;
+  box-shadow: 0 6rpx 12rpx rgba(46, 125, 79, 0.16);
 }
 </style>

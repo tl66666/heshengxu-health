@@ -53,6 +53,20 @@
             placeholder="身高（cm）"
           /><text>cm</text></view
         >
+        <view class="measure-slider"
+          ><view class="measure-label"
+            ><text>身高</text><text>{{ form.heightCm || '--' }} cm</text></view
+          ><slider
+            :value="Number(form.heightCm) || 168"
+            min="140"
+            max="210"
+            step="1"
+            activeColor="#5b9b70"
+            backgroundColor="#dceadd"
+            block-color="#ffffff"
+            block-size="22"
+            @changing="setHeight"
+        /></view>
         <view class="input-row"
           ><input
             v-model="form.weightKg"
@@ -61,9 +75,28 @@
             placeholder="体重（kg）"
           /><text>kg</text></view
         >
+        <view class="measure-slider"
+          ><view class="measure-label"
+            ><text>体重</text><text>{{ form.weightKg || '--' }} kg</text></view
+          ><slider
+            :value="Number(form.weightKg) || 62"
+            min="35"
+            max="150"
+            step="0.1"
+            activeColor="#5b9b70"
+            backgroundColor="#dceadd"
+            block-color="#ffffff"
+            block-size="22"
+            @changing="setWeight"
+        /></view>
         <view v-if="bmi !== null" class="bmi-card"
           ><text class="bmi-value">{{ bmi.toFixed(1) }}</text
           ><text class="bmi-label">BMI · {{ bmiLabel }}</text
+          ><text class="bmi-advice">{{ bmiAdvice }}</text
+          ><view class="bmi-scale"
+            ><view class="bmi-scale-fill" :style="{ width: `${bmiProgress}%` }" /></view
+          ><view class="bmi-scale-labels"
+            ><text>偏瘦</text><text>正常</text><text>偏重</text><text>肥胖</text></view
           ><text class="bmi-note">这是健康管理参考，不是医疗诊断</text></view
         ><view v-else class="empty-card">填写身高和体重后查看 BMI</view>
       </view>
@@ -93,6 +126,7 @@
           ><text>BMI {{ bmi?.toFixed(1) }} · {{ bmiLabel }}</text></view
         >
         <text class="hint">保存后会解锁首页，之后每天记下一点真实生活就好。</text>
+        <text v-if="error" class="error">{{ error }}</text>
       </view>
       <view class="actions"
         ><button v-if="step > 1" class="back" @tap="back">上一步</button
@@ -113,6 +147,7 @@ import { canAdvanceOnboarding, onboardingProgress } from './onboarding-flow.js';
 const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(onboardingState.step.value);
 const saving = ref(false);
+const error = ref('');
 const sexOptions = [
   { value: 'female' as const, label: '女性' },
   { value: 'male' as const, label: '男性' },
@@ -132,6 +167,20 @@ const bmiLabel = computed(
       bmiCategory.value || 'normal'
     ],
 );
+const bmiAdvice = computed(() => {
+  return (
+    {
+      underweight: '可以把规律吃饭和充足休息放在第一位。',
+      normal: '你的身高体重处于较舒适的范围，继续保持规律节奏。',
+      overweight: '先从一件容易坚持的小行动开始，不需要急着改变全部。',
+      obesity: '建议优先建立规律记录，必要时咨询专业人士获得帮助。',
+    } as Record<string, string>
+  )[bmiCategory.value || 'normal'];
+});
+const bmiProgress = computed(() => {
+  if (bmi.value === null) return 0;
+  return Math.max(4, Math.min(100, ((bmi.value - 14) / 22) * 100));
+});
 const selectedGoalLabel = computed(
   () => goalOptions.find((item) => item.value === form.primaryGoal)?.label ?? '还没有选择目标',
 );
@@ -140,6 +189,12 @@ const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, fo
 function back() {
   step.value -= 1;
   onboardingState.step.value = step.value;
+}
+function setHeight(event: { detail: { value: number } }) {
+  form.heightCm = String(event.detail.value);
+}
+function setWeight(event: { detail: { value: number } }) {
+  form.weightKg = Number(event.detail.value).toFixed(1);
 }
 function next() {
   if (!canAdvance.value) return;
@@ -151,6 +206,7 @@ function next() {
   save();
 }
 async function save() {
+  error.value = '';
   saving.value = true;
   try {
     const client = createApiClient({
@@ -177,6 +233,8 @@ async function save() {
     });
     onboardingState.completed.value = true;
     uni.switchTab({ url: '/pages/home/HomePage' });
+  } catch (reason) {
+    error.value = reason instanceof Error ? reason.message : '暂时无法保存，请确认服务已启动后重试';
   } finally {
     saving.value = false;
   }
@@ -330,6 +388,27 @@ async function save() {
   padding-right: 22rpx;
   color: #6d8879;
 }
+.measure-slider {
+  margin: 18rpx 2rpx 6rpx;
+  padding: 16rpx 18rpx 8rpx;
+  border-radius: 16rpx;
+  background: #f1f8f1;
+}
+.measure-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #557260;
+  font-size: 22rpx;
+}
+.measure-label text:last-child {
+  color: #2f7d50;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+.measure-slider slider {
+  margin: 3rpx 0 0;
+}
 .bmi-card,
 .empty-card,
 .summary {
@@ -352,6 +431,32 @@ async function save() {
   margin-top: 4rpx;
   color: #447b59;
   font-size: 27rpx;
+}
+.bmi-advice {
+  display: block;
+  margin-top: 12rpx;
+  color: #4f735a;
+  font-size: 23rpx;
+  line-height: 1.5;
+}
+.bmi-scale {
+  height: 10rpx;
+  margin-top: 20rpx;
+  overflow: hidden;
+  border-radius: 10rpx;
+  background: linear-gradient(90deg, #9dc7a5 0 27%, #62a57b 27% 58%, #d3b76d 58% 78%, #d18a6b 78%);
+}
+.bmi-scale-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(28, 75, 44, 0.16);
+}
+.bmi-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7rpx;
+  color: #7a9180;
+  font-size: 19rpx;
 }
 .bmi-note {
   margin-top: 14rpx;
@@ -400,6 +505,16 @@ async function save() {
   display: flex;
   gap: 16rpx;
   margin-top: 56rpx;
+}
+.error {
+  display: block;
+  margin-top: 22rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 14rpx;
+  color: #a85f4b;
+  background: #fff1ed;
+  font-size: 22rpx;
+  line-height: 1.5;
 }
 .primary,
 .back {

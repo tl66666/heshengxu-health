@@ -20,11 +20,16 @@
       </button></view
     >
     <XuxuHint
-      v-if="presentation.showReminder"
+      v-if="!presentation.showReminder"
       class="record-reminder"
       variant="note"
-      :message="reminderMessage"
+      message="这条记录会帮助你在回顾时看见自己的真实节律。"
     />
+    <view v-if="presentation.showReminder" class="scene-reminder"
+      ><image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFill" /><view
+        ><text>序序的小提醒</text><text>{{ reminderMessage }}</text></view
+      ></view
+    >
     <view class="form-card">
       <template v-if="activeType === 'weight'"
         ><text class="form-title">今天的体重</text
@@ -83,7 +88,6 @@
       <text v-if="formError" class="error">{{ formError }}</text
       ><button class="submit" :loading="saving" @tap="submit">保存记录</button>
     </view>
-    <XuxuHint message="每一条记录都会帮助你在回顾时看见自己的节律。" />
     <view class="section-head"
       ><text>今天已记录</text><text>{{ timeline.length }} 条</text></view
     >
@@ -95,7 +99,7 @@
         ><button class="edit" @tap="edit(item)">修改</button></view
       ></view
     >
-    <view v-else class="empty"
+    <view v-else-if="!presentation.isEmpty" class="empty"
       ><image src="/static/illustrations/record-desk-banner.png" mode="aspectFill" /><text
         >今天还没有记录</text
       ><text>从一件最容易的小事开始就好。</text></view
@@ -356,7 +360,39 @@ onShow(load);
   line-height: 1.45;
 }
 .record-reminder {
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
+}
+.scene-reminder {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin: 0 0 18rpx;
+  padding: 14rpx 16rpx;
+  border: 2rpx solid #d9e8dc;
+  border-radius: 16rpx;
+  background: #f1f8f1;
+}
+.scene-reminder image {
+  width: 78rpx;
+  height: 78rpx;
+  flex: none;
+  border-radius: 50%;
+}
+.scene-reminder view {
+  min-width: 0;
+}
+.scene-reminder text {
+  display: block;
+  color: #3d7050;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.scene-reminder text:last-child {
+  margin-top: 5rpx;
+  color: #6d8876;
+  font-size: 21rpx;
+  font-weight: 400;
+  line-height: 1.45;
 }
 .tabs {
   display: flex;

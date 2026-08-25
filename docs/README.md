@@ -4,6 +4,7 @@
 
 - `product/heshengxu-product-blueprint.md`：产品范围、数据边界与素材用途
 - `engineering/project-structure.md`：目录和分层规范
+- `engineering/mini-frontend-implementation.md`：小程序前端页面、素材和验收规范
 - `engineering/local-development.md`：本地启动、构建与验收命令
 - `architecture/`：模块化单体、原型边界和微信导入决策
 - `superpowers/specs/`：已确认的产品/工程设计规格

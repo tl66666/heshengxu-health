@@ -19,7 +19,32 @@
         action-label="调整计划"
         @action="setup"
       />
-      <view v-if="presentation.showCompleteArt" class="complete"
+      <view class="program-section">
+        <view class="section-head program-head"
+          ><view
+            ><text>我的健康方案</text><text>按一个重点开始，其他习惯也会被温和照顾。</text></view
+          ><text>可叠加</text></view
+        >
+        <view class="program-grid"
+          ><button
+            v-for="item in programs"
+            :key="item.kind"
+            :class="[
+              'program-tile',
+              { active: item.kind === plan.kind, disabled: !item.available },
+            ]"
+            @tap="selectProgram(item)"
+          >
+            <image :src="item.image" mode="aspectFill" /><view
+              ><text>{{ item.label }}</text
+              ><text>{{ item.available ? '可调整' : '后续开放' }}</text></view
+            >
+          </button></view
+        >
+      </view>
+      <view
+        v-if="presentation.completedCount === plan.tasks.length && plan.tasks.length > 0"
+        class="complete"
         ><image src="/static/illustrations/xuxu-complete.png" mode="aspectFill" /><view
           ><text>今天的行动都完成了</text><text>序序已经记下这份稳定的节律。</text></view
         ></view
@@ -61,6 +86,38 @@ import { planPresentation } from '../../features/health-loop/plan-presentation.j
 const date = localDate();
 const plan = computed(() => healthLoopState.today.value?.activePlan || healthLoopState.plan.value);
 const presentation = computed(() => planPresentation(plan.value?.tasks || []));
+const programs = [
+  {
+    kind: 'weight' as const,
+    label: '减脂与体重',
+    image: '/static/illustrations/program-weight.png',
+    available: true,
+  },
+  {
+    kind: 'sleep' as const,
+    label: '睡眠与精力',
+    image: '/static/illustrations/program-sleep.png',
+    available: true,
+  },
+  {
+    kind: 'mood' as const,
+    label: '压力与情绪',
+    image: '/static/illustrations/program-mood.png',
+    available: false,
+  },
+  {
+    kind: 'metabolic' as const,
+    label: '代谢管理',
+    image: '/static/illustrations/program-metabolic.png',
+    available: false,
+  },
+  {
+    kind: 'digestive' as const,
+    label: '肠胃生活方式',
+    image: '/static/illustrations/program-digestive.png',
+    available: false,
+  },
+];
 const targetText = computed(() => {
   const target = plan.value?.healthTarget;
   if (!target) return '';
@@ -83,6 +140,13 @@ async function complete(id: string) {
 }
 function setup() {
   uni.navigateTo({ url: '/pages/plan-setup/PlanSetupPage' });
+}
+function selectProgram(item: (typeof programs)[number]) {
+  if (!item.available) {
+    uni.showToast({ title: '这个方向正在准备中', icon: 'none' });
+    return;
+  }
+  setup();
 }
 function localDate() {
   const now = new Date();
@@ -109,6 +173,78 @@ onShow(() => healthLoopState.loadToday(date));
 .section-head text:last-child {
   color: #5b8d6e;
   font-size: 24rpx;
+}
+.program-section {
+  margin-top: 28rpx;
+}
+.program-head {
+  align-items: flex-start;
+  margin: 0 4rpx 14rpx;
+}
+.program-head > view text {
+  display: block;
+}
+.program-head > view text:first-child {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.program-head > view text:last-child {
+  margin-top: 7rpx;
+  color: #748b7d;
+  font-size: 21rpx;
+  font-weight: 400;
+  line-height: 1.45;
+}
+.program-head > text {
+  padding-top: 4rpx;
+  color: #6a9275;
+  font-size: 21rpx;
+  font-weight: 400;
+}
+.program-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+.program-tile {
+  display: flex;
+  align-items: center;
+  width: calc(50% - 7rpx);
+  min-height: 126rpx;
+  overflow: hidden;
+  border: 2rpx solid #dceadd;
+  border-radius: 18rpx;
+  text-align: left;
+  background: #fff;
+}
+.program-tile image {
+  width: 116rpx;
+  height: 126rpx;
+  flex: none;
+}
+.program-tile view {
+  min-width: 0;
+  padding: 0 12rpx;
+}
+.program-tile view text {
+  display: block;
+  color: #31543e;
+  font-size: 23rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.program-tile view text:last-child {
+  margin-top: 8rpx;
+  color: #799081;
+  font-size: 19rpx;
+  font-weight: 400;
+}
+.program-tile.active {
+  border-color: #77aa83;
+  background: #f1f8ef;
+}
+.program-tile.disabled {
+  opacity: 0.65;
 }
 .tasks {
   display: flex;
