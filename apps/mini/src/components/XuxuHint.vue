@@ -1,15 +1,23 @@
 <template>
-  <view class="hint" @tap="$emit('tap')">
+  <view :class="['hint', presentation.className]" @tap="$emit('tap')">
     <image class="avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
     <view class="copy"
-      ><text class="name">序序</text><text class="message">{{ message }}</text></view
+      ><text class="name">{{ presentation.name }}</text
+      ><text class="message">{{ message }}</text></view
     >
     <text v-if="action" class="action">{{ action }} ›</text>
   </view>
 </template>
 
 <script setup lang="ts">
-defineProps<{ message: string; action?: string }>();
+import { computed } from 'vue';
+import { companionPresentation } from './companion-presentation.js';
+
+const props = withDefaults(
+  defineProps<{ message: string; action?: string; variant?: 'sunny' | 'note' | 'complete' }>(),
+  { variant: 'sunny' },
+);
+const presentation = computed(() => companionPresentation(props.variant));
 defineEmits<{ tap: [] }>();
 </script>
 
@@ -22,6 +30,14 @@ defineEmits<{ tap: [] }>();
   border: 2rpx solid #eee0b5;
   border-radius: 18rpx;
   background: #fffbed;
+}
+.hint--note {
+  border-color: #d9e8dc;
+  background: #f2f8f2;
+}
+.hint--complete {
+  border-color: #cbe5d1;
+  background: #eaf6ec;
 }
 .avatar {
   width: 56rpx;
