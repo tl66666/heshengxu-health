@@ -1,17 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Inject,
-  Param,
-  Patch,
-  Put,
-  Query,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Inject, Param, Patch, Put, Req, Res, UseGuards } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ValidatedBody, ValidatedQuery } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth-context.js';
 import { TodayRecordsQueryDto } from '../health-records/health-records.dto.js';
@@ -28,7 +17,7 @@ export class HealthPlansController {
   @Put('current')
   async saveCurrent(
     @Req() request: AuthenticatedRequest,
-    @Body() body: SaveCurrentPlanDto,
+    @ValidatedBody(SaveCurrentPlanDto) body: SaveCurrentPlanDto,
     @Res() response: Response,
   ) {
     return response.send(envelope(await this.plans.saveCurrent(request.user.id, body), response));
@@ -37,7 +26,7 @@ export class HealthPlansController {
   @Get('current')
   async getCurrent(
     @Req() request: AuthenticatedRequest,
-    @Query() query: TodayRecordsQueryDto,
+    @ValidatedQuery(TodayRecordsQueryDto) query: TodayRecordsQueryDto,
     @Res() response: Response,
   ) {
     return response.send(
@@ -49,7 +38,7 @@ export class HealthPlansController {
   async completeTask(
     @Req() request: AuthenticatedRequest,
     @Param('taskId') taskId: string,
-    @Body() body: UpdatePlanTaskDto,
+    @ValidatedBody(UpdatePlanTaskDto) body: UpdatePlanTaskDto,
     @Res() response: Response,
   ) {
     return response.send(

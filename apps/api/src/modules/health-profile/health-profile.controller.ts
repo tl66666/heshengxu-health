@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Inject, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Put, Req, Res, UseGuards } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ValidatedBody } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth-context.js';
 import { HealthProfileService } from './health-profile.service.js';
@@ -26,7 +27,7 @@ export class HealthProfileController {
   @Put('me')
   async updateCurrentProfile(
     @Req() request: AuthenticatedRequest,
-    @Body() body: UpdateHealthProfileDto,
+    @ValidatedBody(UpdateHealthProfileDto) body: UpdateHealthProfileDto,
     @Res() response: Response,
   ) {
     const profile = await this.healthProfileService.updateForUser(request.user.id, {

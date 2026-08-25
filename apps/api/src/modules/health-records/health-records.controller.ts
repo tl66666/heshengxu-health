@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   Inject,
@@ -7,12 +6,12 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ValidatedBody, ValidatedQuery } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth-context.js';
 import {
@@ -35,7 +34,7 @@ export class HealthRecordsController {
   @Post('weights')
   async createWeight(
     @Req() request: AuthenticatedRequest,
-    @Body() body: CreateWeightRecordDto,
+    @ValidatedBody(CreateWeightRecordDto) body: CreateWeightRecordDto,
     @Res() response: Response,
   ) {
     return response
@@ -46,7 +45,7 @@ export class HealthRecordsController {
   @Post('meal-structures')
   async createMeal(
     @Req() request: AuthenticatedRequest,
-    @Body() body: CreateMealStructureRecordDto,
+    @ValidatedBody(CreateMealStructureRecordDto) body: CreateMealStructureRecordDto,
     @Res() response: Response,
   ) {
     return response
@@ -57,7 +56,7 @@ export class HealthRecordsController {
   @Post('activities')
   async createActivity(
     @Req() request: AuthenticatedRequest,
-    @Body() body: CreateActivityRecordDto,
+    @ValidatedBody(CreateActivityRecordDto) body: CreateActivityRecordDto,
     @Res() response: Response,
   ) {
     return response
@@ -68,7 +67,7 @@ export class HealthRecordsController {
   @Post('sleeps')
   async createSleep(
     @Req() request: AuthenticatedRequest,
-    @Body() body: CreateSleepRecordDto,
+    @ValidatedBody(CreateSleepRecordDto) body: CreateSleepRecordDto,
     @Res() response: Response,
   ) {
     return response
@@ -81,7 +80,7 @@ export class HealthRecordsController {
     @Req() request: AuthenticatedRequest,
     @Param('recordType') recordType: HealthRecordType,
     @Param('recordId') recordId: string,
-    @Body() body: ReplaceHealthRecordDto,
+    @ValidatedBody(ReplaceHealthRecordDto) body: ReplaceHealthRecordDto,
     @Res() response: Response,
   ) {
     if (!isRecordType(recordType)) throw new NotFoundException('未找到该记录类型');
@@ -93,7 +92,7 @@ export class HealthRecordsController {
   @Get('today')
   async getToday(
     @Req() request: AuthenticatedRequest,
-    @Query() query: TodayRecordsQueryDto,
+    @ValidatedQuery(TodayRecordsQueryDto) query: TodayRecordsQueryDto,
     @Res() response: Response,
   ) {
     return response.send(

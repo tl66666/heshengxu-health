@@ -1,5 +1,6 @@
-import { Controller, Get, Inject, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Req, Res, UseGuards } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ValidatedQuery } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth-context.js';
 import { TodayRecordsQueryDto } from '../health-records/health-records.dto.js';
@@ -15,7 +16,7 @@ export class DailyHomeController {
   @Get('today')
   async getToday(
     @Req() request: AuthenticatedRequest,
-    @Query() query: TodayRecordsQueryDto,
+    @ValidatedQuery(TodayRecordsQueryDto) query: TodayRecordsQueryDto,
     @Res() response: Response,
   ) {
     return response.send({
