@@ -19,4 +19,25 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
+  {
+    // Nest emits decorator metadata for controllers and injectable classes.
+    // Their DTO and provider imports must remain runtime values for validation and DI.
+    files: [
+      'apps/api/src/**/*.controller.ts',
+      'apps/api/src/**/*.service.ts',
+      'apps/api/src/**/*.repository.ts',
+    ],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
+    },
+  },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+  },
 );
