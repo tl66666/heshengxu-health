@@ -1,5 +1,6 @@
 export type DailyPlanKind = 'weight' | 'sleep';
 export type DailyActionType =
+  | 'setup_plan'
   | 'record_sleep'
   | 'record_weight'
   | 'record_meal'
@@ -7,7 +8,7 @@ export type DailyActionType =
   | 'review_today';
 
 export type DailyActionInput = {
-  planKind: DailyPlanKind;
+  planKind: DailyPlanKind | null;
   hasSleepForPreviousNight: boolean;
   hasWeightToday: boolean;
   hasMealToday: boolean;
@@ -22,6 +23,12 @@ export type DailyAction = {
 };
 
 const actions: Record<DailyActionType, DailyAction> = {
+  setup_plan: {
+    type: 'setup_plan',
+    title: '设置你的健康计划',
+    description: '先选一个当前最想照顾的方向，再从小行动开始。',
+    route: '/pages/plan-setup/PlanSetupPage',
+  },
   record_sleep: {
     type: 'record_sleep',
     title: '补记昨晚睡眠',
@@ -55,6 +62,7 @@ const actions: Record<DailyActionType, DailyAction> = {
 };
 
 export function selectDailyAction(input: DailyActionInput): DailyAction {
+  if (input.planKind === null) return actions.setup_plan;
   if (!input.hasSleepForPreviousNight) return actions.record_sleep;
   if (input.planKind === 'weight' && !input.hasWeightToday) return actions.record_weight;
   if (!input.hasMealToday) return actions.record_meal;

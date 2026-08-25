@@ -7,6 +7,7 @@ export type PlanTaskAction = 'record_weight' | 'record_meal' | 'walk_15_minutes'
 export type PlanTaskStatus = 'pending' | 'completed' | 'skipped';
 export type HealthRecordType = 'weight' | 'meal-structure' | 'activity' | 'sleep';
 export type DailyActionType =
+  | 'setup_plan'
   | 'record_sleep'
   | 'record_weight'
   | 'record_meal'

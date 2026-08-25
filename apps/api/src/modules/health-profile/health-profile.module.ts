@@ -18,5 +18,6 @@ import { HealthProfileService } from './health-profile.service.js';
       inject: [PrismaHealthProfileRepository],
     },
   ],
+  exports: [HealthProfileService],
 })
 export class HealthProfileModule {}

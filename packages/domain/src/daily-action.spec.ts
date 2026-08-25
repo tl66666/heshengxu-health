@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { selectDailyAction } from './daily-action.js';
 
 describe('selectDailyAction', () => {
+  it('asks a user without a plan to set one up', () => {
+    expect(
+      selectDailyAction({
+        planKind: null,
+        hasSleepForPreviousNight: false,
+        hasWeightToday: false,
+        hasMealToday: false,
+        hasActivityToday: false,
+      }),
+    ).toMatchObject({ type: 'setup_plan', route: '/pages/plan-setup/PlanSetupPage' });
+  });
+
   it('asks to record yesterday sleep before other work', () => {
     expect(
       selectDailyAction({
