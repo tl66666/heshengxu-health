@@ -71,6 +71,384 @@
           }
         }
       }
+    },
+    "/health-records/weights": {
+      "post": {
+        "summary": "记录体重",
+        "description": "保存一条体重事实记录",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-records/meal-structures": {
+      "post": {
+        "summary": "记录饮食结构",
+        "description": "保存一餐的主食、蛋白质和蔬菜结构",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-records/activities": {
+      "post": {
+        "summary": "记录活动",
+        "description": "保存活动类型和时长",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-records/sleeps": {
+      "post": {
+        "summary": "记录睡眠",
+        "description": "保存睡眠时长和主观感受",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-records/{recordType}/{recordId}": {
+      "patch": {
+        "summary": "修改健康记录",
+        "description": "保留旧版本并创建新的当前记录",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-records/today": {
+      "get": {
+        "summary": "读取当天记录",
+        "description": "只返回当前版本的四类记录",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-plans/current": {
+      "get": {
+        "summary": "读取当前计划",
+        "description": "读取当前活跃计划和当天任务",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      },
+      "put": {
+        "summary": "设置当前计划",
+        "description": "归档旧计划并创建新的目标、计划和当天任务",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/health-plans/tasks/{taskId}": {
+      "patch": {
+        "summary": "完成计划任务",
+        "description": "完成或跳过当前用户的待办任务",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
+    },
+    "/daily-home/today": {
+      "get": {
+        "summary": "读取今日首页",
+        "description": "聚合档案、计划、记录进度和唯一行动",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功"
+          },
+          "201": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "参数校验失败"
+          },
+          "401": {
+            "description": "未认证"
+          },
+          "404": {
+            "description": "资源不存在或无权访问"
+          }
+        }
+      }
     }
   }
 }

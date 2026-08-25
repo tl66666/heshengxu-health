@@ -57,6 +57,8 @@ pnpm --filter @heban/mini build:mp-weixin:check
 
 阶段 0.5 已完成：Prisma schema 与 PostgreSQL migration、健康档案持久化仓储、API 重启后档案读取、只保存哈希的 AI 审计表。真实微信登录仍未接入，开发 token 仅限本地联调。
 
+阶段 2A 已完成：体重、饮食结构、活动、睡眠四类版本化记录；体重和睡眠计划；每日任务；首页聚合；小程序五栏导航与规则化序序场景陪伴。完整验收记录见 `docs/engineering/stage-2a-acceptance.md`。
+
 OpenAPI 生成：
 
 ```powershell

@@ -28,7 +28,54 @@ const document = {
         },
       },
     },
+    '/health-records/weights': {
+      post: protectedOperation('记录体重', '保存一条体重事实记录'),
+    },
+    '/health-records/meal-structures': {
+      post: protectedOperation('记录饮食结构', '保存一餐的主食、蛋白质和蔬菜结构'),
+    },
+    '/health-records/activities': {
+      post: protectedOperation('记录活动', '保存活动类型和时长'),
+    },
+    '/health-records/sleeps': {
+      post: protectedOperation('记录睡眠', '保存睡眠时长和主观感受'),
+    },
+    '/health-records/{recordType}/{recordId}': {
+      patch: protectedOperation('修改健康记录', '保留旧版本并创建新的当前记录'),
+    },
+    '/health-records/today': {
+      get: protectedOperation('读取当天记录', '只返回当前版本的四类记录'),
+    },
+    '/health-plans/current': {
+      get: protectedOperation('读取当前计划', '读取当前活跃计划和当天任务'),
+      put: protectedOperation('设置当前计划', '归档旧计划并创建新的目标、计划和当天任务'),
+    },
+    '/health-plans/tasks/{taskId}': {
+      patch: protectedOperation('完成计划任务', '完成或跳过当前用户的待办任务'),
+    },
+    '/daily-home/today': {
+      get: protectedOperation('读取今日首页', '聚合档案、计划、记录进度和唯一行动'),
+    },
   },
 };
 
 await writeFile(resolve(process.cwd(), 'openapi.json'), `${JSON.stringify(document, null, 2)}\n`);
+
+function protectedOperation(summary: string, description: string) {
+  return {
+    summary,
+    description,
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: false,
+      content: { 'application/json': { schema: { type: 'object' } } },
+    },
+    responses: {
+      '200': { description: '请求成功' },
+      '201': { description: '创建成功' },
+      '400': { description: '参数校验失败' },
+      '401': { description: '未认证' },
+      '404': { description: '资源不存在或无权访问' },
+    },
+  };
+}
