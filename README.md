@@ -35,13 +35,14 @@ npx serve prototypes/web-demo
 ## 文档入口
 
 - [权威产品蓝图](docs/product/heshengxu-product-blueprint.md)
+- [阶段 2A 每日健康闭环实施计划](docs/superpowers/plans/2026-08-25-stage-2a-daily-health-loop.md)
 - [历史平台探索](docs/product/archive/2026-08-24-platform-exploration.md)
 - [早期范围取舍](docs/superpowers/specs/2026-08-24-product-scope-after-mint-benchmark.md)
-- [阶段 0 实施计划](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
+- [阶段 0 实施计划（已完成）](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
 - [阶段 1 建档设计](docs/superpowers/specs/2026-08-24-stage-1-onboarding-design.md)
-- [阶段 1 建档实施计划](docs/superpowers/plans/2026-08-24-stage-1-onboarding.md)
+- [阶段 1 建档实施计划（已完成）](docs/superpowers/plans/2026-08-24-stage-1-onboarding.md)
 - [阶段 0.5 持久化设计](docs/superpowers/specs/2026-08-25-stage-0-5-persistence-design.md)
-- [阶段 0.5 持久化实施计划](docs/superpowers/plans/2026-08-25-stage-0-5-persistence.md)
+- [阶段 0.5 持久化实施计划（已完成）](docs/superpowers/plans/2026-08-25-stage-0-5-persistence.md)
 - [项目结构规范](docs/engineering/project-structure.md)
 - [微信小程序导入架构决策](docs/architecture/adr-003-mini-program-import.md)
 

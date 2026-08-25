@@ -1,4 +1,10 @@
-# 健康平台工程底座 Implementation Plan
+# 已归档：早期健康平台工程底座探索
+
+> 本计划是 2026-08-24 的早期探索，已先后被“阶段 0 工程底座计划”和 [和生序产品蓝图](../../../product/heshengxu-product-blueprint.md) 替代。它包含过早的真实 AI Provider 与过宽的功能设想，不得作为后续实施依据。
+
+---
+
+# 健康平台工程底座 Implementation Plan（历史探索）
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 

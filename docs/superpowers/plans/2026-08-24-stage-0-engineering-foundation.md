@@ -1,5 +1,7 @@
 # 阶段 0：工程底座 Implementation Plan
 
+> **状态：已完成。** 对应提交包括 `7d9be45` 至 `fafacc3`、`d8b162d`。2026-08-25 已复核 Docker 健康、API/小程序测试、类型检查与构建。文中未勾选的复选框保留为历史实施步骤，不是当前待办；后续范围以 [和生序产品蓝图](../../product/heshengxu-product-blueprint.md) 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 隔离静态 Demo，并建立可本地运行、可测试、可扩展到微信小程序与 App 的健康管理工程底座。

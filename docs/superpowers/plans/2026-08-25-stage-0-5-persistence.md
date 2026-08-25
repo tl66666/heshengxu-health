@@ -1,5 +1,7 @@
 # 和生序阶段 0.5 数据持久化实施计划
 
+> **状态：已完成。** 对应实现提交为 `51ce5fe`。2026-08-25 已复核 PostgreSQL 迁移表、API 重启后档案读取、API/小程序测试、类型检查与微信小程序构建。文中未勾选的复选框保留为历史实施步骤，不是当前待办；后续范围以 [和生序产品蓝图](../../product/heshengxu-product-blueprint.md) 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 让健康档案和 AI 审计数据由 PostgreSQL 持久化，并保持现有 API 与小程序流程不变。

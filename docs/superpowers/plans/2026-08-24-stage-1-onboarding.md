@@ -1,5 +1,7 @@
 # 和生序阶段 1 建档闭环实施计划
 
+> **状态：已完成。** 对应实现提交为 `fc92879`，并由 `51ce5fe` 补上 PostgreSQL 持久化。2026-08-25 已复核 API、小程序、领域规则测试及微信小程序构建。文中未勾选的复选框保留为历史实施步骤，不是当前待办；后续范围以 [和生序产品蓝图](../../product/heshengxu-product-blueprint.md) 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 实现首次用户建档、实时 BMI、服务端保存和完成前的入口锁定。
