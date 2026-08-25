@@ -17,16 +17,16 @@ scripts/                   可重复执行的工程脚本
 
 ## 小程序导入
 
-在仓库根目录执行：
+日常开发在仓库根目录执行：
 
 ```powershell
 pnpm install
-./scripts/build-mini.ps1
+./scripts/dev-mini.ps1
 ```
 
-然后在微信开发者工具中导入 `apps/mini`。项目配置会自动把微信端根目录指向 `apps/mini/dist/build/mp-weixin`，其中必须存在由 uni-app 生成的 `app.json`。
+然后在微信开发者工具中导入 `apps/mini`。项目配置会自动把微信端根目录指向 `apps/mini/dist/dev/mp-weixin`，其中必须存在由 uni-app 生成的 `app.json`。源码保存后点击微信工具的“重新编译”即可更新。
 
-如果只想预览构建结果，也可以直接导入 `apps/mini/dist/build/mp-weixin`。不要导入仓库根目录，也不要手工创建或修改构建目录里的 `app.json`。
+发布预览前运行 `./scripts/build-mini.ps1`，再直接导入 `apps/mini/dist/build/mp-weixin`。不要导入仓库根目录，也不要手工创建或修改构建目录里的 `app.json`。
 
 ## 配置边界
 

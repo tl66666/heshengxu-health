@@ -15,20 +15,22 @@ pnpm --filter @heban/mini build:mp-weixin:check
 
 ## 微信开发者工具导入
 
-推荐在仓库根目录执行：
+### 日常开发（推荐）
+
+先在仓库根目录运行：
+
+```powershell
+./scripts/dev-mini.ps1
+```
+
+脚本会持续监听源码变化并生成 `apps/mini/dist/dev/mp-weixin`。微信开发者工具只需要导入一次 `apps/mini`，项目配置会自动把小程序根目录指向开发产物；之后保存源码后，在微信工具点击“重新编译”即可看到变化，不需要 HBuilderX 参与。
+
+### 发布前构建
 
 ```powershell
 ./scripts/build-mini.ps1
 ```
 
-然后导入 `apps/mini`。这里的 `project.config.json` 已将 `miniprogramRoot` 指向 `dist/build/mp-weixin`，所以微信工具能找到构建生成的 `app.json`。
-
-也可以直接导入：
-
-```text
-D:\禾伴\heban-ai-health-demo\apps\mini\dist\build\mp-weixin
-```
-
-不要直接导入仓库根目录，也不要把 `apps/mini/src` 当作原生微信小程序项目。源码使用 `pages.json`，微信端 `app.json` 由构建自动生成。
+发布预览时直接导入 `apps/mini/dist/build/mp-weixin`。不要导入仓库根目录，也不要把 `apps/mini/src` 当作原生微信小程序项目。源码使用 `pages.json`，微信端 `app.json` 由构建自动生成。
 
 `manifest.json` 中的 AppID 当前为空，发布前再填入微信公众平台申请的正式 AppID；AppSecret 不进入小程序工程或 Git 仓库。

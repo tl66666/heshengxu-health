@@ -8,12 +8,16 @@
 
 ## 小程序快速开始
 
+安装依赖后启动开发监听：
+
 ```powershell
 pnpm install
-./scripts/build-mini.ps1
+./scripts/dev-mini.ps1
 ```
 
-构建完成后，在微信开发者工具中导入 `apps/mini`。如果提示找不到 `app.json`，说明导入了错误目录；请先运行构建脚本，或直接导入 `apps/mini/dist/build/mp-weixin`。
+微信开发者工具导入 `apps/mini`（只需一次）。开发配置会自动使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可看到最新页面。
+
+发布预览前运行 `./scripts/build-mini.ps1`，再直接导入 `apps/mini/dist/build/mp-weixin`。
 
 ## 仓库结构
 
