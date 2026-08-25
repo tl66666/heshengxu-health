@@ -18,7 +18,13 @@ describe('health records', () => {
     await client
       .post('/api/v1/health-records/meal-structures')
       .set(authorization)
-      .send({ mealType: 'lunch', hasStaple: true, hasProtein: true, hasVegetable: false, recordedAt })
+      .send({
+        mealType: 'lunch',
+        hasStaple: true,
+        hasProtein: true,
+        hasVegetable: false,
+        recordedAt,
+      })
       .expect(201);
     await client
       .post('/api/v1/health-records/activities')
@@ -65,7 +71,11 @@ describe('health records', () => {
       .send({ valueKg: 61.6, recordedAt })
       .expect(200);
 
-    expect(replacement.body.data).toMatchObject({ valueKg: 61.6, isCurrent: true, previousRecordId: original.body.data.id });
+    expect(replacement.body.data).toMatchObject({
+      valueKg: 61.6,
+      isCurrent: true,
+      previousRecordId: original.body.data.id,
+    });
     const today = await client
       .get('/api/v1/health-records/today?date=2026-08-25')
       .set(authorization)

@@ -11,7 +11,10 @@ describe('daily home', () => {
       .set('Authorization', `Bearer dev-home-empty-${Date.now()}`)
       .expect(200);
 
-    expect(response.body.data).toMatchObject({ activePlan: null, dailyAction: { type: 'setup_plan' } });
+    expect(response.body.data).toMatchObject({
+      activePlan: null,
+      dailyAction: { type: 'setup_plan' },
+    });
     await app.close();
   });
 
@@ -26,7 +29,10 @@ describe('daily home', () => {
       .send({ kind: 'weight', direction: 'lose', startDate: '2026-08-25' })
       .expect(200);
 
-    const response = await client.get('/api/v1/daily-home/today?date=2026-08-25').set(authorization).expect(200);
+    const response = await client
+      .get('/api/v1/daily-home/today?date=2026-08-25')
+      .set(authorization)
+      .expect(200);
     expect(response.body.data).toMatchObject({
       activePlan: { kind: 'weight' },
       dailyAction: { type: 'record_sleep' },

@@ -50,8 +50,16 @@ describe('createApiClient', () => {
     await client.patch('/health-plans/tasks/task-1', { status: 'completed' });
 
     expect(requests).toEqual([
-      { url: 'https://example.test/api/v1/health-records/weights', method: 'POST', data: { valueKg: 61.8 } },
-      { url: 'https://example.test/api/v1/health-plans/tasks/task-1', method: 'PATCH', data: { status: 'completed' } },
+      {
+        url: 'https://example.test/api/v1/health-records/weights',
+        method: 'POST',
+        data: { valueKg: 61.8 },
+      },
+      {
+        url: 'https://example.test/api/v1/health-plans/tasks/task-1',
+        method: 'PATCH',
+        data: { status: 'completed' },
+      },
     ]);
   });
 });

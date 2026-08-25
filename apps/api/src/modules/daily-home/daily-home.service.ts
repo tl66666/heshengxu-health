@@ -37,7 +37,14 @@ export class DailyHomeService {
         hasMealToday: hasMeal,
         hasActivityToday: hasActivity,
       }),
-      recordingProgress: { completed, total: 4 as const, hasWeight, hasMeal, hasActivity, hasSleep },
+      recordingProgress: {
+        completed,
+        total: 4 as const,
+        hasWeight,
+        hasMeal,
+        hasActivity,
+        hasSleep,
+      },
     };
   }
 }

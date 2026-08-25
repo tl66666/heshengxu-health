@@ -7,7 +7,8 @@ export type OnboardingForm = {
   birthDate: string;
   heightCm: string;
   weightKg: string;
-  primaryGoal: 'weight_management' | 'weight_maintenance' | 'muscle_gain' | 'sleep' | 'energy' | 'mood' | '';
+  primaryGoal:
+    'weight_management' | 'weight_maintenance' | 'muscle_gain' | 'sleep' | 'energy' | 'mood' | '';
 };
 
 const form = reactive<OnboardingForm>({

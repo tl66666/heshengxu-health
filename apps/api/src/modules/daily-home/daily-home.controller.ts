@@ -13,7 +13,11 @@ export class DailyHomeController {
   constructor(@Inject(DailyHomeService) private readonly dailyHome: DailyHomeService) {}
 
   @Get('today')
-  async getToday(@Req() request: AuthenticatedRequest, @Query() query: TodayRecordsQueryDto, @Res() response: Response) {
+  async getToday(
+    @Req() request: AuthenticatedRequest,
+    @Query() query: TodayRecordsQueryDto,
+    @Res() response: Response,
+  ) {
     return response.send({
       data: await this.dailyHome.getToday(request.user.id, query.date),
       meta: { requestId: response.locals.requestId },

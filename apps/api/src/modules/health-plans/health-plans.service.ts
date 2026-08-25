@@ -15,8 +15,14 @@ export class HealthPlansService {
     await this.ensureUser(userId);
 
     const plan = await this.prisma.$transaction(async (tx) => {
-      await tx.personalPlan.updateMany({ where: { userId, status: 'active' }, data: { status: 'archived' } });
-      await tx.healthTarget.updateMany({ where: { userId, status: 'active' }, data: { status: 'archived' } });
+      await tx.personalPlan.updateMany({
+        where: { userId, status: 'active' },
+        data: { status: 'archived' },
+      });
+      await tx.healthTarget.updateMany({
+        where: { userId, status: 'active' },
+        data: { status: 'archived' },
+      });
       const target = await tx.healthTarget.create({
         data: {
           userId,
@@ -68,7 +74,10 @@ export class HealthPlansService {
   private async getPlanById(userId: string, planId: string, scheduledFor: Date) {
     const plan = await this.prisma.personalPlan.findFirst({
       where: { id: planId, userId },
-      include: { healthTarget: true, tasks: { where: { scheduledFor }, orderBy: { actionType: 'asc' } } },
+      include: {
+        healthTarget: true,
+        tasks: { where: { scheduledFor }, orderBy: { actionType: 'asc' } },
+      },
     });
     if (!plan) throw new NotFoundException('未找到当前计划');
     return plan;
@@ -81,9 +90,7 @@ export class HealthPlansService {
     scheduledFor: Date,
   ) {
     const actions: PlanTaskAction[] =
-      kind === 'weight'
-        ? ['record_weight', 'record_meal', 'walk_15_minutes']
-        : ['record_sleep'];
+      kind === 'weight' ? ['record_weight', 'record_meal', 'walk_15_minutes'] : ['record_sleep'];
     await Promise.all(
       actions.map((actionType) =>
         client.planTask.upsert({
@@ -96,7 +103,8 @@ export class HealthPlansService {
   }
 
   private assertPlanShape(dto: SaveCurrentPlanDto) {
-    if (dto.kind === 'weight' && !dto.direction) throw new BadRequestException('体重计划需要选择目标方向');
+    if (dto.kind === 'weight' && !dto.direction)
+      throw new BadRequestException('体重计划需要选择目标方向');
     if (dto.kind === 'sleep' && (dto.direction || dto.targetWeightKg !== undefined)) {
       throw new BadRequestException('睡眠计划不需要体重目标');
     }

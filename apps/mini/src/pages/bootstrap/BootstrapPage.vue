@@ -2,7 +2,9 @@
   <view class="bootstrap-page">
     <text class="eyebrow">和生序 · 健康管理</text>
     <text class="title">让健康回到自己的节律</text>
-    <text class="description">开发环境已连接。正式建档、健康记录与 AI 助手将在产品确认后接入。</text>
+    <text class="description"
+      >开发环境已连接。正式建档、健康记录与 AI 助手将在产品确认后接入。</text
+    >
   </view>
 </template>
 
@@ -21,7 +23,8 @@ onShow(async () => {
           method: method as never,
           data: data as Record<string, unknown>,
           header: { Authorization: 'Bearer dev-mini-user' },
-          success: (response) => resolve({ statusCode: response.statusCode, data: response.data as never }),
+          success: (response) =>
+            resolve({ statusCode: response.statusCode, data: response.data as never }),
           fail: reject,
         });
       }),

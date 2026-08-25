@@ -10,6 +10,6 @@ allowBuilds:
   esbuild: true
   prisma: true
 
-# These polyfills are transitive dependencies and do not need install-time scripts here.
+  # These polyfills are transitive dependencies and do not need install-time scripts here.
   core-js: false
   core-js-pure: false

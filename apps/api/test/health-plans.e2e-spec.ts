@@ -49,13 +49,20 @@ describe('health plans', () => {
       .expect(200);
     const taskId = created.body.data.tasks[0].id;
 
-    await client.patch(`/api/v1/health-plans/tasks/${taskId}`).set(other).send({ status: 'completed' }).expect(404);
+    await client
+      .patch(`/api/v1/health-plans/tasks/${taskId}`)
+      .set(other)
+      .send({ status: 'completed' })
+      .expect(404);
     const completed = await client
       .patch(`/api/v1/health-plans/tasks/${taskId}`)
       .set(owner)
       .send({ status: 'completed' })
       .expect(200);
-    expect(completed.body.data).toMatchObject({ status: 'completed', completedAt: expect.any(String) });
+    expect(completed.body.data).toMatchObject({
+      status: 'completed',
+      completedAt: expect.any(String),
+    });
     await app.close();
   });
 });

@@ -1,5 +1,8 @@
 import { ref } from 'vue';
-import type { DailyHomeDto, PersonalPlanDto } from '../../../../../packages/contracts/src/health-loop.js';
+import type {
+  DailyHomeDto,
+  PersonalPlanDto,
+} from '../../../../../packages/contracts/src/health-loop.js';
 import {
   completeTask as completeTaskRequest,
   createRecord as createRecordRequest,
@@ -43,7 +46,12 @@ export const healthLoopState = {
     await createRecordRequest(request);
     await this.loadToday(date);
   },
-  async replaceRecord(type: RecordRequest['type'], recordId: string, data: Record<string, unknown>, date: string) {
+  async replaceRecord(
+    type: RecordRequest['type'],
+    recordId: string,
+    data: Record<string, unknown>,
+    date: string,
+  ) {
     await replaceRecordRequest(type, recordId, data);
     await this.loadToday(date);
   },

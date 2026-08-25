@@ -73,14 +73,24 @@ export class HealthRecordsService {
     });
   }
 
-  async replace(userId: string, type: HealthRecordType, recordId: string, dto: ReplaceHealthRecordDto) {
+  async replace(
+    userId: string,
+    type: HealthRecordType,
+    recordId: string,
+    dto: ReplaceHealthRecordDto,
+  ) {
     await this.ensureUser(userId);
     switch (type) {
       case 'weight':
         return this.prisma.$transaction(async (tx) => {
-          const old = await tx.weightRecord.findFirst({ where: { id: recordId, userId, isCurrent: true } });
+          const old = await tx.weightRecord.findFirst({
+            where: { id: recordId, userId, isCurrent: true },
+          });
           if (!old) throw new NotFoundException('未找到可修改的体重记录');
-          await tx.weightRecord.update({ data: { isCurrent: false, supersededAt: new Date() }, where: { id: old.id } });
+          await tx.weightRecord.update({
+            data: { isCurrent: false, supersededAt: new Date() },
+            where: { id: old.id },
+          });
           return tx.weightRecord.create({
             data: {
               userId,
@@ -93,9 +103,14 @@ export class HealthRecordsService {
         });
       case 'meal-structure':
         return this.prisma.$transaction(async (tx) => {
-          const old = await tx.mealStructureRecord.findFirst({ where: { id: recordId, userId, isCurrent: true } });
+          const old = await tx.mealStructureRecord.findFirst({
+            where: { id: recordId, userId, isCurrent: true },
+          });
           if (!old) throw new NotFoundException('未找到可修改的饮食记录');
-          await tx.mealStructureRecord.update({ data: { isCurrent: false, supersededAt: new Date() }, where: { id: old.id } });
+          await tx.mealStructureRecord.update({
+            data: { isCurrent: false, supersededAt: new Date() },
+            where: { id: old.id },
+          });
           return tx.mealStructureRecord.create({
             data: {
               userId,
@@ -111,9 +126,14 @@ export class HealthRecordsService {
         });
       case 'activity':
         return this.prisma.$transaction(async (tx) => {
-          const old = await tx.activityRecord.findFirst({ where: { id: recordId, userId, isCurrent: true } });
+          const old = await tx.activityRecord.findFirst({
+            where: { id: recordId, userId, isCurrent: true },
+          });
           if (!old) throw new NotFoundException('未找到可修改的活动记录');
-          await tx.activityRecord.update({ data: { isCurrent: false, supersededAt: new Date() }, where: { id: old.id } });
+          await tx.activityRecord.update({
+            data: { isCurrent: false, supersededAt: new Date() },
+            where: { id: old.id },
+          });
           return tx.activityRecord.create({
             data: {
               userId,
@@ -128,9 +148,14 @@ export class HealthRecordsService {
         });
       case 'sleep':
         return this.prisma.$transaction(async (tx) => {
-          const old = await tx.sleepRecord.findFirst({ where: { id: recordId, userId, isCurrent: true } });
+          const old = await tx.sleepRecord.findFirst({
+            where: { id: recordId, userId, isCurrent: true },
+          });
           if (!old) throw new NotFoundException('未找到可修改的睡眠记录');
-          await tx.sleepRecord.update({ data: { isCurrent: false, supersededAt: new Date() }, where: { id: old.id } });
+          await tx.sleepRecord.update({
+            data: { isCurrent: false, supersededAt: new Date() },
+            where: { id: old.id },
+          });
           return tx.sleepRecord.create({
             data: {
               userId,
@@ -156,7 +181,13 @@ export class HealthRecordsService {
       this.prisma.activityRecord.findMany({ where, orderBy: { recordedAt: 'asc' } }),
       this.prisma.sleepRecord.findMany({ where, orderBy: { recordedAt: 'desc' } }),
     ]);
-    return { timeZone: 'Asia/Shanghai', weight: weights[0] ?? null, meals, activities, sleep: sleeps[0] ?? null };
+    return {
+      timeZone: 'Asia/Shanghai',
+      weight: weights[0] ?? null,
+      meals,
+      activities,
+      sleep: sleeps[0] ?? null,
+    };
   }
 
   private ensureUser(userId: string) {

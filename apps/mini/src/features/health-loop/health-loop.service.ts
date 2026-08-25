@@ -26,7 +26,8 @@ function createMiniClient() {
           method: method as never,
           data: data as Record<string, unknown>,
           header: { Authorization: 'Bearer dev-mini-user' },
-          success: (response) => resolve({ statusCode: response.statusCode, data: response.data as never }),
+          success: (response) =>
+            resolve({ statusCode: response.statusCode, data: response.data as never }),
           fail: reject,
         });
       }),
@@ -55,7 +56,11 @@ export function createRecord(request: RecordRequest) {
   return createMiniClient().post(paths[request.type], request.data);
 }
 
-export function replaceRecord(type: HealthRecordType, recordId: string, data: Record<string, unknown>) {
+export function replaceRecord(
+  type: HealthRecordType,
+  recordId: string,
+  data: Record<string, unknown>,
+) {
   return createMiniClient().patch(`/health-records/${type}/${recordId}`, data);
 }
 

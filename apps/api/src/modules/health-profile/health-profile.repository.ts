@@ -9,12 +9,7 @@ export type HealthProfile = {
 };
 
 export type HealthGoal =
-  | 'weight_management'
-  | 'weight_maintenance'
-  | 'muscle_gain'
-  | 'sleep'
-  | 'energy'
-  | 'mood';
+  'weight_management' | 'weight_maintenance' | 'muscle_gain' | 'sleep' | 'energy' | 'mood';
 
 export type HealthProfileUpdate = Pick<
   HealthProfile,

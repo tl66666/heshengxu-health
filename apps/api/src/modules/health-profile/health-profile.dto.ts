@@ -1,4 +1,13 @@
-import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import type { HealthGoal } from './health-profile.repository.js';
 
 export const HEALTH_GOALS: HealthGoal[] = [

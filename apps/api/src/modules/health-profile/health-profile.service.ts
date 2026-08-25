@@ -14,7 +14,9 @@ export class HealthProfileService {
     return this.withDerivedMetrics(profile);
   }
 
-  private withDerivedMetrics(profile: Awaited<ReturnType<HealthProfileRepository['findOrCreateForUser']>>) {
+  private withDerivedMetrics(
+    profile: Awaited<ReturnType<HealthProfileRepository['findOrCreateForUser']>>,
+  ) {
     const bmi =
       profile.heightCm && profile.weightKg
         ? calculateBmi(profile.heightCm, profile.weightKg)

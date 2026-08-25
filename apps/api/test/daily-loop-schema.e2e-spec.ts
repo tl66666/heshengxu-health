@@ -9,7 +9,9 @@ describe('daily health loop persistence schema', () => {
     await prisma.user.create({ data: { id: userId } });
 
     const recordedAt = new Date('2026-08-25T08:00:00.000Z');
-    const weight = await prisma.weightRecord.create({ data: { userId, valueKg: 61.8, recordedAt } });
+    const weight = await prisma.weightRecord.create({
+      data: { userId, valueKg: 61.8, recordedAt },
+    });
     const meal = await prisma.mealStructureRecord.create({
       data: {
         userId,
@@ -40,7 +42,13 @@ describe('daily health loop persistence schema', () => {
       data: { userId, kind: 'weight', direction: 'lose', startDate: new Date('2026-08-25') },
     });
     const plan = await prisma.personalPlan.create({
-      data: { userId, healthTargetId: target.id, kind: 'weight', startDate: new Date('2026-08-25'), ruleVersion: 'daily-loop-v1' },
+      data: {
+        userId,
+        healthTargetId: target.id,
+        kind: 'weight',
+        startDate: new Date('2026-08-25'),
+        ruleVersion: 'daily-loop-v1',
+      },
     });
 
     await prisma.planTask.create({
@@ -49,7 +57,11 @@ describe('daily health loop persistence schema', () => {
 
     await expect(
       prisma.planTask.create({
-        data: { planId: plan.id, scheduledFor: new Date('2026-08-25'), actionType: 'record_weight' },
+        data: {
+          planId: plan.id,
+          scheduledFor: new Date('2026-08-25'),
+          actionType: 'record_weight',
+        },
       }),
     ).rejects.toMatchObject({ code: 'P2002' });
   });

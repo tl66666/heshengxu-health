@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Inject, Param, Patch, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Put,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth-context.js';
@@ -14,13 +26,23 @@ export class HealthPlansController {
   constructor(@Inject(HealthPlansService) private readonly plans: HealthPlansService) {}
 
   @Put('current')
-  async saveCurrent(@Req() request: AuthenticatedRequest, @Body() body: SaveCurrentPlanDto, @Res() response: Response) {
+  async saveCurrent(
+    @Req() request: AuthenticatedRequest,
+    @Body() body: SaveCurrentPlanDto,
+    @Res() response: Response,
+  ) {
     return response.send(envelope(await this.plans.saveCurrent(request.user.id, body), response));
   }
 
   @Get('current')
-  async getCurrent(@Req() request: AuthenticatedRequest, @Query() query: TodayRecordsQueryDto, @Res() response: Response) {
-    return response.send(envelope(await this.plans.getForUser(request.user.id, query.date), response));
+  async getCurrent(
+    @Req() request: AuthenticatedRequest,
+    @Query() query: TodayRecordsQueryDto,
+    @Res() response: Response,
+  ) {
+    return response.send(
+      envelope(await this.plans.getForUser(request.user.id, query.date), response),
+    );
   }
 
   @Patch('tasks/:taskId')
@@ -30,7 +52,9 @@ export class HealthPlansController {
     @Body() body: UpdatePlanTaskDto,
     @Res() response: Response,
   ) {
-    return response.send(envelope(await this.plans.completeTask(request.user.id, taskId, body), response));
+    return response.send(
+      envelope(await this.plans.completeTask(request.user.id, taskId, body), response),
+    );
   }
 }
 

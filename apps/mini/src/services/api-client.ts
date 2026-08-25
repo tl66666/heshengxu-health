@@ -12,7 +12,11 @@ type ApiTransport = <T>(request: {
 }) => Promise<ApiResponse<T>>;
 
 export function createApiClient({ baseUrl, request }: { baseUrl: string; request: ApiTransport }) {
-  async function send<T>(method: 'GET' | 'PUT' | 'POST' | 'PATCH', path: string, data?: unknown): Promise<T> {
+  async function send<T>(
+    method: 'GET' | 'PUT' | 'POST' | 'PATCH',
+    path: string,
+    data?: unknown,
+  ): Promise<T> {
     const response = await request<T>({ url: `${baseUrl}${path}`, method, data });
     if (response.statusCode >= 200 && response.statusCode < 300 && 'data' in response.data) {
       return response.data.data;
