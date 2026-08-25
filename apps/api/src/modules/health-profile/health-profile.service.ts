@@ -10,9 +10,6 @@ export class HealthProfileService {
   }
 
   async updateForUser(userId: string, update: HealthProfileUpdate) {
-    if (!this.repository.updateForUser) {
-      throw new Error('health profile repository does not support updates');
-    }
     const profile = await this.repository.updateForUser(userId, update);
     return this.withDerivedMetrics(profile);
   }

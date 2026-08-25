@@ -4,6 +4,9 @@ export type AiTrace = {
   userId: string;
   requestHash: string;
   safetyDecision: 'allow' | 'block';
+  safetyReason?: string;
+  provider?: string;
+  model?: string;
 };
 
 export interface AiTraceRepository {

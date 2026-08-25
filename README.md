@@ -4,7 +4,7 @@
 
 “和生序”取“和身心、生息、循其序”之意：不追求极端的改变，而是通过持续记录、理解变化和小步行动，让健康回到每个人自己的节律。品牌主张：**让健康回到自己的节律。**
 
-当前仓库已完成阶段 0 工程底座和阶段 1 建档闭环，正在进入健康首页与每日记录开发。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
+当前仓库已完成阶段 0 工程底座、阶段 0.5 数据持久化与阶段 1 建档闭环，正在进入健康首页与每日记录开发。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
 
 ## 小程序快速开始
 
@@ -39,6 +39,8 @@ npx serve prototypes/web-demo
 - [阶段 0 实施计划](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
 - [阶段 1 建档设计](docs/superpowers/specs/2026-08-24-stage-1-onboarding-design.md)
 - [阶段 1 建档实施计划](docs/superpowers/plans/2026-08-24-stage-1-onboarding.md)
+- [阶段 0.5 持久化设计](docs/superpowers/specs/2026-08-25-stage-0-5-persistence-design.md)
+- [阶段 0.5 持久化实施计划](docs/superpowers/plans/2026-08-25-stage-0-5-persistence.md)
 - [项目结构规范](docs/engineering/project-structure.md)
 - [微信小程序导入架构决策](docs/architecture/adr-003-mini-program-import.md)
 

@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String             @id
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  externalIdentities ExternalIdentity[]
+  consents           Consent[]
+  healthProfile      HealthProfile?
+  aiTraces           AiTrace[]
+}
+
+model ExternalIdentity {
+  id             String           @id @default(cuid())
+  userId         String
+  provider       IdentityProvider
+  providerUserId String
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+model Consent {
+  id              String   @id @default(cuid())
+  userId          String
+  documentVersion String
+  consentedAt     DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model HealthProfile {
+  id          String        @id @default(cuid())
+  userId      String        @unique
+  displayName String?
+  birthDate   DateTime?     @db.Date
+  sex         ProfileSex    @default(unspecified)
+  heightCm    Float?
+  weightKg    Float?
+  primaryGoal HealthGoal?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AiTrace {
+  id             String         @id @default(cuid())
+  userId         String
+  requestHash    String
+  safetyDecision AiSafetyDecision
+  safetyReason   String?
+  provider       String?
+  model          String?
+  createdAt      DateTime       @default(now())
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum IdentityProvider {
+  wechat
+}
+
+enum ProfileSex {
+  female
+  male
+  unspecified
+}
+
+enum HealthGoal {
+  weight_management
+  weight_maintenance
+  muscle_gain
+  sleep
+  energy
+  mood
+}
+
+enum AiSafetyDecision {
+  allow
+  block
+}

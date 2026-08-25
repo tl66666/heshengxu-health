@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { PrismaService } from '../../common/database/prisma.service.js';
 import { HealthProfileController } from './health-profile.controller.js';
-import { InMemoryHealthProfileRepository } from './health-profile.repository.js';
+import { PrismaHealthProfileRepository } from './prisma-health-profile.repository.js';
 import { HealthProfileService } from './health-profile.service.js';
 
 @Module({
   controllers: [HealthProfileController],
   providers: [
     AuthGuard,
-    InMemoryHealthProfileRepository,
+    PrismaService,
+    PrismaHealthProfileRepository,
     {
       provide: HealthProfileService,
-      useFactory: (repository: InMemoryHealthProfileRepository) =>
+      useFactory: (repository: PrismaHealthProfileRepository) =>
         new HealthProfileService(repository),
-      inject: [InMemoryHealthProfileRepository],
+      inject: [PrismaHealthProfileRepository],
     },
   ],
 })

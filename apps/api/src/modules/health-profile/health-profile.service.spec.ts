@@ -11,6 +11,13 @@ describe('HealthProfileService', () => {
         heightCm: 168,
         weightKg: 62,
       }),
+      updateForUser: async () => ({
+        userId: 'user-a',
+        birthDate: null,
+        sex: 'unspecified' as const,
+        heightCm: 168,
+        weightKg: 62,
+      }),
     };
     const service = new HealthProfileService(repository);
 
