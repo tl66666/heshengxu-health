@@ -28,7 +28,7 @@
 | `apps/mini/src/components/XuxuHint.vue` | 不调用模型的序序场景提示 |
 | `apps/mini/src/custom-tab-bar/index.vue` | 五栏自定义导航，中间突出序序 |
 | `apps/mini/src/pages/*/` | 首页、记录、序序、计划、我的和计划设置页面入口 |
-| `apps/mini/src/static/illustrations/` | 从原型正式提升的已审核插画 |
+| `assets/illustrations/` | 从原型正式提升的已审核插画唯一源目录；构建前同步到小程序静态目录 |
 
 ## API 与数据约定
 

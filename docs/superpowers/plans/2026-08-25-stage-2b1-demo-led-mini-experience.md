@@ -1,5 +1,7 @@
 # Stage 2B-1 Demo-Led Mini Experience Implementation Plan
 
+> **状态：已完成。** 对应实现提交为 `d939160`；后续视觉整理提交为 `50ae9bb`。文中复选框保留为历史实施步骤，不是当前待办。当前图片源统一在 `assets/illustrations/`，小程序构建前由 `scripts/sync-illustrations.mjs` 同步。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Rebuild the formal WeChat mini-program experience around the existing real daily-health-loop API, restoring Demo-grade illustration, sequence, and Xuxu companionship without fabricating health data.
@@ -19,6 +21,7 @@
 | `apps/mini/src/components/XuxuHint.vue` | Reusable embedded Xuxu companion module with neutral/supportive variants. |
 | `apps/mini/src/components/IllustratedHero.vue` | Shared illustration hero with readable foreground copy and a single command. |
 | `apps/mini/src/styles/tokens.scss` | Product-level color, spacing, radius, type, and elevation tokens. |
+| `assets/illustrations/` | 唯一图片源；开发/构建脚本同步到小程序静态目录。 |
 | `apps/mini/src/pages/bootstrap/BootstrapPage.vue` | Warm, illustration-led launch state while routing to onboarding or home. |
 | `apps/mini/src/pages/onboarding/OnboardingPage.vue` | Welcome-led, locked onboarding using the existing saved profile fields and live BMI. |
 | `apps/mini/src/pages/home/HomePage.vue` | Today companion dashboard driven by real daily state. |
