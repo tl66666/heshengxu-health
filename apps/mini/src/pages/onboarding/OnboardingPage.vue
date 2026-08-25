@@ -1,93 +1,106 @@
 <template>
   <view class="page">
-    <view class="brand">和生序 · 健康管理</view>
-    <view class="progress"
-      ><view class="progress-fill" :style="{ width: `${((step + 1) / 4) * 100}%` }"
-    /></view>
-
-    <view v-if="step === 0" class="step">
-      <text class="eyebrow">先认识一下你</text>
-      <text class="title">从今天开始，照顾好自己</text>
-      <text class="hint">这些信息只用于生成更适合你的健康建议。</text>
-      <input
-        v-model="form.displayName"
-        class="input"
-        maxlength="40"
-        placeholder="怎么称呼你？（选填）"
-      />
-      <view class="label">性别</view>
-      <view class="choices">
-        <button
-          v-for="item in sexOptions"
-          :key="item.value"
-          :class="['choice', { selected: form.sex === item.value }]"
-          @tap="form.sex = item.value"
+    <template v-if="step === 0">
+      <image class="welcome-art" src="/static/illustrations/hero.jpg" mode="aspectFill" />
+      <view class="welcome-copy">
+        <view class="xuxu"
+          ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><view
+            ><text>你好，我是序序</text><text>你的健康陪伴助手</text></view
+          ></view
         >
-          {{ item.label }}
-        </button>
+        <text class="brand">和生序</text>
+        <text class="welcome-title">让健康回到自己的节律</text>
+        <text class="hint">花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text>
+        <button class="primary" @tap="next">开始了解我</button>
+        <text class="disclaimer">和生序提供健康管理与生活方式参考，不替代医生诊疗。</text>
       </view>
-    </view>
-
-    <view v-else-if="step === 1" class="step">
-      <text class="eyebrow">了解身体基础</text>
-      <text class="title">你的 BMI 会实时变化</text>
-      <text class="hint">输入身高和体重，看看当前身体状态。</text>
-      <view class="input-row"
-        ><input v-model="form.heightCm" class="input" type="number" placeholder="身高（cm）" /><text
-          class="unit"
-          >cm</text
-        ></view
-      >
-      <view class="input-row"
-        ><input v-model="form.weightKg" class="input" type="digit" placeholder="体重（kg）" /><text
-          class="unit"
-          >kg</text
-        ></view
-      >
-      <view v-if="bmi !== null" class="bmi-card"
-        ><text class="bmi-value">{{ bmi.toFixed(1) }}</text
-        ><text class="bmi-label">BMI · {{ bmiLabel }}</text
-        ><text class="bmi-note">这是健康管理参考，不是医疗诊断</text></view
-      >
-      <view v-else class="empty-card">填写身高和体重后查看 BMI</view>
-    </view>
-
-    <view v-else-if="step === 2" class="step">
-      <text class="eyebrow">选一个现在最想改善的方向</text>
-      <text class="title">从一个小目标开始</text>
-      <text class="hint">之后可以随时调整，不需要一次决定全部。</text>
-      <view class="goal-list"
-        ><button
-          v-for="item in goalOptions"
-          :key="item.value"
-          :class="['goal', { selected: form.primaryGoal === item.value }]"
-          @tap="form.primaryGoal = item.value"
+    </template>
+    <template v-else>
+      <view class="head"
+        ><text class="brand">和生序 · 健康管理</text
+        ><view class="progress"
+          ><view class="progress-fill" :style="{ width: `${progress}%` }" /></view
+      ></view>
+      <view v-if="step === 1" class="step">
+        <text class="eyebrow">先认识一下你</text><text class="title">从今天开始，照顾好自己</text
+        ><text class="hint">这些信息只用于生成更适合你的健康管理参考。</text>
+        <input
+          v-model="form.displayName"
+          class="input"
+          maxlength="40"
+          placeholder="怎么称呼你？（选填）"
+        />
+        <text class="label">性别</text
+        ><view class="choices"
+          ><button
+            v-for="item in sexOptions"
+            :key="item.value"
+            :class="['choice', { selected: form.sex === item.value }]"
+            @tap="form.sex = item.value"
+          >
+            {{ item.label }}
+          </button></view
         >
-          <text>{{ item.icon }}</text
-          ><text>{{ item.label }}</text
-          ><text class="goal-arrow">›</text>
+      </view>
+      <view v-else-if="step === 2" class="step">
+        <text class="eyebrow">了解身体基础</text><text class="title">你的 BMI 会实时变化</text
+        ><text class="hint">输入身高和体重，看看当前身体状态。</text>
+        <view class="input-row"
+          ><input
+            v-model="form.heightCm"
+            class="input"
+            type="number"
+            placeholder="身高（cm）"
+          /><text>cm</text></view
+        >
+        <view class="input-row"
+          ><input
+            v-model="form.weightKg"
+            class="input"
+            type="digit"
+            placeholder="体重（kg）"
+          /><text>kg</text></view
+        >
+        <view v-if="bmi !== null" class="bmi-card"
+          ><text class="bmi-value">{{ bmi.toFixed(1) }}</text
+          ><text class="bmi-label">BMI · {{ bmiLabel }}</text
+          ><text class="bmi-note">这是健康管理参考，不是医疗诊断</text></view
+        ><view v-else class="empty-card">填写身高和体重后查看 BMI</view>
+      </view>
+      <view v-else-if="step === 3" class="step">
+        <text class="eyebrow">选一个现在最想改善的方向</text
+        ><text class="title">从一个小目标开始</text
+        ><text class="hint">之后可以随时调整，不需要一次决定全部。</text>
+        <view class="goal-list"
+          ><button
+            v-for="item in goalOptions"
+            :key="item.value"
+            :class="['goal', { selected: form.primaryGoal === item.value }]"
+            @tap="form.primaryGoal = item.value"
+          >
+            <text>{{ item.icon }}</text
+            ><text>{{ item.label }}</text
+            ><text class="arrow">›</text>
+          </button></view
+        >
+      </view>
+      <view v-else class="step">
+        <text class="eyebrow">最后确认一下</text><text class="title">你的健康画像准备好了</text>
+        <view class="summary"
+          ><text>{{ form.displayName || '新朋友' }}</text
+          ><text>{{ form.heightCm }} cm · {{ form.weightKg }} kg</text
+          ><text>{{ selectedGoalLabel }}</text
+          ><text>BMI {{ bmi?.toFixed(1) }} · {{ bmiLabel }}</text></view
+        >
+        <text class="hint">保存后会解锁首页，之后每天记下一点真实生活就好。</text>
+      </view>
+      <view class="actions"
+        ><button v-if="step > 1" class="back" @tap="back">上一步</button
+        ><button class="primary" :disabled="!canAdvance || saving" @tap="next">
+          {{ saving ? '保存中...' : step === 4 ? '保存并进入首页' : '继续' }}
         </button></view
       >
-    </view>
-
-    <view v-else class="step">
-      <text class="eyebrow">最后确认一下</text>
-      <text class="title">你的健康画像准备好了</text>
-      <view class="summary"
-        ><text>{{ form.displayName || '新朋友' }}</text
-        ><text>{{ form.heightCm || '--' }} cm · {{ form.weightKg || '--' }} kg</text
-        ><text>{{ selectedGoalLabel }}</text
-        ><text v-if="bmi !== null">BMI {{ bmi.toFixed(1) }} · {{ bmiLabel }}</text></view
-      >
-      <text class="hint">保存后会解锁和生序首页，之后每天记录一点点就好。</text>
-    </view>
-
-    <view class="actions"
-      ><button v-if="step > 0" class="back" @tap="step -= 1">上一步</button
-      ><button class="next" :disabled="!canNext || saving" @tap="next">
-        {{ saving ? '保存中…' : step === 3 ? '保存并开始' : '继续' }}
-      </button></view
-    >
+    </template>
   </view>
 </template>
 
@@ -95,6 +108,7 @@
 import { computed, ref } from 'vue';
 import { createApiClient } from '../../services/api-client.js';
 import { onboardingState } from '../../stores/onboarding.js';
+import { canAdvanceOnboarding, onboardingProgress } from './onboarding-flow.js';
 
 const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(onboardingState.step.value);
@@ -106,45 +120,43 @@ const sexOptions = [
 ];
 const goalOptions = [
   { value: 'weight_management' as const, label: '减脂与体重管理', icon: '◌' },
-  { value: 'weight_maintenance' as const, label: '保持当前状态', icon: '○' },
+  { value: 'weight_maintenance' as const, label: '保持当前状态', icon: '◎' },
   { value: 'muscle_gain' as const, label: '力量与体能', icon: '△' },
   { value: 'sleep' as const, label: '睡眠与精力', icon: '☾' },
-  { value: 'energy' as const, label: '饮食与活力', icon: '✦' },
+  { value: 'energy' as const, label: '饮食与活动', icon: '✦' },
   { value: 'mood' as const, label: '压力与情绪', icon: '♡' },
 ];
-const bmiLabel = computed(() => {
-  if (bmiCategory.value === 'underweight') return '偏瘦';
-  if (bmiCategory.value === 'overweight') return '偏重';
-  if (bmiCategory.value === 'obesity') return '肥胖';
-  return '正常';
-});
+const bmiLabel = computed(
+  () =>
+    ({ underweight: '偏瘦', normal: '正常', overweight: '偏重', obesity: '肥胖' })[
+      bmiCategory.value || 'normal'
+    ],
+);
 const selectedGoalLabel = computed(
   () => goalOptions.find((item) => item.value === form.primaryGoal)?.label ?? '还没有选择目标',
 );
-const canNext = computed(() => {
-  if (step.value === 1) return bmi.value !== null;
-  if (step.value === 2) return form.primaryGoal !== '';
-  return true;
-});
-
+const progress = computed(() => onboardingProgress(step.value));
+const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, form.primaryGoal));
+function back() {
+  step.value -= 1;
+  onboardingState.step.value = step.value;
+}
 function next() {
-  if (!canNext.value) return;
-  if (step.value < 3) {
+  if (!canAdvance.value) return;
+  if (step.value < 4) {
     step.value += 1;
     onboardingState.step.value = step.value;
     return;
   }
   save();
 }
-
 async function save() {
   saving.value = true;
   try {
-    const baseUrl = 'http://localhost:3000/api/v1';
     const client = createApiClient({
-      baseUrl,
+      baseUrl: 'http://localhost:3000/api/v1',
       request: ({ url, method, data }) =>
-        new Promise((resolve, reject) => {
+        new Promise((resolve, reject) =>
           uni.request({
             url,
             method: method as never,
@@ -153,8 +165,8 @@ async function save() {
             success: (response) =>
               resolve({ statusCode: response.statusCode, data: response.data as never }),
             fail: reject,
-          });
-        }),
+          }),
+        ),
     });
     await client.update('/health-profiles/me', {
       displayName: form.displayName || undefined,
@@ -175,190 +187,238 @@ async function save() {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 56rpx 44rpx 48rpx;
+  padding: 52rpx 40rpx 46rpx;
   background: #f7fbf8;
   color: #183425;
 }
-.brand {
-  color: #2e7d4f;
-  font-size: 25rpx;
+.welcome-art {
+  width: calc(100% + 80rpx);
+  height: 450rpx;
+  margin: -52rpx -40rpx 0;
+}
+.welcome-copy {
+  margin-top: -42rpx;
+  padding: 34rpx 4rpx 0;
+  border-radius: 30rpx 30rpx 0 0;
+  background: #f7fbf8;
+  position: relative;
+}
+.xuxu {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  color: #566e5c;
+  font-size: 22rpx;
+}
+.xuxu image {
+  width: 64rpx;
+  height: 64rpx;
+  border: 3rpx solid #efd689;
+  border-radius: 50%;
+}
+.xuxu text {
+  display: block;
   font-weight: 700;
-  margin-bottom: 28rpx;
+}
+.xuxu text:last-child {
+  margin-top: 3rpx;
+  color: #778a7d;
+  font-weight: 400;
+}
+.brand,
+.eyebrow,
+.title,
+.hint,
+.label {
+  display: block;
+}
+.brand,
+.eyebrow {
+  color: #3f805a;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.welcome-copy .brand {
+  margin-top: 44rpx;
+}
+.title {
+  margin-top: 13rpx;
+  font-size: 48rpx;
+  font-weight: 700;
+  line-height: 1.28;
+}
+.welcome-title {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 50rpx;
+  font-weight: 700;
+  line-height: 1.24;
+}
+.hint {
+  margin-top: 16rpx;
+  color: #687f71;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+.disclaimer {
+  display: block;
+  margin-top: 22rpx;
+  color: #8a9b90;
+  font-size: 20rpx;
+  line-height: 1.55;
+}
+.head {
+  margin-bottom: 58rpx;
 }
 .progress {
   height: 8rpx;
-  border-radius: 8rpx;
-  background: #e2eee6;
+  margin-top: 24rpx;
   overflow: hidden;
+  border-radius: 8rpx;
+  background: #dfebe1;
 }
 .progress-fill {
   height: 100%;
-  border-radius: 8rpx;
-  background: #65a77b;
-  transition: width 0.2s ease;
+  border-radius: inherit;
+  background: #67a67c;
 }
-.step {
-  padding-top: 72rpx;
-}
-.eyebrow {
-  display: block;
-  color: #5c8b6c;
-  font-size: 25rpx;
-  font-weight: 700;
-  margin-bottom: 18rpx;
-}
-.title {
-  display: block;
-  font-size: 48rpx;
-  line-height: 1.25;
-  font-weight: 700;
-  margin-bottom: 20rpx;
-}
-.hint {
-  display: block;
-  color: #668071;
-  font-size: 27rpx;
-  line-height: 1.65;
-  margin-bottom: 44rpx;
+.input,
+.input-row {
+  box-sizing: border-box;
+  width: 100%;
+  height: 88rpx;
+  border: 2rpx solid #d9e8dc;
+  border-radius: 16rpx;
+  background: #fff;
 }
 .input {
-  box-sizing: border-box;
+  padding: 0 22rpx;
+  font-size: 28rpx;
+}
+.label {
+  margin: 32rpx 0 14rpx;
+  color: #506e5a;
+  font-size: 25rpx;
+}
+.choices {
+  display: flex;
+  gap: 12rpx;
+}
+.choice {
   flex: 1;
-  height: 96rpx;
-  padding: 0 28rpx;
-  border: 2rpx solid #d9e8dd;
-  border-radius: 18rpx;
+  padding: 19rpx 6rpx;
+  border: 2rpx solid #dceadd;
+  border-radius: 14rpx;
+  color: #587362;
   background: #fff;
-  font-size: 30rpx;
+  font-size: 24rpx;
+}
+.selected {
+  border-color: #6daa7b !important;
+  color: #286d48 !important;
+  background: #e9f5ea !important;
 }
 .input-row {
   display: flex;
   align-items: center;
-  margin-bottom: 22rpx;
-  background: #fff;
-  border-radius: 18rpx;
+  margin-top: 18rpx;
 }
 .input-row .input {
   border: 0;
 }
-.unit {
-  padding-right: 28rpx;
-  color: #7d9785;
-  font-size: 26rpx;
-}
-.label {
-  color: #4f6f5a;
-  font-size: 26rpx;
-  margin: 34rpx 0 16rpx;
-}
-.choices {
-  display: flex;
-  gap: 16rpx;
-}
-.choice {
-  flex: 1;
-  padding: 22rpx 8rpx;
-  border-radius: 16rpx;
-  color: #547361;
-  background: #fff;
-  font-size: 27rpx;
-  line-height: 1.2;
-}
-.choice.selected,
-.goal.selected {
-  color: #24653c;
-  background: #e1f1e5;
-  border: 2rpx solid #85bd94;
+.input-row text {
+  padding-right: 22rpx;
+  color: #6d8879;
 }
 .bmi-card,
-.summary,
-.empty-card {
-  padding: 34rpx;
-  margin-top: 28rpx;
-  border-radius: 22rpx;
-  background: #e7f4ea;
+.empty-card,
+.summary {
+  margin-top: 24rpx;
+  padding: 26rpx;
+  border-radius: 18rpx;
+  background: #e8f4e8;
 }
-.bmi-value {
-  display: block;
-  font-size: 64rpx;
-  font-weight: 700;
-  color: #24653c;
-}
-.bmi-label {
-  display: block;
-  margin-top: 8rpx;
-  color: #3f7450;
-  font-size: 28rpx;
-}
+.bmi-value,
+.bmi-label,
 .bmi-note {
   display: block;
-  margin-top: 18rpx;
-  color: #6d8b76;
-  font-size: 22rpx;
+}
+.bmi-value {
+  color: #2c774d;
+  font-size: 60rpx;
+  font-weight: 700;
+}
+.bmi-label {
+  margin-top: 4rpx;
+  color: #447b59;
+  font-size: 27rpx;
+}
+.bmi-note {
+  margin-top: 14rpx;
+  color: #718a7b;
+  font-size: 21rpx;
 }
 .empty-card {
-  color: #789080;
+  color: #748b7b;
   background: #fff;
-  font-size: 27rpx;
+  font-size: 25rpx;
 }
 .goal-list {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 13rpx;
+  margin-top: 26rpx;
 }
 .goal {
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  padding: 24rpx 26rpx;
-  border-radius: 18rpx;
-  color: #355b41;
-  background: #fff;
-  font-size: 28rpx;
+  gap: 16rpx;
+  padding: 22rpx;
+  border: 2rpx solid #dceadd;
+  border-radius: 17rpx;
+  color: #31543e;
   text-align: left;
+  background: #fff;
+  font-size: 27rpx;
 }
 .goal > text:first-child {
-  width: 34rpx;
-  color: #61a276;
-  font-size: 32rpx;
-  text-align: center;
+  color: #5d9b71;
 }
-.goal-arrow {
+.arrow {
   margin-left: auto;
-  color: #9ab4a1;
-  font-size: 34rpx;
+  color: #79a486;
+  font-size: 36rpx;
 }
 .summary {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
-  margin-bottom: 28rpx;
+  gap: 11rpx;
   color: #355b41;
-  font-size: 30rpx;
+  font-size: 28rpx;
 }
 .actions {
   display: flex;
-  gap: 18rpx;
-  margin-top: 60rpx;
+  gap: 16rpx;
+  margin-top: 56rpx;
 }
-.back,
-.next {
-  height: 96rpx;
-  border-radius: 18rpx;
-  font-size: 30rpx;
-  line-height: 96rpx;
-}
+.primary,
 .back {
-  width: 30%;
-  color: #52715d;
-  background: #e6f0e8;
+  height: 86rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 86rpx;
 }
-.next {
+.primary {
   flex: 1;
   color: #fff;
-  background: #3f8658;
+  background: #2e7d4f;
 }
-.next[disabled] {
+.back {
+  width: 190rpx;
+  color: #4d6e58;
+  background: #e7f0e8;
+}
+.primary[disabled] {
   opacity: 0.45;
 }
 </style>

@@ -74,6 +74,10 @@ onShow(() => healthLoopState.loadToday(date));
   color: #1d3d2a;
 }
 .welcome {
+  padding: 30rpx 24rpx;
+  border: 2rpx solid #eadfb8;
+  border-radius: 22rpx;
+  background: #fffbed;
   text-align: center;
 }
 .welcome image {
@@ -110,7 +114,7 @@ onShow(() => healthLoopState.loadToday(date));
   padding: 22rpx;
   border: 2rpx solid #ebdfb4;
   border-radius: 18rpx;
-  background: #fffbed;
+  background: #f2f8f2;
 }
 .current text {
   display: block;

@@ -11,53 +11,71 @@
         @tap="toXuxu"
     /></view>
     <view v-if="loading" class="loading">正在整理今天的节律...</view>
-    <template v-else-if="today">
-      <view class="hero"
-        ><image src="/static/illustrations/home-companion-banner.png" mode="aspectFill" /><view
-          class="hero-copy"
-          ><text class="eyebrow">今日行动</text
-          ><text class="hero-title">{{ today.dailyAction.title }}</text
-          ><text class="hero-desc">{{ today.dailyAction.description }}</text
-          ><button class="hero-button" @tap="go(today.dailyAction.route)">去完成</button></view
-        ></view
-      >
-      <XuxuHint :message="xuxuMessage" action="听序序说" @tap="toXuxu" />
+    <template v-else-if="today && experience">
+      <IllustratedHero
+        image="/static/illustrations/home-companion-banner.png"
+        :eyebrow="experience.hero.eyebrow"
+        :title="experience.hero.title"
+        :description="experience.hero.description"
+        action-label="开始这一步"
+        @action="go(experience.hero.route)"
+      />
+      <XuxuHint
+        class="hint"
+        variant="sunny"
+        :message="xuxuMessage"
+        action="听序序说"
+        @tap="toXuxu"
+      />
       <view class="section-head"
-        ><text class="section-title">今日记录</text
-        ><text class="progress"
-          >{{ today.recordingProgress.completed }}/{{ today.recordingProgress.total }}</text
-        ></view
+        ><text>今天只做这几件小事</text><text>{{ experience.tasks.length }} 件待完成</text></view
       >
-      <view class="record-grid"
-        ><button
-          v-for="item in progressItems"
-          :key="item.type"
-          class="record-item"
-          @tap="go(`/pages/records/RecordsPage?type=${item.type}`)"
-        >
-          <text class="record-icon">{{ item.icon }}</text
-          ><text class="record-name">{{ item.label }}</text
-          ><text :class="['record-status', { done: item.done }]">{{
-            item.done ? '已记录' : '待记录'
-          }}</text>
+      <view v-if="experience.tasks.length" class="tasks"
+        ><button v-for="task in experience.tasks" :key="task.id" class="task" @tap="go(task.route)">
+          <view class="task-dot" /><view
+            ><text>{{ task.title }}</text
+            ><text>{{ task.subtitle }}</text></view
+          ><text>›</text>
         </button></view
       >
-      <view class="plan-card" @tap="toPlan"
-        ><view
-          ><text class="eyebrow">{{ today.activePlan ? '正在执行' : '从这里开始' }}</text
-          ><text class="plan-title">{{ planTitle }}</text
-          ><text class="plan-desc">{{ planDescription }}</text></view
-        ><text class="arrow">›</text></view
+      <view v-else class="done"
+        ><image src="/static/illustrations/xuxu-complete.png" mode="aspectFill" /><view
+          ><text>今天的行动已完成</text><text>不必额外加码，保持自己的节律就好。</text></view
+        ></view
       >
+      <button class="record-summary" @tap="go('/pages/records/RecordsPage')">
+        <view
+          ><text>今天的记录</text
+          ><text
+            >{{ experience.recording.completed }}/{{ experience.recording.total }} 已完成 ·
+            {{ experience.recording.message }}</text
+          ></view
+        ><image
+          :src="
+            experience.recording.image === 'complete'
+              ? '/static/illustrations/xuxu-complete.png'
+              : '/static/illustrations/xuxu-record-reminder.png'
+          "
+          mode="aspectFill"
+        />
+      </button>
+      <button class="plan-summary" @tap="toPlan">
+        <view
+          ><text>{{ today.activePlan ? '正在执行的计划' : '从这里设置计划' }}</text
+          ><text>{{ planText }}</text></view
+        ><text>›</text>
+      </button>
     </template>
     <view v-else class="loading">暂时无法加载今日状态</view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
+import IllustratedHero from '../../components/IllustratedHero.vue';
 import XuxuHint from '../../components/XuxuHint.vue';
+import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { onboardingState } from '../../stores/onboarding.js';
 
@@ -65,32 +83,17 @@ const { today, loading } = healthLoopState;
 const date = localDate();
 const greeting =
   new Date().getHours() < 12 ? '早上好' : new Date().getHours() < 18 ? '下午好' : '晚上好';
-const dateLabel = `${new Date().getMonth() + 1} 月 ${new Date().getDate()} 日 · 今日`;
+const dateLabel = `${new Date().getMonth() + 1} 月 ${new Date().getDate()} 日 · 今天`;
 const displayName = computed(() => today.value?.displayName || '朋友');
-const planTitle = computed(() =>
-  today.value?.activePlan?.kind === 'sleep'
-    ? '睡眠与精力计划'
-    : today.value?.activePlan
-      ? '轻盈节律计划'
-      : '设置你的第一个计划',
-);
-const planDescription = computed(() =>
-  today.value?.activePlan
-    ? `今天有 ${today.value.todayTasks.length} 件小事在等你`
-    : '选一个当前最想照顾的方向',
-);
+const experience = computed(() => (today.value ? deriveDailyExperience(today.value) : null));
 const xuxuMessage = computed(
-  () => today.value?.dailyAction.description || '从一个小行动开始就很好。',
+  () => experience.value?.recording.message || '从一件小事开始，就很好。',
 );
-const progressItems = computed(() => {
-  const value = today.value?.recordingProgress;
-  return [
-    { type: 'weight', label: '体重', icon: '◌', done: value?.hasWeight },
-    { type: 'meal-structure', label: '饮食', icon: '◐', done: value?.hasMeal },
-    { type: 'activity', label: '活动', icon: '⌁', done: value?.hasActivity },
-    { type: 'sleep', label: '睡眠', icon: '☾', done: value?.hasSleep },
-  ];
-});
+const planText = computed(() =>
+  today.value?.activePlan
+    ? '今天的小行动正在等你慢慢完成。'
+    : '选择体重或睡眠方向，从一个小目标开始。',
+);
 function load() {
   if (onboardingState.completed.value) healthLoopState.loadToday(date);
 }
@@ -106,25 +109,23 @@ function toPlan() {
 function toXuxu() {
   uni.switchTab({ url: '/pages/xuxu/XuxuPage' });
 }
-onMounted(load);
+function localDate() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
 onShow(() => {
   if (!onboardingState.completed.value) uni.redirectTo({ url: '/pages/onboarding/OnboardingPage' });
   else load();
 });
-function localDate() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset();
-  return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10);
-}
 </script>
 
 <style scoped>
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 48rpx 32rpx 166rpx;
+  padding: 48rpx 32rpx 172rpx;
   background: #f7fbf8;
-  color: #1d3d2a;
+  color: #183425;
 }
 .head {
   display: flex;
@@ -136,147 +137,149 @@ function localDate() {
 .title {
   display: block;
 }
-.date,
-.eyebrow {
-  color: #69917a;
-  font-size: 23rpx;
-  font-weight: 700;
+.date {
+  color: #718a7a;
+  font-size: 22rpx;
 }
 .title {
-  margin-top: 9rpx;
-  font-size: 46rpx;
+  margin-top: 8rpx;
+  font-size: 44rpx;
   font-weight: 700;
 }
 .avatar {
   width: 72rpx;
   height: 72rpx;
-  border: 3rpx solid #f2df9b;
+  border: 3rpx solid #efd98d;
   border-radius: 50%;
-  background: #fff8df;
 }
-.hero {
-  position: relative;
-  height: 284rpx;
-  overflow: hidden;
-  border-radius: 20rpx;
-  background: #eaf5e9;
-}
-.hero image {
-  width: 100%;
-  height: 100%;
-  opacity: 0.94;
-}
-.hero-copy {
-  position: absolute;
-  inset: 0;
-  box-sizing: border-box;
-  padding: 26rpx;
-}
-.hero-title,
-.hero-desc {
-  display: block;
-  max-width: 370rpx;
-}
-.hero-title {
-  margin-top: 10rpx;
-  font-size: 35rpx;
-  line-height: 1.3;
-  font-weight: 700;
-}
-.hero-desc {
-  margin-top: 8rpx;
-  color: #5a7664;
-  font-size: 22rpx;
-  line-height: 1.45;
-}
-.hero-button {
-  width: 142rpx;
-  height: 54rpx;
-  margin: 17rpx 0 0;
-  border-radius: 27rpx;
-  color: #fff;
-  background: #43865a;
-  font-size: 22rpx;
-  line-height: 54rpx;
+.hint {
+  margin-top: 18rpx;
 }
 .section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 30rpx 0 15rpx;
-}
-.section-title {
+  margin: 30rpx 4rpx 14rpx;
   font-size: 30rpx;
   font-weight: 700;
 }
-.progress {
-  color: #558269;
-  font-size: 24rpx;
+.section-head text:last-child {
+  color: #668a73;
+  font-size: 22rpx;
+  font-weight: 400;
 }
-.record-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.tasks {
+  display: flex;
+  flex-direction: column;
   gap: 12rpx;
 }
-.record-item {
+.task {
   display: flex;
-  height: 132rpx;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 7rpx;
-  padding: 0;
-  border: 2rpx solid #dfecdf;
+  gap: 16rpx;
+  width: 100%;
+  padding: 20rpx;
+  border: 2rpx solid #dceadd;
   border-radius: 16rpx;
-  color: #385b45;
+  text-align: left;
+  color: #284d36;
   background: #fff;
 }
-.record-icon {
-  color: #5c9a70;
-  font-size: 31rpx;
+.task-dot {
+  width: 34rpx;
+  height: 34rpx;
+  border: 2rpx solid #70a77d;
+  border-radius: 50%;
 }
-.record-name {
-  font-size: 23rpx;
+.task view {
+  flex: 1;
 }
-.record-status {
-  color: #93a89a;
-  font-size: 20rpx;
+.task view text {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 700;
 }
-.record-status.done {
-  color: #3d8858;
+.task view text:last-child {
+  margin-top: 4rpx;
+  color: #758c7d;
+  font-size: 21rpx;
+  font-weight: 400;
 }
-.plan-card {
+.task > text {
+  color: #5c956d;
+  font-size: 36rpx;
+}
+.done {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 16rpx;
+  border: 2rpx solid #d5e8d9;
+  border-radius: 16rpx;
+  background: #fff;
+}
+.done image {
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 50%;
+}
+.done text {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.done text:last-child {
+  margin-top: 5rpx;
+  color: #71897a;
+  font-size: 21rpx;
+  font-weight: 400;
+}
+.record-summary,
+.plan-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 28rpx;
-  padding: 24rpx;
-  border: 2rpx solid #dcead9;
-  border-radius: 18rpx;
+  width: 100%;
+  margin-top: 22rpx;
+  padding: 20rpx;
+  border: 2rpx solid #dceadd;
+  border-radius: 17rpx;
+  text-align: left;
+  color: #31543e;
   background: #fff;
 }
-.plan-title,
-.plan-desc {
-  display: block;
+.record-summary view,
+.plan-summary view {
+  flex: 1;
 }
-.plan-title {
-  margin-top: 8rpx;
-  font-size: 30rpx;
+.record-summary text,
+.plan-summary text {
+  display: block;
+  font-size: 27rpx;
   font-weight: 700;
 }
-.plan-desc {
-  margin-top: 5rpx;
-  color: #718a7b;
-  font-size: 22rpx;
+.record-summary text:last-child,
+.plan-summary text:last-child {
+  margin-top: 6rpx;
+  color: #728a7b;
+  font-size: 21rpx;
+  font-weight: 400;
+  line-height: 1.45;
 }
-.arrow {
-  color: #4c8b5e;
-  font-size: 44rpx;
+.record-summary image {
+  width: 76rpx;
+  height: 76rpx;
+  margin-left: 16rpx;
+  border-radius: 50%;
+}
+.plan-summary > text {
+  color: #5e966f;
+  font-size: 38rpx;
 }
 .loading {
-  padding: 120rpx 30rpx;
-  color: #718a7b;
+  padding: 160rpx 20rpx;
+  color: #70897a;
   text-align: center;
-  font-size: 28rpx;
+  font-size: 27rpx;
 }
 </style>

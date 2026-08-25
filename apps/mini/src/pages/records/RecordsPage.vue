@@ -4,6 +4,11 @@
       ><text class="eyebrow">今天的记录</text><text class="title">轻松记一下</text
       ><text class="hint">不用算热量，记下生活里的真实节律。</text></view
     >
+    <view v-if="presentation.isEmpty" class="record-welcome"
+      ><image src="/static/illustrations/record-desk-banner.png" mode="aspectFill" /><view
+        ><text>从一件小事开始</text><text>记录不需要完美，真实就已经足够。</text></view
+      ></view
+    >
     <view class="tabs"
       ><button
         v-for="item in types"
@@ -14,6 +19,12 @@
         {{ item.icon }} {{ item.label }}
       </button></view
     >
+    <XuxuHint
+      v-if="presentation.showReminder"
+      class="record-reminder"
+      variant="note"
+      :message="reminderMessage"
+    />
     <view class="form-card">
       <template v-if="activeType === 'weight'"
         ><text class="form-title">今天的体重</text
@@ -101,6 +112,7 @@ import type {
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import XuxuHint from '../../components/XuxuHint.vue';
+import { recordPresentation } from '../../features/health-loop/record-presentation.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 
 const date = localDate();
@@ -138,6 +150,26 @@ const qualities: Array<{ value: SleepQuality; label: string }> = [
   { value: 'fair', label: '一般' },
   { value: 'good', label: '挺好' },
 ];
+const presentation = computed(() => {
+  const progress = healthLoopState.today.value?.recordingProgress;
+  return recordPresentation(
+    activeType.value,
+    progress || {
+      hasWeight: false,
+      hasMeal: false,
+      hasActivity: false,
+      hasSleep: false,
+    },
+  );
+});
+const reminderMessage = computed(() => {
+  return {
+    weight: '今天还没有体重记录，想记的时候再记一条就好。',
+    'meal-structure': '这一餐可以只看看有没有主食、蛋白质和蔬菜。',
+    activity: '短暂的步行也值得被记录下来。',
+    sleep: '补记昨晚睡眠，会帮助理解今天的精力。',
+  }[activeType.value];
+});
 const timeline = computed(() => {
   const r = healthLoopState.today.value?.todayRecords;
   if (!r) return [];
@@ -291,6 +323,40 @@ onShow(load);
   margin-top: 10rpx;
   color: #70897a;
   font-size: 24rpx;
+}
+.record-welcome {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  overflow: hidden;
+  margin: 22rpx 0 6rpx;
+  border: 2rpx solid #dceadd;
+  border-radius: 18rpx;
+  background: #fff;
+}
+.record-welcome image {
+  width: 174rpx;
+  height: 142rpx;
+}
+.record-welcome view {
+  flex: 1;
+  padding-right: 16rpx;
+}
+.record-welcome text {
+  display: block;
+  color: #31543e;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.record-welcome text:last-child {
+  margin-top: 6rpx;
+  color: #728a7b;
+  font-size: 21rpx;
+  font-weight: 400;
+  line-height: 1.45;
+}
+.record-reminder {
+  margin-bottom: 16rpx;
 }
 .tabs {
   display: flex;

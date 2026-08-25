@@ -1,10 +1,17 @@
 <template>
-  <view class="bootstrap-page">
-    <text class="eyebrow">和生序 · 健康管理</text>
-    <text class="title">让健康回到自己的节律</text>
-    <text class="description"
-      >开发环境已连接。正式建档、健康记录与 AI 助手将在产品确认后接入。</text
-    >
+  <view class="page">
+    <image class="hero" src="/static/illustrations/hero.jpg" mode="aspectFill" />
+    <view class="wash" />
+    <view class="copy">
+      <view class="xuxu"
+        ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><text
+          >序序</text
+        ></view
+      >
+      <text class="eyebrow">和生序 · 健康管理</text>
+      <text class="title">让健康回到自己的节律</text>
+      <text class="hint">正在为你准备一段更适合自己的健康旅程。</text>
+    </view>
   </view>
 </template>
 
@@ -41,37 +48,71 @@ onShow(async () => {
       return;
     }
   } catch {
-    // The onboarding page remains available when the local API is offline.
+    // Offline local development still enters the guided onboarding flow.
   }
   uni.redirectTo({ url: '/pages/onboarding/OnboardingPage' });
 });
 </script>
 
 <style scoped>
-.bootstrap-page {
-  display: flex;
+.page {
+  position: relative;
   min-height: 100vh;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20rpx;
-  padding: 80rpx 56rpx;
+  overflow: hidden;
+  background: #eef5ec;
 }
-
+.hero,
+.wash {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.wash {
+  background: linear-gradient(180deg, rgba(248, 253, 246, 0.2), rgba(248, 253, 246, 0.94) 84%);
+}
+.copy {
+  position: absolute;
+  right: 52rpx;
+  bottom: 130rpx;
+  left: 52rpx;
+}
+.xuxu {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 22rpx;
+  color: #496b55;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+.xuxu image {
+  width: 58rpx;
+  height: 58rpx;
+  border: 3rpx solid #f0d98a;
+  border-radius: 50%;
+}
+.eyebrow,
+.title,
+.hint {
+  display: block;
+}
 .eyebrow {
-  color: #2e7d4f;
+  color: #3d805a;
   font-size: 24rpx;
   font-weight: 700;
 }
-
 .title {
-  color: #183425;
-  font-size: 48rpx;
+  margin-top: 14rpx;
+  color: #173625;
+  font-size: 52rpx;
   font-weight: 700;
+  line-height: 1.24;
 }
-
-.description {
-  color: #668071;
-  font-size: 28rpx;
-  line-height: 1.7;
+.hint {
+  margin-top: 18rpx;
+  color: #577261;
+  font-size: 27rpx;
+  line-height: 1.6;
 }
 </style>
