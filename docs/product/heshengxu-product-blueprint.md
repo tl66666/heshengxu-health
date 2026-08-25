@@ -135,19 +135,19 @@
 
 | 素材 | 正式用途 | 使用限制 |
 | --- | --- | --- |
-| `assets/avatar.jpg` | 序序入口、欢迎头像 | 小尺寸品牌识别，不作为大背景 |
-| `generated/home-companion-banner.png` | 首页今日行动卡 | 每日首页最多使用一次 |
-| `generated/record-desk-banner.png` | 记录页首次空状态 | 有记录后让位给时间线 |
-| `generated/program-weight.png` | 体重管理计划封面 | 阶段 2A 使用 |
-| `generated/xuxu-record-reminder.png` | 首次记录、漏记提醒 | 不以弹窗强迫用户操作 |
-| `generated/xuxu-complete.png` | 连续完成与里程碑 | 完成状态出现，不作为常驻装饰 |
-| `generated/program-sleep.png`、`xuxu-sleep-reminder.png` | 睡眠主题与晚间补记 | 首批共享能力 |
-| `generated/insight-report-banner.png` | 周回顾顶部 | 至少有 3 天记录才展示 |
-| `generated/xuxu-ai-empty.png` | 序序聊天空状态 | 首批聊天界面使用 |
-| `generated/xuxu-safe-support.png` | AI 风险支持页 | 必须与严肃安全文案共同出现 |
-| `generated/program-mood.png` | 情绪主题封面 | 主题正式上线后使用；动漫人物非真人 |
-| `generated/program-digestive.png`、`program-metabolic.png` | 肠胃、代谢主题封面 | 后续主题上线后使用 |
-| `assets/hero.jpg`、`leaf-corner-decoration.png` | 欢迎页或少量空状态装饰 | 不进入数据密集型页面 |
+| `assets/illustrations/xuxu-avatar.jpg` | 序序入口、欢迎头像 | 小尺寸品牌识别，不作为大背景 |
+| `assets/illustrations/home-companion-banner.png` | 首页今日行动卡 | 每日首页最多使用一次 |
+| `assets/illustrations/record-desk-banner.png` | 记录页首次空状态 | 有记录后让位给时间线 |
+| `assets/illustrations/program-weight.png` | 体重管理计划封面 | 阶段 2A 使用 |
+| `assets/illustrations/xuxu-record-reminder.png` | 首次记录、漏记提醒 | 不以弹窗强迫用户操作 |
+| `assets/illustrations/xuxu-complete.png` | 连续完成与里程碑 | 完成状态出现，不作为常驻装饰 |
+| `assets/illustrations/program-sleep.png`、`assets/illustrations/xuxu-sleep-reminder.png` | 睡眠主题与晚间补记 | 首批共享能力 |
+| `assets/illustrations/insight-report-banner.png` | 周回顾顶部 | 至少有 3 天记录才展示 |
+| `assets/illustrations/xuxu-ai-empty.png` | 序序聊天空状态 | 首批聊天界面使用 |
+| `assets/illustrations/xuxu-safe-support.png` | AI 风险支持页 | 必须与严肃安全文案共同出现 |
+| `assets/illustrations/program-mood.png` | 情绪主题封面 | 主题正式上线后使用；动漫人物非真人 |
+| `assets/illustrations/program-digestive.png`、`assets/illustrations/program-metabolic.png` | 肠胃、代谢主题封面 | 后续主题上线后使用 |
+| `assets/illustrations/hero.jpg`、`assets/illustrations/leaf-corner-decoration.png` | 欢迎页或少量空状态装饰 | 不进入数据密集型页面 |
 
 当前素材足以覆盖阶段 2A 至 2C。只有在确定具体页面尺寸、裁切比例和状态缺口后，才用 GPT Image 2 生成补充图；每张新图必须记录用途、尺寸、提示词和生成来源。
 

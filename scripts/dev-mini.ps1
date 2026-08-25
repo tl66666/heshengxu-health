@@ -2,6 +2,8 @@ $ErrorActionPreference = 'Stop'
 
 Set-Location (Join-Path $PSScriptRoot '..')
 
+node scripts/sync-illustrations.mjs
+
 Write-Host '正在启动和生序微信小程序开发监听...' -ForegroundColor Green
 Write-Host '请保持此窗口运行。源码保存后，微信开发者工具点击“重新编译”即可更新。' -ForegroundColor Cyan
 Write-Host ''

@@ -24,6 +24,7 @@ pnpm install
 ```text
 apps/                 # 后续的 uni-app 小程序与 NestJS API
 packages/             # 跨端 contracts、领域规则和共享配置
+assets/illustrations/ # 唯一图片源目录，Demo 与小程序共用
 prototypes/web-demo/  # 当前静态 Demo，仅用于产品与设计讨论
 infra/                # 本地 Docker 与部署基础设施
 docs/                 # 产品、架构、工程规范和实施计划
@@ -33,8 +34,10 @@ docs/                 # 产品、架构、工程规范和实施计划
 
 ```powershell
 node --test prototypes/web-demo/profile-utils.test.cjs
-npx serve prototypes/web-demo
+npx serve .
 ```
+
+然后访问 `http://localhost:3000/prototypes/web-demo/`。Demo 图片统一从 `assets/illustrations/` 读取。
 
 ## 文档入口
 

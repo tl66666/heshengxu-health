@@ -1,6 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 Set-Location (Join-Path $PSScriptRoot '..')
+node scripts/sync-illustrations.mjs
 pnpm --filter @heban/mini build:mp-weixin
 node scripts/verify-mini-build.mjs
 

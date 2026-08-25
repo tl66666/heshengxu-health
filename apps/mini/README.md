@@ -2,7 +2,7 @@
 
 本目录是和生序的 uni-app 小程序源码，目标平台是微信小程序，后续可复用到 App。当前包含阶段 1 建档流程、实时 BMI、建档后首页占位和可测试的 API 请求层。
 
-静态 Demo 和图片仍在 `prototypes/web-demo/`，不会直接作为正式页面实现。
+静态 Demo 在 `prototypes/web-demo/`，图片源统一在仓库根目录 `assets/illustrations/`；不会把 Demo 直接当作正式页面实现。
 
 ## 本地命令
 

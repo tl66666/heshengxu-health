@@ -10,10 +10,13 @@ apps/api/src/modules/      按业务域拆分的模块
 packages/contracts/        前后端共享的接口信封和错误码
 packages/domain/           不依赖框架的健康规则，例如 BMI
 infra/docker/              PostgreSQL、Redis 本地基础设施
+assets/illustrations/     唯一图片源目录
 prototypes/web-demo/       只用于探索的静态原型
 docs/                      产品、架构、开发和验收说明
 scripts/                   可重复执行的工程脚本
 ```
+
+图片不在 Demo 和小程序之间各维护一份。修改 `assets/illustrations/` 后，运行 `scripts/sync-illustrations.mjs`（开发/构建脚本会自动运行）；`apps/mini/src/static/illustrations/` 只是构建缓存并被 Git 忽略。
 
 ## 小程序导入
 

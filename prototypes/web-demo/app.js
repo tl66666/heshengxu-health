@@ -334,7 +334,7 @@
     if (welcome) welcome.remove();
     var wrap = document.createElement("div");
     wrap.className = "msg " + role;
-    var avatar = role === "ai" ? '<img class="msg-avatar" src="assets/avatar.jpg" alt="序序">' : "";
+    var avatar = role === "ai" ? '<img class="msg-avatar" src="../../assets/illustrations/xuxu-avatar.jpg" alt="序序">' : "";
     var src = "";
     if (srcTitle) {
       src = '<div class="src-card"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg><span>知识来源 · 《' + srcTitle + '》</span></div>';
@@ -348,7 +348,7 @@
     var wrap = document.createElement("div");
     wrap.className = "msg ai";
     wrap.id = "typing-msg";
-    wrap.innerHTML = '<img class="msg-avatar" src="assets/avatar.jpg" alt=""><div class="msg-bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
+    wrap.innerHTML = '<img class="msg-avatar" src="../../assets/illustrations/xuxu-avatar.jpg" alt=""><div class="msg-bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
     chatBody.appendChild(wrap);
     scrollChat();
   }

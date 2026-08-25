@@ -46,7 +46,7 @@ pnpm --filter @heban/mini build:mp-weixin
 pnpm --filter @heban/mini build:mp-weixin:check
 ```
 
-微信小程序日常开发先运行 `./scripts/dev-mini.ps1`，再在微信开发者工具导入 `apps/mini`；它会使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可更新。发布预览使用 `./scripts/build-mini.ps1`，直接导入 `apps/mini/dist/build/mp-weixin`。开发环境不填微信 AppSecret，真实微信登录会在后续身份接入阶段实现。
+微信小程序日常开发先运行 `./scripts/dev-mini.ps1`，脚本会先把 `assets/illustrations/` 同步到小程序构建目录，再在微信开发者工具导入 `apps/mini`；它会使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可更新。发布预览使用 `./scripts/build-mini.ps1`，直接导入 `apps/mini/dist/build/mp-weixin`。开发环境不填微信 AppSecret，真实微信登录会在后续身份接入阶段实现。
 
 阶段 1 建档流程验证重点：首次打开只能进入 onboarding；填写身高和体重后 BMI 即时变化；完成目标选择并保存后才进入首页。当前 API 使用开发 token `dev-mini-user`，只用于本地联调。
 
