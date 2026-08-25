@@ -16,7 +16,7 @@
         :class="['tab', { active: activeType === item.type }]"
         @tap="activeType = item.type"
       >
-        {{ item.label }}
+        <icon :type="item.icon" size="17" /><text>{{ item.label }}</text>
       </button></view
     >
     <XuxuHint
@@ -55,7 +55,8 @@
             :class="['switch', { selected: meal[item.key] }]"
             @tap="meal[item.key] = !meal[item.key]"
           >
-            {{ meal[item.key] ? '✓' : '○' }} {{ item.label }}
+            <icon :type="meal[item.key] ? 'success_no_circle' : 'circle'" size="16" />
+            <text>{{ item.label }}</text>
           </button></view
         ></template
       >
@@ -104,7 +105,6 @@
         >今天还没有记录</text
       ><text>从一件最容易的小事开始就好。</text></view
     >
-    <MiniTabBar active="records" />
   </view>
 </template>
 
@@ -117,7 +117,6 @@ import type {
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import XuxuHint from '../../components/XuxuHint.vue';
-import MiniTabBar from '../../components/MiniTabBar.vue';
 import { recordPresentation } from '../../features/health-loop/record-presentation.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 
@@ -135,10 +134,10 @@ const sleepMinutes = ref('');
 const sleepQuality = ref<SleepQuality>('good');
 const editingId = ref<string | null>(null);
 const types: Array<{ type: HealthRecordType; label: string; icon: string }> = [
-  { type: 'weight', label: '体重', icon: '◌' },
-  { type: 'meal-structure', label: '饮食', icon: '◐' },
-  { type: 'activity', label: '活动', icon: '⌁' },
-  { type: 'sleep', label: '睡眠', icon: '☾' },
+  { type: 'weight', label: '体重', icon: 'info_circle' },
+  { type: 'meal-structure', label: '饮食', icon: 'success_no_circle' },
+  { type: 'activity', label: '活动', icon: 'waiting' },
+  { type: 'sleep', label: '睡眠', icon: 'info_circle' },
 ];
 const mealTypes: Array<{ value: MealType; label: string }> = [
   { value: 'breakfast', label: '早餐' },
@@ -306,8 +305,8 @@ onShow(load);
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 32rpx 166rpx;
-  background: #f7fbf8;
+  padding: 48rpx 32rpx 198rpx;
+  background: #f6faf7;
   color: #1d3d2a;
 }
 .eyebrow,
@@ -401,8 +400,12 @@ onShow(load);
   gap: 10rpx;
   margin: 28rpx 0 18rpx;
   overflow: auto;
+  padding-bottom: 2rpx;
 }
 .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7rpx;
   flex: none;
   padding: 14rpx 18rpx;
   border: 2rpx solid #dceadd;
@@ -415,6 +418,12 @@ onShow(load);
   border-color: #75aa81;
   color: #286b47;
   background: #e7f4e9;
+}
+.tab icon {
+  opacity: 0.7;
+}
+.tab.active icon {
+  opacity: 1;
 }
 .form-card {
   padding: 24rpx;
@@ -461,6 +470,9 @@ input {
 }
 .chip,
 .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7rpx;
   padding: 16rpx 18rpx;
   border: 2rpx solid #dce9dd;
   border-radius: 14rpx;

@@ -40,9 +40,8 @@
           <view class="task-dot" /><view class="task-copy"
             ><text>{{ task.title }}</text
             ><text>{{ task.subtitle }}</text></view
-          ><text>›</text>
-        </button></view
-      >
+          ><icon type="forward" size="16" class="forward-icon" /></button
+      ></view>
       <view v-else class="done"
         ><image src="/static/illustrations/xuxu-complete.png" mode="aspectFill" /><view
           ><text>今天的行动已完成</text><text>不必额外加码，保持自己的节律就好。</text></view
@@ -68,7 +67,7 @@
         <view
           ><text>{{ today.activePlan ? '正在执行的计划' : '从这里设置计划' }}</text
           ><text>{{ planText }}</text></view
-        ><text>›</text>
+        ><icon type="forward" size="16" class="forward-icon" />
       </button>
     </template>
     <view v-else-if="error" class="load-failed"
@@ -77,7 +76,6 @@
       ><text>检查服务连接后，再试一次就好。</text><button @tap="load">重新加载</button></view
     >
     <view v-else class="loading">正在准备今天的节律...</view>
-    <MiniTabBar active="home" />
   </view>
 </template>
 
@@ -86,7 +84,6 @@ import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import IllustratedHero from '../../components/IllustratedHero.vue';
 import XuxuHint from '../../components/XuxuHint.vue';
-import MiniTabBar from '../../components/MiniTabBar.vue';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { onboardingState } from '../../stores/onboarding.js';
@@ -140,15 +137,15 @@ onShow(() => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 48rpx 32rpx 172rpx;
-  background: #f7fbf8;
+  padding: 50rpx 32rpx 198rpx;
+  background: #f6faf7;
   color: #183425;
 }
 .head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28rpx;
+  margin-bottom: 24rpx;
 }
 .date,
 .title {
@@ -160,7 +157,7 @@ onShow(() => {
 }
 .title {
   margin-top: 8rpx;
-  font-size: 44rpx;
+  font-size: 40rpx;
   font-weight: 700;
 }
 .avatar {
@@ -178,9 +175,9 @@ onShow(() => {
   gap: 14rpx;
   width: 100%;
   margin-top: 16rpx;
-  padding: 14rpx 16rpx;
-  border: 2rpx solid #e7dfba;
-  border-radius: 18rpx;
+  padding: 18rpx 18rpx;
+  border: 2rpx solid #eadfb6;
+  border-radius: 20rpx;
   text-align: left;
   background: #fffbed;
 }
@@ -210,6 +207,10 @@ onShow(() => {
   color: #8b7d4b;
   font-size: 22rpx;
 }
+.forward-icon {
+  flex: none;
+  opacity: 0.7;
+}
 .section-head {
   display: flex;
   align-items: center;
@@ -233,7 +234,8 @@ onShow(() => {
   align-items: center;
   gap: 16rpx;
   width: 100%;
-  padding: 20rpx;
+  min-height: 92rpx;
+  padding: 16rpx 18rpx;
   border: 2rpx solid #dceadd;
   border-radius: 16rpx;
   text-align: left;
@@ -259,10 +261,6 @@ onShow(() => {
   color: #758c7d;
   font-size: 21rpx;
   font-weight: 400;
-}
-.task > text {
-  color: #5c956d;
-  font-size: 36rpx;
 }
 .done {
   display: flex;

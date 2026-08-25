@@ -60,7 +60,10 @@
             :disabled="task.status !== 'pending'"
             @tap="complete(task.id)"
           >
-            {{ task.status === 'completed' ? '✓' : '' }}</button
+            ><icon
+              :type="task.status === 'completed' ? 'success_no_circle' : 'waiting'"
+              size="18"
+            /></button
           ><view
             ><text>{{ taskTitle(task.actionType) }}</text
             ><text>{{ task.status === 'completed' ? '已完成' : '今天完成就很好' }}</text></view
@@ -73,7 +76,6 @@
         message="每完成一件小事，都会让之后的回顾更了解你的真实节律。"
       />
     </template>
-    <MiniTabBar active="plan" />
   </view>
 </template>
 
@@ -81,7 +83,6 @@
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import IllustratedHero from '../../components/IllustratedHero.vue';
-import MiniTabBar from '../../components/MiniTabBar.vue';
 import XuxuHint from '../../components/XuxuHint.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { planPresentation } from '../../features/health-loop/plan-presentation.js';
@@ -161,8 +162,8 @@ onShow(() => healthLoopState.loadToday(date));
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 40rpx 32rpx 172rpx;
-  background: #f7fbf8;
+  padding: 48rpx 32rpx 198rpx;
+  background: #f6faf7;
   color: #1d3d2a;
 }
 .section-head {
@@ -263,12 +264,15 @@ onShow(() => healthLoopState.loadToday(date));
   background: #fff;
 }
 .check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 46rpx;
   height: 46rpx;
   padding: 0;
   border: 2rpx solid #75a881;
   border-radius: 50%;
-  color: #fff;
+  color: #4e9565;
   background: #fff;
   line-height: 40rpx;
 }

@@ -5,7 +5,10 @@
       ><text class="name">{{ presentation.name }}</text
       ><text class="message">{{ message }}</text></view
     >
-    <text v-if="action" class="action">{{ action }} ›</text>
+    <view v-if="action" class="action"
+      ><text>{{ action }}</text
+      ><icon type="forward" size="14"
+    /></view>
   </view>
 </template>
 
@@ -65,6 +68,9 @@ defineEmits<{ tap: [] }>();
   line-height: 1.45;
 }
 .action {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
   color: #467e58;
   font-size: 22rpx;
   white-space: nowrap;

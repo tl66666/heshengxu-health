@@ -1,8 +1,12 @@
 <template>
   <view class="nav-bar">
-    <button class="back" aria-label="返回" @tap="back">返回</button>
+    <button class="back" aria-label="返回" @tap="back">
+      <icon type="back" size="18" /><text>返回</text>
+    </button>
     <text class="title">{{ title }}</text>
-    <button v-if="closeLabel" class="close" aria-label="退出" @tap="close">{{ closeLabel }}</button>
+    <button v-if="closeLabel" class="close" aria-label="退出" @tap="close">
+      <icon type="clear" size="18" /><text>{{ closeLabel }}</text>
+    </button>
     <view v-else class="placeholder" />
   </view>
 </template>
@@ -45,6 +49,10 @@ function close() {
 }
 .back,
 .close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
   min-width: 112rpx;
   height: 64rpx;
   padding: 0 18rpx;

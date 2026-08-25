@@ -119,11 +119,10 @@
             :class="['goal', { selected: form.primaryGoal === item.value }]"
             @tap="form.primaryGoal = item.value"
           >
-            <icon type="info_circle" size="18" class="goal-icon" />
-            ><text>{{ item.label }}</text
-            ><text class="arrow">›</text>
-          </button></view
-        >
+            <icon :type="item.icon" size="18" class="goal-icon" />
+            <text>{{ item.label }}</text>
+            <icon type="forward" size="16" class="arrow" /></button
+        ></view>
       </view>
       <view v-else class="step">
         <text class="eyebrow">最后确认一下</text><text class="title">你的健康画像准备好了</text>
@@ -164,12 +163,12 @@ const sexOptions = [
   { value: 'unspecified' as const, label: '不方便说' },
 ];
 const goalOptions = [
-  { value: 'weight_management' as const, label: '减脂与体重管理', icon: '◌' },
-  { value: 'weight_maintenance' as const, label: '保持当前状态', icon: '◎' },
-  { value: 'muscle_gain' as const, label: '力量与体能', icon: '△' },
-  { value: 'sleep' as const, label: '睡眠与精力', icon: '☾' },
-  { value: 'energy' as const, label: '饮食与活动', icon: '✦' },
-  { value: 'mood' as const, label: '压力与情绪', icon: '♡' },
+  { value: 'weight_management' as const, label: '减脂与体重管理', icon: 'info_circle' },
+  { value: 'weight_maintenance' as const, label: '保持当前状态', icon: 'success_no_circle' },
+  { value: 'muscle_gain' as const, label: '力量与体能', icon: 'waiting' },
+  { value: 'sleep' as const, label: '睡眠与精力', icon: 'waiting' },
+  { value: 'energy' as const, label: '饮食与活动', icon: 'success_no_circle' },
+  { value: 'mood' as const, label: '压力与情绪', icon: 'info_circle' },
 ];
 const bmiLabel = computed(
   () =>
@@ -508,13 +507,12 @@ async function save() {
   background: #fff;
   font-size: 27rpx;
 }
-.goal > text:first-child {
+.goal-icon {
   color: #5d9b71;
 }
 .arrow {
   margin-left: auto;
-  color: #79a486;
-  font-size: 36rpx;
+  opacity: 0.65;
 }
 .summary {
   display: flex;
