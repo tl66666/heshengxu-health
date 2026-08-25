@@ -23,7 +23,10 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const status = exception instanceof HttpException ? exception.getStatus() : 500;
     const body = exception instanceof HttpException ? exception.getResponse() : null;
     if (!(exception instanceof HttpException)) {
-      this.logger.error(`Unhandled request error: ${String(exception)}`);
+      this.logger.error(
+        `Unhandled request error: ${String(exception)}`,
+        exception instanceof Error ? exception.stack : undefined,
+      );
     }
     const message =
       typeof body === 'object' && body && 'message' in body ? body.message : '服务暂时不可用';
