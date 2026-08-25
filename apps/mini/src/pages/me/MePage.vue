@@ -16,13 +16,13 @@
       </button></view
     ><view class="group"
       ><text class="group-title">数据与隐私</text
-      ><button v-for="item in dataItems" :key="item.label" class="row" @tap="notice(item.label)">
+      ><view v-for="item in dataItems" :key="item.label" class="row row--pending">
         <text>{{ item.icon }}</text
         ><view
           ><text>{{ item.label }}</text
           ><text>{{ item.desc }}</text></view
-        ><text>›</text>
-      </button></view
+        ><text>筹备中</text>
+      </view></view
     ><text class="foot">和生序提供健康管理参考，不提供疾病诊断或治疗建议。</text></view
   >
 </template>
@@ -138,6 +138,13 @@ onShow(() => healthLoopState.loadToday(date));
 .row > text:last-child {
   color: #73a27d;
   font-size: 36rpx;
+}
+.row--pending {
+  opacity: 0.72;
+}
+.row--pending > text:last-child {
+  color: #84978a;
+  font-size: 21rpx;
 }
 .foot {
   display: block;
