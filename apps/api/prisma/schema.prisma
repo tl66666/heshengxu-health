@@ -8,13 +8,19 @@ datasource db {
 }
 
 model User {
-  id                 String             @id
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  externalIdentities ExternalIdentity[]
-  consents           Consent[]
-  healthProfile      HealthProfile?
-  aiTraces           AiTrace[]
+  id                   String                @id
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  externalIdentities   ExternalIdentity[]
+  consents             Consent[]
+  healthProfile        HealthProfile?
+  aiTraces             AiTrace[]
+  healthTargets        HealthTarget[]
+  personalPlans        PersonalPlan[]
+  weightRecords        WeightRecord[]
+  mealStructureRecords MealStructureRecord[]
+  activityRecords      ActivityRecord[]
+  sleepRecords         SleepRecord[]
 }
 
 model ExternalIdentity {
@@ -40,31 +46,158 @@ model Consent {
 }
 
 model HealthProfile {
-  id          String        @id @default(cuid())
-  userId      String        @unique
+  id          String      @id @default(cuid())
+  userId      String      @unique
   displayName String?
-  birthDate   DateTime?     @db.Date
-  sex         ProfileSex    @default(unspecified)
+  birthDate   DateTime?   @db.Date
+  sex         ProfileSex  @default(unspecified)
   heightCm    Float?
   weightKg    Float?
   primaryGoal HealthGoal?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AiTrace {
-  id             String         @id @default(cuid())
+  id             String           @id @default(cuid())
   userId         String
   requestHash    String
   safetyDecision AiSafetyDecision
   safetyReason   String?
   provider       String?
   model          String?
-  createdAt      DateTime       @default(now())
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+model HealthTarget {
+  id             String           @id @default(cuid())
+  userId         String
+  kind           PlanKind
+  direction      WeightDirection?
+  targetWeightKg Float?
+  startDate      DateTime         @db.Date
+  status         PlanStatus       @default(active)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan           PersonalPlan?
+
+  @@index([userId, status])
+}
+
+model PersonalPlan {
+  id             String       @id @default(cuid())
+  userId         String
+  healthTargetId String       @unique
+  kind           PlanKind
+  startDate      DateTime     @db.Date
+  status         PlanStatus   @default(active)
+  ruleVersion    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  healthTarget   HealthTarget @relation(fields: [healthTargetId], references: [id], onDelete: Cascade)
+  tasks          PlanTask[]
+
+  @@index([userId, status])
+}
+
+model PlanTask {
+  id           String         @id @default(cuid())
+  planId       String
+  scheduledFor DateTime       @db.Date
+  actionType   PlanTaskAction
+  status       PlanTaskStatus @default(pending)
+  completedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  plan         PersonalPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, scheduledFor, actionType])
+  @@index([planId, scheduledFor])
+}
+
+model WeightRecord {
+  id               String         @id @default(cuid())
+  userId           String
+  valueKg          Float
+  recordedAt       DateTime
+  note             String?
+  isCurrent        Boolean        @default(true)
+  previousRecordId String?
+  supersededAt     DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  previousRecord   WeightRecord?  @relation("WeightRecordVersions", fields: [previousRecordId], references: [id])
+  replacements     WeightRecord[] @relation("WeightRecordVersions")
+
+  @@index([userId, isCurrent, recordedAt])
+}
+
+model MealStructureRecord {
+  id               String                @id @default(cuid())
+  userId           String
+  mealType         MealType
+  hasStaple        Boolean
+  hasProtein       Boolean
+  hasVegetable     Boolean
+  recordedAt       DateTime
+  note             String?
+  isCurrent        Boolean               @default(true)
+  previousRecordId String?
+  supersededAt     DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  previousRecord   MealStructureRecord?  @relation("MealStructureRecordVersions", fields: [previousRecordId], references: [id])
+  replacements     MealStructureRecord[] @relation("MealStructureRecordVersions")
+
+  @@index([userId, isCurrent, recordedAt])
+}
+
+model ActivityRecord {
+  id               String           @id @default(cuid())
+  userId           String
+  activityType     String
+  durationMinutes  Int
+  intensity        String?
+  recordedAt       DateTime
+  note             String?
+  isCurrent        Boolean          @default(true)
+  previousRecordId String?
+  supersededAt     DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  previousRecord   ActivityRecord?  @relation("ActivityRecordVersions", fields: [previousRecordId], references: [id])
+  replacements     ActivityRecord[] @relation("ActivityRecordVersions")
+
+  @@index([userId, isCurrent, recordedAt])
+}
+
+model SleepRecord {
+  id               String        @id @default(cuid())
+  userId           String
+  durationMinutes  Int
+  quality          SleepQuality
+  sleepAt          DateTime?
+  wakeAt           DateTime?
+  recordedAt       DateTime
+  note             String?
+  isCurrent        Boolean       @default(true)
+  previousRecordId String?
+  supersededAt     DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  previousRecord   SleepRecord?  @relation("SleepRecordVersions", fields: [previousRecordId], references: [id])
+  replacements     SleepRecord[] @relation("SleepRecordVersions")
+
+  @@index([userId, isCurrent, recordedAt])
 }
 
 enum IdentityProvider {
@@ -89,4 +222,47 @@ enum HealthGoal {
 enum AiSafetyDecision {
   allow
   block
+}
+
+enum PlanKind {
+  weight
+  sleep
+}
+
+enum PlanStatus {
+  active
+  paused
+  archived
+}
+
+enum WeightDirection {
+  lose
+  maintain
+  gain
+}
+
+enum PlanTaskAction {
+  record_weight
+  record_meal
+  walk_15_minutes
+  record_sleep
+}
+
+enum PlanTaskStatus {
+  pending
+  completed
+  skipped
+}
+
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
+enum SleepQuality {
+  poor
+  fair
+  good
 }
