@@ -1,5 +1,7 @@
 # 和生序阶段 2A：每日健康闭环 Implementation Plan
 
+> **状态：已完成。** 对应实现提交为 `90de97f`、`6b60e80`、`2a3c79b`、`732f46e`、`b911197`、`1fbb805`；验收提交同时修复了共享领域包的 API 运行时导出。完整验收见 [阶段 2A 验收记录](../../engineering/stage-2a-acceptance.md)。文中复选框保留为历史实施步骤，不是当前待办。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 让已完成建档的用户可以建立体重或睡眠计划，记录体重、饮食结构、活动和睡眠，并通过“首页 / 记录 / 序序 / 计划 / 我的”完成每日闭环。

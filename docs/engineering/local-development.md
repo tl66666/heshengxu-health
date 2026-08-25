@@ -14,6 +14,7 @@ docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
 docker compose --env-file .env -f infra/docker/docker-compose.yml ps
 pnpm --filter @heban/api prisma:generate
 pnpm --filter @heban/api prisma:deploy
+pnpm --filter @heban/domain build
 ```
 
 预期 PostgreSQL 和 Redis 都显示为 `healthy`。
