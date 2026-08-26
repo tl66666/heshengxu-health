@@ -23,7 +23,7 @@ export class MealEntriesService {
         foodNameSnapshot: food.name,
         grams: dto.grams,
         ...nutrition,
-        source: 'manual',
+        source: dto.source ?? 'manual',
         recordedAt: new Date(dto.recordedAt),
         note: dto.note,
       },
