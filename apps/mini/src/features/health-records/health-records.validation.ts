@@ -1,0 +1,30 @@
+import type { RecordForm, RecordFormErrors } from './health-records.types.js';
+
+export function validateRecordForm(form: RecordForm): RecordFormErrors {
+  if (form.type === 'weight') {
+    const value = Number(form.valueKg);
+    if (!form.valueKg.trim()) return { valueKg: '请填写体重' };
+    if (!Number.isFinite(value) || value < 20 || value > 300)
+      return { valueKg: '体重应在 20 到 300 kg 之间' };
+    return {};
+  }
+  if (form.type === 'meal-structure') {
+    if (!form.hasStaple && !form.hasProtein && !form.hasVegetable)
+      return { structure: '至少选择一项餐盘结构' };
+    return {};
+  }
+  if (form.type === 'activity') {
+    const errors: RecordFormErrors = {};
+    const duration = Number(form.durationMinutes);
+    if (!form.activityType.trim()) errors.activityType = '请填写活动类型';
+    if (!form.durationMinutes.trim()) errors.durationMinutes = '请填写活动时长';
+    else if (!Number.isFinite(duration) || duration < 1 || duration > 1440)
+      errors.durationMinutes = '活动时长应在 1 到 1440 分钟之间';
+    return errors;
+  }
+  const duration = Number(form.durationMinutes);
+  if (!form.durationMinutes.trim()) return { durationMinutes: '请填写睡眠时长' };
+  if (!Number.isFinite(duration) || duration < 30 || duration > 1440)
+    return { durationMinutes: '睡眠时长应在 30 到 1440 分钟之间' };
+  return {};
+}
