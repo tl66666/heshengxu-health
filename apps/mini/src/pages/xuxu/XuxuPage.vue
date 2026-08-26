@@ -27,6 +27,7 @@ function localDate() {
   height: 100vh;
   box-sizing: border-box;
   overflow: hidden;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   padding: 24rpx 24rpx 0;
@@ -36,12 +37,19 @@ function localDate() {
 .chat-area {
   display: flex;
   flex: none;
+  width: 100%;
   height: calc(100vh - 148rpx);
   min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 .chat-composer-host {
   display: flex;
   flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
   min-height: 0;
+  min-width: 0;
+  box-sizing: border-box;
 }
 </style>

@@ -144,8 +144,10 @@ function voiceNotice() {
 .chat-shell {
   display: flex;
   flex: 1 1 auto;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
   flex-direction: column;
   margin-top: 0;
@@ -227,6 +229,9 @@ function voiceNotice() {
   flex: 1;
   height: 0;
   min-height: 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12rpx 18rpx;
 }
 .empty-chat {
@@ -271,10 +276,13 @@ function voiceNotice() {
   border-radius: 50%;
 }
 .message-body {
-  max-width: 78%;
+  max-width: calc(100% - 58rpx);
+  min-width: 0;
 }
 .message-text {
   display: block;
+  max-width: 100%;
+  word-break: break-word;
   padding: 11rpx 14rpx;
   border-radius: 14rpx;
   color: #294a36;
@@ -321,6 +329,8 @@ function voiceNotice() {
 .quick {
   display: flex;
   flex: none;
+  width: 100%;
+  box-sizing: border-box;
   padding: 8rpx 18rpx;
   border-top: 1rpx solid #eef4ee;
   white-space: nowrap;

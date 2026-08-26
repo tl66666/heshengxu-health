@@ -128,6 +128,8 @@ onShow(() => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
   padding: 50rpx 32rpx 220rpx;
   background: #f6faf7;
   color: #183425;

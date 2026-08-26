@@ -207,6 +207,8 @@ onShow(load);
 .page {
   min-height: 100vh;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
   padding: 50rpx 32rpx 220rpx;
   background: #f7fbf8;
   color: #1d3d2a;
