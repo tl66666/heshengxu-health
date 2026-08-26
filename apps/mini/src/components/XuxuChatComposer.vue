@@ -82,6 +82,13 @@
       </button>
     </view>
     <text class="disclaimer">序序提供健康管理与生活方式建议，不能替代医生诊疗。</text>
+    <view class="safety">
+      <image src="/static/illustrations/xuxu-safe-support.png" mode="aspectFit" />
+      <view
+        ><text>需要专业帮助时</text
+        ><text>如果出现持续不适或紧急症状，请及时联系医生或当地急救服务。</text></view
+      >
+    </view>
   </view>
 </template>
 
@@ -136,7 +143,8 @@ function voiceNotice() {
 <style scoped>
 .chat-shell {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
+  height: calc(100vh - 280rpx);
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
@@ -379,5 +387,37 @@ function voiceNotice() {
   color: #8a9b90;
   text-align: center;
   font-size: 18rpx;
+}
+.safety {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex: none;
+  margin: 8rpx 18rpx 0;
+  padding: 8rpx 10rpx;
+  border: 1rpx solid #e0e9e0;
+  border-radius: 12rpx;
+  background: #f5f9f4;
+}
+.safety image {
+  width: 46rpx;
+  height: 46rpx;
+  flex: none;
+}
+.safety view {
+  min-width: 0;
+}
+.safety text {
+  display: block;
+  color: #4b6f55;
+  font-size: 19rpx;
+  font-weight: 700;
+}
+.safety text:last-child {
+  margin-top: 3rpx;
+  color: #788e7e;
+  font-size: 17rpx;
+  font-weight: 400;
+  line-height: 1.35;
 }
 </style>
