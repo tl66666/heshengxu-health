@@ -3,6 +3,8 @@
 </template>
 
 <style>
+@import './styles/mini-tokens.css';
+
 page {
   background: #f7fbf8;
   color: #183425;

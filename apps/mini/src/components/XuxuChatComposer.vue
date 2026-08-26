@@ -1,15 +1,30 @@
 <template>
   <view class="chat-shell">
     <view class="chat-head">
-      <image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
-      <view><text>序序</text><text>在线 · 只提供健康管理参考</text></view>
+      <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+      <view class="chat-head-copy"
+        ><text class="chat-name">序序</text
+        ><view class="chat-status"><view class="status-dot" />在线 · 健康管理参考</view></view
+      >
     </view>
-    <view class="scope">我只会使用你主动记录并授权的健康信息，不会替代医生诊疗。</view>
+
+    <view class="chat-profile">
+      <view class="profile-head"
+        ><text>健康画像</text
+        ><button @tap="profileOpen = !profileOpen">
+          {{ profileOpen ? '收起' : '展开' }}
+        </button></view
+      >
+      <view v-if="profileOpen" class="profile-tags">
+        <text v-for="tag in profileTags" :key="tag" class="profile-tag">{{ tag }}</text>
+      </view>
+    </view>
+
     <scroll-view class="messages" scroll-y :scroll-into-view="lastMessageId">
-      <view v-if="!messages.length" class="empty-chat">
+      <view v-if="!messages.length && !typing" class="empty-chat">
         <image src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
-        <text>从一个问题开始吧</text>
-        <text>你可以先点下面的快捷问题</text>
+        <text class="empty-title">今天想从哪里开始照顾自己？</text>
+        <text class="empty-copy">可以问饮食、体重、睡眠、运动或情绪。</text>
       </view>
       <view
         v-for="message in messages"
@@ -19,52 +34,102 @@
       >
         <image
           v-if="message.role === 'assistant'"
+          class="message-avatar"
           src="/static/illustrations/xuxu-avatar.jpg"
           mode="aspectFill"
         />
-        <text>{{ message.text }}</text>
+        <view class="message-body">
+          <text class="message-text">{{ message.text }}</text>
+          <view v-if="message.sourceTitle" class="source-card"
+            ><image src="/static/icons/journal.svg" mode="aspectFit" /><text
+              >知识来源 · {{ message.sourceTitle }}</text
+            ></view
+          >
+        </view>
       </view>
+      <view v-if="typing" class="message assistant typing-row"
+        ><image
+          class="message-avatar"
+          src="/static/illustrations/xuxu-avatar.jpg"
+          mode="aspectFill" /><view class="typing"><text /><text /><text /></view
+      ></view>
     </scroll-view>
-    <scroll-view class="quick" scroll-x>
+
+    <scroll-view class="quick" scroll-x="true" show-scrollbar="false">
       <button v-for="item in quickQuestions" :key="item.id" @tap="send(item.label)">
         {{ item.label }}
       </button>
     </scroll-view>
+
     <view class="composer">
-      <input v-model="draft" confirm-type="send" placeholder="问问序序…" @confirm="send(draft)" />
-      <button class="send" :disabled="!draft.trim()" aria-label="发送" @tap="send(draft)">
-        发送
+      <button class="icon-button" aria-label="语音输入" @tap="voiceNotice">
+        <image src="/static/icons/mic.svg" mode="aspectFit" />
+      </button>
+      <input
+        v-model="draft"
+        confirm-type="send"
+        placeholder="输入你的问题…"
+        @confirm="send(draft)"
+      />
+      <button
+        class="send"
+        :class="{ enabled: draft.trim() }"
+        :disabled="!draft.trim() || typing"
+        aria-label="发送"
+        @tap="send(draft)"
+      >
+        <image src="/static/icons/send.svg" mode="aspectFit" />
       </button>
     </view>
-    <text class="disclaimer">序序的回答仅作生活方式参考，持续不适请寻求专业帮助。</text>
+    <text class="disclaimer">序序提供健康管理与生活方式建议，不能替代医生诊疗。</text>
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
+import { healthLoopState } from '../features/health-loop/health-loop.store.js';
 import {
   createRuleReply,
   createUserMessage,
   quickQuestions,
+  replySource,
   type ChatMessage,
 } from './xuxu-chat.js';
 
 const messages = ref<ChatMessage[]>([]);
 const draft = ref('');
+const typing = ref(false);
+const profileOpen = ref(true);
 const lastMessageId = computed(() => messages.value.at(-1)?.id || '');
+const profileTags = computed(() => {
+  const plan = healthLoopState.today.value?.activePlan;
+  const name = healthLoopState.today.value?.displayName;
+  return [
+    name || '尚未建档',
+    plan?.kind === 'sleep' ? '睡眠与精力' : plan ? '体重管理' : '从一个小目标开始',
+  ];
+});
 
 function send(value: string) {
   const text = value.trim();
-  if (!text) return;
+  if (!text || typing.value) return;
   messages.value.push(createUserMessage(text));
   draft.value = '';
+  typing.value = true;
   nextTick(() => {
-    messages.value.push({
-      id: `assistant-${Date.now()}`,
-      role: 'assistant',
-      text: createRuleReply(text),
-    });
+    setTimeout(() => {
+      messages.value.push({
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        text: createRuleReply(text),
+        sourceTitle: replySource(text),
+      });
+      typing.value = false;
+    }, 420);
   });
+}
+function voiceNotice() {
+  uni.showToast({ title: '语音输入后续开放，先试试打字', icon: 'none' });
 }
 </script>
 
@@ -72,7 +137,6 @@ function send(value: string) {
 .chat-shell {
   display: flex;
   flex: 1;
-  height: auto;
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
@@ -89,33 +153,67 @@ function send(value: string) {
   padding: 0 18rpx 12rpx;
   border-bottom: 1rpx solid #eef4ee;
 }
-.chat-head image {
+.chat-avatar {
   width: 58rpx;
   height: 58rpx;
   border: 3rpx solid #f0da8c;
   border-radius: 50%;
 }
-.chat-head text {
-  display: block;
+.chat-head-copy {
+  min-width: 0;
 }
-.chat-head text:first-child {
+.chat-name,
+.chat-status {
+  display: flex;
+  align-items: center;
+}
+.chat-name {
   color: #244735;
   font-size: 28rpx;
   font-weight: 700;
 }
-.chat-head text:last-child {
+.chat-status {
+  gap: 6rpx;
   margin-top: 5rpx;
   color: #7a9180;
   font-size: 20rpx;
 }
-.scope {
+.status-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #5ba56d;
+}
+.chat-profile {
   margin: 10rpx 18rpx 0;
-  padding: 9rpx 12rpx;
+  padding: 10rpx 12rpx;
   border-radius: 12rpx;
-  color: #547260;
   background: #f1f8f1;
+}
+.profile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #4f735d;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.profile-head button {
+  color: #4f8a60;
+  font-size: 20rpx;
+}
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 9rpx;
+}
+.profile-tag {
+  padding: 5rpx 10rpx;
+  border-radius: 14rpx;
+  color: #4e765c;
+  background: #fff;
   font-size: 19rpx;
-  line-height: 1.45;
 }
 .messages {
   flex: 1;
@@ -128,16 +226,21 @@ function send(value: string) {
   align-items: center;
   flex-direction: column;
   padding: 24rpx 0;
-  color: #7b9180;
-  font-size: 23rpx;
+  text-align: center;
 }
 .empty-chat image {
   width: 128rpx;
   height: 128rpx;
   margin-bottom: 12rpx;
 }
-.empty-chat text:last-child {
+.empty-title {
+  color: #31543e;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.empty-copy {
   margin-top: 6rpx;
+  color: #7b9180;
   font-size: 20rpx;
 }
 .message {
@@ -147,20 +250,23 @@ function send(value: string) {
   margin: 10rpx 0;
 }
 .message.assistant {
-  padding-right: 48rpx;
+  padding-right: 38rpx;
 }
 .message.user {
   justify-content: flex-end;
-  padding-left: 48rpx;
+  padding-left: 38rpx;
 }
-.message image {
+.message-avatar {
   width: 48rpx;
   height: 48rpx;
   flex: none;
   border-radius: 50%;
 }
-.message text {
+.message-body {
   max-width: 78%;
+}
+.message-text {
+  display: block;
   padding: 11rpx 14rpx;
   border-radius: 14rpx;
   color: #294a36;
@@ -168,22 +274,54 @@ function send(value: string) {
   font-size: 23rpx;
   line-height: 1.55;
 }
-.message.user text {
+.message.user .message-text {
   color: #315a70;
   background: #edf5f8;
+}
+.source-card {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-top: 7rpx;
+  padding: 7rpx 9rpx;
+  border: 1rpx solid #e2ebe3;
+  border-radius: 9rpx;
+  color: #789080;
+  background: #fff;
+  font-size: 18rpx;
+}
+.source-card image {
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.7;
+}
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 5rpx;
+  height: 48rpx;
+  padding: 0 16rpx;
+  border-radius: 14rpx;
+  background: #f1f8f1;
+}
+.typing text {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #8db19a;
 }
 .quick {
   display: flex;
   flex: none;
   padding: 8rpx 18rpx;
-  white-space: nowrap;
   border-top: 1rpx solid #eef4ee;
+  white-space: nowrap;
 }
 .quick button {
   display: inline-block;
   margin-right: 10rpx;
   padding: 9rpx 13rpx;
-  border: 2rpx solid #dceadd;
+  border: 1rpx solid #dceadd;
   border-radius: 24rpx;
   color: #4f735d;
   background: #fff;
@@ -196,8 +334,21 @@ function send(value: string) {
   flex: none;
   padding: 0 18rpx;
 }
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52rpx;
+  height: 62rpx;
+  flex: none;
+}
+.icon-button image {
+  width: 34rpx;
+  height: 34rpx;
+}
 .composer input {
   flex: 1;
+  min-width: 0;
   height: 68rpx;
   padding: 0 20rpx;
   border-radius: 38rpx;
@@ -206,16 +357,21 @@ function send(value: string) {
   font-size: 25rpx;
 }
 .send {
-  width: 82rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62rpx;
   height: 62rpx;
+  flex: none;
   border-radius: 31rpx;
-  color: #fff;
-  background: #2e7d4f;
-  font-size: 23rpx;
-  line-height: 62rpx;
+  background: #bdd4c1;
 }
-.send[disabled] {
-  opacity: 0.45;
+.send.enabled {
+  background: #2e7d4f;
+}
+.send image {
+  width: 34rpx;
+  height: 34rpx;
 }
 .disclaimer {
   display: block;

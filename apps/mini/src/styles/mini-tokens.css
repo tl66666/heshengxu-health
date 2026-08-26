@@ -1,0 +1,15 @@
+page {
+  --hz-bg: #f7fbf8;
+  --hz-surface: #ffffff;
+  --hz-soft: #eef6ef;
+  --hz-warm: #fffdf5;
+  --hz-ink: #214632;
+  --hz-muted: #71897a;
+  --hz-green: #347c50;
+  --hz-green-soft: #e8f4e8;
+  --hz-rule: #dceadd;
+  --hz-rule-light: #e4eee5;
+  --hz-danger: #b85e43;
+  --hz-danger-soft: #fff1ed;
+  --hz-tabbar-height: 124rpx;
+}

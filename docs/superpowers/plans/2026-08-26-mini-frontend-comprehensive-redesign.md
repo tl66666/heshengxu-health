@@ -13,7 +13,7 @@
 ## 文件边界
 
 - Modify: `apps/mini/src/App.vue`，只保留全局基础字体、按钮、页面背景和通用令牌。
-- Create: `apps/mini/src/styles/mini-tokens.scss`，唯一共享视觉令牌文件。
+- Create: `apps/mini/src/styles/mini-tokens.css`，唯一共享视觉令牌文件，使用原生 CSS 变量，不新增 Sass 依赖。
 - Modify: `apps/mini/src/components/AppNavBar.vue`，统一非 Tab 页面导航。
 - Modify: `apps/mini/src/components/MiniTabBar.vue`，统一五栏导航和安全区。
 - Modify: `apps/mini/src/components/IllustratedHero.vue`，只承载主视觉，不允许页面叠加重复标题。
@@ -28,7 +28,7 @@
 ### Task 1: 建立共享视觉令牌
 
 **Files:**
-- Create: `apps/mini/src/styles/mini-tokens.scss`
+- Create: `apps/mini/src/styles/mini-tokens.css`
 - Modify: `apps/mini/src/App.vue`
 
 - [ ] **Step 1:** 写令牌结构，包含背景、表面、主文字、次文字、主色、边界、状态色、间距、圆角和 TabBar 高度。

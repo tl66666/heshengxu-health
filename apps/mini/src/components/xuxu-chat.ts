@@ -1,4 +1,9 @@
-export type ChatMessage = { id: string; role: 'user' | 'assistant'; text: string };
+export type ChatMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  sourceTitle?: string;
+};
 
 export const quickQuestions = [
   { id: 'sleep', label: '最近睡不好怎么办？' },
@@ -25,4 +30,11 @@ export function createRuleReply(text: string) {
     return '久坐时每 50 分钟起身活动 3 分钟，今天先完成一次 15 分钟轻松步行就很好。出现疼痛或明显不适时请停止并咨询专业人士。';
   }
   return '我会结合你已经记录的信息，陪你把问题拆成一个今天能做的小行动。你可以问我睡眠、饮食、活动或记录。';
+}
+
+export function replySource(text: string) {
+  if (/睡|失眠|熬夜/.test(text)) return '睡眠与精力指南';
+  if (/外卖|饮食|吃|喝水|饮水|热量/.test(text)) return '日常饮食结构';
+  if (/运动|久坐|活动|走路|锻炼/.test(text)) return '轻量活动建议';
+  return undefined;
 }
