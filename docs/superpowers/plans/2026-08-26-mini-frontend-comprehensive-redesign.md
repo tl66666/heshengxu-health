@@ -21,7 +21,7 @@
 - Modify: `apps/mini/src/pages/bootstrap/BootstrapPage.vue`、`OnboardingPage.vue`、`PlanSetupPage.vue`、`HomePage.vue`、`RecordsPage.vue`、`XuxuPage.vue`、`PlanPage.vue`、`MePage.vue`，按设计逐页重排。
 - Modify: `apps/mini/src/components/*.spec.ts` 与各页面 `*.spec.ts`，补齐导航和关键交互契约。
 - Modify: `docs/engineering/mini-frontend-implementation.md`、`apps/mini/README.md`，同步开发和验收流程。
-- Create or replace: `assets/illustrations/onboarding-companion.png`，卡通/二次元建档入口图；生成前先确认素材提示词与尺寸。
+- Keep: `assets/illustrations/hero.jpg`，继续作为建档欢迎页已确认主视觉，不进行替换。
 
 ## 阶段 A：视觉基础与资源治理
 
@@ -50,18 +50,19 @@
 - [ ] **Step 4:** 为 Tab 路由、次级页返回目标和建档退出行为补测试。
 - [ ] **Step 5:** 运行 `npm exec -- vitest run src/components/navigation-contract.spec.ts`，提交 `refactor: unify mini navigation icons`。
 
-### Task 3: 清理真人入口素材和引用
+### Task 3: 整理页面图片使用规则
 
 **Files:**
 - Modify: `apps/mini/src/pages/bootstrap/BootstrapPage.vue`
 - Modify: `apps/mini/src/pages/onboarding/OnboardingPage.vue`
+- Modify: `apps/mini/src/pages/home/HomePage.vue`
+- Modify: `apps/mini/src/pages/plan/PlanPage.vue`
 - Modify: `scripts/sync-illustrations.mjs`
-- Create or replace: `assets/illustrations/onboarding-companion.png`
 
-- [ ] **Step 1:** 删除正式页面对 `hero.jpg` 的引用，保留该文件在原型素材中但标记为历史素材。
-- [ ] **Step 2:** 将建档入口改为卡通序序主视觉，图片不包含 UI 文字，文字全部由 Vue 渲染。
-- [ ] **Step 3:** 运行资源同步脚本，确认构建缓存只由脚本生成。
-- [ ] **Step 4:** 提交 `feat: replace human onboarding visual with companion art`。
+- [ ] **Step 1:** 保留建档页 `hero.jpg`，明确它只负责欢迎页主视觉，页面文字、按钮和导航不写入图片。
+- [ ] **Step 2:** 为首页、计划、记录、序序、我的建立图片使用清单：每个页面最多一个主视觉，空状态和完成状态才使用第二张插画。
+- [ ] **Step 3:** 检查图片 `mode`、容器比例、裁切位置和加载失败状态，避免图片挤压文字或撑高布局。
+- [ ] **Step 4:** 运行资源同步脚本，确认构建缓存只由脚本生成，提交 `refactor: normalize mini illustration usage`。
 
 ## 阶段 B：建档与导航闭环
 
