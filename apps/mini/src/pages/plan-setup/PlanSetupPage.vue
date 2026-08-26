@@ -4,10 +4,10 @@
     <text class="eyebrow">从一个方向开始</text>
     <text class="title">设置我的健康计划</text>
     <text class="hint">之后随时可以调整，不需要一次决定全部。</text>
-    <view class="cards">
+    <view class="plan-options">
       <button :class="['choice', { selected: kind === 'weight' }]" @tap="kind = 'weight'">
         <image src="/static/illustrations/program-weight.png" mode="aspectFill" />
-        <view><text>体重管理</text><text>从规律记录与小行动开始</text></view>
+        <view class="choice-copy"><text>体重管理</text><text>从规律记录与小行动开始</text></view>
         <image
           v-if="kind === 'weight'"
           class="choice-check"
@@ -17,7 +17,7 @@
       </button>
       <button :class="['choice', { selected: kind === 'sleep' }]" @tap="kind = 'sleep'">
         <image src="/static/illustrations/program-sleep.png" mode="aspectFill" />
-        <view><text>睡眠与精力</text><text>先找回更稳定的作息</text></view>
+        <view class="choice-copy"><text>睡眠与精力</text><text>先找回更稳定的作息</text></view>
         <image
           v-if="kind === 'sleep'"
           class="choice-check"
@@ -26,7 +26,8 @@
         />
       </button>
     </view>
-    <view v-if="kind === 'weight'" class="panel">
+    <view v-if="fields.showDirection" class="panel">
+      <view class="panel-head"><text>体重计划</text><text>可随时调整</text></view>
       <text class="label">目标方向</text>
       <view class="directions"
         ><button
@@ -38,24 +39,31 @@
           {{ item.label }}
         </button></view
       >
-      <text class="label">目标体重（选填）</text>
-      <view class="input-row"
-        ><input v-model="targetWeightKg" type="digit" placeholder="例如 58" /><text>kg</text></view
-      >
+      <template v-if="fields.showTargetWeight">
+        <text class="label">目标体重（选填）</text>
+        <view class="input-row"
+          ><input v-model="targetWeightKg" type="digit" placeholder="例如 58" /><text
+            >kg</text
+          ></view
+        >
+        <text class="input-note">不填也可以，先从记录和规律行动开始。</text>
+      </template>
     </view>
+    <view v-else class="sleep-note"><text>睡眠计划会从记录作息和一件轻量行动开始。</text></view>
     <text v-if="error" class="error">{{ error }}</text>
     <button class="submit" :loading="saving" @tap="save">开始我的计划</button>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import type {
   PlanKind,
   WeightDirection,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { planSetupFields } from './plan-setup-flow.js';
 
 const kind = ref<PlanKind>('weight');
 const direction = ref<WeightDirection>('lose');
@@ -67,6 +75,7 @@ const directions: Array<{ value: WeightDirection; label: string }> = [
   { value: 'maintain', label: '保持' },
   { value: 'gain', label: '增重' },
 ];
+const fields = computed(() => planSetupFields(kind.value));
 async function save() {
   error.value = '';
   saving.value = true;
@@ -125,11 +134,14 @@ function localDate() {
   color: #70897a;
   font-size: 24rpx;
 }
-.cards {
+.plan-options {
   display: flex;
   flex-direction: column;
-  gap: 0;
   margin-top: 28rpx;
+  overflow: hidden;
+  border: 1rpx solid #dceadd;
+  border-radius: 18rpx;
+  background: #fff;
 }
 .choice {
   display: flex;
@@ -156,28 +168,45 @@ function localDate() {
   height: 40rpx;
   margin-right: 18rpx;
 }
-.choice view text {
+.choice-copy {
+  flex: 1;
+  min-width: 0;
+}
+.choice-copy text {
   display: block;
   color: #31543e;
   font-size: 27rpx;
   font-weight: 700;
 }
-.choice view text:last-child {
+.choice-copy text:last-child {
   margin-top: 6rpx;
   color: #778e80;
   font-size: 21rpx;
   font-weight: 400;
 }
 .panel {
-  margin-top: 24rpx;
-  padding: 4rpx 0 18rpx;
-  border-top: 1rpx solid #dceadd;
-  border-bottom: 1rpx solid #dceadd;
-  background: transparent;
+  margin-top: 22rpx;
+  padding: 22rpx;
+  border: 1rpx solid #dceadd;
+  border-radius: 18rpx;
+  background: #fff;
+}
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 22rpx;
+  color: #31543e;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+.panel-head text:last-child {
+  color: #7a9180;
+  font-size: 20rpx;
+  font-weight: 400;
 }
 .label {
   display: block;
-  margin-bottom: 12rpx;
+  margin: 20rpx 0 12rpx;
   color: #567463;
   font-size: 24rpx;
 }
@@ -215,6 +244,21 @@ function localDate() {
 .input-row text {
   padding-right: 20rpx;
   color: #6f8b79;
+}
+.input-note,
+.sleep-note {
+  display: block;
+  margin-top: 10rpx;
+  color: #788e7e;
+  font-size: 20rpx;
+  line-height: 1.45;
+}
+.sleep-note {
+  margin-top: 22rpx;
+  padding: 20rpx 22rpx;
+  border: 1rpx solid #dceadd;
+  border-radius: 18rpx;
+  background: #f3f9f3;
 }
 .error {
   display: block;

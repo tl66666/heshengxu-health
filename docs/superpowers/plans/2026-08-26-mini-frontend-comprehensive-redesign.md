@@ -88,10 +88,10 @@
 - Modify: `apps/mini/src/pages/plan-setup/PlanSetupPage.vue`
 - Test: `apps/mini/src/features/health-loop/plan-presentation.spec.ts`
 
-- [ ] **Step 1:** 将两个方向改为单列选择行，统一选中态和插画缩略图尺寸。
-- [ ] **Step 2:** 将体重方向和目标体重字段放进同一开放表单区，保存按钮固定在内容末尾并避开系统安全区。
-- [ ] **Step 3:** API 和本地演示计划使用同一个页面状态，不让保存失败停留在错误页面。
-- [ ] **Step 4:** 运行类型、测试和微信构建，提交 `feat: rebuild plan setup flow`。
+- [x] **Step 1:** 将两个方向改为单列选择行，统一选中态和插画缩略图尺寸。
+- [x] **Step 2:** 将体重方向和目标体重字段放进同一开放表单区，保存按钮固定在内容末尾并避开系统安全区。
+- [x] **Step 3:** API 和本地演示计划使用同一个页面状态，不让保存失败停留在错误页面。
+- [x] **Step 4:** 运行类型、测试和微信构建，提交 `feat: rebuild plan setup flow`。
 
 ## 阶段 C：首页与序序工作区
 

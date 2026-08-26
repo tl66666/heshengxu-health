@@ -144,7 +144,6 @@ function voiceNotice() {
 .chat-shell {
   display: flex;
   flex: 1 1 auto;
-  height: calc(100vh - 280rpx);
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
