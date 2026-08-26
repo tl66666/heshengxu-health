@@ -41,6 +41,14 @@
     {
       "path": "pages/food-confirm/FoodConfirmPage",
       "style": { "navigationBarTitleText": "确认记录" }
+    },
+    {
+      "path": "pages/profile/ProfilePage",
+      "style": { "navigationBarTitleText": "健康档案" }
+    },
+    {
+      "path": "pages/profile-edit/ProfileEditPage",
+      "style": { "navigationBarTitleText": "编辑健康档案" }
     }
   ],
   "tabBar": {

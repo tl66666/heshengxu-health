@@ -60,7 +60,7 @@ const healthItems = [
     label: '我的健康档案',
     desc: '基础资料与健康目标',
     icon: '/static/icons/profile.svg',
-    action: () => uni.navigateTo({ url: '/pages/onboarding/OnboardingPage' }),
+      action: () => uni.navigateTo({ url: '/pages/profile/ProfilePage' }),
   },
   {
     label: '调整当前计划',
