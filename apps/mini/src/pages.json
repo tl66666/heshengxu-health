@@ -33,6 +33,14 @@
     {
       "path": "pages/plan-setup/PlanSetupPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "设置计划" }
+    },
+    {
+      "path": "pages/food-search/FoodSearchPage",
+      "style": { "navigationBarTitleText": "选择食物" }
+    },
+    {
+      "path": "pages/food-confirm/FoodConfirmPage",
+      "style": { "navigationBarTitleText": "确认记录" }
     }
   ],
   "tabBar": {

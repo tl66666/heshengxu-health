@@ -33,6 +33,12 @@
         </button>
       </view>
 
+      <button class="food-entry" @tap="openFoodSearch">
+        <view class="food-entry-mark">+</view>
+        <view><text>记一份具体食物</text><text>搜索食物并按份量计算热量与营养</text></view>
+        <text class="food-entry-arrow">›</text>
+      </button>
+
       <view class="form-section">
         <view class="form-heading">
           <view>
@@ -322,6 +328,9 @@ function localDate() {
   const n = new Date();
   return new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
+function openFoodSearch() {
+  uni.navigateTo({ url: '/pages/food-search/FoodSearchPage' });
+}
 onLoad((options) => {
   if (options?.type && types.some((item) => item.type === options.type))
     activeType.value = options.type as HealthRecordType;
@@ -420,6 +429,35 @@ onShow(() => {
   box-shadow: 0 3rpx 10rpx rgba(52, 111, 71, 0.08);
   font-weight: 700;
 }
+.food-entry {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 92rpx;
+  margin: 2rpx 0 22rpx;
+  padding: 12rpx 4rpx;
+  border-top: 1rpx solid #dceadd;
+  border-bottom: 1rpx solid #dceadd;
+  text-align: left;
+  background: transparent;
+}
+.food-entry-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52rpx;
+  height: 52rpx;
+  margin-right: 14rpx;
+  border-radius: 17rpx;
+  color: #fff;
+  background: #76a77d;
+  font-size: 34rpx;
+}
+.food-entry view { flex: 1; }
+.food-entry text { display: block; }
+.food-entry text:first-child { color: #31543e; font-size: 25rpx; font-weight: 700; }
+.food-entry text:last-child { margin-top: 5rpx; color: #7d9584; font-size: 20rpx; }
+.food-entry-arrow { color: #79a180; font-size: 38rpx !important; }
 .form-section {
   padding: 6rpx 0 24rpx;
   border-top: 1rpx solid #dceadd;
