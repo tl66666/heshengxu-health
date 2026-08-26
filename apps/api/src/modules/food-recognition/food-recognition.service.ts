@@ -8,6 +8,7 @@ import { recognitionJobDto } from './food-recognition.mapper.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
 import type { CreateFoodRecognitionUploadDto } from './food-recognition.dto.js';
 import type { RecognitionImageStorage } from './storage/recognition-image-storage.js';
+import { safeRecognitionFailure } from './recognition-failure.js';
 
 @Injectable()
 export class FoodRecognitionService {
@@ -98,14 +99,21 @@ export class FoodRecognitionService {
         }),
       );
     } catch (error) {
+      const failure = safeRecognitionFailure(error);
       await this.prisma.foodRecognitionJob.update({
         where: { id: job.id },
         data: {
           status: 'failed',
-          errorMessage: error instanceof Error ? error.message : '识别失败',
+          errorCode: failure.code,
+          errorMessage: failure.message,
         },
       });
-      throw error;
+      return recognitionJobDto(
+        await this.prisma.foodRecognitionJob.findUniqueOrThrow({
+          where: { id: job.id },
+          include: { candidates: true },
+        }),
+      );
     }
   }
 
