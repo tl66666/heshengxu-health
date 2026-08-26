@@ -16,6 +16,7 @@ export type FoodRecognitionJobDto = {
   status: FoodRecognitionStatus;
   imageKey: string;
   candidates: FoodRecognitionCandidateDto[];
+  errorCode: string | null;
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;

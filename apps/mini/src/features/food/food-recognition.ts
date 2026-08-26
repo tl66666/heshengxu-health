@@ -14,6 +14,7 @@ export type RecognitionJob = {
   id: string;
   status: 'queued' | 'processing' | 'succeeded' | 'failed' | 'confirmed';
   imageKey: string;
+  errorCode: string | null;
   candidates: RecognitionCandidate[];
   errorMessage: string | null;
 };

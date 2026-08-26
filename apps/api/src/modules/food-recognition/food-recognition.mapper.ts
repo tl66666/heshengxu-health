@@ -4,6 +4,7 @@ type RecognitionJobSource = {
   id: string;
   status: FoodRecognitionJobDto['status'];
   imageKey: string;
+  errorCode: string | null;
   errorMessage: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +23,7 @@ export function recognitionJobDto(job: RecognitionJobSource): FoodRecognitionJob
     id: job.id,
     status: job.status,
     imageKey: job.imageKey,
+    errorCode: job.errorCode,
     errorMessage: job.errorMessage,
     createdAt: job.createdAt.toISOString(),
     updatedAt: job.updatedAt.toISOString(),

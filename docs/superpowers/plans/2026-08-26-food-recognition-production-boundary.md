@@ -126,7 +126,7 @@ Assert that selecting `cloudbase` storage or `hunyuan` recognition without requi
 
 Use a server-side credential or workload identity, issue short-lived upload authorization, normalize vision results to `{ name, confidence, estimatedGrams }`, and reject any provider output outside this shape. The provider must never supply calories or medical interpretation.
 
-- [ ] **Step 3: Add provider audit and failure fallback**
+- [x] **Step 3: Add provider audit and failure fallback**
 
 Record provider/model in `AiTrace`, persist a non-sensitive job error code, and return a user-facing retry/manual-search path without creating `MealEntry`.
 

@@ -131,6 +131,7 @@ model FoodRecognitionJob {
   imageKey     String
   uploadId     String?
   status       FoodRecognitionJobStatus  @default(queued)
+  errorCode    String?
   errorMessage String?
   user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   upload       FoodRecognitionUpload?    @relation(fields: [uploadId], references: [id], onDelete: SetNull)
