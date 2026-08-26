@@ -9,6 +9,8 @@
 
 ## 启动本地服务
 
+本项目当前以 NestJS + PostgreSQL 为本地事实后端。微信云开发不是本地 API 的前置条件；只有未来把服务部署到腾讯云时，才按部署方案启用云函数、云数据库或云存储。
+
 ```powershell
 Copy-Item .env.example .env
 docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
