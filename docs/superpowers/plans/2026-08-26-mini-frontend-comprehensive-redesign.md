@@ -21,7 +21,8 @@
 - Modify: `apps/mini/src/pages/bootstrap/BootstrapPage.vue`、`OnboardingPage.vue`、`PlanSetupPage.vue`、`HomePage.vue`、`RecordsPage.vue`、`XuxuPage.vue`、`PlanPage.vue`、`MePage.vue`，按设计逐页重排。
 - Modify: `apps/mini/src/components/*.spec.ts` 与各页面 `*.spec.ts`，补齐导航和关键交互契约。
 - Modify: `docs/engineering/mini-frontend-implementation.md`、`apps/mini/README.md`，同步开发和验收流程。
-- Keep: `assets/illustrations/hero.jpg`，继续作为建档欢迎页已确认主视觉，不进行替换。
+- Keep: `assets/illustrations/hero.jpg`，仅作为网页端项目展示素材。
+- Create: `assets/illustrations/onboarding-hero-vertical.png`，竖屏建档主视觉，完整显示序序主体。
 
 ## 阶段 A：视觉基础与资源治理
 
@@ -59,7 +60,7 @@
 - Modify: `apps/mini/src/pages/plan/PlanPage.vue`
 - Modify: `scripts/sync-illustrations.mjs`
 
-- [ ] **Step 1:** 保留建档页 `hero.jpg`，明确它只负责欢迎页主视觉，页面文字、按钮和导航不写入图片。
+- [ ] **Step 1:** 将横屏 `hero.jpg` 从小程序 Bootstrap/Onboarding 入口移除，只保留网页端项目展示；接入竖屏 `onboarding-hero-vertical.png`，页面文字、按钮和导航不写入图片。
 - [ ] **Step 2:** 为首页、计划、记录、序序、我的建立图片使用清单：每个页面最多一个主视觉，空状态和完成状态才使用第二张插画。
 - [ ] **Step 3:** 检查图片 `mode`、容器比例、裁切位置和加载失败状态，避免图片挤压文字或撑高布局。
 - [ ] **Step 4:** 运行资源同步脚本，确认构建缓存只由脚本生成，提交 `refactor: normalize mini illustration usage`。

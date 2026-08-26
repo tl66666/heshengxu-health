@@ -10,7 +10,11 @@
       @close="exitOnboarding"
     />
     <template v-if="step === 0">
-      <image class="welcome-art" src="/static/illustrations/hero.jpg" mode="aspectFit" />
+      <image
+        class="welcome-art"
+        src="/static/illustrations/onboarding-hero-vertical.png"
+        mode="aspectFit"
+      />
       <view class="welcome-copy">
         <view class="xuxu"
           ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><view
@@ -282,7 +286,7 @@ async function save() {
 }
 .welcome-art {
   width: 100%;
-  height: 350rpx;
+  height: 520rpx;
   margin: 0;
   border-radius: 20rpx;
   background: #fffdf5;

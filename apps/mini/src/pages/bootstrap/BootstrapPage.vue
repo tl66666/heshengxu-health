@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <image class="hero" src="/static/illustrations/hero.jpg" mode="aspectFit" />
+    <image class="hero" src="/static/illustrations/onboarding-hero-vertical.png" mode="aspectFit" />
     <view class="wash" />
     <view class="copy">
       <view class="xuxu"
