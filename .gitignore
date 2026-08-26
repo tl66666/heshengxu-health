@@ -10,6 +10,8 @@ apps/mini/src/static/illustrations/
 apps/mini/package-lock.json
 apps/mini/project.private.config.json
 apps/api/.prisma-tools/
+food.sql
+food_category.sql
 
 # Local configuration and secrets
 .env

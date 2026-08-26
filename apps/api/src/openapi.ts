@@ -56,6 +56,15 @@ const document = {
     '/daily-home/today': {
       get: protectedOperation('读取今日首页', '聚合档案、计划、记录进度和唯一行动'),
     },
+    '/foods/search': {
+      get: protectedOperation('搜索食品', '只返回启用的食品及其营养和可选份量'),
+    },
+    '/foods/{foodId}': {
+      get: protectedOperation('读取食品详情', '读取单个启用食品的营养和份量'),
+    },
+    '/meal-entries': {
+      post: protectedOperation('记录食物', '由服务端根据食品目录计算并保存营养快照'),
+    },
   },
 };
 

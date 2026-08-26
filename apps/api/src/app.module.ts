@@ -4,9 +4,11 @@ import { HealthProfileModule } from './modules/health-profile/health-profile.mod
 import { HealthRecordsModule } from './modules/health-records/health-records.module.js';
 import { HealthPlansModule } from './modules/health-plans/health-plans.module.js';
 import { DailyHomeModule } from './modules/daily-home/daily-home.module.js';
+import { FoodCatalogModule } from './modules/food-catalog/food-catalog.module.js';
+import { MealEntriesModule } from './modules/meal-entries/meal-entries.module.js';
 
 @Module({
-  imports: [HealthProfileModule, HealthRecordsModule, HealthPlansModule, DailyHomeModule],
+  imports: [HealthProfileModule, HealthRecordsModule, HealthPlansModule, DailyHomeModule, FoodCatalogModule, MealEntriesModule],
   controllers: [SystemController],
 })
 export class AppModule {}

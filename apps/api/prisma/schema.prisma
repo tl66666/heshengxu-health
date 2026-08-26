@@ -21,6 +21,99 @@ model User {
   mealStructureRecords MealStructureRecord[]
   activityRecords      ActivityRecord[]
   sleepRecords         SleepRecord[]
+  mealEntries          MealEntry[]
+}
+
+model FoodCategory {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  items     FoodItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model FoodItem {
+  id            String          @id @default(cuid())
+  name          String
+  brand         String?
+  categoryId    String?
+  isActive      Boolean         @default(true)
+  category      FoodCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  aliases       FoodAlias[]
+  nutrition     FoodNutrition?
+  servings      FoodServing[]
+  mealEntries   MealEntry[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([isActive, name])
+  @@index([categoryId, isActive])
+}
+
+model FoodAlias {
+  id        String   @id @default(cuid())
+  foodId    String
+  alias     String
+  food      FoodItem @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@unique([foodId, alias])
+  @@index([alias])
+}
+
+model FoodNutrition {
+  id              String   @id @default(cuid())
+  foodId          String   @unique
+  basisGrams      Int      @default(100)
+  energyKcal      Float
+  proteinG        Float
+  fatG            Float
+  carbohydrateG   Float
+  dietaryFiberG   Float?
+  sodiumMg        Float?
+  food            FoodItem @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FoodServing {
+  id        String   @id @default(cuid())
+  foodId    String
+  label     String
+  grams     Float
+  food      FoodItem @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@unique([foodId, label])
+  @@index([foodId])
+}
+
+model MealEntry {
+  id                    String    @id @default(cuid())
+  userId                String
+  mealType              MealType
+  foodId                String?
+  foodNameSnapshot      String
+  grams                 Float
+  energyKcal            Float
+  proteinG              Float
+  fatG                  Float
+  carbohydrateG         Float
+  dietaryFiberG         Float?
+  sodiumMg              Float?
+  source                MealEntrySource @default(manual)
+  recordedAt            DateTime
+  note                  String?
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food                  FoodItem? @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId, recordedAt])
+  @@index([userId, mealType, recordedAt])
 }
 
 model ExternalIdentity {
@@ -259,6 +352,11 @@ enum MealType {
   lunch
   dinner
   snack
+}
+
+enum MealEntrySource {
+  manual
+  photo_confirmed
 }
 
 enum SleepQuality {
