@@ -1,9 +1,27 @@
-import { IsDateString, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateFoodRecognitionDto {
   @IsString()
-  @MaxLength(300)
-  imageKey!: string;
+  uploadId!: string;
+}
+
+export class CreateFoodRecognitionUploadDto {
+  @IsIn(['image/jpeg', 'image/png', 'image/webp'])
+  contentType!: 'image/jpeg' | 'image/png' | 'image/webp';
+
+  @IsNumber()
+  @Min(1)
+  @Max(10 * 1024 * 1024)
+  sizeBytes!: number;
 }
 
 export class ConfirmFoodRecognitionDto {

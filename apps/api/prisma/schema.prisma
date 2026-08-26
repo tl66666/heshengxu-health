@@ -22,6 +22,7 @@ model User {
   activityRecords      ActivityRecord[]
   sleepRecords         SleepRecord[]
   mealEntries          MealEntry[]
+  foodRecognitionUploads FoodRecognitionUpload[]
   foodRecognitionJobs  FoodRecognitionJob[]
 }
 
@@ -128,15 +129,35 @@ model FoodRecognitionJob {
   id           String                    @id @default(cuid())
   userId       String
   imageKey     String
+  uploadId     String?
   status       FoodRecognitionJobStatus  @default(queued)
   errorMessage String?
   user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upload       FoodRecognitionUpload?    @relation(fields: [uploadId], references: [id], onDelete: SetNull)
   candidates   FoodRecognitionCandidate[]
   createdAt    DateTime                  @default(now())
   updatedAt    DateTime                  @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, status])
+  @@index([uploadId])
+}
+
+model FoodRecognitionUpload {
+  id          String                        @id @default(cuid())
+  userId      String
+  objectKey   String                        @unique
+  contentType String
+  sizeBytes   Int
+  status      FoodRecognitionUploadStatus  @default(pending)
+  expiresAt   DateTime
+  completedAt DateTime?
+  createdAt   DateTime                      @default(now())
+  updatedAt   DateTime                      @updatedAt
+  user        User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs        FoodRecognitionJob[]
+
+  @@index([userId, status, expiresAt])
 }
 
 model FoodRecognitionCandidate {
@@ -403,6 +424,12 @@ enum FoodRecognitionJobStatus {
   succeeded
   failed
   confirmed
+}
+
+enum FoodRecognitionUploadStatus {
+  pending
+  ready
+  expired
 }
 
 enum SleepQuality {

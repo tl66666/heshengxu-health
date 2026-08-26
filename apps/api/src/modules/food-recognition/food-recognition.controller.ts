@@ -3,7 +3,11 @@ import type { Request, Response } from 'express';
 import { ValidatedBody } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth-context.js';
-import { ConfirmFoodRecognitionDto, CreateFoodRecognitionDto } from './food-recognition.dto.js';
+import {
+  ConfirmFoodRecognitionDto,
+  CreateFoodRecognitionDto,
+  CreateFoodRecognitionUploadDto,
+} from './food-recognition.dto.js';
 import { FoodRecognitionService } from './food-recognition.service.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -17,12 +21,32 @@ export class FoodRecognitionController {
   ) {}
   @Post('consents')
   async grantConsent(@Req() request: AuthenticatedRequest, @Res() response: Response) {
-    return response
-      .status(201)
-      .send({
-        data: await this.consent.grant(request.user.id),
-        meta: { requestId: response.locals.requestId },
-      });
+    return response.status(201).send({
+      data: await this.consent.grant(request.user.id),
+      meta: { requestId: response.locals.requestId },
+    });
+  }
+  @Post('uploads')
+  async createUpload(
+    @Req() request: AuthenticatedRequest,
+    @ValidatedBody(CreateFoodRecognitionUploadDto) body: CreateFoodRecognitionUploadDto,
+    @Res() response: Response,
+  ) {
+    return response.status(201).send({
+      data: await this.recognition.createUpload(request.user.id, body),
+      meta: { requestId: response.locals.requestId },
+    });
+  }
+  @Post('uploads/:uploadId/complete')
+  async completeUpload(
+    @Req() request: AuthenticatedRequest,
+    @Param('uploadId') uploadId: string,
+    @Res() response: Response,
+  ) {
+    return response.status(200).send({
+      data: await this.recognition.completeUpload(request.user.id, uploadId),
+      meta: { requestId: response.locals.requestId },
+    });
   }
   @Post('jobs')
   async create(
@@ -30,12 +54,10 @@ export class FoodRecognitionController {
     @ValidatedBody(CreateFoodRecognitionDto) body: CreateFoodRecognitionDto,
     @Res() response: Response,
   ) {
-    return response
-      .status(201)
-      .send({
-        data: await this.recognition.create(request.user.id, body.imageKey),
-        meta: { requestId: response.locals.requestId },
-      });
+    return response.status(201).send({
+      data: await this.recognition.create(request.user.id, body.uploadId),
+      meta: { requestId: response.locals.requestId },
+    });
   }
   @Get('jobs/:jobId')
   async get(
@@ -54,11 +76,9 @@ export class FoodRecognitionController {
     @ValidatedBody(ConfirmFoodRecognitionDto) body: ConfirmFoodRecognitionDto,
     @Res() response: Response,
   ) {
-    return response
-      .status(201)
-      .send({
-        data: await this.recognition.confirm(request.user.id, body),
-        meta: { requestId: response.locals.requestId },
-      });
+    return response.status(201).send({
+      data: await this.recognition.confirm(request.user.id, body),
+      meta: { requestId: response.locals.requestId },
+    });
   }
 }

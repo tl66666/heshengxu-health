@@ -21,7 +21,20 @@ export type FoodRecognitionJobDto = {
   updatedAt: string;
 };
 
-export type CreateFoodRecognitionJobRequest = { imageKey: string };
+export type FoodRecognitionUploadStatus = 'pending' | 'ready' | 'expired';
+export type FoodRecognitionUploadDto = {
+  id: string;
+  objectKey: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  sizeBytes: number;
+  status: FoodRecognitionUploadStatus;
+  expiresAt: string;
+};
+export type CreateFoodRecognitionUploadRequest = {
+  contentType: FoodRecognitionUploadDto['contentType'];
+  sizeBytes: number;
+};
+export type CreateFoodRecognitionJobRequest = { uploadId: string };
 export type ConfirmFoodRecognitionRequest = {
   candidateId: string;
   mealType: MealType;

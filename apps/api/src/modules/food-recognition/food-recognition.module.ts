@@ -8,6 +8,7 @@ import { FoodRecognitionController } from './food-recognition.controller.js';
 import { FoodRecognitionService } from './food-recognition.service.js';
 import { MockFoodRecognitionProvider } from './providers/mock-food-recognition.provider.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
+import { MockRecognitionImageStorage } from './storage/mock-recognition-image-storage.js';
 
 @Module({
   imports: [MealEntriesModule],
@@ -18,8 +19,10 @@ import { FoodRecognitionConsentService } from './food-recognition-consent.servic
     FoodRecognitionConsentService,
     FoodRecognitionService,
     MockFoodRecognitionProvider,
+    MockRecognitionImageStorage,
     PrismaAiTraceRepository,
     { provide: 'FoodRecognitionProvider', useExisting: MockFoodRecognitionProvider },
+    { provide: 'RecognitionImageStorage', useExisting: MockRecognitionImageStorage },
     {
       provide: AiAuditService,
       useFactory: (repository: PrismaAiTraceRepository) => new AiAuditService(repository),

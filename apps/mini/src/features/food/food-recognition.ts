@@ -18,6 +18,15 @@ export type RecognitionJob = {
   errorMessage: string | null;
 };
 
+export type RecognitionUpload = {
+  id: string;
+  objectKey: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  sizeBytes: number;
+  status: 'pending' | 'ready' | 'expired';
+  expiresAt: string;
+};
+
 export function defaultRecognitionCandidateId(
   candidates: Array<Pick<RecognitionCandidate, 'id' | 'rank'>>,
 ) {
@@ -26,6 +35,12 @@ export function defaultRecognitionCandidateId(
 
 export function canStartRecognition(imagePath: string, hasConsent: boolean) {
   return Boolean(imagePath) && hasConsent;
+}
+
+export function imageContentType(imagePath: string): RecognitionUpload['contentType'] {
+  if (/\.png(?:$|\?)/iu.test(imagePath)) return 'image/png';
+  if (/\.webp(?:$|\?)/iu.test(imagePath)) return 'image/webp';
+  return 'image/jpeg';
 }
 
 function client() {
@@ -46,8 +61,22 @@ function client() {
   });
 }
 
-export function createRecognitionJob(imageKey: string) {
-  return client().post<RecognitionJob>('/food-recognition/jobs', { imageKey });
+export function createRecognitionUpload(input: {
+  contentType: RecognitionUpload['contentType'];
+  sizeBytes: number;
+}) {
+  return client().post<RecognitionUpload>('/food-recognition/uploads', input);
+}
+
+export function completeRecognitionUpload(uploadId: string) {
+  return client().post<RecognitionUpload>(
+    `/food-recognition/uploads/${encodeURIComponent(uploadId)}/complete`,
+    {},
+  );
+}
+
+export function createRecognitionJob(uploadId: string) {
+  return client().post<RecognitionJob>('/food-recognition/jobs', { uploadId });
 }
 
 export function grantFoodRecognitionConsent() {

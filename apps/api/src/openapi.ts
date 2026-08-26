@@ -57,19 +57,46 @@ const document = {
       get: protectedOperation('读取今日首页', '聚合档案、计划、记录进度和唯一行动'),
     },
     '/health-insights/weekly': {
-      get: protectedOperation('Weekly health review', 'Aggregates only current, user-owned records for the requested week.'),
+      get: protectedOperation(
+        'Weekly health review',
+        'Aggregates only current, user-owned records for the requested week.',
+      ),
     },
     '/food-recognition/consents': {
-      post: protectedOperation('Authorize food recognition', 'Records explicit user authorization before a selected image can be sent to a recognition provider.'),
+      post: protectedOperation(
+        'Authorize food recognition',
+        'Records explicit user authorization before a selected image can be sent to a recognition provider.',
+      ),
+    },
+    '/food-recognition/uploads': {
+      post: protectedOperation(
+        'Create food recognition upload',
+        'Creates an owned, expiring upload session and opaque object key for an authorized image.',
+      ),
+    },
+    '/food-recognition/uploads/{uploadId}/complete': {
+      post: protectedOperation(
+        'Complete food recognition upload',
+        'Marks only the owners non-expired upload session as ready for recognition.',
+      ),
     },
     '/food-recognition/jobs': {
-      post: protectedOperation('Create food recognition job', 'Creates candidate food suggestions only after explicit authorization.'),
+      post: protectedOperation(
+        'Create food recognition job',
+        'Creates candidate food suggestions only after explicit authorization.',
+      ),
     },
     '/food-recognition/jobs/{jobId}': {
-      get: protectedOperation('Read food recognition job', 'Returns only the current users recognition job and editable candidates.'),
+      get: protectedOperation(
+        'Read food recognition job',
+        'Returns only the current users recognition job and editable candidates.',
+      ),
     },
     '/food-recognition/confirm': {
-      post: protectedOperation('Confirm food recognition candidate', 'Creates a meal entry only after the user confirms a candidate and serving size.'),
+      post: protectedOperation(
+        'Confirm food recognition candidate',
+        'Creates a meal entry only after the user confirms a candidate and serving size.',
+      ),
     },
     '/foods/search': {
       get: protectedOperation('搜索食品', '只返回启用的食品及其营养和可选份量'),

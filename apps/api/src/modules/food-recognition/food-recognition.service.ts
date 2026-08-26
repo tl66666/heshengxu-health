@@ -6,6 +6,8 @@ import type { FoodRecognitionProvider } from './providers/food-recognition.provi
 import type { ConfirmFoodRecognitionDto } from './food-recognition.dto.js';
 import { recognitionJobDto } from './food-recognition.mapper.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
+import type { CreateFoodRecognitionUploadDto } from './food-recognition.dto.js';
+import type { RecognitionImageStorage } from './storage/recognition-image-storage.js';
 
 @Injectable()
 export class FoodRecognitionService {
@@ -15,21 +17,52 @@ export class FoodRecognitionService {
     @Inject(MealEntriesService) private readonly mealEntries: MealEntriesService,
     @Inject(FoodRecognitionConsentService) private readonly consent: FoodRecognitionConsentService,
     @Inject(AiAuditService) private readonly audit: AiAuditService,
+    @Inject('RecognitionImageStorage') private readonly storage: RecognitionImageStorage,
   ) {}
 
-  async create(userId: string, imageKey: string) {
+  async createUpload(userId: string, dto: CreateFoodRecognitionUploadDto) {
+    await this.consent.assertGranted(userId);
+    await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
+    return this.prisma.foodRecognitionUpload.create({
+      data: {
+        userId,
+        objectKey: this.storage.createObjectKey({ userId, contentType: dto.contentType }),
+        contentType: dto.contentType,
+        sizeBytes: dto.sizeBytes,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    });
+  }
+
+  async completeUpload(userId: string, uploadId: string) {
+    const upload = await this.prisma.foodRecognitionUpload.findFirst({
+      where: { id: uploadId, userId, status: 'pending', expiresAt: { gt: new Date() } },
+    });
+    if (!upload) throw new NotFoundException('上传会话不存在、已过期或无权访问');
+    return this.prisma.foodRecognitionUpload.update({
+      where: { id: upload.id },
+      data: { status: 'ready', completedAt: new Date() },
+    });
+  }
+
+  async create(userId: string, uploadId: string) {
     await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
     try {
       await this.consent.assertGranted(userId);
     } catch (error) {
       await this.audit.record({
         userId,
-        message: imageKey,
+        message: uploadId,
         safetyDecision: 'block',
         safetyReason: 'image_recognition_consent_required',
       });
       throw error;
     }
+    const upload = await this.prisma.foodRecognitionUpload.findFirst({
+      where: { id: uploadId, userId, status: 'ready', expiresAt: { gt: new Date() } },
+    });
+    if (!upload) throw new NotFoundException('上传图片不存在、未完成或无权访问');
+    const imageKey = upload.objectKey;
     await this.audit.record({
       userId,
       message: imageKey,
@@ -38,7 +71,7 @@ export class FoodRecognitionService {
       model: this.provider.model,
     });
     const job = await this.prisma.foodRecognitionJob.create({
-      data: { userId, imageKey, status: 'processing' },
+      data: { userId, imageKey, uploadId: upload.id, status: 'processing' },
     });
     try {
       const rawCandidates = await this.provider.recognize({ imageKey });

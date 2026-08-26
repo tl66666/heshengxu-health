@@ -38,10 +38,14 @@ import { computed, ref } from 'vue';
 import AppNavBar from '../../components/AppNavBar.vue';
 import {
   canStartRecognition,
+  completeRecognitionUpload,
+  createRecognitionUpload,
   createRecognitionJob,
   grantFoodRecognitionConsent,
+  imageContentType,
 } from '../../features/food/food-recognition.js';
 const imagePath = ref('');
+const imageSize = ref(0);
 const processing = ref(false);
 const error = ref('');
 const hasConsent = ref(false);
@@ -51,8 +55,10 @@ function chooseImage() {
     count: 1,
     sizeType: ['compressed'],
     sourceType: ['camera', 'album'],
-    success: ({ tempFilePaths }) => {
+    success: ({ tempFilePaths, tempFiles }) => {
       imagePath.value = tempFilePaths[0] || '';
+      const firstFile = Array.isArray(tempFiles) ? tempFiles[0] : tempFiles;
+      imageSize.value = Number((firstFile as { size?: number } | undefined)?.size || 0);
       error.value = '';
     },
   });
@@ -66,7 +72,12 @@ async function recognize() {
   error.value = '';
   try {
     await grantFoodRecognitionConsent();
-    const job = await createRecognitionJob(imagePath.value);
+    const upload = await createRecognitionUpload({
+      contentType: imageContentType(imagePath.value),
+      sizeBytes: Math.max(1, imageSize.value),
+    });
+    await completeRecognitionUpload(upload.id);
+    const job = await createRecognitionJob(upload.id);
     uni.navigateTo({
       url: `/pages/food-candidates/FoodCandidatesPage?jobId=${encodeURIComponent(job.id)}&imagePath=${encodeURIComponent(imagePath.value)}`,
     });
