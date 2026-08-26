@@ -64,8 +64,8 @@ function switchTab(url: string) {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   align-items: end;
-  height: 124rpx;
-  padding: 10rpx 10rpx calc(10rpx + env(safe-area-inset-bottom));
+  height: 116rpx;
+  padding: 6rpx 10rpx calc(6rpx + env(safe-area-inset-bottom));
   background: rgba(251, 253, 249, 0.98);
   border-top: 1rpx solid #dfe9df;
   box-shadow: 0 -8rpx 24rpx rgba(47, 79, 55, 0.08);
@@ -73,7 +73,7 @@ function switchTab(url: string) {
 .tab {
   display: flex;
   min-width: 0;
-  height: 96rpx;
+  height: 92rpx;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -98,12 +98,12 @@ function switchTab(url: string) {
   font-weight: 700;
 }
 .tab--xuxu {
-  transform: translateY(-30rpx);
+  transform: translateY(-12rpx);
   color: #54705a;
 }
 .xuxu-orbit {
-  width: 78rpx;
-  height: 78rpx;
+  width: 70rpx;
+  height: 70rpx;
   padding: 5rpx;
   border: 4rpx solid #f0da8c;
   border-radius: 50%;

@@ -329,7 +329,7 @@ async function save() {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-x: hidden;
-  padding: 72rpx 32rpx 56rpx;
+  padding: 28rpx 32rpx 56rpx;
   background: #f7fbf8;
   color: #183425;
 }

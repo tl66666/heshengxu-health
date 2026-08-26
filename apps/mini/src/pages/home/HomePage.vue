@@ -130,7 +130,7 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 50rpx 32rpx 220rpx;
+  padding: 50rpx 32rpx 150rpx;
   background: #f6faf7;
   color: #183425;
 }

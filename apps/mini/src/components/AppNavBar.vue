@@ -1,12 +1,12 @@
 <template>
   <view class="nav-bar">
-    <button v-if="!backDisabled" class="back" aria-label="返回" @tap="back">
-      <image src="/static/icons/back.svg" mode="aspectFit" /><text>返回</text>
+    <button v-if="!backDisabled" class="icon-action" aria-label="返回" @tap="back">
+      <image src="/static/icons/back.svg" mode="aspectFit" />
     </button>
     <view v-else class="placeholder" />
     <text class="title">{{ title }}</text>
-    <button v-if="closeLabel" class="close" aria-label="退出" @tap="close">
-      <image src="/static/icons/close.svg" mode="aspectFit" /><text>{{ closeLabel }}</text>
+    <button v-if="closeLabel" class="icon-action close" aria-label="退出" @tap="close">
+      <image src="/static/icons/close.svg" mode="aspectFit" />
     </button>
     <view v-else class="placeholder" />
   </view>
@@ -49,27 +49,22 @@ function close() {
   height: 76rpx;
   margin: -8rpx -8rpx 18rpx;
 }
-.back,
-.close {
+.icon-action {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6rpx;
-  min-width: 104rpx;
-  height: 56rpx;
-  padding: 0 12rpx;
-  border-radius: 14rpx;
+  width: 60rpx;
+  height: 60rpx;
+  padding: 0;
+  border-radius: 20rpx;
   color: #397651;
-  background: transparent;
-  font-size: 23rpx;
-  line-height: 56rpx;
+  background: #eaf3eb;
 }
 .close {
   color: #8d685b;
   background: #fff4ef;
 }
-.back image,
-.close image {
+.icon-action image {
   width: 34rpx;
   height: 34rpx;
 }
@@ -79,6 +74,6 @@ function close() {
   font-weight: 700;
 }
 .placeholder {
-  width: 104rpx;
+  width: 60rpx;
 }
 </style>

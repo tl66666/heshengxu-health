@@ -112,7 +112,7 @@ function localDate() {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 72rpx 32rpx 96rpx;
+  padding: 28rpx 32rpx 96rpx;
   background: #f7fbf8;
   color: #1d3d2a;
 }
