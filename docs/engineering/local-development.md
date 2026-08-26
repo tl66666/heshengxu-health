@@ -4,7 +4,8 @@
 
 - Node.js 24.x
 - pnpm 11.x
-- Docker Desktop 已启动
+- 仅开发微信小程序前端：不需要 Docker Desktop，直接使用 `apps/mini` 和本地构建。
+- 联调 NestJS API、PostgreSQL、Redis：需要 Docker Desktop，启动本地基础设施后再运行 API。
 
 ## 启动本地服务
 

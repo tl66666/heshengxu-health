@@ -12,7 +12,7 @@
     <template v-if="step === 0">
       <view class="welcome-screen">
         <view class="welcome-art-frame">
-          <image class="welcome-art" :src="heroImage" mode="aspectFit" @error="useFallbackHero" />
+          <image class="welcome-art" :src="heroImage" mode="aspectFill" @error="useFallbackHero" />
         </view>
         <view class="welcome-copy">
           <view class="xuxu"
@@ -329,20 +329,20 @@ async function save() {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-x: hidden;
-  padding: 28rpx 32rpx 56rpx;
+  padding: 92rpx 32rpx 48rpx;
   background: #f7fbf8;
   color: #183425;
 }
 .welcome-screen {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 122rpx);
+  min-height: calc(100vh - 190rpx);
 }
 .welcome-art-frame {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 420rpx;
   overflow: hidden;
-  border-radius: 28rpx;
+  border-radius: 26rpx;
   background: #fffdf5;
   box-shadow: 0 18rpx 42rpx rgba(54, 102, 66, 0.08);
 }
@@ -353,9 +353,9 @@ async function save() {
 }
 .welcome-copy {
   display: flex;
-  flex: 1;
+  flex: none;
   flex-direction: column;
-  padding: 28rpx 12rpx 0;
+  padding: 22rpx 12rpx 0;
   background: #f7fbf8;
   position: relative;
 }
@@ -395,7 +395,7 @@ async function save() {
   font-weight: 700;
 }
 .welcome-copy .brand {
-  margin-top: 24rpx;
+  margin-top: 18rpx;
 }
 .title {
   margin-top: 13rpx;
@@ -414,7 +414,7 @@ async function save() {
   width: 100%;
   height: 86rpx;
   flex: none;
-  margin-top: auto;
+  margin-top: 24rpx;
   line-height: 86rpx;
 }
 .hint {
@@ -425,7 +425,7 @@ async function save() {
 }
 .disclaimer {
   display: block;
-  margin-top: 22rpx;
+  margin-top: 12rpx;
   color: #8a9b90;
   font-size: 20rpx;
   line-height: 1.55;
