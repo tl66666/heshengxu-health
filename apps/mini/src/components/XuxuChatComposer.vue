@@ -140,7 +140,7 @@ function voiceNotice() {
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
-  margin-top: 14rpx;
+  margin-top: 0;
   padding: 14rpx 0 10rpx;
   border: 1rpx solid #dceadd;
   border-radius: 18rpx;

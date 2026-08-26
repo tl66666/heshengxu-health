@@ -1,12 +1,5 @@
 <template>
   <view class="page">
-    <view class="page-head">
-      <view>
-        <text class="eyebrow">序序 · 健康陪伴</text>
-        <text class="title">今天想从哪里开始照顾自己？</text>
-      </view>
-      <image class="avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
-    </view>
     <XuxuChatComposer />
     <view class="safety">
       <image src="/static/illustrations/xuxu-safe-support.png" mode="aspectFill" />
@@ -41,46 +34,18 @@ function localDate() {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 46rpx 32rpx 214rpx;
+  padding: 24rpx 24rpx 136rpx;
   background: #f7fbf8;
   color: #1d3d2a;
-}
-.page-head {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.eyebrow,
-.title {
-  display: block;
-}
-.eyebrow {
-  color: #668e76;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-.title {
-  margin-top: 9rpx;
-  color: #244735;
-  font-size: 34rpx;
-  font-weight: 700;
-  line-height: 1.3;
-}
-.avatar {
-  width: 72rpx;
-  height: 72rpx;
-  border: 3rpx solid #f0da8c;
-  border-radius: 50%;
 }
 .safety {
   display: flex;
   align-items: center;
   gap: 14rpx;
-  margin-top: 12rpx;
-  padding: 10rpx 14rpx;
-  border: 2rpx solid #e0e9e0;
-  border-radius: 16rpx;
+  margin-top: 10rpx;
+  padding: 9rpx 12rpx;
+  border: 1rpx solid #e0e9e0;
+  border-radius: 14rpx;
   background: #f5f9f4;
 }
 .safety image {
