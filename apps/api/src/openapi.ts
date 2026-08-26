@@ -63,6 +63,7 @@ const document = {
       get: protectedOperation('读取食品详情', '读取单个启用食品的营养和份量'),
     },
     '/meal-entries': {
+      get: protectedOperation('读取当日食物', '读取指定日期的餐食营养快照'),
       post: protectedOperation('记录食物', '由服务端根据食品目录计算并保存营养快照'),
     },
   },

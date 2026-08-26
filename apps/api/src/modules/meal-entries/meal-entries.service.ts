@@ -36,4 +36,11 @@ export class MealEntriesService {
       orderBy: { recordedAt: 'asc' },
     });
   }
+
+  listForDate(userId: string, date: string) {
+    const [year, month, day] = date.slice(0, 10).split('-').map(Number);
+    if (!year || !month || !day) throw new NotFoundException('日期格式不正确');
+    const from = new Date(Date.UTC(year, month - 1, day, -8));
+    return this.list(userId, from, new Date(from.getTime() + 24 * 60 * 60 * 1000));
+  }
 }

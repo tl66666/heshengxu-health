@@ -1,5 +1,10 @@
 import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
+export class MealEntriesQueryDto {
+  @IsDateString()
+  date!: string;
+}
+
 export class CreateMealEntryDto {
   @IsEnum(['breakfast', 'lunch', 'dinner', 'snack'])
   mealType!: 'breakfast' | 'lunch' | 'dinner' | 'snack';

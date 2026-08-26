@@ -39,6 +39,12 @@
         <text class="food-entry-arrow">›</text>
       </button>
 
+      <view v-if="foodEntries.length" class="food-summary">
+        <view class="food-summary-head"><view><text class="food-summary-title">今天的食物</text><text class="food-summary-caption">已记录 {{ foodEntries.length }} 份 · 以保存时的营养快照为准</text></view><text class="food-kcal">{{ foodSummary.energyKcal }} 千卡</text></view>
+        <view class="macro-strip"><view><text>{{ foodSummary.proteinG }}g</text><text>蛋白质</text></view><view><text>{{ foodSummary.fatG }}g</text><text>脂肪</text></view><view><text>{{ foodSummary.carbohydrateG }}g</text><text>碳水</text></view></view>
+        <view class="food-list"><view v-for="entry in foodEntries" :key="entry.id" class="food-item"><view class="food-dot" /><view class="food-copy"><text>{{ entry.foodNameSnapshot }}</text><text>{{ mealLabel(entry.mealType) }} · {{ entry.grams }}g</text></view><text class="food-item-kcal">{{ entry.energyKcal }} kcal</text></view></view>
+      </view>
+
       <view class="form-section">
         <view class="form-heading">
           <view>
@@ -169,6 +175,8 @@ import type {
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { createHealthRecordsStore } from '../../features/health-records/health-records.store.js';
+import { loadMealEntries } from '../../features/food/food.service.js';
+import { summarizeFoodEntries, type MealEntry } from '../../features/food/food.summary.js';
 import type {
   RecordFormErrors,
   RecordTimelineItem,
@@ -191,6 +199,8 @@ const activityMinutes = ref('');
 const sleepMinutes = ref('');
 const sleepQuality = ref<SleepQuality>('good');
 const note = ref('');
+const foodEntries = ref<MealEntry[]>([]);
+const foodSummary = computed(() => summarizeFoodEntries(foodEntries.value));
 
 const types: Array<{ type: HealthRecordType; label: string }> = [
   { type: 'weight', label: '体重' },
@@ -331,12 +341,19 @@ function localDate() {
 function openFoodSearch() {
   uni.navigateTo({ url: '/pages/food-search/FoodSearchPage' });
 }
+async function loadFoods() {
+  try { foodEntries.value = await loadMealEntries(date); } catch { foodEntries.value = []; }
+}
+function mealLabel(type: MealEntry['mealType']) {
+  return ({ breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' })[type];
+}
 onLoad((options) => {
   if (options?.type && types.some((item) => item.type === options.type))
     activeType.value = options.type as HealthRecordType;
 });
 onShow(() => {
   load();
+  loadFoods();
   healthLoopState.loadToday(date);
 });
 </script>
@@ -458,6 +475,26 @@ onShow(() => {
 .food-entry text:first-child { color: #31543e; font-size: 25rpx; font-weight: 700; }
 .food-entry text:last-child { margin-top: 5rpx; color: #7d9584; font-size: 20rpx; }
 .food-entry-arrow { color: #79a180; font-size: 38rpx !important; }
+.food-summary { margin: 0 0 24rpx; padding: 20rpx 18rpx; border: 1rpx solid #dceadd; border-radius: 18rpx; background: #fff; }
+.food-summary-head { display: flex; align-items: flex-start; justify-content: space-between; }
+.food-summary-title, .food-summary-caption { display: block; }
+.food-summary-title { color: #31543e; font-size: 27rpx; font-weight: 700; }
+.food-summary-caption { margin-top: 5rpx; color: #82968a; font-size: 19rpx; }
+.food-kcal { color: #2e7d4f; font-size: 26rpx; font-weight: 700; }
+.macro-strip { display: flex; justify-content: space-around; margin-top: 18rpx; padding: 14rpx 0; border-top: 1rpx solid #e3eee4; border-bottom: 1rpx solid #e3eee4; }
+.macro-strip view { text-align: center; }
+.macro-strip text { display: block; }
+.macro-strip text:first-child { color: #466d50; font-size: 23rpx; font-weight: 700; }
+.macro-strip text:last-child { margin-top: 4rpx; color: #8a9d90; font-size: 18rpx; }
+.food-list { margin-top: 4rpx; }
+.food-item { display: flex; align-items: center; gap: 10rpx; padding: 14rpx 0; border-bottom: 1rpx solid #edf3ed; }
+.food-item:last-child { border-bottom: 0; }
+.food-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #7eae86; }
+.food-copy { flex: 1; min-width: 0; }
+.food-copy text { display: block; }
+.food-copy text:first-child { color: #46664e; font-size: 23rpx; font-weight: 700; }
+.food-copy text:last-child { margin-top: 4rpx; color: #8a9d90; font-size: 18rpx; }
+.food-item-kcal { color: #658570; font-size: 20rpx; }
 .form-section {
   padding: 6rpx 0 24rpx;
   border-top: 1rpx solid #dceadd;

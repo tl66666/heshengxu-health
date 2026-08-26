@@ -1,5 +1,6 @@
 import { createApiClient } from '../../services/api-client.js';
 import type { FoodItem, MealType } from './food.types.js';
+import type { MealEntry } from './food.summary.js';
 
 function createMiniClient() {
   return createApiClient({
@@ -24,4 +25,8 @@ export function searchFoods(query = '') {
 
 export function createMealEntry(input: { mealType: MealType; foodId: string; grams: number; recordedAt: string; note?: string }) {
   return createMiniClient().post('/meal-entries', input);
+}
+
+export function loadMealEntries(date: string) {
+  return createMiniClient().get<MealEntry[]>(`/meal-entries?date=${encodeURIComponent(date)}`);
 }
