@@ -89,7 +89,7 @@ function localDate() {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 32rpx 60rpx;
+  padding: 44rpx 32rpx 96rpx;
   background: #f7fbf8;
   color: #1d3d2a;
 }
@@ -105,7 +105,7 @@ function localDate() {
 }
 .title {
   margin-top: 10rpx;
-  font-size: 43rpx;
+  font-size: 40rpx;
   font-weight: 700;
 }
 .hint {
@@ -116,7 +116,7 @@ function localDate() {
 .cards {
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
+  gap: 0;
   margin-top: 28rpx;
 }
 .choice {
@@ -124,14 +124,14 @@ function localDate() {
   align-items: center;
   gap: 18rpx;
   overflow: hidden;
+  min-height: 122rpx;
   padding: 0;
-  border: 2rpx solid #dceadd;
-  border-radius: 18rpx;
+  border: 0;
+  border-bottom: 1rpx solid #e0ebe1;
   text-align: left;
   background: #fff;
 }
 .choice.selected {
-  border-color: #70a57c;
   background: #f1f8f1;
 }
 .choice image {
@@ -153,9 +153,10 @@ function localDate() {
 }
 .panel {
   margin-top: 24rpx;
-  padding: 24rpx;
-  border-radius: 18rpx;
-  background: #fff;
+  padding: 4rpx 0 18rpx;
+  border-top: 1rpx solid #dceadd;
+  border-bottom: 1rpx solid #dceadd;
+  background: transparent;
 }
 .label {
   display: block;

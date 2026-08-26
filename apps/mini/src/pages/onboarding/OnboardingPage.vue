@@ -265,7 +265,7 @@ async function save() {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 52rpx 40rpx 46rpx;
+  padding: 52rpx 40rpx 90rpx;
   background: #f7fbf8;
   color: #183425;
 }
@@ -321,14 +321,14 @@ async function save() {
 }
 .title {
   margin-top: 13rpx;
-  font-size: 48rpx;
+  font-size: 42rpx;
   font-weight: 700;
   line-height: 1.28;
 }
 .welcome-title {
   display: block;
   margin-top: 12rpx;
-  font-size: 50rpx;
+  font-size: 44rpx;
   font-weight: 700;
   line-height: 1.24;
 }
@@ -346,7 +346,7 @@ async function save() {
   line-height: 1.55;
 }
 .head {
-  margin-bottom: 58rpx;
+  margin-bottom: 38rpx;
 }
 .progress {
   height: 8rpx;
@@ -433,7 +433,7 @@ async function save() {
 .empty-card,
 .summary {
   margin-top: 24rpx;
-  padding: 26rpx;
+  padding: 22rpx;
   border-radius: 18rpx;
   background: #e8f4e8;
 }
@@ -522,7 +522,7 @@ async function save() {
 .actions {
   display: flex;
   gap: 16rpx;
-  margin-top: 56rpx;
+  margin-top: 34rpx;
 }
 .error {
   display: block;
