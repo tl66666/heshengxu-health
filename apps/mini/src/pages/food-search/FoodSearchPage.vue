@@ -29,7 +29,7 @@ const error = ref(false);
 async function load() { loading.value = true; error.value = false; try { foods.value = await searchFoods(query.value); } catch { error.value = true; } finally { loading.value = false; } }
 function choose(food: FoodItem) { uni.navigateTo({ url: `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(food.id)}` }); uni.$emit('food-selected', food); }
 function back() { uni.navigateBack(); }
-function photoComing() { uni.showToast({ title: '拍照识别将在下一阶段接入', icon: 'none' }); }
+function photoComing() { uni.navigateTo({ url: '/pages/food-recognition/FoodRecognitionPage' }); }
 onLoad(load);
 </script>
 

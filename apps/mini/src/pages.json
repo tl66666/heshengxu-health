@@ -49,6 +49,14 @@
     {
       "path": "pages/profile-edit/ProfileEditPage",
       "style": { "navigationBarTitleText": "编辑健康档案" }
+    },
+    {
+      "path": "pages/food-recognition/FoodRecognitionPage",
+      "style": { "navigationBarTitleText": "拍照识别食物" }
+    },
+    {
+      "path": "pages/food-candidates/FoodCandidatesPage",
+      "style": { "navigationBarTitleText": "确认识别结果" }
     }
   ],
   "tabBar": {
