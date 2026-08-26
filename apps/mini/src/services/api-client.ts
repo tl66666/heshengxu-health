@@ -7,17 +7,18 @@ type ApiResponse<T> = {
 
 type ApiTransport = <T>(request: {
   url: string;
-  method: 'GET' | 'PUT' | 'POST' | 'PATCH';
+  method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE';
   data?: unknown;
 }) => Promise<ApiResponse<T>>;
 
 export function createApiClient({ baseUrl, request }: { baseUrl: string; request: ApiTransport }) {
   async function send<T>(
-    method: 'GET' | 'PUT' | 'POST' | 'PATCH',
+    method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE',
     path: string,
     data?: unknown,
   ): Promise<T> {
     const response = await request<T>({ url: `${baseUrl}${path}`, method, data });
+    if (response.statusCode === 204) return undefined as T;
     if (response.statusCode >= 200 && response.statusCode < 300 && 'data' in response.data) {
       return response.data.data;
     }
@@ -38,6 +39,9 @@ export function createApiClient({ baseUrl, request }: { baseUrl: string; request
     },
     async patch<T>(path: string, data: unknown): Promise<T> {
       return send<T>('PATCH', path, data);
+    },
+    async delete<T>(path: string): Promise<T> {
+      return send<T>('DELETE', path);
     },
   };
 }

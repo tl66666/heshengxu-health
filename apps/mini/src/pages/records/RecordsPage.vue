@@ -42,7 +42,7 @@
       <view v-if="foodEntries.length" class="food-summary">
         <view class="food-summary-head"><view><text class="food-summary-title">今天的食物</text><text class="food-summary-caption">已记录 {{ foodEntries.length }} 份 · 以保存时的营养快照为准</text></view><text class="food-kcal">{{ foodSummary.energyKcal }} 千卡</text></view>
         <view class="macro-strip"><view><text>{{ foodSummary.proteinG }}g</text><text>蛋白质</text></view><view><text>{{ foodSummary.fatG }}g</text><text>脂肪</text></view><view><text>{{ foodSummary.carbohydrateG }}g</text><text>碳水</text></view></view>
-        <view class="food-list"><view v-for="entry in foodEntries" :key="entry.id" class="food-item"><view class="food-dot" /><view class="food-copy"><text>{{ entry.foodNameSnapshot }}</text><text>{{ mealLabel(entry.mealType) }} · {{ entry.grams }}g</text></view><text class="food-item-kcal">{{ entry.energyKcal }} kcal</text></view></view>
+        <view class="food-list"><view v-for="entry in foodEntries" :key="entry.id" class="food-item"><view class="food-dot" /><view class="food-copy"><text>{{ entry.foodNameSnapshot }}</text><text>{{ mealLabel(entry.mealType) }} · {{ entry.grams }}g</text></view><view class="food-actions"><text class="food-item-kcal">{{ entry.energyKcal }} kcal</text><button class="food-more" @tap="manageFood(entry)">管理</button></view></view></view>
       </view>
 
       <view class="form-section">
@@ -175,7 +175,7 @@ import type {
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { createHealthRecordsStore } from '../../features/health-records/health-records.store.js';
-import { loadMealEntries } from '../../features/food/food.service.js';
+import { deleteMealEntry, loadMealEntries } from '../../features/food/food.service.js';
 import { summarizeFoodEntries, type MealEntry } from '../../features/food/food.summary.js';
 import type {
   RecordFormErrors,
@@ -347,6 +347,19 @@ async function loadFoods() {
 function mealLabel(type: MealEntry['mealType']) {
   return ({ breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' })[type];
 }
+function manageFood(entry: MealEntry) {
+  uni.showActionSheet({
+    itemList: ['编辑这份记录', '删除这份记录'],
+    success: ({ tapIndex }) => {
+      if (tapIndex === 0) {
+        if (!entry.foodId) { uni.showToast({ title: '原食品不可用，请重新记录', icon: 'none' }); return; }
+        uni.navigateTo({ url: `/pages/food-confirm/FoodConfirmPage?entryId=${encodeURIComponent(entry.id)}&foodId=${encodeURIComponent(entry.foodId)}&grams=${entry.grams}&mealType=${entry.mealType}&note=${encodeURIComponent(entry.note || '')}` });
+        return;
+      }
+      uni.showModal({ title: '删除这份记录？', content: '删除后不会出现在当天营养汇总中。', confirmColor: '#b85e43', success: async ({ confirm }) => { if (!confirm) return; try { await deleteMealEntry(entry.id); await loadFoods(); uni.showToast({ title: '已删除', icon: 'success' }); } catch { uni.showToast({ title: '删除失败，请稍后重试', icon: 'none' }); } } });
+    },
+  });
+}
 onLoad((options) => {
   if (options?.type && types.some((item) => item.type === options.type))
     activeType.value = options.type as HealthRecordType;
@@ -495,6 +508,8 @@ onShow(() => {
 .food-copy text:first-child { color: #46664e; font-size: 23rpx; font-weight: 700; }
 .food-copy text:last-child { margin-top: 4rpx; color: #8a9d90; font-size: 18rpx; }
 .food-item-kcal { color: #658570; font-size: 20rpx; }
+.food-actions { display: flex; align-items: flex-end; flex-direction: column; gap: 6rpx; }
+.food-more { padding: 4rpx 8rpx; color: #4d7f5a; background: #edf6ee; font-size: 18rpx; }
 .form-section {
   padding: 6rpx 0 24rpx;
   border-top: 1rpx solid #dceadd;

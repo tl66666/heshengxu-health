@@ -109,13 +109,19 @@ model MealEntry {
   source                MealEntrySource @default(manual)
   recordedAt            DateTime
   note                  String?
+  isCurrent             Boolean   @default(true)
+  previousRecordId      String?
+  supersededAt          DateTime?
+  deletedAt             DateTime?
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   food                  FoodItem? @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  previousRecord        MealEntry? @relation("MealEntryVersions", fields: [previousRecordId], references: [id])
+  replacements          MealEntry[] @relation("MealEntryVersions")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  @@index([userId, recordedAt])
-  @@index([userId, mealType, recordedAt])
+  @@index([userId, isCurrent, recordedAt])
+  @@index([userId, mealType, isCurrent, recordedAt])
 }
 
 model FoodRecognitionJob {

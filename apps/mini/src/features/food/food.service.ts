@@ -30,3 +30,11 @@ export function createMealEntry(input: { mealType: MealType; foodId: string; gra
 export function loadMealEntries(date: string) {
   return createMiniClient().get<MealEntry[]>(`/meal-entries?date=${encodeURIComponent(date)}`);
 }
+
+export function replaceMealEntry(recordId: string, input: { mealType?: MealType; foodId?: string; grams?: number; recordedAt?: string; note?: string }) {
+  return createMiniClient().patch(`/meal-entries/${encodeURIComponent(recordId)}`, input);
+}
+
+export function deleteMealEntry(recordId: string) {
+  return createMiniClient().delete(`/meal-entries/${encodeURIComponent(recordId)}`);
+}
