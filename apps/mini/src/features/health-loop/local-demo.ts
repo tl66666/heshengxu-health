@@ -12,6 +12,7 @@ export type LocalHealthProfile = {
   heightCm: number;
   weightKg: number;
   primaryGoal: string;
+  goals?: string[];
 };
 
 export function saveLocalProfile(profile: LocalHealthProfile) {
@@ -26,6 +27,7 @@ export function loadLocalProfile(): LocalHealthProfile | null {
     heightCm: Number(value.heightCm),
     weightKg: Number(value.weightKg),
     primaryGoal: value.primaryGoal,
+    goals: Array.isArray(value.goals) ? value.goals.map(String) : [value.primaryGoal],
   };
 }
 

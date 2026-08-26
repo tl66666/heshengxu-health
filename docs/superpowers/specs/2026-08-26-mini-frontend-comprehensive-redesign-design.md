@@ -23,7 +23,7 @@
 
 ### 1.3 资源问题
 
-- `assets/illustrations/` 已有治愈系场景插画和序序素材，`hero.jpg` 只作为网页端展示素材；小程序建档使用竖屏序序主视觉，其他页面按场景选择素材，不重复堆叠。
+- `assets/illustrations/` 已有治愈系场景插画和序序素材，`hero.jpg` 只作为网页端展示素材；小程序建档使用方形 `onboarding-hero-square.png`，完整显示序序主体，其他页面按场景选择素材，不重复堆叠。
 - 图标目前只有首页、记录、计划、我的、前进方向等基础 SVG；返回、关闭、完成状态已补充 SVG，但仍需建立完整图标清单和命名规范。
 - 页面不允许使用 emoji、Unicode 符号、微信原生系统 icon 或 CSS 手绘图形替代正式图标。
 
@@ -87,7 +87,7 @@
 
 **按钮规则：** 返回为透明文字按钮 + SVG；退出为低强调文字按钮 + SVG；主按钮使用单一绿色实心样式；保存中显示 loading 并禁用重复提交；网络不可用时保存本地并进入首页。
 
-**资源规则：** 小程序欢迎页使用 `onboarding-hero-vertical.png`；图片作为完整主视觉背景，文字通过独立内容层叠加，禁止裁切到标题、按钮或导航区域。`hero.jpg` 只用于网页端展示。其他页面继续使用现有卡通序序和健康场景插画。
+**资源规则：** 小程序欢迎页使用方形 `onboarding-hero-square.png`；图片按原比例完整显示，文字通过独立内容层叠加，禁止裁切到标题、按钮或导航区域。`hero.jpg` 只用于网页端展示。其他页面继续使用现有卡通序序和健康场景插画。
 
 ### 3.3 Home 首页
 
@@ -224,7 +224,8 @@
 - 小程序同步缓存：`apps/mini/src/static/illustrations/`，由脚本生成，不手工修改。
 - SVG 图标目录：`apps/mini/src/static/icons/`。
 - 页面只引用 `/static/illustrations/...` 和 `/static/icons/...`，禁止跨目录相对路径。
-- `hero.jpg` 仅用于网页端项目展示；小程序建档使用 `onboarding-hero-vertical.png`。新增图片必须先进入 `assets/illustrations/`，再由同步脚本复制到小程序缓存目录。
+- `hero.jpg` 仅用于网页端项目展示；小程序建档使用 `onboarding-hero-square.png`。新增图片必须先进入 `assets/illustrations/`，再由同步脚本复制到小程序缓存目录。
+- 建档目标支持同时选择 1—3 个方向，第一个选择作为 `primaryGoal` 兼容后端，其余目标保存在本地画像中。
 - 构建产物只保留当前用途：开发时 `dist/dev/mp-weixin`，发布时 `dist/build/mp-weixin`，不同时维护。
 
 ## 6. 验收标准

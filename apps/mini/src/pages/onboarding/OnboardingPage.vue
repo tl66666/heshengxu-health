@@ -10,22 +10,26 @@
       @close="exitOnboarding"
     />
     <template v-if="step === 0">
-      <image
-        class="welcome-art"
-        src="/static/illustrations/onboarding-hero-vertical.png"
-        mode="aspectFit"
-      />
-      <view class="welcome-copy">
-        <view class="xuxu"
-          ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><view
-            ><text>你好，我是序序</text><text>你的健康陪伴助手</text></view
-          ></view
-        >
-        <text class="brand">和生序</text>
-        <text class="welcome-title">让健康回到自己的节律</text>
-        <text class="hint">花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text>
-        <button class="primary" @tap="next">开始了解我</button>
-        <text class="disclaimer">和生序提供健康管理与生活方式参考，不替代医生诊疗。</text>
+      <view class="welcome-screen">
+        <view class="welcome-art-frame">
+          <image
+            class="welcome-art"
+            src="/static/illustrations/onboarding-hero-square.png"
+            mode="aspectFit"
+          />
+        </view>
+        <view class="welcome-copy">
+          <view class="xuxu"
+            ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><view
+              ><text>你好，我是序序</text><text>你的健康陪伴助手</text></view
+            ></view
+          >
+          <text class="brand">和生序</text>
+          <text class="welcome-title">让健康回到自己的节律</text>
+          <text class="hint">花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text>
+          <button class="primary" @tap="next">开始了解我</button>
+          <text class="disclaimer">和生序提供健康管理与生活方式参考，不替代医生诊疗。</text>
+        </view>
       </view>
     </template>
     <template v-else>
@@ -114,18 +118,32 @@
         ><view v-else class="empty-card">填写身高和体重后查看 BMI</view>
       </view>
       <view v-else-if="step === 3" class="step">
-        <text class="eyebrow">选一个现在最想改善的方向</text
-        ><text class="title">从一个小目标开始</text
-        ><text class="hint">之后可以随时调整，不需要一次决定全部。</text>
+        <text class="eyebrow">选你现在最想改善的方向</text
+        ><text class="title">给生活设定 1—3 个小目标</text
+        ><text class="hint">可以多选，序序会按第一个目标安排优先建议，之后随时都能调整。</text>
+        <view class="goal-meta"
+          ><text>已选择 {{ form.goals.length }}/3</text><text>可多选</text></view
+        >
         <view class="goal-list"
           ><button
             v-for="item in goalOptions"
             :key="item.value"
-            :class="['goal', { selected: form.primaryGoal === item.value }]"
-            @tap="form.primaryGoal = item.value"
+            :class="[
+              'goal',
+              { selected: form.goals.includes(item.value), blocked: isGoalBlocked(item.value) },
+            ]"
+            @tap="toggleGoal(item.value)"
           >
-            <text>{{ item.label }}</text>
-            <image src="/static/icons/forward.svg" mode="aspectFit" class="arrow" /></button
+            <view class="goal-copy"
+              ><text class="goal-label">{{ item.label }}</text
+              ><text class="goal-detail">{{ item.detail }}</text></view
+            >
+            <image
+              v-if="form.goals.includes(item.value)"
+              src="/static/icons/check.svg"
+              mode="aspectFit"
+              class="goal-check"
+            /><view v-else class="goal-radio" /></button
         ></view>
       </view>
       <view v-else class="step">
@@ -133,7 +151,7 @@
         <view class="summary"
           ><text>{{ form.displayName || '新朋友' }}</text
           ><text>{{ form.heightCm }} cm · {{ form.weightKg }} kg</text
-          ><text>{{ selectedGoalLabel }}</text
+          ><text>目标：{{ selectedGoalLabel }}</text
           ><text>BMI {{ bmi?.toFixed(1) }} · {{ bmiLabel }}</text></view
         >
         <text class="hint">保存后会解锁首页，之后每天记下一点真实生活就好。</text>
@@ -153,7 +171,11 @@
 import { computed, ref } from 'vue';
 import { createApiClient } from '../../services/api-client.js';
 import { onboardingState } from '../../stores/onboarding.js';
-import { canAdvanceOnboarding, onboardingProgress } from './onboarding-flow.js';
+import {
+  canAdvanceOnboarding,
+  onboardingProgress,
+  toggleOnboardingGoal,
+} from './onboarding-flow.js';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { shouldConfirmOnboardingExit } from '../../components/navigation.js';
 import { saveLocalProfile } from '../../features/health-loop/local-demo.js';
@@ -168,12 +190,20 @@ const sexOptions = [
   { value: 'unspecified' as const, label: '不方便说' },
 ];
 const goalOptions = [
-  { value: 'weight_management' as const, label: '减脂与体重管理' },
-  { value: 'weight_maintenance' as const, label: '保持当前状态' },
-  { value: 'muscle_gain' as const, label: '力量与体能' },
-  { value: 'sleep' as const, label: '睡眠与精力' },
-  { value: 'energy' as const, label: '饮食与活动' },
-  { value: 'mood' as const, label: '压力与情绪' },
+  {
+    value: 'weight_management' as const,
+    label: '减脂与体重管理',
+    detail: '建立更轻松的饮食与活动节奏',
+  },
+  {
+    value: 'weight_maintenance' as const,
+    label: '保持当前状态',
+    detail: '稳定体重，也稳定生活的节律',
+  },
+  { value: 'muscle_gain' as const, label: '力量与体能', detail: '让身体更有力量，行动更有底气' },
+  { value: 'sleep' as const, label: '睡眠与精力', detail: '找回更规律的作息和白天状态' },
+  { value: 'energy' as const, label: '饮食与活动', detail: '吃得更明白，动得更自然' },
+  { value: 'mood' as const, label: '压力与情绪', detail: '给情绪留出被看见和照顾的空间' },
 ];
 const bmiLabel = computed(
   () =>
@@ -196,10 +226,26 @@ const bmiProgress = computed(() => {
   return Math.max(4, Math.min(100, ((bmi.value - 14) / 22) * 100));
 });
 const selectedGoalLabel = computed(
-  () => goalOptions.find((item) => item.value === form.primaryGoal)?.label ?? '还没有选择目标',
+  () =>
+    form.goals
+      .map((goal) => goalOptions.find((item) => item.value === goal)?.label)
+      .filter(Boolean)
+      .join('、') || '还没有选择目标',
 );
 const progress = computed(() => onboardingProgress(step.value));
-const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, form.primaryGoal));
+const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, form.goals));
+function isGoalBlocked(value: (typeof goalOptions)[number]['value']) {
+  return form.goals.length >= 3 && !form.goals.includes(value);
+}
+function toggleGoal(value: (typeof goalOptions)[number]['value']) {
+  const result = toggleOnboardingGoal(form.goals, value);
+  if (result.limited) {
+    uni.showToast({ title: '最多选择 3 个方向', icon: 'none' });
+    return;
+  }
+  form.goals.splice(0, form.goals.length, ...(result.goals as typeof form.goals));
+  form.primaryGoal = form.goals[0] || '';
+}
 function back() {
   step.value -= 1;
   onboardingState.step.value = step.value;
@@ -239,6 +285,7 @@ async function save() {
     heightCm: Number(form.heightCm),
     weightKg: Number(form.weightKg),
     primaryGoal: form.primaryGoal,
+    goals: form.goals,
   });
   try {
     const client = createApiClient({
@@ -280,21 +327,33 @@ async function save() {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-x: hidden;
-  padding: 28rpx 32rpx 76rpx;
+  padding: 28rpx 32rpx 56rpx;
   background: #f7fbf8;
   color: #183425;
 }
-.welcome-art {
+.welcome-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 122rpx);
+}
+.welcome-art-frame {
   width: 100%;
-  height: 520rpx;
-  margin: 0;
-  border-radius: 20rpx;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 28rpx;
   background: #fffdf5;
+  box-shadow: 0 18rpx 42rpx rgba(54, 102, 66, 0.08);
+}
+.welcome-art {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .welcome-copy {
-  margin-top: -20rpx;
-  padding: 26rpx 20rpx 0;
-  border-radius: 20rpx 20rpx 0 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 28rpx 12rpx 0;
   background: #f7fbf8;
   position: relative;
 }
@@ -348,6 +407,9 @@ async function save() {
   font-size: 42rpx;
   font-weight: 700;
   line-height: 1.24;
+}
+.welcome-copy .primary {
+  margin-top: auto;
 }
 .hint {
   margin-top: 16rpx;
@@ -514,8 +576,9 @@ async function save() {
 .goal {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 22rpx;
+  gap: 18rpx;
+  min-height: 96rpx;
+  padding: 18rpx 20rpx;
   border: 2rpx solid #dceadd;
   border-radius: 17rpx;
   color: #31543e;
@@ -523,11 +586,49 @@ async function save() {
   background: #fff;
   font-size: 27rpx;
 }
-.arrow {
-  width: 32rpx;
-  height: 32rpx;
+.goal-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5rpx;
+}
+.goal-label {
+  color: #31543e;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+.goal-detail {
+  color: #7a9180;
+  font-size: 21rpx;
+  line-height: 1.35;
+}
+.goal-check,
+.goal-radio {
+  width: 36rpx;
+  height: 36rpx;
+  flex: 0 0 36rpx;
+}
+.goal-radio {
+  box-sizing: border-box;
+  border: 2rpx solid #c6d9c9;
+  border-radius: 50%;
+}
+.goal.blocked {
+  opacity: 0.46;
+}
+.goal-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 22rpx;
+  color: #6f8777;
+  font-size: 22rpx;
+}
+.goal-meta text:first-child {
+  color: #36794f;
+  font-weight: 700;
+}
+.goal-check {
   margin-left: auto;
-  opacity: 0.72;
 }
 .summary {
   display: flex;

@@ -1,14 +1,17 @@
 import { computed, reactive, ref } from 'vue';
 import { calculateBmi, classifyBmi } from '../../../../packages/domain/src/bmi.js';
 
+export type HealthGoal =
+  'weight_management' | 'weight_maintenance' | 'muscle_gain' | 'sleep' | 'energy' | 'mood';
+
 export type OnboardingForm = {
   displayName: string;
   sex: 'female' | 'male' | 'unspecified';
   birthDate: string;
   heightCm: string;
   weightKg: string;
-  primaryGoal:
-    'weight_management' | 'weight_maintenance' | 'muscle_gain' | 'sleep' | 'energy' | 'mood' | '';
+  primaryGoal: HealthGoal | '';
+  goals: HealthGoal[];
 };
 
 const form = reactive<OnboardingForm>({
@@ -18,6 +21,7 @@ const form = reactive<OnboardingForm>({
   heightCm: '',
   weightKg: '',
   primaryGoal: '',
+  goals: [],
 });
 
 const bmi = computed(() => {
@@ -47,6 +51,7 @@ export function resetOnboarding() {
     heightCm: '',
     weightKg: '',
     primaryGoal: '',
+    goals: [],
   });
   onboardingState.step.value = 0;
   onboardingState.completed.value = false;

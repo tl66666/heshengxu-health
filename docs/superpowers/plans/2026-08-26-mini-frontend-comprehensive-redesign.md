@@ -22,7 +22,7 @@
 - Modify: `apps/mini/src/components/*.spec.ts` 与各页面 `*.spec.ts`，补齐导航和关键交互契约。
 - Modify: `docs/engineering/mini-frontend-implementation.md`、`apps/mini/README.md`，同步开发和验收流程。
 - Keep: `assets/illustrations/hero.jpg`，仅作为网页端项目展示素材。
-- Create: `assets/illustrations/onboarding-hero-vertical.png`，竖屏建档主视觉，完整显示序序主体。
+- Create: `assets/illustrations/onboarding-hero-square.png`，方形建档主视觉，完整显示序序主体，避免手机页面出现横向留白。
 
 ## 阶段 A：视觉基础与资源治理
 
@@ -79,6 +79,8 @@
 - [ ] **Step 3:** 保持 BMI 实时计算、输入与滑块同步、返回/退出确认、本地保存兜底。
 - [ ] **Step 4:** 添加“网络失败仍进入首页”的流程测试和“退出后回到 Bootstrap”的导航测试。
 - [ ] **Step 5:** 运行小程序测试和 `vue-tsc`，提交 `feat: rebuild onboarding flow shell`。
+- [x] **Step 6:** 建档欢迎页改用方形序序插画并按原比例显示；目标选择改为最多 3 项多选，第一个目标兼容写入 `primaryGoal`。
+- [x] **Step 7:** 增加目标选择、取消选择、上限限制和至少选择一项的流程测试。
 
 ### Task 5: 重做 PlanSetup
 
