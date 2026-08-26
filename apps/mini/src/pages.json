@@ -8,7 +8,7 @@
     },
     {
       "path": "pages/onboarding/OnboardingPage",
-      "style": { "navigationBarTitleText": "开始了解自己" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "开始了解自己" }
     },
     {
       "path": "pages/home/HomePage",
@@ -32,7 +32,7 @@
     },
     {
       "path": "pages/plan-setup/PlanSetupPage",
-      "style": { "navigationBarTitleText": "设置计划" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "设置计划" }
     }
   ],
   "tabBar": {

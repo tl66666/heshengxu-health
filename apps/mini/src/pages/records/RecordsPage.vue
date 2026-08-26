@@ -371,7 +371,7 @@ onShow(() => {
   background: #fff;
 }
 .welcome-strip image {
-  width: 166rpx;
+  width: 183rpx;
   height: 122rpx;
   flex: none;
 }

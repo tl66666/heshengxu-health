@@ -110,7 +110,7 @@ function localDate() {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 32rpx 96rpx;
+  padding: 72rpx 32rpx 96rpx;
   background: #f7fbf8;
   color: #1d3d2a;
 }

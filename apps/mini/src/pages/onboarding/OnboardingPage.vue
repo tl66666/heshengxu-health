@@ -327,7 +327,7 @@ async function save() {
   min-height: 100vh;
   box-sizing: border-box;
   overflow-x: hidden;
-  padding: 28rpx 32rpx 56rpx;
+  padding: 72rpx 32rpx 56rpx;
   background: #f7fbf8;
   color: #183425;
 }
@@ -409,7 +409,11 @@ async function save() {
   line-height: 1.24;
 }
 .welcome-copy .primary {
+  width: 100%;
+  height: 86rpx;
+  flex: none;
   margin-top: auto;
+  line-height: 86rpx;
 }
 .hint {
   margin-top: 16rpx;
