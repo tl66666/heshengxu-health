@@ -89,8 +89,12 @@ onShow(async () => {
 .copy {
   position: absolute;
   right: 52rpx;
-  bottom: 130rpx;
+  bottom: 104rpx;
   left: 52rpx;
+  padding: 22rpx 20rpx 24rpx;
+  border-radius: 26rpx;
+  background: rgba(250, 253, 247, 0.84);
+  box-shadow: 0 12rpx 34rpx rgba(72, 103, 76, 0.08);
 }
 .xuxu {
   display: flex;

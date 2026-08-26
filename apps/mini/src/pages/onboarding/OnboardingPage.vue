@@ -12,11 +12,7 @@
     <template v-if="step === 0">
       <view class="welcome-screen">
         <view class="welcome-art-frame">
-          <image
-            class="welcome-art"
-            src="/static/illustrations/onboarding-hero-square.png"
-            mode="aspectFit"
-          />
+          <image class="welcome-art" :src="heroImage" mode="aspectFit" @error="useFallbackHero" />
         </view>
         <view class="welcome-copy">
           <view class="xuxu"
@@ -184,6 +180,7 @@ const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(onboardingState.step.value);
 const saving = ref(false);
 const error = ref('');
+const heroImage = ref('/static/illustrations/onboarding-hero-square.png');
 const sexOptions = [
   { value: 'female' as const, label: '女性' },
   { value: 'male' as const, label: '男性' },
@@ -234,6 +231,11 @@ const selectedGoalLabel = computed(
 );
 const progress = computed(() => onboardingProgress(step.value));
 const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, form.goals));
+function useFallbackHero() {
+  if (heroImage.value !== '/static/illustrations/xuxu-avatar.jpg') {
+    heroImage.value = '/static/illustrations/xuxu-avatar.jpg';
+  }
+}
 function isGoalBlocked(value: (typeof goalOptions)[number]['value']) {
   return form.goals.length >= 3 && !form.goals.includes(value);
 }

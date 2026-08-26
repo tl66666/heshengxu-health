@@ -1,6 +1,8 @@
 <template>
   <view class="page">
-    <XuxuChatComposer />
+    <view class="chat-area">
+      <XuxuChatComposer class="chat-composer-host" />
+    </view>
     <MiniTabBar active="xuxu" />
   </view>
 </template>
@@ -27,8 +29,19 @@ function localDate() {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 124rpx;
+  padding: 24rpx 24rpx 0;
   background: #f7fbf8;
   color: #1d3d2a;
+}
+.chat-area {
+  display: flex;
+  flex: none;
+  height: calc(100vh - 148rpx);
+  min-height: 0;
+}
+.chat-composer-host {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 </style>
