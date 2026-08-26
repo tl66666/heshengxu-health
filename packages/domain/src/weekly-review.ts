@@ -88,7 +88,7 @@ function inWeek<T extends { recordedAt: string }>(items: ReadonlyArray<T>, range
   });
 }
 
-function weekRangeForShanghai(anchorDate: string): WeeklyRange {
+export function weekRangeForShanghai(anchorDate: string): WeeklyRange {
   const anchor = parseDate(anchorDate);
   const mondayOffset = (anchor.getUTCDay() + 6) % 7;
   anchor.setUTCDate(anchor.getUTCDate() - mondayOffset);

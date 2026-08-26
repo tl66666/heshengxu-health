@@ -56,6 +56,9 @@ const document = {
     '/daily-home/today': {
       get: protectedOperation('读取今日首页', '聚合档案、计划、记录进度和唯一行动'),
     },
+    '/health-insights/weekly': {
+      get: protectedOperation('Weekly health review', 'Aggregates only current, user-owned records for the requested week.'),
+    },
     '/foods/search': {
       get: protectedOperation('搜索食品', '只返回启用的食品及其营养和可选份量'),
     },

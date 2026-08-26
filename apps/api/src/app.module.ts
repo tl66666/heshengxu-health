@@ -7,9 +7,10 @@ import { DailyHomeModule } from './modules/daily-home/daily-home.module.js';
 import { FoodCatalogModule } from './modules/food-catalog/food-catalog.module.js';
 import { MealEntriesModule } from './modules/meal-entries/meal-entries.module.js';
 import { FoodRecognitionModule } from './modules/food-recognition/food-recognition.module.js';
+import { HealthInsightsModule } from './modules/health-insights/health-insights.module.js';
 
 @Module({
-  imports: [HealthProfileModule, HealthRecordsModule, HealthPlansModule, DailyHomeModule, FoodCatalogModule, MealEntriesModule, FoodRecognitionModule],
+  imports: [HealthProfileModule, HealthRecordsModule, HealthPlansModule, DailyHomeModule, FoodCatalogModule, MealEntriesModule, FoodRecognitionModule, HealthInsightsModule],
   controllers: [SystemController],
 })
 export class AppModule {}
