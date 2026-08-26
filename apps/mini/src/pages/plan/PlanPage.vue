@@ -86,6 +86,13 @@
         <view><text>今天的行动都完成了</text><text>序序已经记下这份稳定的节律。</text></view>
       </view>
 
+      <view v-if="weeklyReview" class="weekly-entry" @tap="openWeeklyReview">
+        <view
+          ><text>{{ weeklyEntry.title }}</text
+          ><text>{{ weeklyEntry.caption }}</text></view
+        ><text>{{ weeklyEntry.action }}</text>
+      </view>
+
       <view class="section-heading programs-heading"
         ><view><text>可照顾的方向</text><text>先专注一个重点，其他方向慢慢加入</text></view
         ><text>更多方向</text></view
@@ -113,11 +120,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { planPageState, planPresentation } from '../../features/health-loop/plan-presentation.js';
+import { weeklyReviewEntry } from '../../features/weekly-review/weekly-review.presentation.js';
+import {
+  loadWeeklyReview,
+  type WeeklyReview,
+} from '../../features/weekly-review/weekly-review.service.js';
 
 const date = localDate();
 const plan = computed(() => healthLoopState.today.value?.activePlan || healthLoopState.plan.value);
@@ -125,6 +137,14 @@ const pageState = computed(() =>
   planPageState(plan.value, healthLoopState.error.value || '', healthLoopState.loading.value),
 );
 const presentation = computed(() => planPresentation(plan.value?.tasks || []));
+const weeklyReview = ref<WeeklyReview | null>(null);
+const weeklyEntry = computed(() =>
+  weeklyReviewEntry(
+    weeklyReview.value || {
+      coverage: { recordedDayCount: 0, requiredDayCount: 3, status: 'insufficient' },
+    },
+  ),
+);
 const progress = computed(() => {
   const total = plan.value?.tasks.length || 0;
   return total ? Math.round((presentation.value.completedCount / total) * 100) : 0;
@@ -186,8 +206,16 @@ async function complete(id: string) {
 function setup() {
   uni.navigateTo({ url: '/pages/plan-setup/PlanSetupPage' });
 }
-function load() {
+async function load() {
   healthLoopState.loadToday(date);
+  try {
+    weeklyReview.value = await loadWeeklyReview(date);
+  } catch {
+    weeklyReview.value = null;
+  }
+}
+function openWeeklyReview() {
+  uni.navigateTo({ url: '/pages/weekly-review/WeeklyReviewPage' });
 }
 function selectProgram(item: (typeof programs)[number]) {
   if (!item.available) {
@@ -322,6 +350,39 @@ onShow(load);
 .programs-heading > text {
   padding-top: 4rpx;
   color: #5d9169;
+}
+.weekly-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: 34rpx;
+  padding: 22rpx 24rpx;
+  border: 2rpx solid #dbeadd;
+  border-radius: 16rpx;
+  background: #fffdf5;
+}
+.weekly-entry view {
+  min-width: 0;
+  flex: 1;
+}
+.weekly-entry view text {
+  display: block;
+  color: #315a40;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.weekly-entry view text:last-child {
+  margin-top: 7rpx;
+  color: #789181;
+  font-size: 20rpx;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.weekly-entry > text {
+  flex: none;
+  color: #4d855b;
+  font-size: 22rpx;
 }
 .tasks {
   border-top: 1rpx solid #e1ebe2;

@@ -1,6 +1,6 @@
-<template>
-  <slot />
-</template>
+<script lang="ts">
+export default {};
+</script>
 
 <style>
 @import './styles/mini-tokens.css';

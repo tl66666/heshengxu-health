@@ -27,6 +27,10 @@
       "style": { "navigationBarTitleText": "我的计划" }
     },
     {
+      "path": "pages/weekly-review/WeeklyReviewPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "本周回顾" }
+    },
+    {
       "path": "pages/me/MePage",
       "style": { "navigationBarTitleText": "我的" }
     },
