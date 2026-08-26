@@ -92,6 +92,8 @@
 
 ## 阶段 C：首页与序序工作区
 
+**执行顺序约束：** 先执行 Task 7 的序序 Demo 等价迁移，再执行 Task 6 的首页重排；首页入口联动依赖序序页的最终消息接口。
+
 ### Task 6: 重做 Home
 
 **Files:**
@@ -112,10 +114,12 @@
 - Modify: `apps/mini/src/components/XuxuChatComposer.vue`
 - Test: `apps/mini/src/components/xuxu-chat.spec.ts`
 
-- [ ] **Step 1:** 将消息滚动区设置为唯一可滚动区域，输入区、快捷问题和免责声明固定在底部布局中。
-- [ ] **Step 2:** 统一序序头像、消息气泡、快捷问题和发送按钮尺寸，禁用态必须可辨识。
-- [ ] **Step 3:** 验证空消息、快捷问题、连续发送、长消息和小屏底部安全区。
-- [ ] **Step 4:** 提交 `feat: polish xuxu chat workspace`。
+- [ ] **Step 1:** 对照 `prototypes/web-demo/index.html#view-chat` 建立 Vue 结构：`chat-head`、`chat-profile`、`messages`、`quick`、`composer`、`disclaimer` 六个区域，保持顺序不变。
+- [ ] **Step 2:** 对照 `prototypes/web-demo/app.js` 迁移四类交互：入口带问题进入聊天、健康画像收起/展开、快捷问题发送、输入框确认键发送。
+- [ ] **Step 3:** 将 Demo 的 `addMsg` 数据模型改为 `ChatMessage` 类型，assistant 消息支持头像和可选知识来源，user 消息右对齐；不复制 HTML 字符串拼接。
+- [ ] **Step 4:** 增加风险问题安全回复测试：输入“胸痛”时返回就医/急救提示，不返回诊断结论；语音按钮只显示后续开放提示。
+- [ ] **Step 5:** 在 390x844 和 430x932 下验证消息滚动、快捷问题横向滚动、键盘弹起和底部输入区不被 TabBar 遮挡。
+- [ ] **Step 6:** 运行 `npm exec -- vitest run src/components/xuxu-chat.spec.ts`，提交 `feat: migrate demo-equivalent xuxu chat workspace`。
 
 ## 阶段 D：记录与计划闭环
 
