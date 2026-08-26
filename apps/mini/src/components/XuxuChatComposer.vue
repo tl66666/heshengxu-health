@@ -71,24 +71,27 @@ function send(value: string) {
 <style scoped>
 .chat-shell {
   display: flex;
-  min-height: calc(100vh - 260rpx);
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
   flex-direction: column;
-  margin-top: 24rpx;
-  padding: 18rpx 0 16rpx;
-  border: 2rpx solid #dceadd;
-  border-radius: 22rpx;
+  margin-top: 14rpx;
+  padding: 14rpx 0 10rpx;
+  border: 1rpx solid #dceadd;
+  border-radius: 18rpx;
   background: #fff;
 }
 .chat-head {
   display: flex;
   align-items: center;
   gap: 14rpx;
-  padding: 0 20rpx 16rpx;
-  border-bottom: 2rpx solid #eef4ee;
+  padding: 0 18rpx 12rpx;
+  border-bottom: 1rpx solid #eef4ee;
 }
 .chat-head image {
-  width: 70rpx;
-  height: 70rpx;
+  width: 58rpx;
+  height: 58rpx;
   border: 3rpx solid #f0da8c;
   border-radius: 50%;
 }
@@ -106,31 +109,31 @@ function send(value: string) {
   font-size: 20rpx;
 }
 .scope {
-  margin: 14rpx 20rpx 0;
-  padding: 12rpx 14rpx;
+  margin: 10rpx 18rpx 0;
+  padding: 9rpx 12rpx;
   border-radius: 12rpx;
   color: #547260;
   background: #f1f8f1;
-  font-size: 21rpx;
+  font-size: 19rpx;
   line-height: 1.45;
 }
 .messages {
   flex: 1;
-  min-height: 410rpx;
-  max-height: 620rpx;
-  padding: 16rpx 20rpx;
+  height: 0;
+  min-height: 0;
+  padding: 12rpx 18rpx;
 }
 .empty-chat {
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 48rpx 0;
+  padding: 24rpx 0;
   color: #7b9180;
   font-size: 23rpx;
 }
 .empty-chat image {
-  width: 180rpx;
-  height: 180rpx;
+  width: 128rpx;
+  height: 128rpx;
   margin-bottom: 12rpx;
 }
 .empty-chat text:last-child {
@@ -141,7 +144,7 @@ function send(value: string) {
   display: flex;
   align-items: flex-start;
   gap: 10rpx;
-  margin: 14rpx 0;
+  margin: 10rpx 0;
 }
 .message.assistant {
   padding-right: 48rpx;
@@ -157,11 +160,12 @@ function send(value: string) {
   border-radius: 50%;
 }
 .message text {
-  padding: 14rpx 16rpx;
-  border-radius: 16rpx;
+  max-width: 78%;
+  padding: 11rpx 14rpx;
+  border-radius: 14rpx;
   color: #294a36;
   background: #f1f8f1;
-  font-size: 24rpx;
+  font-size: 23rpx;
   line-height: 1.55;
 }
 .message.user text {
@@ -170,29 +174,31 @@ function send(value: string) {
 }
 .quick {
   display: flex;
-  padding: 12rpx 20rpx;
+  flex: none;
+  padding: 8rpx 18rpx;
   white-space: nowrap;
-  border-top: 2rpx solid #eef4ee;
+  border-top: 1rpx solid #eef4ee;
 }
 .quick button {
   display: inline-block;
   margin-right: 10rpx;
-  padding: 12rpx 16rpx;
+  padding: 9rpx 13rpx;
   border: 2rpx solid #dceadd;
   border-radius: 24rpx;
   color: #4f735d;
   background: #fff;
-  font-size: 21rpx;
+  font-size: 20rpx;
 }
 .composer {
   display: flex;
   align-items: center;
   gap: 10rpx;
-  padding: 0 20rpx;
+  flex: none;
+  padding: 0 18rpx;
 }
 .composer input {
   flex: 1;
-  height: 76rpx;
+  height: 68rpx;
   padding: 0 20rpx;
   border-radius: 38rpx;
   color: #284b37;
@@ -200,22 +206,22 @@ function send(value: string) {
   font-size: 25rpx;
 }
 .send {
-  width: 96rpx;
-  height: 68rpx;
-  border-radius: 34rpx;
+  width: 82rpx;
+  height: 62rpx;
+  border-radius: 31rpx;
   color: #fff;
   background: #2e7d4f;
   font-size: 23rpx;
-  line-height: 68rpx;
+  line-height: 62rpx;
 }
 .send[disabled] {
   opacity: 0.45;
 }
 .disclaimer {
   display: block;
-  padding: 12rpx 20rpx 0;
+  padding: 8rpx 18rpx 0;
   color: #8a9b90;
   text-align: center;
-  font-size: 19rpx;
+  font-size: 18rpx;
 }
 </style>

@@ -3,7 +3,7 @@
 ## 1. 统一基础组件
 
 - 清理 `AppNavBar`、`MiniTabBar`、`XuxuHint` 中字符箭头和旧模板格式。
-- 新增轻量 `MiniIcon` 封装微信原生 `<icon>`，统一尺寸、颜色和语义。
+- 增加 `static/icons` 标准线性 SVG 资源，导航和前进动作使用业务语义明确的图标；系统状态仍使用微信原生 `<icon>`。
 - 为按钮、卡片、页面底部留白建立局部 token，避免页面各自硬编码不同间距。
 
 ## 2. 页面模板重写
@@ -13,10 +13,11 @@
 - 重写计划页模板，保留现有计划 store 和任务完成逻辑，清理字符勾号和旧布局。
 - 重写建档页目标选择和底部操作区，保留 BMI 实时计算和退出确认。
 - 统一序序、我的、计划设置页的标题、卡片、返回与安全提示。
+- 将序序聊天改为固定首屏工作区，消息列表独立滚动，快捷问题、输入框和免责声明不再被页面自然高度推到首屏外。
 
 ## 3. 资源和质量检查
 
-- 所有插画只从 `apps/mini/src/static/illustrations` 引用；不新增重复资源目录。
+- 所有插画只从 `apps/mini/src/static/illustrations` 引用，业务图标只从 `apps/mini/src/static/icons` 引用；不新增重复资源目录。
 - 运行 `rg` 字符残留扫描、Vitest、`vue-tsc`、Prettier 和微信构建。
 - 使用构建产物检查脚本确认 `dist/dev/mp-weixin` 和 `dist/build/mp-weixin` 内容一致，避免开发工具读取旧页面。
 

@@ -7,7 +7,7 @@
       :class="{ active: activePath === item.path }"
       @tap="go(item.path)"
     >
-      <icon class="icon" :type="item.icon" size="22" /><text>{{ item.label }}</text>
+      <image class="icon" :src="item.icon" mode="aspectFit" /><text>{{ item.label }}</text>
     </button>
     <button class="xuxu" :class="{ active: activePath === xuxu.path }" @tap="go(xuxu.path)">
       <view class="xuxu-orbit"
@@ -21,7 +21,7 @@
       :class="{ active: activePath === item.path }"
       @tap="go(item.path)"
     >
-      <icon class="icon" :type="item.icon" size="22" /><text>{{ item.label }}</text>
+      <image class="icon" :src="item.icon" mode="aspectFit" /><text>{{ item.label }}</text>
     </button>
   </view>
 </template>
@@ -30,10 +30,10 @@
 import { computed } from 'vue';
 
 const sideItems = [
-  { path: '/pages/home/HomePage', label: '首页', icon: 'info_circle' },
-  { path: '/pages/records/RecordsPage', label: '记录', icon: 'waiting' },
-  { path: '/pages/plan/PlanPage', label: '计划', icon: 'success_no_circle' },
-  { path: '/pages/me/MePage', label: '我的', icon: 'clear' },
+  { path: '/pages/home/HomePage', label: '首页', icon: '/static/icons/home.svg' },
+  { path: '/pages/records/RecordsPage', label: '记录', icon: '/static/icons/journal.svg' },
+  { path: '/pages/plan/PlanPage', label: '计划', icon: '/static/icons/plan.svg' },
+  { path: '/pages/me/MePage', label: '我的', icon: '/static/icons/profile.svg' },
 ];
 const xuxu = { path: '/pages/xuxu/XuxuPage' };
 const activePath = computed(() => {

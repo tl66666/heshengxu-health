@@ -36,13 +36,17 @@ function localDate() {
 
 <style scoped>
 .page {
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 32rpx 190rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 38rpx 32rpx 164rpx;
   background: #f7fbf8;
   color: #1d3d2a;
 }
 .page-head {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,7 +63,7 @@ function localDate() {
 .title {
   margin-top: 9rpx;
   color: #244735;
-  font-size: 38rpx;
+  font-size: 34rpx;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -73,15 +77,15 @@ function localDate() {
   display: flex;
   align-items: center;
   gap: 14rpx;
-  margin-top: 22rpx;
-  padding: 14rpx 16rpx;
+  margin-top: 12rpx;
+  padding: 10rpx 14rpx;
   border: 2rpx solid #e0e9e0;
   border-radius: 16rpx;
   background: #f5f9f4;
 }
 .safety image {
-  width: 76rpx;
-  height: 76rpx;
+  width: 58rpx;
+  height: 58rpx;
   flex: none;
   border-radius: 14rpx;
 }
@@ -91,13 +95,13 @@ function localDate() {
 .safety text {
   display: block;
   color: #4b6f55;
-  font-size: 22rpx;
+  font-size: 20rpx;
   font-weight: 700;
 }
 .safety text:last-child {
   margin-top: 5rpx;
   color: #788e7e;
-  font-size: 20rpx;
+  font-size: 18rpx;
   font-weight: 400;
   line-height: 1.45;
 }

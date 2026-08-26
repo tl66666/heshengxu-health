@@ -7,7 +7,7 @@
     >
     <view v-if="action" class="action"
       ><text>{{ action }}</text
-      ><icon type="forward" size="14"
+      ><image src="/static/icons/forward.svg" mode="aspectFit"
     /></view>
   </view>
 </template>
@@ -74,5 +74,9 @@ defineEmits<{ tap: [] }>();
   color: #467e58;
   font-size: 22rpx;
   white-space: nowrap;
+}
+.action image {
+  width: 28rpx;
+  height: 28rpx;
 }
 </style>

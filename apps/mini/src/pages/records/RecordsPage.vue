@@ -16,7 +16,7 @@
         :class="['tab', { active: activeType === item.type }]"
         @tap="activeType = item.type"
       >
-        <icon :type="item.icon" size="17" /><text>{{ item.label }}</text>
+        <text>{{ item.label }}</text>
       </button></view
     >
     <XuxuHint
@@ -135,11 +135,11 @@ const activityMinutes = ref('');
 const sleepMinutes = ref('');
 const sleepQuality = ref<SleepQuality>('good');
 const editingId = ref<string | null>(null);
-const types: Array<{ type: HealthRecordType; label: string; icon: string }> = [
-  { type: 'weight', label: '体重', icon: 'info_circle' },
-  { type: 'meal-structure', label: '饮食', icon: 'success_no_circle' },
-  { type: 'activity', label: '活动', icon: 'waiting' },
-  { type: 'sleep', label: '睡眠', icon: 'info_circle' },
+const types: Array<{ type: HealthRecordType; label: string }> = [
+  { type: 'weight', label: '体重' },
+  { type: 'meal-structure', label: '饮食' },
+  { type: 'activity', label: '活动' },
+  { type: 'sleep', label: '睡眠' },
 ];
 const mealTypes: Array<{ value: MealType; label: string }> = [
   { value: 'breakfast', label: '早餐' },

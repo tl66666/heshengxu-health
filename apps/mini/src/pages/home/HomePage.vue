@@ -20,17 +20,10 @@
         action-label="开始这一步"
         @action="go(experience.hero.route)"
       />
-      <XuxuHint
-        class="hint"
-        variant="sunny"
-        :message="xuxuMessage"
-        action="听序序说"
-        @tap="toXuxu"
-      />
       <button class="chat-entry" @tap="toXuxu">
         <image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
         <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
-        <text class="chat-entry-arrow">进入</text>
+        <image class="chat-entry-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
       <view class="section-head"
         ><text>今天只做这几件小事</text><text>{{ experience.tasks.length }} 件待完成</text></view
@@ -40,7 +33,7 @@
           <view class="task-dot" /><view class="task-copy"
             ><text>{{ task.title }}</text
             ><text>{{ task.subtitle }}</text></view
-          ><icon type="forward" size="16" class="forward-icon" /></button
+          ><image src="/static/icons/forward.svg" mode="aspectFit" class="forward-icon" /></button
       ></view>
       <view v-else class="done"
         ><image src="/static/illustrations/xuxu-complete.png" mode="aspectFill" /><view
@@ -67,7 +60,7 @@
         <view
           ><text>{{ today.activePlan ? '正在执行的计划' : '从这里设置计划' }}</text
           ><text>{{ planText }}</text></view
-        ><icon type="forward" size="16" class="forward-icon" />
+        ><image src="/static/icons/forward.svg" mode="aspectFit" class="forward-icon" />
       </button>
     </template>
     <view v-else-if="error" class="load-failed"
@@ -84,7 +77,6 @@
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import IllustratedHero from '../../components/IllustratedHero.vue';
-import XuxuHint from '../../components/XuxuHint.vue';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
@@ -97,9 +89,6 @@ const greeting =
 const dateLabel = `${new Date().getMonth() + 1} 月 ${new Date().getDate()} 日 · 今天`;
 const displayName = computed(() => today.value?.displayName || '朋友');
 const experience = computed(() => (today.value ? deriveDailyExperience(today.value) : null));
-const xuxuMessage = computed(
-  () => experience.value?.recording.message || '从一件小事开始，就很好。',
-);
 const planText = computed(() =>
   today.value?.activePlan
     ? '今天的小行动正在等你慢慢完成。'
@@ -206,10 +195,13 @@ onShow(() => {
   font-weight: 400;
 }
 .chat-entry-arrow {
-  color: #8b7d4b;
-  font-size: 22rpx;
+  width: 34rpx;
+  height: 34rpx;
+  opacity: 0.78;
 }
 .forward-icon {
+  width: 34rpx;
+  height: 34rpx;
   flex: none;
   opacity: 0.7;
 }

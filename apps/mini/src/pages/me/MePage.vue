@@ -17,7 +17,7 @@
         <icon type="info_circle" size="18" class="row-icon" /><view
           ><text>{{ item.label }}</text
           ><text>{{ item.desc }}</text></view
-        ><icon type="forward" size="16" />
+        ><image class="forward-icon" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
     </view>
     <view class="group"
@@ -164,6 +164,11 @@ onShow(() => healthLoopState.loadToday(date));
 }
 .row-icon {
   opacity: 0.75;
+}
+.forward-icon {
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.7;
 }
 .row view {
   flex: 1;

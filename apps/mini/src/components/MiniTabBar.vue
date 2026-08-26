@@ -7,7 +7,7 @@
       :class="{ active: active === item.key }"
       @tap="switchTab(item.path)"
     >
-      <icon class="native-icon" :type="item.icon" size="23" />
+      <image class="tab-icon" :src="item.icon" mode="aspectFit" />
       <text>{{ item.label }}</text>
     </button>
     <button
@@ -27,7 +27,7 @@
       :class="{ active: active === item.key }"
       @tap="switchTab(item.path)"
     >
-      <icon class="native-icon" :type="item.icon" size="23" />
+      <image class="tab-icon" :src="item.icon" mode="aspectFit" />
       <text>{{ item.label }}</text>
     </button>
   </view>
@@ -37,10 +37,15 @@
 defineProps<{ active: 'home' | 'records' | 'xuxu' | 'plan' | 'me' }>();
 
 const items = [
-  { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: 'info_circle' },
-  { key: 'records', path: '/pages/records/RecordsPage', label: '记录', icon: 'waiting' },
-  { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: 'success_no_circle' },
-  { key: 'me', path: '/pages/me/MePage', label: '我的', icon: 'clear' },
+  { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: '/static/icons/home.svg' },
+  {
+    key: 'records',
+    path: '/pages/records/RecordsPage',
+    label: '记录',
+    icon: '/static/icons/journal.svg',
+  },
+  { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: '/static/icons/plan.svg' },
+  { key: 'me', path: '/pages/me/MePage', label: '我的', icon: '/static/icons/profile.svg' },
 ] as const;
 const xuxu = { path: '/pages/xuxu/XuxuPage' };
 
@@ -80,10 +85,12 @@ function switchTab(url: string) {
   font-size: 20rpx;
   line-height: 1;
 }
-.native-icon {
-  opacity: 0.65;
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
+  opacity: 0.62;
 }
-.active .native-icon {
+.active .tab-icon {
   opacity: 1;
 }
 .active {
@@ -101,7 +108,7 @@ function switchTab(url: string) {
   border: 4rpx solid #f0da8c;
   border-radius: 50%;
   background: #fffdf1;
-  box-shadow: 0 8rpx 18rpx rgba(90, 74, 27, 0.16);
+  box-shadow: 0 6rpx 14rpx rgba(90, 74, 27, 0.14);
 }
 .xuxu-orbit image {
   width: 100%;
