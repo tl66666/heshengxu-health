@@ -1,5 +1,7 @@
 # 文档导航
 
+工程整理从阶段 0.1 开始执行，入口文档为 [代码库治理规范](architecture/codebase-governance.md) 和 [阶段 0.1 实施计划](superpowers/plans/2026-08-26-engineering-structure-cleanup.md)。
+
 ## 当前有效
 
 - `product/heshengxu-product-blueprint.md`：产品范围、数据边界与素材用途

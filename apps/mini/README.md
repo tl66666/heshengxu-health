@@ -4,6 +4,13 @@
 
 静态 Demo 在 `prototypes/web-demo/`，图片源统一在仓库根目录 `assets/illustrations/`；不会把 Demo 直接当作正式页面实现。
 
+## 源码边界
+
+- 页面组合放在 `src/pages/`，跨页面展示组件放在 `src/components/`。
+- 健康业务状态和请求编排放在 `src/features/health-loop/`；通用请求 transport 放在 `src/services/`。
+- 底部导航唯一源码实现是 `src/components/MiniTabBar.vue`；不要重新创建 `custom-tab-bar/` 或在页面里复制导航模板。
+- `src/static/illustrations/` 是图片同步缓存，`dist/` 是构建产物，均不手工维护。
+
 ## 本地命令
 
 ```powershell

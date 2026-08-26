@@ -25,6 +25,11 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
+if (existsSync(resolve(root, 'custom-tab-bar'))) {
+  console.error('微信构建产物包含已废弃的 custom-tab-bar 目录，请清空 dist 后重新构建。');
+  process.exit(1);
+}
+
 const app = JSON.parse(readFileSync(resolve(root, 'app.json'), 'utf8'));
 if (!Array.isArray(app.pages) || app.pages.length < 3) {
   console.error('app.json 页面数量异常，请确认 uni-app 构建是否完整。');

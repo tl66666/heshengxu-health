@@ -1,5 +1,7 @@
 # 项目结构规范
 
+> 当前唯一有效的工程边界见 [代码库治理规范](../architecture/codebase-governance.md)。历史阶段计划只用于追溯，不作为新增代码的放置依据。
+
 ```text
 apps/mini/                 uni-app 小程序源码
 apps/mini/src/pages/       页面，只负责页面展示和交互

@@ -9,6 +9,7 @@
     "prebuild:mp-weixin": "node ../../scripts/sync-illustrations.mjs",
     "build:mp-weixin": "uni build -p mp-weixin",
     "build:mp-weixin:check": "pnpm build:mp-weixin && node ../../scripts/verify-mini-build.mjs",
+    "check:layout": "node ../../scripts/verify-repository-layout.mjs",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit"
   },
