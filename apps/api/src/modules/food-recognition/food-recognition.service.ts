@@ -3,6 +3,7 @@ import { PrismaService } from '../../common/database/prisma.service.js';
 import { MealEntriesService } from '../meal-entries/meal-entries.service.js';
 import type { FoodRecognitionProvider } from './providers/food-recognition.provider.js';
 import type { ConfirmFoodRecognitionDto } from './food-recognition.dto.js';
+import { recognitionJobDto } from './food-recognition.mapper.js';
 
 @Injectable()
 export class FoodRecognitionService {
@@ -13,6 +14,7 @@ export class FoodRecognitionService {
   ) {}
 
   async create(userId: string, imageKey: string) {
+    await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
     const job = await this.prisma.foodRecognitionJob.create({ data: { userId, imageKey, status: 'processing' } });
     try {
       const rawCandidates = await this.provider.recognize({ imageKey });
@@ -22,7 +24,7 @@ export class FoodRecognitionService {
         candidates.push({ jobId: job.id, foodId: food?.id, nameSnapshot: raw.name, confidence: raw.confidence, estimatedGrams: raw.estimatedGrams, rank: index + 1 });
       }
       await this.prisma.foodRecognitionCandidate.createMany({ data: candidates });
-      return this.prisma.foodRecognitionJob.update({ where: { id: job.id }, data: { status: 'succeeded' }, include: { candidates: true } });
+      return recognitionJobDto(await this.prisma.foodRecognitionJob.update({ where: { id: job.id }, data: { status: 'succeeded' }, include: { candidates: true } }));
     } catch (error) {
       await this.prisma.foodRecognitionJob.update({ where: { id: job.id }, data: { status: 'failed', errorMessage: error instanceof Error ? error.message : '识别失败' } });
       throw error;
@@ -32,7 +34,7 @@ export class FoodRecognitionService {
   async get(userId: string, jobId: string) {
     const job = await this.prisma.foodRecognitionJob.findFirst({ where: { id: jobId, userId }, include: { candidates: true } });
     if (!job) throw new NotFoundException('识别任务不存在');
-    return job;
+    return recognitionJobDto(job);
   }
 
   async confirm(userId: string, dto: ConfirmFoodRecognitionDto) {

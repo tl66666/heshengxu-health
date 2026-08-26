@@ -4,7 +4,7 @@ import type { MealType } from './food.types.js';
 export type RecognitionCandidate = {
   id: string;
   foodId: string | null;
-  nameSnapshot: string;
+  name: string;
   confidence: number;
   estimatedGrams: number;
   rank: number;
