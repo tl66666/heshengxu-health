@@ -12,6 +12,7 @@ import {
   savePlan as savePlanRequest,
   type RecordRequest,
 } from './health-loop.service.js';
+import { completeLocalTask, createLocalDailyHome, saveLocalPlan } from './local-demo.js';
 
 const today = ref<DailyHomeDto | null>(null);
 const plan = ref<PersonalPlanDto | null>(null);
@@ -31,6 +32,12 @@ export const healthLoopState = {
       plan.value = today.value.activePlan;
     } catch (reason) {
       error.value = reason instanceof Error ? reason.message : '暂时无法加载今日状态';
+      const localToday = createLocalDailyHome(date);
+      if (localToday) {
+        today.value = localToday;
+        plan.value = localToday.activePlan;
+        error.value = null;
+      }
     } finally {
       loading.value = false;
     }
@@ -39,7 +46,11 @@ export const healthLoopState = {
     plan.value = await loadPlan(date);
   },
   async savePlan(data: Parameters<typeof savePlanRequest>[0], date: string) {
-    plan.value = await savePlanRequest(data);
+    try {
+      plan.value = await savePlanRequest(data);
+    } catch {
+      plan.value = saveLocalPlan(data);
+    }
     await this.loadToday(date);
   },
   async createRecord(request: RecordRequest, date: string) {
@@ -56,7 +67,11 @@ export const healthLoopState = {
     await this.loadToday(date);
   },
   async completeTask(taskId: string, date: string) {
-    await completeTaskRequest(taskId);
+    try {
+      await completeTaskRequest(taskId);
+    } catch {
+      completeLocalTask(taskId);
+    }
     await this.loadToday(date);
   },
 };

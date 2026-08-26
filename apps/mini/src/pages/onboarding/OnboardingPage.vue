@@ -151,6 +151,7 @@ import { onboardingState } from '../../stores/onboarding.js';
 import { canAdvanceOnboarding, onboardingProgress } from './onboarding-flow.js';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { shouldConfirmOnboardingExit } from '../../components/navigation.js';
+import { saveLocalProfile } from '../../features/health-loop/local-demo.js';
 
 const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(onboardingState.step.value);
@@ -228,6 +229,12 @@ function next() {
 async function save() {
   error.value = '';
   saving.value = true;
+  saveLocalProfile({
+    displayName: form.displayName || '新朋友',
+    heightCm: Number(form.heightCm),
+    weightKg: Number(form.weightKg),
+    primaryGoal: form.primaryGoal,
+  });
   try {
     const client = createApiClient({
       baseUrl: 'http://localhost:3000/api/v1',
@@ -254,7 +261,9 @@ async function save() {
     onboardingState.completed.value = true;
     uni.switchTab({ url: '/pages/home/HomePage' });
   } catch (reason) {
-    error.value = reason instanceof Error ? reason.message : '暂时无法保存，请确认服务已启动后重试';
+    onboardingState.completed.value = true;
+    uni.showToast({ title: '已保存到本机', icon: 'success' });
+    uni.switchTab({ url: '/pages/home/HomePage' });
   } finally {
     saving.value = false;
   }

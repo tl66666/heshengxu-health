@@ -19,6 +19,7 @@
 import { onShow } from '@dcloudio/uni-app';
 import { createApiClient } from '../../services/api-client.js';
 import { onboardingState } from '../../stores/onboarding.js';
+import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
 
 onShow(async () => {
   const client = createApiClient({
@@ -48,7 +49,11 @@ onShow(async () => {
       return;
     }
   } catch {
-    // Offline local development still enters the guided onboarding flow.
+    if (loadLocalProfile()) {
+      onboardingState.completed.value = true;
+      uni.switchTab({ url: '/pages/home/HomePage' });
+      return;
+    }
   }
   uni.redirectTo({ url: '/pages/onboarding/OnboardingPage' });
 });
