@@ -18,8 +18,14 @@ export type RecognitionJob = {
   errorMessage: string | null;
 };
 
-export function defaultRecognitionCandidateId(candidates: Array<Pick<RecognitionCandidate, 'id' | 'rank'>>) {
+export function defaultRecognitionCandidateId(
+  candidates: Array<Pick<RecognitionCandidate, 'id' | 'rank'>>,
+) {
   return [...candidates].sort((left, right) => left.rank - right.rank)[0]?.id || '';
+}
+
+export function canStartRecognition(imagePath: string, hasConsent: boolean) {
+  return Boolean(imagePath) && hasConsent;
 }
 
 function client() {
@@ -32,7 +38,8 @@ function client() {
           method: method as never,
           data: data as Record<string, unknown>,
           header: { Authorization: 'Bearer dev-mini-user' },
-          success: (response) => resolve({ statusCode: response.statusCode, data: response.data as never }),
+          success: (response) =>
+            resolve({ statusCode: response.statusCode, data: response.data as never }),
           fail: reject,
         });
       }),
@@ -43,10 +50,20 @@ export function createRecognitionJob(imageKey: string) {
   return client().post<RecognitionJob>('/food-recognition/jobs', { imageKey });
 }
 
+export function grantFoodRecognitionConsent() {
+  return client().post('/food-recognition/consents', {});
+}
+
 export function loadRecognitionJob(jobId: string) {
   return client().get<RecognitionJob>(`/food-recognition/jobs/${encodeURIComponent(jobId)}`);
 }
 
-export function confirmRecognition(input: { candidateId: string; mealType: MealType; grams: number; recordedAt: string; note?: string }) {
+export function confirmRecognition(input: {
+  candidateId: string;
+  mealType: MealType;
+  grams: number;
+  recordedAt: string;
+  note?: string;
+}) {
   return client().post('/food-recognition/confirm', input);
 }

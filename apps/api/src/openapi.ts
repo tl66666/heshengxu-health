@@ -59,6 +59,18 @@ const document = {
     '/health-insights/weekly': {
       get: protectedOperation('Weekly health review', 'Aggregates only current, user-owned records for the requested week.'),
     },
+    '/food-recognition/consents': {
+      post: protectedOperation('Authorize food recognition', 'Records explicit user authorization before a selected image can be sent to a recognition provider.'),
+    },
+    '/food-recognition/jobs': {
+      post: protectedOperation('Create food recognition job', 'Creates candidate food suggestions only after explicit authorization.'),
+    },
+    '/food-recognition/jobs/{jobId}': {
+      get: protectedOperation('Read food recognition job', 'Returns only the current users recognition job and editable candidates.'),
+    },
+    '/food-recognition/confirm': {
+      post: protectedOperation('Confirm food recognition candidate', 'Creates a meal entry only after the user confirms a candidate and serving size.'),
+    },
     '/foods/search': {
       get: protectedOperation('搜索食品', '只返回启用的食品及其营养和可选份量'),
     },
