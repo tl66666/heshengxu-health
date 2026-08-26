@@ -8,10 +8,22 @@
       <button :class="['choice', { selected: kind === 'weight' }]" @tap="kind = 'weight'">
         <image src="/static/illustrations/program-weight.png" mode="aspectFill" />
         <view><text>体重管理</text><text>从规律记录与小行动开始</text></view>
+        <image
+          v-if="kind === 'weight'"
+          class="choice-check"
+          src="/static/icons/check.svg"
+          mode="aspectFit"
+        />
       </button>
       <button :class="['choice', { selected: kind === 'sleep' }]" @tap="kind = 'sleep'">
         <image src="/static/illustrations/program-sleep.png" mode="aspectFill" />
         <view><text>睡眠与精力</text><text>先找回更稳定的作息</text></view>
+        <image
+          v-if="kind === 'sleep'"
+          class="choice-check"
+          src="/static/icons/check.svg"
+          mode="aspectFit"
+        />
       </button>
     </view>
     <view v-if="kind === 'weight'" class="panel">
@@ -138,6 +150,11 @@ function localDate() {
   width: 170rpx;
   height: 122rpx;
   flex: none;
+}
+.choice .choice-check {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 18rpx;
 }
 .choice view text {
   display: block;

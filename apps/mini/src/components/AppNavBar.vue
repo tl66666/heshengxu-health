@@ -1,8 +1,9 @@
 <template>
   <view class="nav-bar">
-    <button class="back" aria-label="返回" @tap="back">
+    <button v-if="!backDisabled" class="back" aria-label="返回" @tap="back">
       <image src="/static/icons/back.svg" mode="aspectFit" /><text>返回</text>
     </button>
+    <view v-else class="placeholder" />
     <text class="title">{{ title }}</text>
     <button v-if="closeLabel" class="close" aria-label="退出" @tap="close">
       <image src="/static/icons/close.svg" mode="aspectFit" /><text>{{ closeLabel }}</text>
@@ -18,6 +19,7 @@ const props = defineProps<{
   title: string;
   route: string;
   closeLabel?: string;
+  backDisabled?: boolean;
   backMode?: 'navigate' | 'emit';
 }>();
 const emit = defineEmits<{ close: []; back: [] }>();

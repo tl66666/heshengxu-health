@@ -3,6 +3,7 @@
     <AppNavBar
       title="开始了解自己"
       close-label="退出"
+      :back-disabled="step === 0"
       route="/pages/onboarding/OnboardingPage"
       back-mode="emit"
       @back="back"
@@ -274,19 +275,21 @@ async function save() {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 52rpx 40rpx 90rpx;
+  overflow-x: hidden;
+  padding: 28rpx 32rpx 76rpx;
   background: #f7fbf8;
   color: #183425;
 }
 .welcome-art {
-  width: calc(100% + 80rpx);
-  height: 450rpx;
-  margin: -52rpx -40rpx 0;
+  width: 100%;
+  height: 338rpx;
+  margin: 0;
+  border-radius: 20rpx;
 }
 .welcome-copy {
-  margin-top: -42rpx;
-  padding: 34rpx 4rpx 0;
-  border-radius: 30rpx 30rpx 0 0;
+  margin-top: -20rpx;
+  padding: 26rpx 20rpx 0;
+  border-radius: 20rpx 20rpx 0 0;
   background: #f7fbf8;
   position: relative;
 }
@@ -326,7 +329,7 @@ async function save() {
   font-weight: 700;
 }
 .welcome-copy .brand {
-  margin-top: 44rpx;
+  margin-top: 24rpx;
 }
 .title {
   margin-top: 13rpx;
@@ -337,14 +340,14 @@ async function save() {
 .welcome-title {
   display: block;
   margin-top: 12rpx;
-  font-size: 44rpx;
+  font-size: 42rpx;
   font-weight: 700;
   line-height: 1.24;
 }
 .hint {
   margin-top: 16rpx;
   color: #687f71;
-  font-size: 26rpx;
+  font-size: 24rpx;
   line-height: 1.6;
 }
 .disclaimer {
@@ -355,7 +358,7 @@ async function save() {
   line-height: 1.55;
 }
 .head {
-  margin-bottom: 38rpx;
+  margin-bottom: 32rpx;
 }
 .progress {
   height: 8rpx;
