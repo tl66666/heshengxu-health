@@ -8,6 +8,10 @@ import { FoodRecognitionController } from './food-recognition.controller.js';
 import { FoodRecognitionService } from './food-recognition.service.js';
 import { MockFoodRecognitionProvider } from './providers/mock-food-recognition.provider.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
+import {
+  resolveFoodRecognitionRuntimeConfig,
+  type FoodRecognitionRuntimeConfig,
+} from './food-recognition-runtime.config.js';
 import { MockRecognitionImageStorage } from './storage/mock-recognition-image-storage.js';
 
 @Module({
@@ -21,8 +25,26 @@ import { MockRecognitionImageStorage } from './storage/mock-recognition-image-st
     MockFoodRecognitionProvider,
     MockRecognitionImageStorage,
     PrismaAiTraceRepository,
-    { provide: 'FoodRecognitionProvider', useExisting: MockFoodRecognitionProvider },
-    { provide: 'RecognitionImageStorage', useExisting: MockRecognitionImageStorage },
+    {
+      provide: 'FoodRecognitionRuntimeConfig',
+      useFactory: () => resolveFoodRecognitionRuntimeConfig(),
+    },
+    {
+      provide: 'FoodRecognitionProvider',
+      useFactory: (config: FoodRecognitionRuntimeConfig, mock: MockFoodRecognitionProvider) => {
+        if (config.visionProvider === 'mock') return mock;
+        throw new Error('Hunyuan food-recognition provider is not deployed in this runtime.');
+      },
+      inject: ['FoodRecognitionRuntimeConfig', MockFoodRecognitionProvider],
+    },
+    {
+      provide: 'RecognitionImageStorage',
+      useFactory: (config: FoodRecognitionRuntimeConfig, mock: MockRecognitionImageStorage) => {
+        if (config.storageProvider === 'mock') return mock;
+        throw new Error('CloudBase food-recognition storage is not deployed in this runtime.');
+      },
+      inject: ['FoodRecognitionRuntimeConfig', MockRecognitionImageStorage],
+    },
     {
       provide: AiAuditService,
       useFactory: (repository: PrismaAiTraceRepository) => new AiAuditService(repository),

@@ -11,6 +11,8 @@
 
 本项目当前以 NestJS + PostgreSQL 为本地事实后端。微信云开发不是本地 API 的前置条件；只有未来把服务部署到腾讯云时，才按部署方案启用云函数、云数据库或云存储。
 
+食物拍照识别当前默认使用本地 mock Provider，用于验证“授权 -> 上传会话 -> 候选 -> 用户确认”的流程。不要在小程序填写 CloudBase、腾讯云或混元密钥。未来服务端适配器部署时，才由服务端运行环境配置 `CLOUDBASE_ENV_ID`、`TENCENTCLOUD_SECRET_ID` 和 `TENCENTCLOUD_SECRET_KEY`；选择 `cloudbase` 或 `hunyuan` 但缺少这些变量时，API 会拒绝启动。
+
 ```powershell
 Copy-Item .env.example .env
 docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
