@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <image class="hero" src="/static/illustrations/onboarding-hero-vertical.png" mode="aspectFit" />
+    <image class="hero" src="/static/illustrations/onboarding-hero-vertical.png" mode="aspectFill" />
     <view class="wash" />
     <view class="copy">
       <view class="xuxu"
@@ -75,32 +75,31 @@ onShow(async () => {
 }
 .hero {
   background: #fffdf5;
+  object-position: center bottom;
 }
 .wash {
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(248, 253, 246, 0) 42%,
-    rgba(248, 253, 246, 0.08) 58%,
-    rgba(248, 253, 246, 0.54) 82%,
-    rgba(248, 253, 246, 0.82) 100%
+    rgba(248, 253, 246, 0) 38%,
+    rgba(248, 253, 246, 0.05) 52%,
+    rgba(248, 253, 246, 0.46) 76%,
+    rgba(248, 253, 246, 0.94) 100%
   );
 }
 .copy {
   position: absolute;
-  right: 52rpx;
-  bottom: 104rpx;
-  left: 52rpx;
-  padding: 22rpx 20rpx 24rpx;
-  border-radius: 26rpx;
-  background: rgba(250, 253, 247, 0.84);
-  box-shadow: 0 12rpx 34rpx rgba(72, 103, 76, 0.08);
+  right: 42rpx;
+  bottom: 72rpx;
+  left: 42rpx;
+  padding: 12rpx 10rpx 8rpx;
+  background: transparent;
 }
 .xuxu {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  margin-bottom: 22rpx;
+  margin-bottom: 16rpx;
   color: #496b55;
   font-size: 23rpx;
   font-weight: 700;
@@ -122,14 +121,14 @@ onShow(async () => {
   font-weight: 700;
 }
 .title {
-  margin-top: 14rpx;
+  margin-top: 12rpx;
   color: #173625;
   font-size: 52rpx;
   font-weight: 700;
   line-height: 1.24;
 }
 .hint {
-  margin-top: 18rpx;
+  margin-top: 14rpx;
   color: #577261;
   font-size: 27rpx;
   line-height: 1.6;
