@@ -23,4 +23,8 @@ export class CreateMealEntryDto {
   @IsString()
   @MaxLength(280)
   note?: string;
+
+  @IsOptional()
+  @IsEnum(['manual', 'photo_confirmed'])
+  source?: 'manual' | 'photo_confirmed';
 }

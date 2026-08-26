@@ -22,6 +22,7 @@ model User {
   activityRecords      ActivityRecord[]
   sleepRecords         SleepRecord[]
   mealEntries          MealEntry[]
+  foodRecognitionJobs  FoodRecognitionJob[]
 }
 
 model FoodCategory {
@@ -48,6 +49,7 @@ model FoodItem {
   nutrition     FoodNutrition?
   servings      FoodServing[]
   mealEntries   MealEntry[]
+  recognitionCandidates FoodRecognitionCandidate[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -114,6 +116,36 @@ model MealEntry {
 
   @@index([userId, recordedAt])
   @@index([userId, mealType, recordedAt])
+}
+
+model FoodRecognitionJob {
+  id           String                    @id @default(cuid())
+  userId       String
+  imageKey     String
+  status       FoodRecognitionJobStatus  @default(queued)
+  errorMessage String?
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  candidates   FoodRecognitionCandidate[]
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
+}
+
+model FoodRecognitionCandidate {
+  id             String             @id @default(cuid())
+  jobId          String
+  foodId         String?
+  nameSnapshot   String
+  confidence     Float
+  estimatedGrams Float
+  rank           Int
+  job            FoodRecognitionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  food           FoodItem?          @relation(fields: [foodId], references: [id], onDelete: SetNull)
+
+  @@unique([jobId, rank])
+  @@index([jobId])
 }
 
 model ExternalIdentity {
@@ -357,6 +389,14 @@ enum MealType {
 enum MealEntrySource {
   manual
   photo_confirmed
+}
+
+enum FoodRecognitionJobStatus {
+  queued
+  processing
+  succeeded
+  failed
+  confirmed
 }
 
 enum SleepQuality {
