@@ -22,6 +22,8 @@ pnpm --filter @heban/mini build:mp-weixin:check
 
 ## 微信开发者工具导入
 
+开发和发布只使用一套构建产物，不要同时保留或切换旧目录。日常改代码不需要手动执行 `build`：开发监听会自动编译，微信工具只需点击“重新编译”。
+
 ### 日常开发（推荐）
 
 先在仓库根目录运行：
@@ -34,10 +36,23 @@ pnpm --filter @heban/mini build:mp-weixin:check
 
 ### 发布前构建
 
+先关闭开发监听窗口，再运行：
+
 ```powershell
 ./scripts/build-mini.ps1
 ```
 
 发布预览时直接导入 `apps/mini/dist/build/mp-weixin`。不要导入仓库根目录，也不要把 `apps/mini/src` 当作原生微信小程序项目。源码使用 `pages.json`，微信端 `app.json` 由构建自动生成。
+
+### 目录混乱时
+
+在仓库根目录执行：
+
+```powershell
+pnpm --filter @heban/mini clean:dist
+./scripts/dev-mini.ps1
+```
+
+然后在微信开发者工具删除旧项目，重新导入 `apps/mini`。日常开发只保留 `dist/dev/mp-weixin`；发布前才会生成 `dist/build/mp-weixin`。
 
 `manifest.json` 中的 AppID 当前为空，发布前再填入微信公众平台申请的正式 AppID；AppSecret 不进入小程序工程或 Git 仓库。

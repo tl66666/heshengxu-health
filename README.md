@@ -8,7 +8,7 @@
 
 ## 小程序快速开始
 
-安装依赖后启动开发监听：
+安装依赖后启动开发监听（以后改源码会自动编译，不需要每次手动 build）：
 
 ```powershell
 pnpm install
@@ -18,6 +18,8 @@ pnpm install
 微信开发者工具导入 `apps/mini`（只需一次）。开发配置会自动使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可看到最新页面。
 
 发布预览前运行 `./scripts/build-mini.ps1`，再直接导入 `apps/mini/dist/build/mp-weixin`。
+
+开发时只使用 `apps/mini`；发布时才使用 `dist/build/mp-weixin`。如果两个目录同时存在导致混乱，先运行 `pnpm --filter @heban/mini clean:dist`，再运行 `./scripts/dev-mini.ps1`。
 
 ## 仓库结构
 
