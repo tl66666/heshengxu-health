@@ -5,14 +5,14 @@
       <image class="header-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
     </view>
 
-    <view class="profile-line">
+    <button class="profile-line" @tap="openProfile">
       <image class="profile-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
       <view class="profile-copy"
         ><text class="profile-name">{{ displayName }}</text
         ><text class="profile-subtitle">{{ profileText }}</text></view
       >
       <image class="forward-icon" src="/static/icons/forward.svg" mode="aspectFit" />
-    </view>
+    </button>
 
     <view class="group">
       <text class="group-title">健康管理</text>
@@ -28,14 +28,14 @@
 
     <view class="group">
       <text class="group-title">数据与隐私</text>
-      <view v-for="item in dataItems" :key="item.label" class="row row-disabled">
+      <button v-for="item in dataItems" :key="item.label" class="row" @tap="item.action">
         <view class="row-icon"><image :src="item.icon" mode="aspectFit" /></view>
         <view class="row-copy"
           ><text class="row-title">{{ item.label }}</text
           ><text class="row-desc">{{ item.desc }}</text></view
         >
-        <text class="pending">即将开放</text>
-      </view>
+        <image class="forward-icon" src="/static/icons/forward.svg" mode="aspectFit" />
+      </button>
     </view>
 
     <text class="foot">和生序提供健康管理参考，不提供疾病诊断或治疗建议。</text>
@@ -60,7 +60,7 @@ const healthItems = [
     label: '我的健康档案',
     desc: '基础资料与健康目标',
     icon: '/static/icons/profile.svg',
-      action: () => uni.navigateTo({ url: '/pages/profile/ProfilePage' }),
+    action: () => uni.navigateTo({ url: '/pages/profile/ProfilePage' }),
   },
   {
     label: '调整当前计划',
@@ -76,9 +76,29 @@ const healthItems = [
   },
 ];
 const dataItems = [
-  { label: '我的健康数据', desc: '记录只用于你的健康管理', icon: '/static/icons/journal.svg' },
-  { label: '数据导出与删除', desc: '数据管理能力会在后续开放', icon: '/static/icons/profile.svg' },
+  {
+    label: '我的健康数据',
+    desc: '记录只用于你的健康管理',
+    icon: '/static/icons/journal.svg',
+    action: () => uni.switchTab({ url: '/pages/records/RecordsPage' }),
+  },
+  {
+    label: '数据导出与删除',
+    desc: '查看当前版本的数据管理范围',
+    icon: '/static/icons/profile.svg',
+    action: manageData,
+  },
 ];
+function openProfile() {
+  uni.navigateTo({ url: '/pages/profile/ProfilePage' });
+}
+function manageData() {
+  uni.showModal({
+    title: '数据管理',
+    content: '当前版本支持查看和修改自己的健康记录。导出与彻底删除功能将在身份认证接入后开放。',
+    showCancel: false,
+  });
+}
 function notice(label: string) {
   uni.showToast({ title: `${label}正在准备中`, icon: 'none' });
 }
@@ -129,6 +149,11 @@ onShow(() => healthLoopState.loadToday(date));
   gap: 18rpx;
   padding: 20rpx 0 26rpx;
   border-bottom: 1rpx solid #dfeae0;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  text-align: left;
+  background: transparent;
 }
 .profile-avatar {
   width: 86rpx;
@@ -175,8 +200,12 @@ onShow(() => healthLoopState.loadToday(date));
   width: 100%;
   min-height: 88rpx;
   padding: 14rpx 2rpx;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
   border-bottom: 1rpx solid #e2ebe3;
   text-align: left;
+  background: transparent;
 }
 .row-icon {
   display: flex;
@@ -207,13 +236,6 @@ onShow(() => healthLoopState.loadToday(date));
   margin-top: 4rpx;
   color: #7b9181;
   font-size: 21rpx;
-}
-.pending {
-  color: #9aa99d;
-  font-size: 20rpx;
-}
-.row-disabled {
-  opacity: 0.68;
 }
 .foot {
   display: block;

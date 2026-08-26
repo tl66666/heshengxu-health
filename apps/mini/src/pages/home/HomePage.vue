@@ -25,6 +25,24 @@
         <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
         <image class="chat-entry-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
+      <view class="quick-section">
+        <view class="section-head quick-head"><text>现在就做</text><text>选一个开始</text></view>
+        <view class="quick-grid">
+          <button
+            v-for="item in homeQuickActions"
+            :key="item.label"
+            class="quick-action"
+            @tap="go(item.route)"
+          >
+            <view class="quick-icon"><image :src="item.icon" mode="aspectFit" /></view>
+            <view class="quick-copy"
+              ><text>{{ item.label }}</text
+              ><text>{{ item.detail }}</text></view
+            >
+            <image class="quick-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          </button>
+        </view>
+      </view>
       <view class="section-head"
         ><text>今天只做这几件小事</text><text>{{ experience.tasks.length }} 件待完成</text></view
       >
@@ -81,6 +99,7 @@ import MiniTabBar from '../../components/MiniTabBar.vue';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { onboardingState } from '../../stores/onboarding.js';
+import { homeQuickActions } from './home-actions.js';
 
 const { today, loading, error } = healthLoopState;
 const date = localDate();
@@ -200,6 +219,72 @@ onShow(() => {
   width: 34rpx;
   height: 34rpx;
   opacity: 0.78;
+}
+.quick-section {
+  margin-top: 26rpx;
+}
+.quick-head {
+  margin-top: 0;
+  margin-bottom: 12rpx;
+}
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10rpx;
+}
+.quick-action {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 104rpx;
+  padding: 14rpx 12rpx;
+  border: 1rpx solid #dfeae0;
+  border-radius: 16rpx;
+  text-align: left;
+  background: #fff;
+}
+.quick-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54rpx;
+  height: 54rpx;
+  flex: none;
+  border-radius: 16rpx;
+  background: #edf6ee;
+}
+.quick-icon image {
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.78;
+}
+.quick-copy {
+  min-width: 0;
+  flex: 1;
+  margin-left: 10rpx;
+}
+.quick-copy text {
+  display: block;
+  overflow: hidden;
+  color: #31543e;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quick-copy text:first-child {
+  font-size: 23rpx;
+  font-weight: 700;
+}
+.quick-copy text:last-child {
+  margin-top: 5rpx;
+  color: #82988a;
+  font-size: 18rpx;
+}
+.quick-arrow {
+  width: 26rpx;
+  height: 26rpx;
+  flex: none;
+  margin-left: 5rpx;
+  opacity: 0.62;
 }
 .forward-icon {
   width: 34rpx;
