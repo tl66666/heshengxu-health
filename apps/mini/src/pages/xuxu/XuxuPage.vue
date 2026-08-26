@@ -41,7 +41,7 @@ function localDate() {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 38rpx 32rpx 164rpx;
+  padding: 46rpx 32rpx 214rpx;
   background: #f7fbf8;
   color: #1d3d2a;
 }

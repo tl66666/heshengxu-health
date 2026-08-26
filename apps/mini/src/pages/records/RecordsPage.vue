@@ -334,7 +334,7 @@ onShow(() => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 48rpx 32rpx 198rpx;
+  padding: 50rpx 32rpx 220rpx;
   background: #f6faf7;
   color: #244735;
 }
@@ -395,29 +395,32 @@ onShow(() => {
 .type-tabs {
   display: flex;
   gap: 10rpx;
-  margin: 24rpx 0 16rpx;
+  margin: 26rpx 0 18rpx;
+  padding: 6rpx;
+  border-radius: 16rpx;
+  background: #eaf3eb;
 }
 .type-tab {
   flex: 1;
-  height: 68rpx;
-  border: 1rpx solid #dceadd;
-  border-radius: 14rpx;
+  height: 60rpx;
+  border: 0;
+  border-radius: 12rpx;
   color: #64806e;
-  background: #fff;
+  background: transparent;
   font-size: 24rpx;
-  line-height: 68rpx;
+  line-height: 60rpx;
 }
 .type-tab.active {
-  border-color: #6da47b;
   color: #286b47;
-  background: #e8f4e8;
+  background: #fff;
+  box-shadow: 0 3rpx 10rpx rgba(52, 111, 71, 0.08);
   font-weight: 700;
 }
 .form-section {
-  padding: 24rpx;
-  border: 1rpx solid #dceadd;
-  border-radius: 18rpx;
-  background: #fff;
+  padding: 6rpx 0 24rpx;
+  border-top: 1rpx solid #dceadd;
+  border-bottom: 1rpx solid #dceadd;
+  background: transparent;
 }
 .form-heading {
   display: flex;
@@ -466,7 +469,7 @@ onShow(() => {
   width: 100%;
   height: 78rpx;
   border: 1rpx solid #d6e5d8;
-  border-radius: 13rpx;
+  border-radius: 10rpx;
   color: #2d523a;
   background: #fbfdfb;
   font-size: 25rpx;
@@ -501,7 +504,7 @@ onShow(() => {
   min-width: 124rpx;
   padding: 13rpx 16rpx;
   border: 1rpx solid #dceadd;
-  border-radius: 12rpx;
+  border-radius: 10rpx;
   color: #597463;
   background: #fff;
   font-size: 22rpx;

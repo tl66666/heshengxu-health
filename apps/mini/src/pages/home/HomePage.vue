@@ -128,7 +128,7 @@ onShow(() => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 50rpx 32rpx 198rpx;
+  padding: 50rpx 32rpx 220rpx;
   background: #f6faf7;
   color: #183425;
 }
@@ -165,12 +165,12 @@ onShow(() => {
   align-items: center;
   gap: 14rpx;
   width: 100%;
-  margin-top: 16rpx;
-  padding: 18rpx 18rpx;
-  border: 2rpx solid #eadfb6;
-  border-radius: 20rpx;
+  margin-top: 22rpx;
+  padding: 16rpx 2rpx;
+  border-top: 1rpx solid #e7e4ca;
+  border-bottom: 1rpx solid #e7e4ca;
   text-align: left;
-  background: #fffbed;
+  background: transparent;
 }
 .chat-entry image {
   width: 64rpx;
@@ -221,7 +221,7 @@ onShow(() => {
 .tasks {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  border-top: 1rpx solid #e1ebe2;
 }
 .task {
   display: flex;
@@ -229,12 +229,11 @@ onShow(() => {
   gap: 16rpx;
   width: 100%;
   min-height: 92rpx;
-  padding: 16rpx 18rpx;
-  border: 2rpx solid #dceadd;
-  border-radius: 16rpx;
+  padding: 16rpx 2rpx;
+  border-bottom: 1rpx solid #e1ebe2;
   text-align: left;
   color: #284d36;
-  background: #fff;
+  background: transparent;
 }
 .task-dot {
   width: 34rpx;
@@ -260,10 +259,10 @@ onShow(() => {
   display: flex;
   align-items: center;
   gap: 14rpx;
-  padding: 16rpx;
-  border: 2rpx solid #d5e8d9;
-  border-radius: 16rpx;
-  background: #fff;
+  padding: 16rpx 0;
+  border-top: 1rpx solid #d5e8d9;
+  border-bottom: 1rpx solid #d5e8d9;
+  background: transparent;
 }
 .done image {
   width: 92rpx;
@@ -287,13 +286,15 @@ onShow(() => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-top: 22rpx;
-  padding: 20rpx;
-  border: 2rpx solid #dceadd;
-  border-radius: 17rpx;
+  margin-top: 0;
+  padding: 20rpx 2rpx;
+  border-bottom: 1rpx solid #e1ebe2;
   text-align: left;
   color: #31543e;
-  background: #fff;
+  background: transparent;
+}
+.record-summary {
+  border-top: 1rpx solid #e1ebe2;
 }
 .record-summary view,
 .plan-summary view {
