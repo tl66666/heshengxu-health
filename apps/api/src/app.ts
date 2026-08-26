@@ -6,7 +6,10 @@ import { requestIdMiddleware } from './common/http/request-id.middleware.js';
 import { ApiExceptionFilter } from './common/http/api-exception.filter.js';
 
 export async function createApp() {
-  const app = await NestFactory.create(AppModule, { logger: ['error'] });
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error'],
+    abortOnError: false,
+  });
   app.use(requestIdMiddleware);
   app.useGlobalPipes(
     new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }),

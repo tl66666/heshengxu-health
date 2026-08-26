@@ -22,7 +22,7 @@
 - Modify: `apps/api/src/modules/food-recognition/food-recognition.module.ts`
 - Modify: `apps/api/test/food-recognition.e2e-spec.ts`
 
-- [ ] **Step 1: Write failing tests for consent gate and hashed audit**
+- [x] **Step 1: Write failing tests for consent gate and hashed audit**
 
 ```ts
 await client
@@ -41,19 +41,19 @@ await client
 
 The service unit test must assert that the `AiTrace.requestHash` is not the image key and the trace includes `provider` and `model` metadata.
 
-- [ ] **Step 2: Run the focused tests and confirm RED**
+- [x] **Step 2: Run the focused tests and confirm RED**
 
 Run: `node ..\\mini\\node_modules\\vitest\\vitest.mjs run --config vitest.config.ts test/food-recognition.e2e-spec.ts src/modules/food-recognition/food-recognition-consent.service.spec.ts`
 
 Expected: the consent endpoint is `404` and job creation currently succeeds without consent.
 
-- [ ] **Step 3: Add the minimum consent and audit implementation**
+- [x] **Step 3: Add the minimum consent and audit implementation**
 
 Use document version `food-recognition-v1`. `FoodRecognitionConsentService.grant(userId)` must upsert the user and insert a consent only when an equivalent record does not already exist. `assertGranted(userId)` must throw `ForbiddenException` when no such consent exists.
 
 Extend `AiAuditService.record` so callers can supply optional `provider`, `model`, and `safetyReason`, while it still hashes the supplied image-key message. In `FoodRecognitionService.create`, assert consent before provider access, write an `allow` audit trace before recognition, and write a `block` trace for a missing consent. The controller exposes `POST /food-recognition/consents` and never accepts a user ID from the body.
 
-- [ ] **Step 4: Run tests and API type check**
+- [x] **Step 4: Run tests and API type check**
 
 Run: `node ..\\mini\\node_modules\\vitest\\vitest.mjs run --config vitest.config.ts test/food-recognition.e2e-spec.ts src/modules/food-recognition/food-recognition-consent.service.spec.ts`
 
@@ -63,7 +63,7 @@ Run: `node node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsc -
 
 Expected: exit code `0`.
 
-- [ ] **Step 5: Commit the consent boundary**
+- [x] **Step 5: Commit the consent boundary**
 
 ```bash
 git add apps/api/src/modules/ai apps/api/src/modules/food-recognition apps/api/test/food-recognition.e2e-spec.ts
@@ -84,25 +84,25 @@ git commit -m "feat: gate food recognition with consent"
 - Modify: `apps/mini/src/pages/food-recognition/FoodRecognitionPage.vue`
 - Test: `apps/api/test/food-recognition.e2e-spec.ts`
 
-- [ ] **Step 1: Write failing owned-upload tests**
+- [x] **Step 1: Write failing owned-upload tests**
 
 The test must show that an arbitrary `imageKey` is rejected, another user cannot complete or submit an upload, and a completed owned upload can create a recognition job.
 
-- [ ] **Step 2: Run the test and confirm RED**
+- [x] **Step 2: Run the test and confirm RED**
 
 Run: `node ..\\mini\\node_modules\\vitest\\vitest.mjs run --config vitest.config.ts test/food-recognition.e2e-spec.ts`
 
 Expected: no upload route exists and direct image keys are still accepted.
 
-- [ ] **Step 3: Implement storage seam and session routes**
+- [x] **Step 3: Implement storage seam and session routes**
 
 Add a `FoodRecognitionUpload` record with `userId`, unique object key, content type, byte limit, status, expiry, and completion timestamp. The mock adapter creates an opaque key only; it must not treat a mini-program temporary filepath as an object key. Create `POST /food-recognition/uploads` and `POST /food-recognition/uploads/:id/complete`, then change job creation to accept `uploadId` and verify ready ownership before provider access.
 
-- [ ] **Step 4: Change mini-program orchestration**
+- [x] **Step 4: Change mini-program orchestration**
 
 After `uni.chooseImage`, create and complete an upload session before creating the job. Keep `imagePath` only for local preview and navigation display. The primary action must be disabled until the user has checked the explicit recognition-consent control.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run API e2e, mini unit tests, `vue-tsc --noEmit`, Prisma migration deployment, and `npm exec -- uni build -p mp-weixin`.
 
@@ -118,7 +118,7 @@ git commit -m "feat: add owned recognition upload sessions"
 - Modify: `.env.example`
 - Modify: `docs/engineering/local-development.md`
 
-- [ ] **Step 1: Add configuration validation tests**
+- [x] **Step 1: Add configuration validation tests**
 
 Assert that selecting `cloudbase` storage or `hunyuan` recognition without required server-only variables fails during API boot with a clear configuration message. Assert mini-program source contains no provider key.
 

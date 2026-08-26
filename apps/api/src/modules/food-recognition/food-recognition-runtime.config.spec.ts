@@ -1,10 +1,15 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createApp } from '../../app.js';
 import { resolveFoodRecognitionRuntimeConfig } from './food-recognition-runtime.config.js';
 
 describe('food recognition runtime configuration', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('uses mock storage and recognition by default', () => {
     expect(resolveFoodRecognitionRuntimeConfig({})).toEqual({
       storageProvider: 'mock',
@@ -22,6 +27,13 @@ describe('food recognition runtime configuration', () => {
     expect(() =>
       resolveFoodRecognitionRuntimeConfig({ FOOD_RECOGNITION_VISION_PROVIDER: 'hunyuan' }),
     ).toThrow('TENCENTCLOUD_SECRET_ID, TENCENTCLOUD_SECRET_KEY');
+  });
+
+  it('fails API startup when CloudBase is selected without server-only credentials', async () => {
+    vi.stubEnv('FOOD_RECOGNITION_STORAGE_PROVIDER', 'cloudbase');
+    await expect(createApp()).rejects.toThrow(
+      'CLOUDBASE_ENV_ID, TENCENTCLOUD_SECRET_ID, TENCENTCLOUD_SECRET_KEY',
+    );
   });
 
   it('keeps server-only provider credentials out of mini-program source', async () => {
