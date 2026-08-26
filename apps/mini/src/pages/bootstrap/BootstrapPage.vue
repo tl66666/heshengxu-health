@@ -77,7 +77,14 @@ onShow(async () => {
   background: #fffdf5;
 }
 .wash {
-  background: linear-gradient(180deg, rgba(248, 253, 246, 0.2), rgba(248, 253, 246, 0.94) 84%);
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 253, 246, 0) 42%,
+    rgba(248, 253, 246, 0.08) 58%,
+    rgba(248, 253, 246, 0.54) 82%,
+    rgba(248, 253, 246, 0.82) 100%
+  );
 }
 .copy {
   position: absolute;

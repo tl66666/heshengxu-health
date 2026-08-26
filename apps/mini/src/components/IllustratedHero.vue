@@ -25,7 +25,7 @@ defineEmits<{ action: [] }>();
 <style scoped>
 .hero {
   position: relative;
-  height: 312rpx;
+  height: 456rpx;
   overflow: hidden;
   border: 2rpx solid #d9e8da;
   border-radius: 24rpx;
@@ -38,6 +38,9 @@ defineEmits<{ action: [] }>();
   inset: 0;
   width: 100%;
   height: 100%;
+}
+.hero image {
+  background: #fffdf5;
 }
 .wash {
   background: linear-gradient(
