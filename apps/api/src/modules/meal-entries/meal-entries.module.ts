@@ -7,5 +7,6 @@ import { MealEntriesService } from './meal-entries.service.js';
 @Module({
   controllers: [MealEntriesController],
   providers: [AuthGuard, PrismaService, MealEntriesService],
+  exports: [MealEntriesService],
 })
 export class MealEntriesModule {}
