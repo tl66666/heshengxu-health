@@ -7,7 +7,7 @@
     </view>
 
     <view v-if="store.loading" class="status">正在整理今天的记录...</view>
-    <view v-else-if="error && !timeline.length" class="error-state">
+    <view v-else-if="loadError && !timeline.length" class="error-state">
       <image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFit" />
       <text>记录暂时没有加载出来</text>
       <button class="secondary-action" @tap="load">重新加载</button>
@@ -123,7 +123,7 @@
           maxlength="280"
           placeholder="补充一点感受（选填）"
         />
-        <text v-if="error && timeline.length" class="submit-error">{{ error }}</text>
+        <text v-if="saveError" class="submit-error">{{ saveError }}</text>
         <button class="primary-action" :loading="saving" :disabled="saving" @tap="submit">
           {{ saving ? '保存中...' : editingId ? '保存修改' : '保存记录' }}
         </button>
@@ -171,7 +171,8 @@ import type {
 const store = createHealthRecordsStore();
 const timeline = store.timeline;
 const saving = store.saving;
-const error = store.error;
+const loadError = store.loadError;
+const saveError = store.saveError;
 const date = localDate();
 const activeType = ref<HealthRecordType>('weight');
 const editingId = ref<string | null>(null);
@@ -262,8 +263,9 @@ function selectType(type: HealthRecordType) {
   }
 }
 async function submit() {
-  errors.value = await store.save(currentForm(), date, editingId.value);
-  if (Object.keys(errors.value).length) return;
+  const result = await store.save(currentForm(), date, editingId.value);
+  errors.value = result.fieldErrors;
+  if (!result.persisted) return;
   resetForm();
   await healthLoopState.loadToday(date);
   uni.showToast({ title: '已保存', icon: 'success' });

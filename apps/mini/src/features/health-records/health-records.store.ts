@@ -18,18 +18,19 @@ export function createHealthRecordsStore() {
   const records = ref<TodayRecordsDto | null>(null);
   const loading = ref(false);
   const saving = ref(false);
-  const error = ref('');
+  const loadError = ref('');
+  const saveError = ref('');
   const timeline = computed<RecordTimelineItem[]>(() =>
     records.value ? timelineFromToday(records.value) : [],
   );
 
   async function load(date: string) {
     loading.value = true;
-    error.value = '';
+    loadError.value = '';
     try {
       records.value = await loadTodayRecords(date);
     } catch (reason) {
-      error.value = reason instanceof Error ? reason.message : '记录暂时加载失败';
+      loadError.value = reason instanceof Error ? reason.message : '记录暂时加载失败';
     } finally {
       loading.value = false;
     }
@@ -39,21 +40,21 @@ export function createHealthRecordsStore() {
     form: RecordForm,
     date: string,
     editingId: string | null,
-  ): Promise<RecordFormErrors> {
-    const errors = validateRecordForm(form);
-    if (Object.keys(errors).length > 0) return errors;
+  ): Promise<{ fieldErrors: RecordFormErrors; persisted: boolean }> {
+    const fieldErrors = validateRecordForm(form);
+    if (Object.keys(fieldErrors).length > 0) return { fieldErrors, persisted: false };
     saving.value = true;
-    error.value = '';
+    saveError.value = '';
     try {
       const request = formToRequest(form, new Date().toISOString());
       if (editingId)
         await replaceHealthRecord(request.type, editingId, request.data as Record<string, unknown>);
       else await createHealthRecord(request);
       await load(date);
-      return {};
+      return { fieldErrors: {}, persisted: true };
     } catch (reason) {
-      error.value = reason instanceof Error ? reason.message : '保存失败，请检查网络后重试';
-      return { valueKg: error.value };
+      saveError.value = reason instanceof Error ? reason.message : '保存失败，请检查网络后重试';
+      return { fieldErrors: {}, persisted: false };
     } finally {
       saving.value = false;
     }
@@ -63,5 +64,5 @@ export function createHealthRecordsStore() {
     return records.value ? formFromTimeline(item.type, records.value, item.id) : null;
   }
 
-  return { records, timeline, loading, saving, error, load, save, edit };
+  return { records, timeline, loading, saving, loadError, saveError, load, save, edit };
 }

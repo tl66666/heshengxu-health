@@ -133,10 +133,10 @@
 - Modify: `apps/mini/src/features/health-records/health-records.store.ts`
 - Test: `apps/mini/src/pages/records/records-experience.spec.ts`
 
-- [ ] **Step 1:** 保留分段控件、单一表单和时间线三层结构，统一字段、错误和保存状态。
-- [ ] **Step 2:** 体重、饮食、活动、睡眠四种表单使用相同的标题、字段间距和主按钮。
-- [ ] **Step 3:** 修改记录时回填、取消修改、网络失败保留输入，保存成功后刷新时间线。
-- [ ] **Step 4:** 提交 `feat: complete health records experience`。
+- [x] **Step 1:** 保留分段控件、单一表单和时间线三层结构，统一字段、错误和保存状态。
+- [x] **Step 2:** 体重、饮食、活动、睡眠四种表单使用相同的标题、字段间距和主按钮。
+- [x] **Step 3:** 修改记录时回填、取消修改、网络失败保留输入，保存成功后刷新时间线。
+- [x] **Step 4:** 提交 `feat: complete health records experience`。
 
 ### Task 9: 重做 Plan
 
@@ -145,10 +145,10 @@
 - Modify: `apps/mini/src/features/health-loop/local-demo.ts`
 - Test: `apps/mini/src/features/health-loop/plan-presentation.spec.ts`
 
-- [ ] **Step 1:** 当前计划摘要只保留一张主视觉区域，进度使用轻量线性进度。
-- [ ] **Step 2:** 任务使用开放时间线，完成态使用 `check.svg`，不可用方向使用低对比度但保持可读。
-- [ ] **Step 3:** 无计划、计划加载失败、本地计划和全部完成四种状态分别验收。
-- [ ] **Step 4:** 提交 `feat: complete health plan experience`。
+- [x] **Step 1:** 当前计划摘要只保留一张主视觉区域，进度使用轻量线性进度。
+- [x] **Step 2:** 任务使用开放时间线，完成态使用 `check.svg`，不可用方向使用低对比度但保持可读。
+- [x] **Step 3:** 无计划、计划加载失败、本地计划和全部完成四种状态分别验收。
+- [x] **Step 4:** 提交 `feat: complete health plan experience`。
 
 ## 阶段 E：我的页与全量验收
 

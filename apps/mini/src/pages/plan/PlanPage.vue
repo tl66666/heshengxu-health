@@ -1,13 +1,22 @@
 <template>
   <view class="page">
-    <view v-if="!plan" class="empty-state">
-      <image class="empty-art" src="/static/illustrations/program-weight.png" mode="aspectFill" />
+    <view v-if="pageState === 'loading'" class="page-loading">正在整理你的计划...</view>
+
+    <view v-else-if="pageState === 'error'" class="empty-state error-state">
+      <image class="empty-art" src="/static/illustrations/xuxu-safe-support.png" mode="aspectFit" />
+      <text class="empty-title">计划暂时没有加载出来</text>
+      <text class="empty-copy">检查网络后再试一次，已经设置的计划不会丢失。</text>
+      <button class="primary-button" @tap="load">重新加载</button>
+    </view>
+
+    <view v-else-if="pageState === 'empty'" class="empty-state">
+      <image class="empty-art" src="/static/illustrations/program-weight.png" mode="aspectFit" />
       <text class="empty-title">从一份小计划开始</text>
       <text class="empty-copy">把想照顾的方向交给序序，一步一步来。</text>
       <button class="primary-button" @tap="setup">设置我的计划</button>
     </view>
 
-    <template v-else>
+    <template v-else-if="plan">
       <view class="page-header">
         <view>
           <text class="date-label">今天的节律</text>
@@ -108,10 +117,13 @@ import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
-import { planPresentation } from '../../features/health-loop/plan-presentation.js';
+import { planPageState, planPresentation } from '../../features/health-loop/plan-presentation.js';
 
 const date = localDate();
 const plan = computed(() => healthLoopState.today.value?.activePlan || healthLoopState.plan.value);
+const pageState = computed(() =>
+  planPageState(plan.value, healthLoopState.error.value || '', healthLoopState.loading.value),
+);
 const presentation = computed(() => planPresentation(plan.value?.tasks || []));
 const progress = computed(() => {
   const total = plan.value?.tasks.length || 0;
@@ -174,6 +186,9 @@ async function complete(id: string) {
 function setup() {
   uni.navigateTo({ url: '/pages/plan-setup/PlanSetupPage' });
 }
+function load() {
+  healthLoopState.loadToday(date);
+}
 function selectProgram(item: (typeof programs)[number]) {
   if (!item.available) {
     uni.showToast({ title: '这个方向正在准备中', icon: 'none' });
@@ -185,7 +200,7 @@ function localDate() {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
-onShow(() => healthLoopState.loadToday(date));
+onShow(load);
 </script>
 
 <style scoped>
@@ -432,9 +447,10 @@ onShow(() => healthLoopState.loadToday(date));
   text-align: center;
 }
 .empty-art {
-  width: 290rpx;
-  height: 290rpx;
-  border-radius: 50%;
+  width: 250rpx;
+  height: 250rpx;
+  border-radius: 20rpx;
+  background: #fffdf5;
 }
 .empty-title {
   margin-top: 20rpx;
@@ -453,6 +469,15 @@ onShow(() => healthLoopState.loadToday(date));
   border-radius: 14rpx;
   color: #fff;
   background: #347c50;
+  font-size: 26rpx;
+}
+.error-state .empty-art {
+  background: #f3f9f3;
+}
+.page-loading {
+  padding: 180rpx 20rpx;
+  color: #718a7a;
+  text-align: center;
   font-size: 26rpx;
 }
 </style>
