@@ -14,6 +14,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "openapi:generate": "node --experimental-strip-types src/openapi.ts"
   },
+  "prisma": { "seed": "node --experimental-strip-types prisma/seed.ts" },
   "dependencies": {
     "@prisma/client": "6.16.0",
     "@heban/domain": "workspace:*",
