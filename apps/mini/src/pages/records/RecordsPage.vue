@@ -15,7 +15,7 @@
 
     <template v-else>
       <view v-if="!timeline.length" class="welcome-strip">
-        <image src="/static/illustrations/record-desk-banner.png" mode="aspectFill" />
+        <image src="/static/illustrations/record-desk-banner.png" mode="aspectFit" />
         <view>
           <text>从一件小事开始</text>
           <text>记录不需要完美，真实就已经足够。</text>

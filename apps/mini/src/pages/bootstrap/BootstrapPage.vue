@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <image class="hero" src="/static/illustrations/hero.jpg" mode="aspectFill" />
+    <image class="hero" src="/static/illustrations/hero.jpg" mode="aspectFit" />
     <view class="wash" />
     <view class="copy">
       <view class="xuxu"
@@ -72,6 +72,9 @@ onShow(async () => {
   inset: 0;
   width: 100%;
   height: 100%;
+}
+.hero {
+  background: #fffdf5;
 }
 .wash {
   background: linear-gradient(180deg, rgba(248, 253, 246, 0.2), rgba(248, 253, 246, 0.94) 84%);

@@ -1,6 +1,6 @@
 <template>
   <view class="hero">
-    <image :src="image" mode="aspectFill" />
+    <image :src="image" mode="aspectFit" />
     <view class="wash" />
     <view class="copy">
       <text class="eyebrow">{{ eyebrow }}</text>
@@ -29,7 +29,7 @@ defineEmits<{ action: [] }>();
   overflow: hidden;
   border: 2rpx solid #d9e8da;
   border-radius: 24rpx;
-  background: #e7f2e6;
+  background: #fffdf5;
   box-shadow: 0 10rpx 26rpx rgba(46, 125, 79, 0.08);
 }
 .hero image,
