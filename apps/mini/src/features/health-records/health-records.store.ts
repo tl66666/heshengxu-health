@@ -1,11 +1,6 @@
 import { computed, ref } from 'vue';
 import type { TodayRecordsDto } from '../../../../../packages/contracts/src/health-loop.js';
-import {
-  formToRequest,
-  formFromTimeline,
-  timelineFromToday,
-  type HealthRecordRequest,
-} from './health-records.mapper.js';
+import { formToRequest, formFromTimeline, timelineFromToday } from './health-records.mapper.js';
 import type { RecordForm, RecordFormErrors, RecordTimelineItem } from './health-records.types.js';
 import { validateRecordForm } from './health-records.validation.js';
 import {

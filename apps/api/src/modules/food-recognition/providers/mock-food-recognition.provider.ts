@@ -10,6 +10,7 @@ export class MockFoodRecognitionProvider implements FoodRecognitionProvider {
   readonly model = 'food-recognition-mock-v1';
 
   async recognize(_input: { imageKey: string }): Promise<RecognitionProviderCandidate[]> {
+    void _input;
     return [{ name: '鸡蛋', confidence: 0.78, estimatedGrams: 50 }];
   }
 }

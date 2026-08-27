@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Param, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ValidatedQuery } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
