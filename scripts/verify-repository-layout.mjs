@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,13 +42,26 @@ const trackedFiles = execFileSync('git', ['ls-files'], { cwd: repoRoot, encoding
   .filter(Boolean);
 const forbiddenTracked = trackedFiles.filter(
   (file) =>
-    file !== '.env.example' &&
+    !/\.env\.example$/i.test(file) &&
     /(^|\/)(dist|node_modules|\.env($|\.)|.*\.log$|project\.private\.config\.json$|package-lock\.json$)/i.test(
       file,
     ),
 );
 if (forbiddenTracked.length > 0) {
   console.error(`发现不应提交的文件：${forbiddenTracked.join(', ')}`);
+  process.exit(1);
+}
+
+const publicMiniConfig = JSON.parse(
+  readFileSync(resolve(repoRoot, 'apps/mini/project.config.json'), 'utf8'),
+);
+const publicManifest = JSON.parse(
+  readFileSync(resolve(repoRoot, 'apps/mini/src/manifest.json'), 'utf8'),
+);
+if (publicMiniConfig.appid || publicManifest['mp-weixin']?.appid) {
+  console.error(
+    '公开小程序配置不能包含 AppID，请将个人 AppID 放在被 .gitignore 忽略的 project.private.config.json。',
+  );
   process.exit(1);
 }
 
