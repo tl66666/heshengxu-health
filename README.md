@@ -4,7 +4,7 @@
 
 “和生序”取“和身心、生息、循其序”之意：不追求极端的改变，而是通过持续记录、理解变化和小步行动，让健康回到每个人自己的节律。品牌主张：**让健康回到自己的节律。**
 
-当前仓库已完成阶段 0 工程底座、阶段 0.5 数据持久化与阶段 1 建档闭环，正在进入阶段 2A“每日健康闭环”开发。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
+当前仓库已完成阶段 0 工程底座、阶段 0.5 数据持久化、阶段 1 建档闭环、阶段 2A 每日健康闭环和食品记录/识别演示闭环。当前进入前端全量验收与生产能力准备阶段。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
 
 ## 小程序快速开始
 
@@ -42,6 +42,9 @@ npx serve .
 然后访问 `http://localhost:3000/prototypes/web-demo/`。Demo 图片统一从 `assets/illustrations/` 读取。
 
 ## 文档入口
+
+- [项目交接说明（给后续 AI/开发者）](docs/engineering/handoff.md)
+- [公开仓库安全与本地配置规范](docs/engineering/public-repository-security.md)
 
 - [目标运行架构与上线方案](docs/architecture/adr-005-target-runtime-and-deployment.md)
 - [微信 CloudBase 准备清单](docs/engineering/cloudbase-preparation.md)

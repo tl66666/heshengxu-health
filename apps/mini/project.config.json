@@ -32,7 +32,7 @@
   "compileType": "miniprogram",
   "projectname": "heshengxu-health",
   "miniprogramRoot": "dist/dev/mp-weixin/",
-  "appid": "__PRIVATE_WECHAT_APPID__",
+  "appid": "",
   "condition": {},
   "simulatorPluginLibVersion": {},
   "editorSetting": {}
