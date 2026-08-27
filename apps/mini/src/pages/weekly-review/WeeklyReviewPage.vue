@@ -1,11 +1,7 @@
 <template>
   <view class="page">
-    <view class="header"
-      ><button class="back" @tap="back">返回</button
-      ><view
-        ><text class="eyebrow">一周的真实记录</text><text class="title">本周回顾</text></view
-      ></view
-    >
+    <AppNavBar title="本周回顾" route="/pages/weekly-review/WeeklyReviewPage" />
+    <view class="intro"><text class="eyebrow">一周的真实记录</text></view>
     <view v-if="loading" class="state"><text>正在整理这一周的记录...</text></view>
     <view v-else-if="error" class="state"
       ><text class="state-title">回顾暂时没有加载出来</text
@@ -73,6 +69,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
+import AppNavBar from '../../components/AppNavBar.vue';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import {
   loadWeeklyReview,
@@ -96,9 +93,6 @@ async function load() {
 function signed(value?: number) {
   return value === undefined ? '' : `${value > 0 ? '+' : ''}${value}`;
 }
-function back() {
-  uni.navigateBack();
-}
 function goRecords() {
   uni.navigateTo({ url: '/pages/records/RecordsPage' });
 }
@@ -117,35 +111,17 @@ onLoad(load);
   background: #f7fbf8;
   color: #244a32;
 }
-.header {
-  display: flex;
-  align-items: center;
-  gap: 18rpx;
-  margin-bottom: 28rpx;
-}
-.back {
-  width: 80rpx;
-  padding: 10rpx 0;
-  border: 1rpx solid #cfe1d2;
-  border-radius: 10rpx;
-  color: #477a56;
-  background: #fff;
-  font-size: 22rpx;
-}
 .eyebrow,
-.title,
 .section-title,
 .caption {
   display: block;
 }
+.intro {
+  margin: -2rpx 0 24rpx 2rpx;
+}
 .eyebrow {
   color: #789181;
   font-size: 21rpx;
-}
-.title {
-  margin-top: 5rpx;
-  font-size: 38rpx;
-  font-weight: 700;
 }
 .banner,
 .section,

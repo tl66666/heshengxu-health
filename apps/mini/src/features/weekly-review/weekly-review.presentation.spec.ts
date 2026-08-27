@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { weeklyReviewEntry } from './weekly-review.presentation.js';
+import weeklyReviewPageSource from '../../pages/weekly-review/WeeklyReviewPage.vue?raw';
 
 describe('weekly review presentation', () => {
   it('explains insufficient data without inventing a trend', () => {
@@ -20,5 +21,10 @@ describe('weekly review presentation', () => {
         coverage: { recordedDayCount: 4, requiredDayCount: 3, status: 'ready' },
       }),
     ).toEqual({ title: '本周回顾已准备好', caption: '已覆盖 4 天真实记录。', action: '查看回顾' });
+  });
+
+  it('uses the shared secondary-page navigation instead of a text back button', () => {
+    expect(weeklyReviewPageSource).toContain('<AppNavBar title="本周回顾"');
+    expect(weeklyReviewPageSource).not.toMatch(/class=\"back\"/);
   });
 });

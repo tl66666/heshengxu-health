@@ -19,6 +19,9 @@ describe('navigation contracts', () => {
     expect(ordinaryBackTarget('/pages/food-candidates/FoodCandidatesPage')).toBe(
       '/pages/food-recognition/FoodRecognitionPage',
     );
+    expect(ordinaryBackTarget('/pages/weekly-review/WeeklyReviewPage')).toBe(
+      '/pages/plan/PlanPage',
+    );
   });
 
   it('only confirms exit from the first onboarding step', () => {

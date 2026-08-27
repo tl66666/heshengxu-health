@@ -13,7 +13,10 @@ export function isTabRoute(url: string) {
 export function ordinaryBackTarget(route: string) {
   if (route.includes('food-confirm')) return '/pages/food-search/FoodSearchPage';
   if (route.includes('food-candidates')) return '/pages/food-recognition/FoodRecognitionPage';
-  return route.includes('plan-setup') ? '/pages/plan/PlanPage' : '/pages/bootstrap/BootstrapPage';
+  if (route.includes('plan-setup') || route.includes('weekly-review')) {
+    return '/pages/plan/PlanPage';
+  }
+  return '/pages/bootstrap/BootstrapPage';
 }
 
 export function shouldConfirmOnboardingExit(step: number) {
