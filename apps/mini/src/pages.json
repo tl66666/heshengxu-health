@@ -40,27 +40,27 @@
     },
     {
       "path": "pages/food-search/FoodSearchPage",
-      "style": { "navigationBarTitleText": "选择食物" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "选择食物" }
     },
     {
       "path": "pages/food-confirm/FoodConfirmPage",
-      "style": { "navigationBarTitleText": "确认记录" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "确认记录" }
     },
     {
       "path": "pages/profile/ProfilePage",
-      "style": { "navigationBarTitleText": "健康档案" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "健康档案" }
     },
     {
       "path": "pages/profile-edit/ProfileEditPage",
-      "style": { "navigationBarTitleText": "编辑健康档案" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "编辑健康档案" }
     },
     {
       "path": "pages/food-recognition/FoodRecognitionPage",
-      "style": { "navigationBarTitleText": "拍照识别食物" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "拍照识别食物" }
     },
     {
       "path": "pages/food-candidates/FoodCandidatesPage",
-      "style": { "navigationBarTitleText": "确认识别结果" }
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "确认识别结果" }
     }
   ],
   "tabBar": {

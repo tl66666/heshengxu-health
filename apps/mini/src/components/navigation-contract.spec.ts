@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { isTabRoute, ordinaryBackTarget, shouldConfirmOnboardingExit } from './navigation.js';
 import appNavBarSource from './AppNavBar.vue?raw';
+import pagesConfig from '../pages.json' with { type: 'json' };
 
 describe('navigation contracts', () => {
   it('recognizes tab routes even when a query selects a record type', () => {
@@ -35,5 +36,25 @@ describe('navigation contracts', () => {
     expect(appNavBarSource).toMatch(/background:\s*rgba\(255, 255, 255, 0\.72\)/);
     expect(appNavBarSource).not.toMatch(/background:\s*#eaf3eb/);
     expect(appNavBarSource).not.toMatch(/background:\s*#fff4ef/);
+  });
+
+  it('does not render a second native navigation bar on pages with AppNavBar', () => {
+    const pages = pagesConfig.pages as Array<{
+      path: string;
+      style?: { navigationStyle?: string };
+    }>;
+    const appNavPages = [
+      'pages/food-search/FoodSearchPage',
+      'pages/food-confirm/FoodConfirmPage',
+      'pages/food-recognition/FoodRecognitionPage',
+      'pages/food-candidates/FoodCandidatesPage',
+      'pages/profile/ProfilePage',
+      'pages/profile-edit/ProfileEditPage',
+      'pages/weekly-review/WeeklyReviewPage',
+    ];
+
+    for (const path of appNavPages) {
+      expect(pages.find((page) => page.path === path)?.style?.navigationStyle).toBe('custom');
+    }
   });
 });
