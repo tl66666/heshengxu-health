@@ -25,6 +25,6 @@ describe('weekly review presentation', () => {
 
   it('uses the shared secondary-page navigation instead of a text back button', () => {
     expect(weeklyReviewPageSource).toContain('<AppNavBar title="本周回顾"');
-    expect(weeklyReviewPageSource).not.toMatch(/class=\"back\"/);
+    expect(weeklyReviewPageSource).not.toMatch(/class="back"/);
   });
 });
