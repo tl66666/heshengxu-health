@@ -36,6 +36,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @heban/api prisma:generate
       - run: pnpm --filter @heban/api prisma:deploy
+      - run: pnpm --filter @heban/api prisma db seed
       - run: pnpm --filter @heban/domain build
       - run: pnpm check
       - run: pnpm test
