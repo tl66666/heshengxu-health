@@ -91,18 +91,17 @@ defineEmits<{ action: [] }>();
   justify-content: space-between;
   height: 72rpx;
   padding: 0 22rpx;
-  border: 0;
-  border-radius: 14rpx;
-  color: #fff;
-  background: #28744d;
+  border: 1rpx solid rgba(205, 201, 166, 0.9);
+  border-radius: 12rpx;
+  color: #5c604d;
+  background: rgba(255, 253, 245, 0.72);
   font-size: 24rpx;
   font-weight: 700;
   line-height: 72rpx;
-  box-shadow: 0 8rpx 16rpx rgba(40, 116, 77, 0.18);
+  box-shadow: none;
 }
 .action-arrow {
   width: 30rpx;
   height: 30rpx;
-  filter: brightness(0) invert(1);
 }
 </style>
