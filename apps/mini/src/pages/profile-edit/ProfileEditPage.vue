@@ -371,8 +371,10 @@ onLoad((options) => {
   height: 84rpx;
   margin-top: 24rpx;
   border-radius: 14rpx;
-  color: #fff;
-  background: #347c50;
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  color: var(--hz-primary-ink);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
   box-shadow: 0 8rpx 20rpx rgba(40, 92, 60, 0.2);
   font-size: 27rpx;
   font-weight: 600;

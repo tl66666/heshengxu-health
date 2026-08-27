@@ -430,7 +430,7 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + var(--hz-tabbar-offset) * 2 + 40rpx);
+  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
   background: #f6faf7;
   color: #244735;
 }
@@ -779,8 +779,10 @@ onShow(() => {
   height: 78rpx;
   margin-top: 20rpx;
   border-radius: 14rpx;
-  color: #fff;
-  background: #2e7d4f;
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  color: var(--hz-primary-ink);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
   font-size: 26rpx;
   line-height: 78rpx;
 }

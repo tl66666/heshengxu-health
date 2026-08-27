@@ -248,8 +248,10 @@ async function recognize() {
   height: 80rpx;
   margin-top: 26rpx;
   border-radius: 14rpx;
-  color: #fff;
-  background: #2e7d4f;
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  color: var(--hz-primary-ink);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
   font-size: 26rpx;
   line-height: 80rpx;
 }

@@ -9,7 +9,7 @@ describe('home quick actions', () => {
       {
         label: '记一餐',
         route: '/pages/food-search/FoodSearchPage',
-        icon: '/static/icons/journal.svg',
+        icon: '/static/icons/meal.svg',
         tone: 'mint',
       },
       {

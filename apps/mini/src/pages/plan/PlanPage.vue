@@ -237,7 +237,7 @@ onShow(load);
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + var(--hz-tabbar-offset) * 2 + 40rpx);
+  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
   background: #f7fbf8;
   color: #1d3d2a;
 }
@@ -530,8 +530,10 @@ onShow(load);
   margin-top: 28rpx;
   padding: 18rpx 34rpx;
   border-radius: 14rpx;
-  color: #fff;
-  background: #347c50;
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  color: var(--hz-primary-ink);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
   font-size: 26rpx;
 }
 .error-state .empty-art {

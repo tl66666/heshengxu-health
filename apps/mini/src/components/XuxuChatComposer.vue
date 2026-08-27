@@ -379,7 +379,10 @@ function voiceNotice() {
   background: #bdd4c1;
 }
 .send.enabled {
-  background: #2e7d4f;
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  color: var(--hz-primary-ink);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
 }
 .send image {
   width: 34rpx;

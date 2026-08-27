@@ -3,7 +3,7 @@ export const homeQuickActions = [
     label: '记一餐',
     detail: '食物目录',
     route: '/pages/food-search/FoodSearchPage',
-    icon: '/static/icons/journal.svg',
+    icon: '/static/icons/meal.svg',
     tone: 'mint',
   },
   {

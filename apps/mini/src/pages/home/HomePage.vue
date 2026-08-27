@@ -16,7 +16,7 @@
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
       <!-- 今日概览：只呈现真实记录状态，点击直达对应记录表单 -->
-      <button class="overview" @tap="go('/pages/records/RecordsPage')">
+      <button class="overview hz-rise" @tap="go('/pages/records/RecordsPage')">
         <view class="overview-head">
           <text class="overview-title">今日概览</text>
           <text class="overview-count">{{ experience.recording.completed }}/4 已记录</text>
@@ -33,8 +33,11 @@
             class="cell"
             @tap.stop="go(cell.route)"
           >
-            <view class="cell-dot" :class="{ done: cell.done }">
-              <image v-if="cell.done" src="/static/icons/check.svg" mode="aspectFit" />
+            <view class="cell-tile" :class="[`tone--${cell.tone}`, { 'tile--done': cell.done }]">
+              <image :src="cell.icon" mode="aspectFit" />
+              <view v-if="cell.done" class="cell-badge">
+                <image src="/static/icons/check.svg" mode="aspectFit" />
+              </view>
             </view>
             <text class="cell-label">{{ cell.label }}</text>
             <text class="cell-state" :class="{ 'cell-state--done': cell.done }">
@@ -45,7 +48,7 @@
       </button>
 
       <!-- 今日主行动：整卡可进入，不再重复展示标题行；主视觉按天轮换且完整显示 -->
-      <view class="hero-host" @tap="go(experience.hero.route)">
+      <view class="hero-host hz-rise hz-rise-1" @tap="go(experience.hero.route)">
         <IllustratedHero
           :image="heroArt.image"
           :copy-side="heroArt.copySide"
@@ -56,14 +59,14 @@
         />
       </view>
 
-      <button class="chat-entry" @tap="toXuxu">
+      <button class="chat-entry hz-rise hz-rise-2" @tap="toXuxu">
         <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
         <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
 
       <view class="section-head"><text>快捷记录</text></view>
-      <view class="quick-grid">
+      <view class="quick-grid hz-rise hz-rise-2">
         <button
           v-for="item in homeQuickActions"
           :key="item.label"
@@ -81,7 +84,7 @@
       <view class="section-head"
         ><text>今天的小行动</text><text>{{ experience.tasks.length }} 项待完成</text></view
       >
-      <view v-if="experience.tasks.length" class="card tasks">
+      <view v-if="experience.tasks.length" class="card tasks hz-rise hz-rise-3">
         <button v-for="task in experience.tasks" :key="task.id" class="task" @tap="go(task.route)">
           <view class="task-dot" /><view class="task-copy"
             ><text>{{ task.title }}</text
@@ -89,12 +92,12 @@
           ><image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
         </button>
       </view>
-      <view v-else class="card done"
+      <view v-else class="card done hz-rise hz-rise-3"
         ><text>今天的行动已经完成</text><text>保持自己的节律就很好。</text></view
       >
 
       <view class="section-head"><text>管理进度</text></view>
-      <view class="card card--list">
+      <view class="card card--list hz-rise hz-rise-4">
         <button class="summary-row" @tap="go('/pages/records/RecordsPage')">
           <view
             ><text>记录时间线</text><text>{{ experience.recording.message }}</text></view
@@ -146,24 +149,32 @@ const overviewCells = computed(() => {
       key: 'weight',
       label: '体重',
       done: progress.hasWeight,
+      icon: '/static/icons/scale.svg',
+      tone: 'mint',
       route: '/pages/records/RecordsPage?type=weight',
     },
     {
       key: 'meal',
       label: '饮食',
       done: progress.hasMeal,
+      icon: '/static/icons/meal.svg',
+      tone: 'amber',
       route: '/pages/records/RecordsPage?type=meal-structure',
     },
     {
       key: 'activity',
       label: '活动',
       done: progress.hasActivity,
+      icon: '/static/icons/activity.svg',
+      tone: 'blush',
       route: '/pages/records/RecordsPage?type=activity',
     },
     {
       key: 'sleep',
       label: '睡眠',
       done: progress.hasSleep,
+      icon: '/static/icons/sleep.svg',
+      tone: 'sky',
       route: '/pages/records/RecordsPage?type=sleep',
     },
   ];
@@ -230,7 +241,7 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + var(--hz-tabbar-offset) * 2 + 40rpx);
+  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
   background: #f6faf7;
   color: #183425;
 }
@@ -316,6 +327,7 @@ onShow(() => {
   min-width: 12rpx;
   border-radius: inherit;
   background: linear-gradient(90deg, #67a37b, #347c50);
+  transition: width 0.5s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 .cells {
   display: grid;
@@ -332,22 +344,41 @@ onShow(() => {
   color: inherit;
   line-height: 1;
 }
-.cell-dot {
+.cell-tile {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52rpx;
-  height: 52rpx;
-  border: 2rpx solid #b9cfbf;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 24rpx;
+}
+.cell-tile image {
+  width: 38rpx;
+  height: 38rpx;
+  opacity: 0.82;
+}
+.tile--done {
+  box-shadow: inset 0 0 0 2rpx #9fc6ab;
+}
+.cell-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30rpx;
+  height: 30rpx;
+  border: 2rpx solid #fff;
   border-radius: 50%;
+  background: #67a37b;
 }
-.cell-dot.done {
-  border-color: #9fc6ab;
-  background: #e3f2e4;
-}
-.cell-dot image {
-  width: 26rpx;
-  height: 26rpx;
+.cell-badge image {
+  width: 16rpx;
+  height: 16rpx;
+  filter: brightness(4);
+  opacity: 1;
 }
 .cell-label {
   color: #284d36;
@@ -381,6 +412,7 @@ onShow(() => {
   box-shadow: var(--hz-shadow-card);
 }
 .chat-avatar {
+  animation: hz-float 3.4s ease-in-out infinite;
   width: 64rpx;
   height: 64rpx;
   flex: none;
@@ -446,10 +478,10 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 74rpx;
-  height: 74rpx;
-  margin-bottom: 8rpx;
-  border-radius: 24rpx;
+  width: 84rpx;
+  height: 84rpx;
+  margin-bottom: 10rpx;
+  border-radius: 50%;
 }
 .tone--mint {
   background: var(--hz-mint);

@@ -127,7 +127,7 @@ onLoad(load);
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + var(--hz-tabbar-offset) * 2 + 40rpx);
+  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
   background: #f7fbf8;
   color: #244a32;
 }
@@ -317,8 +317,10 @@ onLoad(load);
   margin-top: 26rpx;
   padding: 16rpx 32rpx;
   border-radius: 12rpx;
-  color: #fff;
-  background: #347c50;
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  color: var(--hz-primary-ink);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
   font-size: 25rpx;
 }
 .insufficient {

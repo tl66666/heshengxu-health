@@ -11,20 +11,29 @@
     />
     <template v-if="step === 0">
       <view class="welcome-screen">
-        <view class="welcome-art-frame">
-          <image class="welcome-art" :src="heroImage" mode="aspectFit" @error="useFallbackHero" />
+        <view class="welcome-art-frame hz-rise">
+          <image
+            class="welcome-art hz-float"
+            :src="heroImage"
+            mode="aspectFit"
+            @error="useFallbackHero"
+          />
         </view>
         <view class="welcome-copy">
-          <view class="xuxu"
+          <view class="xuxu hz-rise hz-rise-1"
             ><image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" /><view
               ><text>你好，我是序序</text><text>你的健康陪伴助手</text></view
             ></view
           >
-          <text class="brand">和生序</text>
-          <text class="welcome-title">让健康回到自己的节律</text>
-          <text class="hint">花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text>
-          <button class="primary" @tap="next">开始了解我</button>
-          <text class="disclaimer">和生序提供健康管理与生活方式参考，不替代医生诊疗。</text>
+          <text class="brand hz-rise hz-rise-2">和生序</text>
+          <text class="welcome-title hz-rise hz-rise-2">让健康回到自己的节律</text>
+          <text class="hint hz-rise hz-rise-3"
+            >花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text
+          >
+          <button class="primary hz-rise hz-rise-3" @tap="next">开始了解我</button>
+          <text class="disclaimer hz-rise hz-rise-4"
+            >和生序提供健康管理与生活方式参考，不替代医生诊疗。</text
+          >
         </view>
       </view>
     </template>
@@ -34,7 +43,7 @@
         ><view class="progress"
           ><view class="progress-fill" :style="{ width: `${progress}%` }" /></view
       ></view>
-      <view v-if="step === 1" class="step">
+      <view v-if="step === 1" class="step hz-rise">
         <text class="eyebrow">先认识一下你</text><text class="title">从今天开始，照顾好自己</text
         ><text class="hint">这些信息只用于生成更适合你的健康管理参考。</text>
         <input
@@ -55,7 +64,7 @@
           </button></view
         >
       </view>
-      <view v-else-if="step === 2" class="step">
+      <view v-else-if="step === 2" class="step hz-rise">
         <text class="eyebrow">了解身体基础</text><text class="title">你的 BMI 会实时变化</text
         ><text class="hint">输入身高和体重，看看当前身体状态。</text>
         <view class="input-row"
@@ -74,8 +83,8 @@
             min="140"
             max="210"
             step="1"
-            activeColor="#5b9b70"
-            backgroundColor="#dceadd"
+            activeColor="#79ac8c"
+            backgroundColor="#e2eedd"
             block-color="#ffffff"
             block-size="22"
             @changing="setHeight"
@@ -96,8 +105,8 @@
             min="35"
             max="150"
             step="0.1"
-            activeColor="#5b9b70"
-            backgroundColor="#dceadd"
+            activeColor="#79ac8c"
+            backgroundColor="#e2eedd"
             block-color="#ffffff"
             block-size="22"
             @changing="setWeight"
@@ -113,7 +122,7 @@
           ><text class="bmi-note">这是健康管理参考，不是医疗诊断</text></view
         ><view v-else class="empty-card">填写身高和体重后查看 BMI</view>
       </view>
-      <view v-else-if="step === 3" class="step">
+      <view v-else-if="step === 3" class="step hz-rise">
         <text class="eyebrow">选你现在最想改善的方向</text
         ><text class="title">给生活设定 1—3 个小目标</text
         ><text class="hint">可以多选，序序会按第一个目标安排优先建议，之后随时都能调整。</text>
@@ -142,7 +151,7 @@
             /><view v-else class="goal-radio" /></button
         ></view>
       </view>
-      <view v-else class="step">
+      <view v-else class="step hz-rise">
         <text class="eyebrow">最后确认一下</text><text class="title">你的健康画像准备好了</text>
         <view class="summary"
           ><text>{{ form.displayName || '新朋友' }}</text
@@ -326,9 +335,9 @@ async function save() {
 }
 .welcome-art-frame {
   width: 100%;
-  height: 420rpx;
+  height: 640rpx;
   overflow: hidden;
-  border-radius: 26rpx;
+  border-radius: 28rpx;
   background: #fffdf5;
   box-shadow: 0 18rpx 42rpx rgba(54, 102, 66, 0.08);
 }
@@ -429,7 +438,8 @@ async function save() {
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: #67a67c;
+  background: linear-gradient(90deg, #8fbf9d, #5f9e76);
+  transition: width 0.4s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 .input,
 .input-row {
@@ -463,9 +473,9 @@ async function save() {
   font-size: 24rpx;
 }
 .selected {
-  border-color: #6daa7b !important;
-  color: #286d48 !important;
-  background: #e9f5ea !important;
+  border-color: #9ec6ab !important;
+  color: var(--hz-primary-ink) !important;
+  background: var(--hz-primary-soft) !important;
 }
 .input-row {
   display: flex;
@@ -646,20 +656,24 @@ async function save() {
 }
 .primary,
 .back {
-  height: 86rpx;
-  border-radius: 16rpx;
-  font-size: 28rpx;
-  line-height: 86rpx;
+  height: 88rpx;
+  border-radius: 999rpx;
+  font-size: 29rpx;
+  font-weight: 600;
+  line-height: 88rpx;
 }
 .primary {
   flex: 1;
-  color: #fff;
-  background: #2e7d4f;
+  color: var(--hz-primary-ink);
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
 }
 .back {
   width: 190rpx;
   color: #4d6e58;
-  background: #e7f0e8;
+  background: #fff;
+  border: 2rpx solid #dfe9e1;
 }
 .primary[disabled] {
   opacity: 0.45;

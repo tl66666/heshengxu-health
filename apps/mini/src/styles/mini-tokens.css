@@ -31,3 +31,10 @@ page {
   --hz-tabbar-offset: 0rpx;
   --hz-tabbar-height: 108rpx;
 }
+page {
+  /* 柔和主按钮体系：与水彩插画同氛围，坚决不用实心深绿 */
+  --hz-primary-soft: #e9f5ec;
+  --hz-primary-soft-active: #dcede2;
+  --hz-primary-border: #cbe3d2;
+  --hz-primary-ink: #2f6140;
+}
