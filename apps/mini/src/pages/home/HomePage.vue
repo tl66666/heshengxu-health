@@ -44,11 +44,12 @@
         </view>
       </button>
 
-      <!-- 今日主行动：整卡可进入，不再重复展示标题行 -->
+      <!-- 今日主行动：整卡可进入，不再重复展示标题行；主视觉按天轮换且完整显示 -->
       <view class="hero-host" @tap="go(experience.hero.route)">
         <IllustratedHero
-          image="/static/illustrations/home-hero-morning.png"
-          copy-side="right"
+          :image="heroArt.image"
+          :copy-side="heroArt.copySide"
+          :alt="heroArt.alt"
           :eyebrow="experience.hero.eyebrow"
           :title="experience.hero.title"
           :description="experience.hero.description"
@@ -127,9 +128,11 @@ import type { HealthRecordType } from '../../../../../packages/contracts/src/hea
 import { requestRecordTypeFocus } from '../../features/health-records/records-focus.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { homeQuickActions } from './home-actions.js';
+import { pickHomeHeroArt } from './home-hero-art.js';
 
 const { today, loading, error } = healthLoopState;
 const date = localDate();
+const heroArt = computed(() => pickHomeHeroArt(date));
 const greeting =
   new Date().getHours() < 12 ? '早上好' : new Date().getHours() < 18 ? '下午好' : '晚上好';
 const dateLabel = `${new Date().getMonth() + 1} 月 ${new Date().getDate()} 日 · 今天`;
