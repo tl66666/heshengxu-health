@@ -1,92 +1,93 @@
 <template>
   <view class="page">
-    <view class="head"
-      ><view
+    <view class="head">
+      <view
         ><text class="date">{{ dateLabel }}</text
         ><text class="title">{{ greeting }}，{{ displayName }}</text></view
-      ><image
+      >
+      <image
         class="avatar"
         src="/static/illustrations/xuxu-avatar.jpg"
         mode="aspectFill"
         @tap="toXuxu"
-    /></view>
-    <view v-if="loading" class="loading">正在整理今天的节律...</view>
+      />
+    </view>
+
+    <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
       <IllustratedHero
         image="/static/illustrations/home-companion-banner.png"
         :eyebrow="experience.hero.eyebrow"
         :title="experience.hero.title"
         :description="experience.hero.description"
-        action-label="开始这一步"
-        @action="go(experience.hero.route)"
       />
-      <button class="chat-entry" @tap="toXuxu">
-        <image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
-        <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
-        <image class="chat-entry-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+
+      <button class="today-action" @tap="go(experience.hero.route)">
+        <view
+          ><text>今天先做</text><text>{{ experience.hero.title }}</text></view
+        >
+        <image src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
-      <view class="quick-section">
-        <view class="section-head quick-head"><text>现在就做</text><text>选一个开始</text></view>
-        <view class="quick-grid">
-          <button
-            v-for="item in homeQuickActions"
-            :key="item.label"
-            class="quick-action"
-            @tap="go(item.route)"
+
+      <button class="chat-entry" @tap="toXuxu">
+        <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+        <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
+        <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+      </button>
+
+      <view class="section-head"><text>饮食记录</text><text>选择一种方式</text></view>
+      <view class="quick-grid">
+        <button
+          v-for="item in homeQuickActions"
+          :key="item.label"
+          class="quick-action"
+          @tap="go(item.route)"
+        >
+          <view class="quick-icon"><image :src="item.icon" mode="aspectFit" /></view>
+          <view
+            ><text>{{ item.label }}</text
+            ><text>{{ item.detail }}</text></view
           >
-            <view class="quick-icon"><image :src="item.icon" mode="aspectFit" /></view>
-            <view class="quick-copy"
-              ><text>{{ item.label }}</text
-              ><text>{{ item.detail }}</text></view
-            >
-            <image class="quick-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-          </button>
-        </view>
+        </button>
       </view>
+
       <view class="section-head"
-        ><text>今天只做这几件小事</text><text>{{ experience.tasks.length }} 件待完成</text></view
+        ><text>今天的小行动</text><text>{{ experience.tasks.length }} 项待完成</text></view
       >
-      <view v-if="experience.tasks.length" class="tasks"
-        ><button v-for="task in experience.tasks" :key="task.id" class="task" @tap="go(task.route)">
+      <view v-if="experience.tasks.length" class="tasks">
+        <button v-for="task in experience.tasks" :key="task.id" class="task" @tap="go(task.route)">
           <view class="task-dot" /><view class="task-copy"
             ><text>{{ task.title }}</text
             ><text>{{ task.subtitle }}</text></view
-          ><image src="/static/icons/forward.svg" mode="aspectFit" class="forward-icon" /></button
-      ></view>
+          ><image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+        </button>
+      </view>
       <view v-else class="done"
-        ><image src="/static/illustrations/xuxu-complete.png" mode="aspectFill" /><view
-          ><text>今天的行动已完成</text><text>不必额外加码，保持自己的节律就好。</text></view
-        ></view
+        ><text>今天的行动已经完成</text><text>保持自己的节律就很好。</text></view
       >
-      <button class="record-summary" @tap="go('/pages/records/RecordsPage')">
+
+      <view class="section-head"><text>管理进度</text></view>
+      <button class="summary-row" @tap="go('/pages/records/RecordsPage')">
         <view
-          ><text>今天的记录</text
+          ><text>今日记录</text
           ><text
             >{{ experience.recording.completed }}/{{ experience.recording.total }} 已完成 ·
             {{ experience.recording.message }}</text
           ></view
-        ><image
-          :src="
-            experience.recording.image === 'complete'
-              ? '/static/illustrations/xuxu-complete.png'
-              : '/static/illustrations/xuxu-record-reminder.png'
-          "
-          mode="aspectFill"
-        />
+        ><image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
-      <button class="plan-summary" @tap="toPlan">
+      <button class="summary-row" @tap="toPlan">
         <view
-          ><text>{{ today.activePlan ? '正在执行的计划' : '从这里设置计划' }}</text
+          ><text>{{ today.activePlan ? '当前计划' : '设置计划' }}</text
           ><text>{{ planText }}</text></view
-        ><image src="/static/icons/forward.svg" mode="aspectFit" class="forward-icon" />
+        ><image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
     </template>
     <view v-else-if="error" class="load-failed"
-      ><image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFill" /><text
-        >今天的状态还没加载出来</text
-      ><text>检查服务连接后，再试一次就好。</text><button @tap="load">重新加载</button></view
+      ><text>今天的状态还没有加载出来</text><text>检查服务连接后，再试一次就好。</text
+      ><button @tap="load">重新加载</button></view
     >
-    <view v-else class="loading">正在准备今天的节律...</view>
+    <view v-else class="loading">正在准备今天的节律…</view>
     <MiniTabBar active="home" />
   </view>
 </template>
@@ -113,6 +114,7 @@ const planText = computed(() =>
     ? '今天的小行动正在等你慢慢完成。'
     : '选择体重或睡眠方向，从一个小目标开始。',
 );
+
 function load() {
   if (onboardingState.completed.value) healthLoopState.loadToday(date);
 }
@@ -160,7 +162,15 @@ onShow(() => {
   margin-bottom: 24rpx;
 }
 .date,
-.title {
+.title,
+.section-head text,
+.today-action text,
+.chat-entry text,
+.quick-action text,
+.task-copy text,
+.done text,
+.summary-row text,
+.load-failed text {
   display: block;
 }
 .date {
@@ -178,54 +188,85 @@ onShow(() => {
   border: 3rpx solid #efd98d;
   border-radius: 50%;
 }
-.hint {
-  margin-top: 18rpx;
+.today-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 14rpx;
+  padding: 17rpx 2rpx;
+  border: 0;
+  border-bottom: 1rpx solid #dfe9df;
+  text-align: left;
+  background: transparent;
+}
+.today-action text:first-child {
+  color: #758a78;
+  font-size: 20rpx;
+}
+.today-action text:last-child {
+  margin-top: 5rpx;
+  color: #31543e;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.today-action image {
+  width: 34rpx;
+  height: 34rpx;
 }
 .chat-entry {
   display: flex;
   align-items: center;
   gap: 14rpx;
   width: 100%;
-  margin-top: 22rpx;
-  padding: 16rpx 2rpx;
-  border-top: 1rpx solid #e7e4ca;
-  border-bottom: 1rpx solid #e7e4ca;
+  padding: 18rpx 2rpx;
+  border: 0;
+  border-bottom: 1rpx solid #e5e4ca;
   text-align: left;
   background: transparent;
 }
-.chat-entry image {
-  width: 64rpx;
-  height: 64rpx;
+.chat-avatar {
+  width: 58rpx;
+  height: 58rpx;
   flex: none;
   border: 3rpx solid #f0da8c;
   border-radius: 50%;
 }
 .chat-entry view {
   flex: 1;
+  min-width: 0;
 }
-.chat-entry view text {
-  display: block;
+.chat-entry text:first-child {
   color: #5d563e;
   font-size: 25rpx;
   font-weight: 700;
 }
-.chat-entry view text:last-child {
+.chat-entry text:last-child {
   margin-top: 5rpx;
   color: #8a8060;
   font-size: 20rpx;
-  font-weight: 400;
 }
-.chat-entry-arrow {
-  width: 34rpx;
-  height: 34rpx;
-  opacity: 0.78;
+.arrow {
+  width: 30rpx;
+  height: 30rpx;
+  flex: none;
+  margin-left: 14rpx;
+  opacity: 0.68;
 }
-.quick-section {
-  margin-top: 26rpx;
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 30rpx 2rpx 12rpx;
 }
-.quick-head {
-  margin-top: 0;
-  margin-bottom: 12rpx;
+.section-head text:first-child {
+  color: #274a35;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+.section-head text:last-child {
+  color: #76907d;
+  font-size: 20rpx;
 }
 .quick-grid {
   display: grid;
@@ -235,11 +276,12 @@ onShow(() => {
 .quick-action {
   display: flex;
   align-items: center;
+  gap: 10rpx;
   min-width: 0;
-  min-height: 104rpx;
-  padding: 14rpx 12rpx;
+  min-height: 94rpx;
+  padding: 12rpx;
   border: 1rpx solid #dfeae0;
-  border-radius: 16rpx;
+  border-radius: 12rpx;
   text-align: left;
   background: #fff;
 }
@@ -247,169 +289,113 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 54rpx;
-  height: 54rpx;
+  width: 48rpx;
+  height: 48rpx;
   flex: none;
-  border-radius: 16rpx;
+  border-radius: 12rpx;
   background: #edf6ee;
 }
 .quick-icon image {
-  width: 32rpx;
-  height: 32rpx;
+  width: 30rpx;
+  height: 30rpx;
   opacity: 0.78;
 }
-.quick-copy {
+.quick-action view:last-child {
   min-width: 0;
-  flex: 1;
-  margin-left: 10rpx;
 }
-.quick-copy text {
-  display: block;
+.quick-action text:first-child {
   overflow: hidden;
   color: #31543e;
+  font-size: 22rpx;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.quick-copy text:first-child {
-  font-size: 23rpx;
-  font-weight: 700;
-}
-.quick-copy text:last-child {
+.quick-action text:last-child {
   margin-top: 5rpx;
+  overflow: hidden;
   color: #82988a;
   font-size: 18rpx;
-}
-.quick-arrow {
-  width: 26rpx;
-  height: 26rpx;
-  flex: none;
-  margin-left: 5rpx;
-  opacity: 0.62;
-}
-.forward-icon {
-  width: 34rpx;
-  height: 34rpx;
-  flex: none;
-  opacity: 0.7;
-}
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 30rpx 4rpx 14rpx;
-  font-size: 30rpx;
-  font-weight: 700;
-}
-.section-head text:last-child {
-  color: #668a73;
-  font-size: 22rpx;
-  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tasks {
-  display: flex;
-  flex-direction: column;
   border-top: 1rpx solid #e1ebe2;
 }
 .task {
   display: flex;
   align-items: center;
-  gap: 16rpx;
+  gap: 14rpx;
   width: 100%;
   min-height: 92rpx;
-  padding: 16rpx 2rpx;
+  padding: 15rpx 2rpx;
+  border: 0;
   border-bottom: 1rpx solid #e1ebe2;
   text-align: left;
-  color: #284d36;
   background: transparent;
 }
 .task-dot {
-  width: 34rpx;
-  height: 34rpx;
-  border: 2rpx solid #70a77d;
+  width: 30rpx;
+  height: 30rpx;
+  flex: none;
+  border: 2rpx solid #7cad88;
   border-radius: 50%;
 }
 .task-copy {
   flex: 1;
+  min-width: 0;
 }
-.task view text {
-  display: block;
-  font-size: 26rpx;
+.task-copy text:first-child {
+  color: #284d36;
+  font-size: 25rpx;
   font-weight: 700;
 }
-.task view text:last-child {
+.task-copy text:last-child {
   margin-top: 4rpx;
   color: #758c7d;
-  font-size: 21rpx;
-  font-weight: 400;
+  font-size: 20rpx;
 }
 .done {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-  padding: 16rpx 0;
-  border-top: 1rpx solid #d5e8d9;
-  border-bottom: 1rpx solid #d5e8d9;
-  background: transparent;
+  padding: 20rpx 2rpx;
+  border-top: 1rpx solid #dbe9dc;
+  border-bottom: 1rpx solid #dbe9dc;
 }
-.done image {
-  width: 92rpx;
-  height: 92rpx;
-  border-radius: 50%;
-}
-.done text {
-  display: block;
+.done text:first-child {
+  color: #315e41;
   font-size: 26rpx;
   font-weight: 700;
 }
 .done text:last-child {
-  margin-top: 5rpx;
-  color: #71897a;
+  margin-top: 6rpx;
+  color: #789080;
   font-size: 21rpx;
-  font-weight: 400;
 }
-.record-summary,
-.plan-summary {
+.summary-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-top: 0;
-  padding: 20rpx 2rpx;
+  min-height: 92rpx;
+  padding: 15rpx 2rpx;
+  border: 0;
   border-bottom: 1rpx solid #e1ebe2;
   text-align: left;
-  color: #31543e;
   background: transparent;
 }
-.record-summary {
-  border-top: 1rpx solid #e1ebe2;
-}
-.record-summary view,
-.plan-summary view {
+.summary-row view {
   flex: 1;
+  min-width: 0;
 }
-.record-summary text,
-.plan-summary text {
-  display: block;
-  font-size: 27rpx;
+.summary-row text:first-child {
+  color: #31543e;
+  font-size: 25rpx;
   font-weight: 700;
 }
-.record-summary text:last-child,
-.plan-summary text:last-child {
-  margin-top: 6rpx;
-  color: #728a7b;
-  font-size: 21rpx;
-  font-weight: 400;
-  line-height: 1.45;
-}
-.record-summary image {
-  width: 76rpx;
-  height: 76rpx;
-  margin-left: 16rpx;
-  border-radius: 50%;
-}
-.plan-summary > text {
-  color: #5e966f;
-  font-size: 38rpx;
+.summary-row text:last-child {
+  margin-top: 5rpx;
+  color: #758c7d;
+  font-size: 20rpx;
+  line-height: 1.4;
 }
 .loading {
   padding: 160rpx 20rpx;
@@ -421,34 +407,27 @@ onShow(() => {
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 110rpx 32rpx;
+  padding: 150rpx 32rpx;
   text-align: center;
 }
-.load-failed image {
-  width: 180rpx;
-  height: 180rpx;
-  border-radius: 50%;
-}
-.load-failed text {
-  display: block;
-  margin-top: 18rpx;
+.load-failed text:first-child {
   color: #466a52;
   font-size: 28rpx;
   font-weight: 700;
 }
-.load-failed text:nth-of-type(2) {
-  margin-top: 8rpx;
+.load-failed text:nth-child(2) {
+  margin-top: 9rpx;
   color: #7a9080;
   font-size: 22rpx;
-  font-weight: 400;
 }
 .load-failed button {
-  width: 230rpx;
   height: 70rpx;
-  margin-top: 24rpx;
-  border-radius: 35rpx;
-  color: #fff;
-  background: #2e7d4f;
+  margin-top: 26rpx;
+  padding: 0 28rpx;
+  border: 1rpx solid #bfd6c1;
+  border-radius: 12rpx;
+  color: #426a4e;
+  background: #eef6ee;
   font-size: 24rpx;
   line-height: 70rpx;
 }
