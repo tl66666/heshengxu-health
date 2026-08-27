@@ -17,6 +17,7 @@
 5. **新增 UI 图标必须**：24 viewBox、stroke 1.8、stroke-linecap round、颜色 `#789181`，先查 `static/icons/` 是否已有语义相近的，不允许引入多色或面性图标。
 6. **数字层级**：关键指标 ≥34rpx 加粗 + 单位小字分节点排；辅助说明 ≤20rpx 浅灰绿 `#7d9585`。
 7. **不再局部试错**：每页改动前在本文件勾选范围 → 实现 → 全量测试/typecheck/build/prettier 通过才提交。
+8. **图片一律完整显示**：插画容器必须 `aspectFit`，且容器底色用画面同色 `#fffdf5`（留白不可见）；**禁止用 `aspectFill` 展示插画**。仅两类例外：圆形头像掩膜（方形脸特写裁成圆，主体完整）与多张同比例图的轮播位。每张生成图必须声明专用比例槽位，不得跨比例槽位复用。
 
 ## 配图资产盘点与需求（gpt-image2 待办）
 
@@ -108,6 +109,8 @@
 
 - [x] 收到图后逐一核对风格关键词与本文件规格：`xuxu-avatar.png`、`home-hero-morning.png`、`weekly-insight-banner.png` 已生成，角色身份、比例和留白通过静态验收
 - [x] 替换引用：头像 9 处切到 `.png`；首页主视觉切 `home-hero-morning.png`（文案区改右侧 wash）；周回顾横幅改整卡背景 + 右侧文字区；同步脚本通过（21 个资产）
+- [x] 全站去裁切：首页主视觉/周回顾横幅/建档欢迎图/启动页/计划页头部与方向缩略全部改 `aspectFit` + 同色底（修复首页新图被裁、TabBar 序序圆环被按钮 overflow 裁顶）；设计规则新增第 8 条“图片一律完整显示”
+- [x] 首页主视觉改为按日轮换图池（`home-hero-art.ts`）：`home-hero-morning` 与原 `home-companion-banner` 隔天轮换、各自带文案侧，测试覆盖池覆盖性与当日稳定性
 - [ ] 双尺寸真机截图对比（390x844 / 430x932）
 - [ ] 接入 `onboarding-guide-vertical.png`（等下一批生图）
 - [x] 更新 roadmap-status.md
