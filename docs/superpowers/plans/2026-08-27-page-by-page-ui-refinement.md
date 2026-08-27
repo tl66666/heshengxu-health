@@ -88,7 +88,7 @@
 
 ### Task E：配图接入（阻塞于 gpt-image2）
 
-- [ ] 收到图后逐一核对风格关键词与本文件规格
+- [x] 收到图后逐一核对风格关键词与本文件规格：`xuxu-avatar.png`、`home-hero-morning.png`、`weekly-insight-banner.png` 已生成，角色身份、比例和留白通过静态验收
 - [ ] 替换引用 → 同步脚本 → 双尺寸真机截图对比
 - [ ] 更新 roadmap-status.md
 
