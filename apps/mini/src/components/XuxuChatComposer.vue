@@ -1,7 +1,7 @@
 <template>
   <view class="chat-shell">
     <view class="chat-head">
-      <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+      <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
       <view class="chat-head-copy"
         ><text class="chat-name">序序</text
         ><view class="chat-status"><view class="status-dot" />在线 · 健康管理参考</view></view
@@ -35,7 +35,7 @@
         <image
           v-if="message.role === 'assistant'"
           class="message-avatar"
-          src="/static/illustrations/xuxu-avatar.jpg"
+          src="/static/illustrations/xuxu-avatar.png"
           mode="aspectFill"
         />
         <view class="message-body">
@@ -50,7 +50,7 @@
       <view v-if="typing" class="message assistant typing-row"
         ><image
           class="message-avatar"
-          src="/static/illustrations/xuxu-avatar.jpg"
+          src="/static/illustrations/xuxu-avatar.png"
           mode="aspectFill" /><view class="typing"><text /><text /><text /></view
       ></view>
     </scroll-view>

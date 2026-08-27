@@ -16,7 +16,7 @@
       @tap="switchTab(xuxu.path)"
     >
       <view class="xuxu-orbit">
-        <image class="xuxu-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+        <image class="xuxu-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
       </view>
       <text>序序</text>
     </button>

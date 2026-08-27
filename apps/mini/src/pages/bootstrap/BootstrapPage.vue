@@ -8,7 +8,7 @@
     <view class="wash" />
     <view class="copy">
       <view class="xuxu"
-        ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><text
+        ><image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" /><text
           >序序</text
         ></view
       >

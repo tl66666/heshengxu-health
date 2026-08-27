@@ -16,7 +16,7 @@
         </view>
         <view class="welcome-copy">
           <view class="xuxu"
-            ><image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" /><view
+            ><image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" /><view
               ><text>你好，我是序序</text><text>你的健康陪伴助手</text></view
             ></view
           >

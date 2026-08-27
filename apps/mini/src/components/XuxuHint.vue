@@ -1,6 +1,6 @@
 <template>
   <view :class="['hint', presentation.className]" @tap="$emit('tap')">
-    <image class="avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+    <image class="avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
     <view class="copy"
       ><text class="name">{{ presentation.name }}</text
       ><text class="message">{{ message }}</text></view

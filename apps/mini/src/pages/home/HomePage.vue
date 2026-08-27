@@ -7,7 +7,7 @@
       >
       <image
         class="avatar"
-        src="/static/illustrations/xuxu-avatar.jpg"
+        src="/static/illustrations/xuxu-avatar.png"
         mode="aspectFill"
         @tap="toXuxu"
       />
@@ -47,7 +47,8 @@
       <!-- 今日主行动：整卡可进入，不再重复展示标题行 -->
       <view class="hero-host" @tap="go(experience.hero.route)">
         <IllustratedHero
-          image="/static/illustrations/home-companion-banner.png"
+          image="/static/illustrations/home-hero-morning.png"
+          copy-side="right"
           :eyebrow="experience.hero.eyebrow"
           :title="experience.hero.title"
           :description="experience.hero.description"
@@ -55,7 +56,7 @@
       </view>
 
       <button class="chat-entry" @tap="toXuxu">
-        <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+        <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <view><text>和序序聊聊</text><text>把今天的困惑说给序序听</text></view>
         <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>

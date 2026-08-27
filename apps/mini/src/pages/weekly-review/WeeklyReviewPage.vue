@@ -17,8 +17,11 @@
       >
       <template v-else>
         <view class="banner"
-          ><image src="/static/illustrations/insight-report-banner.png" mode="aspectFit" /><view
-            class="banner-copy"
+          ><image
+            class="banner-art"
+            src="/static/illustrations/weekly-insight-banner.png"
+            mode="aspectFill"
+          /><view class="banner-wash" /><view class="banner-copy"
             ><text class="banner-days"
               ><text class="days-num">{{ review.coverage.recordedDayCount }}</text
               ><text class="days-unit">天记录</text></text
@@ -149,21 +152,35 @@ onLoad(load);
   box-shadow: var(--hz-shadow-card);
 }
 .banner {
-  display: flex;
-  align-items: center;
-  min-height: 168rpx;
+  position: relative;
+  min-height: 176rpx;
   overflow: hidden;
   background: #fffdf5;
 }
-.banner image {
-  width: 220rpx;
-  height: 160rpx;
-  flex: none;
+.banner-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* 右侧浅色留白区上的文字保护层，镜像 IllustratedHero 的处理方式 */
+.banner-wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    270deg,
+    rgba(253, 255, 249, 0.95) 0%,
+    rgba(253, 255, 249, 0.72) 34%,
+    rgba(253, 255, 249, 0) 62%
+  );
 }
 .banner-copy {
-  flex: 1;
-  min-width: 0;
-  padding-right: 20rpx;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  padding: 24rpx 26rpx 20rpx;
 }
 .banner-days {
   display: flex;

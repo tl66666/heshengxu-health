@@ -1,8 +1,8 @@
 <template>
   <view class="hero">
     <image class="hero-image" :src="image" mode="aspectFill" />
-    <view class="wash" />
-    <view class="copy">
+    <view class="wash" :class="{ 'wash--right': copySide === 'right' }" />
+    <view class="copy" :class="{ 'copy--right': copySide === 'right' }">
       <text class="eyebrow">{{ eyebrow }}</text>
       <text class="title">{{ title }}</text>
       <text class="description">{{ description }}</text>
@@ -11,12 +11,16 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  image: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-}>();
+withDefaults(
+  defineProps<{
+    image: string;
+    eyebrow: string;
+    title: string;
+    description: string;
+    copySide?: 'left' | 'right';
+  }>(),
+  { copySide: 'left' },
+);
 </script>
 
 <style scoped>
@@ -44,12 +48,25 @@ defineProps<{
     rgba(253, 255, 249, 0) 82%
   );
 }
+.wash--right {
+  background: linear-gradient(
+    270deg,
+    rgba(253, 255, 249, 0.97) 0%,
+    rgba(253, 255, 249, 0.78) 45%,
+    rgba(253, 255, 249, 0) 80%
+  );
+}
 .copy {
   position: absolute;
   top: 28rpx;
   left: 26rpx;
   z-index: 1;
   width: 58%;
+}
+.copy--right {
+  right: 26rpx;
+  left: auto;
+  width: 52%;
 }
 .eyebrow,
 .title,
