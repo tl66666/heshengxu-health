@@ -52,9 +52,6 @@
           :title="experience.hero.title"
           :description="experience.hero.description"
         />
-        <view class="hero-cta"
-          ><text>去做</text><image src="/static/icons/forward.svg" mode="aspectFit"
-        /></view>
       </view>
 
       <button class="chat-entry" @tap="toXuxu">
@@ -360,33 +357,12 @@ onShow(() => {
 .cell-state--done {
   color: #4c7d5a;
 }
-/* 主视觉与序序入口 */
+/* 主视觉与序序入口：整卡可点，不在插画上叠加任何按钮或角标 */
 .hero-host {
   position: relative;
   margin-top: 22rpx;
   border-radius: var(--hz-radius-card);
   box-shadow: var(--hz-shadow-card);
-}
-.hero-cta {
-  position: absolute;
-  right: 20rpx;
-  bottom: 18rpx;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 5rpx;
-  padding: 9rpx 18rpx;
-  border-radius: 999rpx;
-  color: #fff;
-  background: #347c50;
-  font-size: 21rpx;
-  font-weight: 600;
-  box-shadow: 0 6rpx 14rpx rgba(40, 92, 60, 0.25);
-}
-.hero-cta image {
-  width: 24rpx;
-  height: 24rpx;
-  filter: brightness(3);
 }
 .chat-entry {
   display: flex;

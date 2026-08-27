@@ -55,73 +55,61 @@ function switchTab(url: string) {
 </script>
 
 <style scoped>
-/* 浮动胶囊导航：参照主流健康 App 的悬浮 TabBar，保留中间序序头像的突出位 */
+/* 贴底导航栏：与微信原生习惯一致，占满最底部，安全区在栏内消化 */
 .mini-tabbar {
   position: fixed;
-  right: var(--hz-tabbar-offset);
-  bottom: calc(var(--hz-tabbar-offset) + env(safe-area-inset-bottom));
-  left: var(--hz-tabbar-offset);
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 99;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  align-items: end;
-  height: var(--hz-tabbar-height);
-  padding: 0 8rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: var(--hz-shadow-float);
+  align-items: stretch;
+  height: calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom));
+  padding: 0 10rpx env(safe-area-inset-bottom);
+  background: rgba(255, 255, 255, 0.99);
+  border-top: 1rpx solid #e6efe7;
+  box-shadow: 0 -6rpx 20rpx rgba(31, 74, 48, 0.05);
 }
 .tab {
   display: flex;
   min-width: 0;
-  height: 100%;
+  height: var(--hz-tabbar-height);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6rpx;
-  padding: 12rpx 0;
-  border: 0;
+  gap: 5rpx;
+  border-radius: 20rpx;
   color: #708779;
-  background: transparent;
   font-size: 20rpx;
   line-height: 1;
 }
 .tab-icon {
-  width: 42rpx;
-  height: 42rpx;
+  width: 44rpx;
+  height: 44rpx;
   opacity: 0.55;
 }
 .active .tab-icon {
   opacity: 1;
 }
 .active:not(.tab--xuxu) {
-  position: relative;
   color: #28744d;
   font-weight: 700;
-}
-.active:not(.tab--xuxu)::before {
-  position: absolute;
-  top: 10rpx;
-  right: 14rpx;
-  bottom: 6rpx;
-  left: 14rpx;
-  z-index: -1;
-  border-radius: 999rpx;
   background: #e3f2e4;
-  content: '';
 }
 .tab--xuxu {
-  transform: translateY(-18rpx);
+  position: relative;
   color: #54705a;
 }
 .xuxu-orbit {
-  width: 76rpx;
-  height: 76rpx;
+  width: 82rpx;
+  height: 82rpx;
+  margin-top: -26rpx;
   padding: 5rpx;
   border: 4rpx solid #f0da8c;
   border-radius: 50%;
   background: #fffdf1;
-  box-shadow: 0 6rpx 16rpx rgba(90, 74, 27, 0.16);
+  box-shadow: 0 6rpx 16rpx rgba(90, 74, 27, 0.18);
 }
 .xuxu-avatar {
   width: 100%;

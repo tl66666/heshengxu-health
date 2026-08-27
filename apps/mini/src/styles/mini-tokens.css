@@ -28,6 +28,6 @@ page {
   --hz-blush: #fdeee6;
   --hz-blush-ink: #a06a4c;
   /* 自定义 TabBar 占用空间（含离底间距），页面据此预留底部安全距离 */
-  --hz-tabbar-offset: 14rpx;
-  --hz-tabbar-height: 110rpx;
+  --hz-tabbar-offset: 0rpx;
+  --hz-tabbar-height: 108rpx;
 }
