@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import onboardingPageSource from './OnboardingPage.vue?raw';
 import {
   canAdvanceOnboarding,
   onboardingProgress,
@@ -6,6 +7,10 @@ import {
 } from './onboarding-flow.js';
 
 describe('onboarding flow', () => {
+  it('falls back between onboarding illustrations instead of stretching the avatar', () => {
+    expect(onboardingPageSource).toContain("heroImage.value = '/static/illustrations/onboarding-hero-vertical.png'");
+    expect(onboardingPageSource).not.toContain("heroImage.value = '/static/illustrations/xuxu-avatar.jpg'");
+  });
   it('keeps the welcome step freely enterable and requires BMI before body details advance', () => {
     expect(canAdvanceOnboarding(0, null, [])).toBe(true);
     expect(canAdvanceOnboarding(2, null, [])).toBe(false);

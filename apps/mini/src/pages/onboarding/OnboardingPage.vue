@@ -232,8 +232,8 @@ const selectedGoalLabel = computed(
 const progress = computed(() => onboardingProgress(step.value));
 const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, form.goals));
 function useFallbackHero() {
-  if (heroImage.value !== '/static/illustrations/xuxu-avatar.jpg') {
-    heroImage.value = '/static/illustrations/xuxu-avatar.jpg';
+  if (heroImage.value !== '/static/illustrations/onboarding-hero-vertical.png') {
+    heroImage.value = '/static/illustrations/onboarding-hero-vertical.png';
   }
 }
 function isGoalBlocked(value: (typeof goalOptions)[number]['value']) {
