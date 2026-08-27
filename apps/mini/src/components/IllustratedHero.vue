@@ -8,8 +8,10 @@
       <text class="description">{{ description }}</text>
     </view>
     <button class="action" @tap="$emit('action')">
-      <text>{{ actionLabel }}</text
-      ><image class="action-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+      <text class="action-label">{{ actionLabel }}</text>
+      <view class="action-arrow-wrap">
+        <image class="action-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+      </view>
     </button>
   </view>
 </template>
@@ -82,26 +84,41 @@ defineEmits<{ action: [] }>();
 }
 .action {
   position: absolute;
-  right: 20rpx;
+  right: auto;
   bottom: 20rpx;
-  left: 20rpx;
+  left: 26rpx;
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 72rpx;
-  padding: 0 22rpx;
-  border: 1rpx solid rgba(205, 201, 166, 0.9);
-  border-radius: 12rpx;
-  color: #5c604d;
-  background: rgba(255, 253, 245, 0.72);
+  justify-content: flex-start;
+  width: auto;
+  height: 60rpx;
+  padding: 0;
+  border: 0;
+  color: #5e6f61;
+  background: transparent;
   font-size: 24rpx;
   font-weight: 700;
-  line-height: 72rpx;
+  line-height: 60rpx;
   box-shadow: none;
 }
+.action-label {
+  padding-bottom: 2rpx;
+  border-bottom: 1rpx solid rgba(94, 111, 97, 0.46);
+}
+.action-arrow-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  margin-left: 14rpx;
+  border: 1rpx solid rgba(218, 211, 178, 0.88);
+  border-radius: 50%;
+  background: rgba(255, 253, 245, 0.54);
+}
 .action-arrow {
-  width: 30rpx;
-  height: 30rpx;
+  width: 28rpx;
+  height: 28rpx;
 }
 </style>
