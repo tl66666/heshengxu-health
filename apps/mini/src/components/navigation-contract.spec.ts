@@ -30,6 +30,11 @@ describe('navigation contracts', () => {
     expect(shouldConfirmOnboardingExit(2)).toBe(false);
   });
 
+  it('falls back to relaunch when an ordinary page is the first page in the stack', () => {
+    expect(appNavBarSource).toContain('uni.reLaunch({ url: ordinaryBackTarget(props.route) })');
+    expect(appNavBarSource).not.toContain('uni.switchTab({ url: ordinaryBackTarget');
+  });
+
   it('keeps secondary navigation actions neutral and circular', () => {
     expect(appNavBarSource).toMatch(/border-radius:\s*50%/);
     expect(appNavBarSource).toMatch(/border:\s*1rpx solid #dfe8df/);

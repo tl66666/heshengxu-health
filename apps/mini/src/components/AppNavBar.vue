@@ -34,7 +34,7 @@ function back() {
     uni.navigateBack();
     return;
   }
-  uni.switchTab({ url: ordinaryBackTarget(props.route) });
+  uni.reLaunch({ url: ordinaryBackTarget(props.route) });
 }
 function close() {
   emit('close');
