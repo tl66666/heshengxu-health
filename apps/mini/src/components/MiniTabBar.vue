@@ -55,30 +55,31 @@ function switchTab(url: string) {
 </script>
 
 <style scoped>
+/* 浮动胶囊导航：参照主流健康 App 的悬浮 TabBar，保留中间序序头像的突出位 */
 .mini-tabbar {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  right: var(--hz-tabbar-offset);
+  bottom: calc(var(--hz-tabbar-offset) + env(safe-area-inset-bottom));
+  left: var(--hz-tabbar-offset);
   z-index: 99;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   align-items: end;
-  height: 116rpx;
-  padding: 6rpx 10rpx calc(6rpx + env(safe-area-inset-bottom));
-  background: rgba(251, 253, 249, 0.98);
-  border-top: 1rpx solid #dfe9df;
-  box-shadow: 0 -8rpx 24rpx rgba(47, 79, 55, 0.08);
+  height: var(--hz-tabbar-height);
+  padding: 0 8rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--hz-shadow-float);
 }
 .tab {
   display: flex;
   min-width: 0;
-  height: 92rpx;
+  height: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5rpx;
-  padding: 0;
+  gap: 6rpx;
+  padding: 12rpx 0;
   border: 0;
   color: #708779;
   background: transparent;
@@ -86,29 +87,41 @@ function switchTab(url: string) {
   line-height: 1;
 }
 .tab-icon {
-  width: 44rpx;
-  height: 44rpx;
-  opacity: 0.62;
+  width: 42rpx;
+  height: 42rpx;
+  opacity: 0.55;
 }
 .active .tab-icon {
   opacity: 1;
 }
-.active {
+.active:not(.tab--xuxu) {
+  position: relative;
   color: #28744d;
   font-weight: 700;
 }
+.active:not(.tab--xuxu)::before {
+  position: absolute;
+  top: 10rpx;
+  right: 14rpx;
+  bottom: 6rpx;
+  left: 14rpx;
+  z-index: -1;
+  border-radius: 999rpx;
+  background: #e3f2e4;
+  content: '';
+}
 .tab--xuxu {
-  transform: translateY(-12rpx);
+  transform: translateY(-18rpx);
   color: #54705a;
 }
 .xuxu-orbit {
-  width: 70rpx;
-  height: 70rpx;
+  width: 76rpx;
+  height: 76rpx;
   padding: 5rpx;
   border: 4rpx solid #f0da8c;
   border-radius: 50%;
   background: #fffdf1;
-  box-shadow: 0 6rpx 14rpx rgba(90, 74, 27, 0.14);
+  box-shadow: 0 6rpx 16rpx rgba(90, 74, 27, 0.16);
 }
 .xuxu-avatar {
   width: 100%;

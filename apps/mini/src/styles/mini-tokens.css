@@ -13,3 +13,21 @@ page {
   --hz-danger-soft: #fff1ed;
   --hz-tabbar-height: 124rpx;
 }
+page {
+  /* 卡片与投影：借鉴成熟健康产品的轻卡片层级 */
+  --hz-radius-card: 22rpx;
+  --hz-radius-tile: 16rpx;
+  --hz-shadow-card: 0 8rpx 24rpx rgba(31, 74, 48, 0.07);
+  --hz-shadow-float: 0 12rpx 32rpx rgba(24, 52, 37, 0.14);
+  /* 功能色砖块底色（记录四项、工具入口） */
+  --hz-mint: #e8f4e8;
+  --hz-amber: #fff6dc;
+  --hz-amber-ink: #8a7434;
+  --hz-sky: #e9f2fb;
+  --hz-sky-ink: #4a6f96;
+  --hz-blush: #fdeee6;
+  --hz-blush-ink: #a06a4c;
+  /* 自定义 TabBar 占用空间（含离底间距），页面据此预留底部安全距离 */
+  --hz-tabbar-offset: 14rpx;
+  --hz-tabbar-height: 110rpx;
+}

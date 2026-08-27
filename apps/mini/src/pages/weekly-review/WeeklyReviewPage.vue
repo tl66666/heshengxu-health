@@ -107,7 +107,7 @@ onLoad(load);
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 32rpx 150rpx;
+  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + var(--hz-tabbar-offset) * 2 + 40rpx);
   background: #f7fbf8;
   color: #244a32;
 }

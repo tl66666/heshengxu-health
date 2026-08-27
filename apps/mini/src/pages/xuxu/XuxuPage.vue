@@ -38,7 +38,7 @@ function localDate() {
   display: flex;
   flex: none;
   width: 100%;
-  height: calc(100vh - 116rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - var(--hz-tabbar-height) - var(--hz-tabbar-offset) * 2 - env(safe-area-inset-bottom));
   min-height: 0;
   min-width: 0;
   overflow: hidden;
