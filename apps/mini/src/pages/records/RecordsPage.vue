@@ -35,8 +35,10 @@
 
       <button class="food-entry" @tap="openFoodSearch">
         <view class="food-entry-mark">+</view>
-        <view><text>记一份具体食物</text><text>搜索食物并按份量计算热量与营养</text></view>
-        <text class="food-entry-arrow">›</text>
+        <view class="food-entry-copy"
+          ><text>记一份具体食物</text><text>搜索食物并按份量计算热量与营养</text></view
+        >
+        <image class="food-entry-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
 
       <view v-if="foodEntries.length" class="food-summary">
@@ -477,17 +479,18 @@ onShow(() => {
   justify-content: center;
   width: 52rpx;
   height: 52rpx;
+  flex: none;
   margin-right: 14rpx;
   border-radius: 17rpx;
   color: #fff;
   background: #76a77d;
   font-size: 34rpx;
 }
-.food-entry view { flex: 1; }
+.food-entry-copy { min-width: 0; flex: 1; }
 .food-entry text { display: block; }
 .food-entry text:first-child { color: #31543e; font-size: 25rpx; font-weight: 700; }
 .food-entry text:last-child { margin-top: 5rpx; color: #7d9584; font-size: 20rpx; }
-.food-entry-arrow { color: #79a180; font-size: 38rpx !important; }
+.food-entry-arrow { width: 32rpx; height: 32rpx; flex: none; margin-left: 14rpx; opacity: 0.68; }
 .food-summary { margin: 0 0 24rpx; padding: 20rpx 18rpx; border: 1rpx solid #dceadd; border-radius: 18rpx; background: #fff; }
 .food-summary-head { display: flex; align-items: flex-start; justify-content: space-between; }
 .food-summary-title, .food-summary-caption { display: block; }
