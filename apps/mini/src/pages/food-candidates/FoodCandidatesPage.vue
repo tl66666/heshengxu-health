@@ -4,7 +4,7 @@
     <view v-if="loading" class="state">正在整理候选食物…</view>
     <template v-else-if="job">
       <view class="image-strip"
-        ><image v-if="imagePath" :src="imagePath" mode="aspectFill" /><view
+        ><image v-if="imagePath" :src="imagePath" mode="aspectFill" /><view class="image-copy"
           ><text>识别出的候选</text><text>请确认食物和份量，再保存到记录</text></view
         ></view
       >
@@ -34,7 +34,7 @@
             @tap="select(candidate)"
           >
             <view class="candidate-mark">{{ candidate.name.slice(0, 1) }}</view
-            ><view
+            ><view class="candidate-copy"
               ><text>{{ candidate.name }}</text
               ><text
                 >匹配度 {{ Math.round(candidate.confidence * 100) }}% · 估算
@@ -175,8 +175,9 @@ onLoad((options) => {
   height: 84rpx;
   border-radius: 13rpx;
 }
-.image-strip view {
+.image-copy {
   flex: 1;
+  min-width: 0;
 }
 .image-strip text {
   display: block;
@@ -219,8 +220,9 @@ onLoad((options) => {
   font-size: 26rpx;
   font-weight: 700;
 }
-.candidate view {
+.candidate-copy {
   flex: 1;
+  min-width: 0;
 }
 .candidate text {
   display: block;
