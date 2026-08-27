@@ -65,3 +65,9 @@ pnpm --filter @heban/mini clean:dist
 2. **开发者工具手动清理**：微信开发者工具工具栏「清缓存 → 清除数据缓存」（或调试器 Storage 面板删除上述两个 `heshengxu.local.*` 键），然后点击「重新编译」。
 
 注意：如果本地演示 API（PostgreSQL）正在运行且已有服务端档案，工具清缓存后 Bootstrap 页仍可能因服务端档案直接跳转首页；此时使用应用内入口即可，重新建档会覆盖服务端演示档案。
+
+### 报 "module is not defined" 怎么办
+
+新增源码文件后，如果开发者工具报 `module 'pages/xxx/yyy.js' is not defined`，说明 dev 监听编译中断过、`dist/dev` 产物不完整。处理：关闭微信开发者工具里的项目 → 重新运行 `./scripts/dev-mini.ps1` → 等日志出现 `Build complete` → 重新导入 `apps/mini`。
+
+提交前可用 `node scripts/verify-mini-build.mjs`（检查 build 产物）和 `node scripts/verify-mini-build.mjs apps/mini/dist/dev/mp-weixin`（检查 dev 产物）验证产物里没有缺失的模块引用；该检查已接入 CI。
