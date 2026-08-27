@@ -9,7 +9,6 @@ const root = roots.find((candidate) => existsSync(resolve(candidate, 'app.json')
 const required = [
   'app.json',
   'app.js',
-  'App.wxml',
   'pages/onboarding/OnboardingPage.js',
   'pages/home/HomePage.js',
   'pages/records/RecordsPage.js',
@@ -19,6 +18,10 @@ const required = [
   'components/MiniTabBar.js',
 ];
 const missing = required.filter((file) => !existsSync(resolve(root, file)));
+const appTemplateFiles = ['app.wxml', 'App.wxml'];
+if (!appTemplateFiles.some((file) => existsSync(resolve(root, file)))) {
+  missing.push(appTemplateFiles.join(' or '));
+}
 
 if (missing.length > 0) {
   console.error(`微信小程序构建产物缺少文件：${missing.join(', ')}`);
