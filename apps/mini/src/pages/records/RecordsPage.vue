@@ -202,6 +202,7 @@ import type {
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { createHealthRecordsStore } from '../../features/health-records/health-records.store.js';
+import { consumeRecordTypeFocus } from '../../features/health-records/records-focus.js';
 import { deleteMealEntry, loadMealEntries } from '../../features/food/food.service.js';
 import { summarizeFoodEntries, type MealEntry } from '../../features/food/food.summary.js';
 import type {
@@ -415,6 +416,8 @@ onLoad((options) => {
     activeType.value = options.type as HealthRecordType;
 });
 onShow(() => {
+  const requested = consumeRecordTypeFocus();
+  if (requested) activeType.value = requested;
   load();
   loadFoods();
   healthLoopState.loadToday(date);
@@ -427,7 +430,7 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 50rpx 32rpx 150rpx;
+  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + var(--hz-tabbar-offset) * 2 + 40rpx);
   background: #f6faf7;
   color: #244735;
 }
