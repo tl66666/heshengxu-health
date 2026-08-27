@@ -1,10 +1,6 @@
 <template>
   <view class="page">
-    <image
-      class="hero"
-      src="/static/illustrations/onboarding-hero-vertical.png"
-      mode="aspectFill"
-    />
+    <image class="hero" src="/static/illustrations/onboarding-hero-vertical.png" mode="aspectFit" />
     <view class="wash" />
     <view class="copy">
       <view class="xuxu"
@@ -54,7 +50,7 @@ onShow(async () => {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: #eef5ec;
+  background: #fffdf5;
 }
 .hero,
 .wash {

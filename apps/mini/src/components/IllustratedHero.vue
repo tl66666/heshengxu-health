@@ -1,6 +1,7 @@
 <template>
   <view class="hero">
-    <image class="hero-image" :src="image" mode="aspectFill" />
+    <!-- aspectFit：任何比例的插画都完整显示，留白与卡片同色不可见 -->
+    <image class="hero-image" :src="image" mode="aspectFit" />
     <view class="wash" :class="{ 'wash--right': copySide === 'right' }" />
     <view class="copy" :class="{ 'copy--right': copySide === 'right' }">
       <text class="eyebrow">{{ eyebrow }}</text>
@@ -18,8 +19,9 @@ withDefaults(
     title: string;
     description: string;
     copySide?: 'left' | 'right';
+    alt?: string;
   }>(),
-  { copySide: 'left' },
+  { copySide: 'left', alt: '' },
 );
 </script>
 

@@ -33,7 +33,7 @@
               ? '/static/illustrations/program-sleep.png'
               : '/static/illustrations/program-weight.png'
           "
-          mode="aspectFill"
+          mode="aspectFit"
         />
         <view class="plan-intro-copy">
           <text class="plan-kicker">正在执行</text>
@@ -105,7 +105,7 @@
           :class="{ active: item.kind === plan.kind, disabled: !item.available }"
           @tap="selectProgram(item)"
         >
-          <image :src="item.image" mode="aspectFill" />
+          <image :src="item.image" mode="aspectFit" />
           <view
             ><text>{{ item.label }}</text
             ><text>{{

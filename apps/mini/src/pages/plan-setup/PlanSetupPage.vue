@@ -6,7 +6,7 @@
     <text class="hint">之后随时可以调整，不需要一次决定全部。</text>
     <view class="plan-options">
       <button :class="['choice', { selected: kind === 'weight' }]" @tap="kind = 'weight'">
-        <image src="/static/illustrations/program-weight.png" mode="aspectFill" />
+        <image src="/static/illustrations/program-weight.png" mode="aspectFit" />
         <view class="choice-copy"><text>体重管理</text><text>从规律记录与小行动开始</text></view>
         <image
           v-if="kind === 'weight'"
@@ -16,7 +16,7 @@
         />
       </button>
       <button :class="['choice', { selected: kind === 'sleep' }]" @tap="kind = 'sleep'">
-        <image src="/static/illustrations/program-sleep.png" mode="aspectFill" />
+        <image src="/static/illustrations/program-sleep.png" mode="aspectFit" />
         <view class="choice-copy"><text>睡眠与精力</text><text>先找回更稳定的作息</text></view>
         <image
           v-if="kind === 'sleep'"

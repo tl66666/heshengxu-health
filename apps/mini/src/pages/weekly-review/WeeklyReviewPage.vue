@@ -20,7 +20,7 @@
           ><image
             class="banner-art"
             src="/static/illustrations/weekly-insight-banner.png"
-            mode="aspectFill"
+            mode="aspectFit"
           /><view class="banner-wash" /><view class="banner-copy"
             ><text class="banner-days"
               ><text class="days-num">{{ review.coverage.recordedDayCount }}</text

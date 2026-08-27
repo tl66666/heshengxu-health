@@ -12,7 +12,7 @@
     <template v-if="step === 0">
       <view class="welcome-screen">
         <view class="welcome-art-frame">
-          <image class="welcome-art" :src="heroImage" mode="aspectFill" @error="useFallbackHero" />
+          <image class="welcome-art" :src="heroImage" mode="aspectFit" @error="useFallbackHero" />
         </view>
         <view class="welcome-copy">
           <view class="xuxu"

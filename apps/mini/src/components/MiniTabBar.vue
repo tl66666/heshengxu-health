@@ -79,6 +79,7 @@ function switchTab(url: string) {
   align-items: center;
   justify-content: center;
   gap: 5rpx;
+  overflow: visible;
   border-radius: 20rpx;
   color: #708779;
   font-size: 20rpx;
@@ -99,8 +100,10 @@ function switchTab(url: string) {
 }
 .tab--xuxu {
   position: relative;
+  overflow: visible;
   color: #54705a;
 }
+/* 头像圈上浮出栏外：按钮必须 overflow visible，否则微信端会裁掉圆环顶部 */
 .xuxu-orbit {
   width: 82rpx;
   height: 82rpx;
