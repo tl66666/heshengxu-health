@@ -53,20 +53,17 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx;
+  height: 64rpx;
   padding: 0;
-  border-radius: 20rpx;
-  color: #397651;
-  background: #eaf3eb;
-}
-.close {
-  color: #8d685b;
-  background: #fff4ef;
+  border: 1rpx solid #dfe8df;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 3rpx 9rpx rgba(41, 66, 50, 0.05);
 }
 .icon-image {
-  width: 34rpx;
-  height: 34rpx;
+  width: 32rpx;
+  height: 32rpx;
 }
 .title {
   color: #244735;
@@ -74,6 +71,6 @@ function close() {
   font-weight: 700;
 }
 .placeholder {
-  width: 60rpx;
+  width: 64rpx;
 }
 </style>
