@@ -1,67 +1,66 @@
-# Azure Test Environment Implementation Plan
+# Azure 测试环境实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> 面向执行者：必须逐项执行，步骤使用复选框记录状态。
 
-**Goal:** Deploy the existing NestJS API and PostgreSQL database to an Azure test environment that the WeChat Mini Program can reach through HTTPS without depending on a local computer.
+**目标：** 将现有 NestJS API 与 PostgreSQL 部署到 Azure 测试环境，让微信小程序通过 HTTPS 使用服务，不依赖开发者电脑。
 
-**Architecture:** Azure Container Apps runs the NestJS API image; Azure Database for PostgreSQL Flexible Server holds the authoritative Prisma schema. CloudBase remains an external server-side integration, not the health-record database. The Mini Program receives only the public Azure HTTPS API URL during its build.
+**架构：** Azure Container Apps 运行 NestJS API；Azure Database for PostgreSQL Flexible Server 保存 Prisma schema。CloudBase 仍是服务端外部集成，不保存健康业务事实。小程序构建时只接收公开 Azure HTTPS API 地址。
 
-**Tech Stack:** Azure Container Apps, Azure Container Registry, Azure Database for PostgreSQL Flexible Server, NestJS, Prisma, GitHub Actions, uni-app.
+**技术栈：** Azure Container Apps、Azure Container Registry、Azure Database for PostgreSQL Flexible Server、NestJS、Prisma、GitHub Actions、uni-app。
 
 ---
 
-### Task 1: Create the Azure test resource group and budget guardrail
+### 任务 1：创建 Azure 测试资源组与费用保护
 
-**Files:**
-- Modify: `infra/azure/README.md`
+**文件：**
+- 修改：`infra/azure/README.md`
 
-- [ ] In Azure Portal, create `rg-heshengxu-test` in the region selected for lowest cost and acceptable China-to-user latency.
-- [ ] Create a Cost Management budget below the remaining Azure credit, with alerts at 50%, 80%, and 100%.
-- [ ] Record only resource names and region in `infra/azure/README.md`; never record subscription IDs, passwords, or connection strings.
-- [ ] Verify the budget alert exists before creating billable database resources.
+- [ ] 在 Azure Portal 创建 `rg-heshengxu-test`，选择费用较低且中国用户延迟可接受的区域。
+- [ ] 在 Cost Management 创建低于剩余代金券的预算，并配置 50%、80%、100% 告警。
+- [ ] 只在 `infra/azure/README.md` 记录资源名和区域，禁止记录订阅 ID、密码和连接串。
+- [ ] 创建任何计费数据库前，确认预算告警已经生效。
 
-### Task 2: Provision managed PostgreSQL and apply Prisma migrations
+### 任务 2：创建托管 PostgreSQL 并执行 Prisma migration
 
-**Files:**
-- Modify: `apps/api/prisma/schema.prisma`
-- Modify: `infra/azure/README.md`
+**文件：**
+- 修改：`infra/azure/README.md`
 
-- [ ] Create a Burstable Azure Database for PostgreSQL Flexible Server for the test environment, with a dedicated database named `heban` and a non-default administrator password stored only in Azure.
-- [ ] Permit the deployment runner to reach PostgreSQL. Do not expose the database to the public Mini Program.
-- [ ] Put the PostgreSQL connection string in a Container Apps secret named `database-url`.
-- [ ] Run `pnpm --filter @heban/api prisma:deploy` in the deployment environment and verify `_prisma_migrations` contains every committed migration.
-- [ ] Run the API E2E suite against the deployed database only after test users are isolated from local development data.
+- [ ] 创建 Burstable 规格的 Azure Database for PostgreSQL Flexible Server，使用独立数据库 `heban`；管理员密码只保存于 Azure。
+- [ ] 只允许部署环境访问 PostgreSQL，禁止小程序直接访问数据库。
+- [ ] 将连接串保存为 Container Apps secret `database-url`。
+- [ ] 在部署环境执行 `pnpm --filter @heban/api prisma:deploy`，确认 `_prisma_migrations` 包含所有已提交 migration。
+- [ ] 仅在测试用户与本地开发数据隔离后，针对已部署数据库运行 API E2E 测试。
 
-### Task 3: Package and deploy the NestJS API
+### 任务 3：打包并部署 NestJS API
 
-**Files:**
-- Create: `apps/api/Dockerfile`
-- Create: `apps/api/.dockerignore`
-- Create: `.github/workflows/deploy-azure-test.yml`
+**文件：**
+- 新增：`apps/api/Dockerfile`
+- 新增：`apps/api/.dockerignore`
+- 新增：`.github/workflows/deploy-azure-test.yml`
 
-- [ ] Write a Docker build test that starts the built API image with test environment variables and verifies `GET /health` returns HTTP 200.
-- [ ] Create a multi-stage Node 24 Dockerfile that installs locked workspace dependencies, builds `@heban/domain` and `@heban/api`, and runs only API runtime output in the final stage.
-- [ ] Build the image locally or in CI and verify it contains no `.env`, `node_modules` from the host, source food SQL files, or Mini Program artifacts.
-- [ ] Create Azure Container Registry and push the verified image.
-- [ ] Create Azure Container Apps with `API_PORT=3000`, the `database-url` secret, and mock recognition providers. Verify `GET /health` over the Azure HTTPS FQDN.
+- [ ] 编写 Docker 构建测试：用测试环境变量启动 API 镜像，`GET /health` 必须返回 HTTP 200。
+- [ ] 创建多阶段 Node 24 Dockerfile：安装锁定的 workspace 依赖，构建 `@heban/domain` 与 `@heban/api`，最终镜像仅运行 API 产物。
+- [ ] 在本地或 CI 构建镜像，确认其中没有 `.env`、宿主机 `node_modules`、原始食品 SQL 或小程序构建产物。
+- [ ] 创建 Azure Container Registry 并推送经验证镜像。
+- [ ] 创建 Azure Container Apps，设置 `API_PORT=3000`、`database-url` 和 mock 识别 Provider；通过 Azure HTTPS FQDN 验证 `GET /health`。
 
-### Task 4: Configure the Mini Program test build
+### 任务 4：配置小程序测试构建
 
-**Files:**
-- Create: `apps/mini/.env.test.example`
-- Modify: `docs/engineering/local-development.md`
+**文件：**
+- 新增：`apps/mini/.env.test.example`
+- 修改：`docs/engineering/local-development.md`
 
-- [ ] Add `VITE_MINI_API_BASE_URL=https://<container-app-fqdn>/api/v1` to the example, with no credentials.
-- [ ] Add the Container Apps HTTPS domain to WeChat Mini Program request-domain settings.
-- [ ] Build the Mini Program with the test endpoint, complete onboarding, create one health record, and refresh it from a second Mini Program session.
-- [ ] Record the acceptance date and FQDN in a private deployment record, not Git.
+- [ ] 添加 `VITE_MINI_API_BASE_URL=https://<container-app-fqdn>/api/v1` 示例，不含任何凭证。
+- [ ] 将 Container Apps 的 HTTPS 域名加入微信小程序“request 合法域名”。
+- [ ] 使用测试地址构建小程序，完成建档、新建一条健康记录，并从第二个小程序会话刷新验证持久化。
+- [ ] 验收日期与 FQDN 记录在私有部署记录中，不提交到 Git。
 
-### Task 5: Enable production only after test acceptance
+### 任务 5：测试验收后再开放生产环境
 
-**Files:**
-- Modify: `infra/azure/README.md`
+**文件：**
+- 修改：`infra/azure/README.md`
 
-- [ ] Create a new production resource group and database; never promote the test database directly.
-- [ ] Enable automated backups, minimum log retention, HTTPS monitoring, and deployment approval before production rollout.
-- [ ] Replace the local development bearer token with real WeChat login before external release.
-- [ ] Implement CloudBase storage and Hunyuan adapters before enabling their production provider flags.
+- [ ] 创建新的生产资源组和数据库，不直接提升测试数据库。
+- [ ] 开启自动备份、最低日志保留、HTTPS 监控和部署审批后再发布。
+- [ ] 对外发布前必须用真实微信登录替换本地开发 bearer token。
+- [ ] 只有 CloudBase 存储和混元适配器真实完成后，才能启用对应生产 Provider 标志。

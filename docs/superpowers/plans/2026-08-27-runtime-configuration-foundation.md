@@ -1,74 +1,75 @@
-# Runtime Configuration Foundation Implementation Plan
+# 小程序运行时配置底座实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> 面向执行者：必须逐项执行，步骤使用复选框记录状态。
 
-**Goal:** Centralize the Mini Program API endpoint and development identity so one codebase can run locally, in Azure test, and in production without editing feature files.
+**目标：** 将小程序 API 地址和开发身份收口，使同一套代码能在本地、Azure 测试与生产环境运行，无须逐页修改。
 
-**Architecture:** A small runtime module owns the API base URL and development authorization value. Feature services obtain a shared client factory from this module rather than duplicating `localhost` and request setup. `VITE_` variables configure build-time targets; secrets remain server-only and are not part of this module.
+**架构：** 小型运行时模块负责 API 基地址和本地开发授权；业务服务通过共享客户端请求 API，不再自行拼接 `localhost` 或请求头。`VITE_` 变量只存放公开构建配置，任何密钥仍只存在服务端。
 
-**Tech Stack:** uni-app, Vue 3, TypeScript, Vitest, Vite environment variables.
+**技术栈：** uni-app、Vue 3、TypeScript、Vitest、Vite 环境变量。
 
 ---
 
-### Task 1: Define and test Mini Program runtime configuration
+### 任务 1：定义并测试小程序运行时配置
 
-**Files:**
-- Create: `apps/mini/src/config/runtime.ts`
-- Create: `apps/mini/src/config/runtime.spec.ts`
+**文件：**
+- 新增：`apps/mini/src/config/runtime.ts`
+- 新增：`apps/mini/src/config/runtime.spec.ts`
 
-- [x] Write a failing test for the local default: `resolveMiniRuntime({})` returns `apiBaseUrl: 'http://localhost:3000/api/v1'` and `authorization: 'Bearer dev-mini-user'`.
-- [x] Run `node node_modules/vitest/vitest.mjs run src/config/runtime.spec.ts`; it must fail because the resolver does not exist.
-- [x] Implement `resolveMiniRuntime(environment)` with the type `{ apiBaseUrl: string; authorization?: string }`. It reads `VITE_MINI_API_BASE_URL`, removes one trailing slash, and omits the development token when a configured URL exists.
-- [x] Add a passing test for `VITE_MINI_API_BASE_URL: 'https://api.example.test/api/v1/'`, expecting `https://api.example.test/api/v1` and no authorization token.
-- [x] Run the focused test again and commit `feat: define mini program runtime configuration`.
+- [x] 为本地默认值编写失败测试：`resolveMiniRuntime({})` 返回 `apiBaseUrl: 'http://localhost:3000/api/v1'` 与 `authorization: 'Bearer dev-mini-user'`。
+- [x] 运行 `node node_modules/vitest/vitest.mjs run src/config/runtime.spec.ts`，确认模块不存在导致失败。
+- [x] 实现 `resolveMiniRuntime(environment)`，读取 `VITE_MINI_API_BASE_URL`，移除末尾斜杠；配置 HTTPS 地址时不返回本地开发令牌。
+- [x] 为 `VITE_MINI_API_BASE_URL: 'https://api.example.test/api/v1/'` 添加通过测试，断言地址标准化且没有授权令牌。
+- [x] 运行聚焦测试并提交 `feat: define mini program runtime configuration`。
 
-### Task 2: Add one Mini Program API client factory
+### 任务 2：创建唯一的小程序 API 客户端工厂
 
-**Files:**
-- Create: `apps/mini/src/services/mini-api.ts`
-- Create: `apps/mini/src/services/mini-api.spec.ts`
+**文件：**
+- 新增：`apps/mini/src/services/mini-api.ts`
+- 新增：`apps/mini/src/services/mini-api.spec.ts`
 
-- [x] Write a failing test using an injected request adapter. It must assert a configured HTTPS runtime calls `https://api.example.test/api/v1/health` and sends an empty request header rather than a development bearer token.
-- [x] Run `node node_modules/vitest/vitest.mjs run src/services/mini-api.spec.ts`; it must fail because the shared factory does not exist.
-- [x] Implement `createMiniApiClient()` by composing `resolveMiniRuntime(import.meta.env)` with `createApiClient`. The `uni.request` adapter sets `Authorization` only when runtime configuration provides it. Tests inject the adapter instead of calling `uni.request`.
-- [x] Run `node node_modules/vitest/vitest.mjs run src/services/mini-api.spec.ts src/services/api-client.spec.ts` and commit `feat: add shared mini program API client`.
+- [x] 使用注入的请求适配器编写失败测试：配置 HTTPS 地址后请求 `https://api.example.test/api/v1/health`，请求头不得携带开发 bearer token。
+- [x] 运行测试并确认共享客户端不存在导致失败。
+- [x] 实现 `createMiniApiClient()`：组合 `resolveMiniRuntime` 和 `createApiClient`，仅在本地运行时配置提供授权值时发送 `Authorization`；测试注入适配器，不调用 `uni.request`。
+- [x] 运行共享客户端与已有 API 客户端测试并提交 `feat: add shared mini program API client`。
 
-### Task 3: Remove duplicated localhost configuration
+### 任务 3：移除重复的本地地址配置
 
-**Files:**
-- Modify: `apps/mini/src/pages/bootstrap/BootstrapPage.vue`
-- Modify: `apps/mini/src/pages/onboarding/OnboardingPage.vue`
-- Modify: `apps/mini/src/features/health-loop/health-loop.service.ts`
-- Modify: `apps/mini/src/features/health-profile/health-profile.service.ts`
-- Modify: `apps/mini/src/features/health-records/health-records.service.ts`
-- Modify: `apps/mini/src/features/food/food.service.ts`
-- Modify: `apps/mini/src/features/food/food-recognition.ts`
-- Modify: `apps/mini/src/features/weekly-review/weekly-review.service.ts`
-- Create: `apps/mini/src/services/no-hardcoded-api-base.spec.ts`
+**文件：**
+- 修改：`apps/mini/src/pages/bootstrap/BootstrapPage.vue`
+- 修改：`apps/mini/src/pages/onboarding/OnboardingPage.vue`
+- 修改：`apps/mini/src/features/health-loop/health-loop.service.ts`
+- 修改：`apps/mini/src/features/health-profile/health-profile.service.ts`
+- 修改：`apps/mini/src/features/health-records/health-records.service.ts`
+- 修改：`apps/mini/src/features/food/food.service.ts`
+- 修改：`apps/mini/src/features/food/food-recognition.ts`
+- 修改：`apps/mini/src/features/weekly-review/weekly-review.service.ts`
+- 新增：`apps/mini/test/no-hardcoded-api-base.spec.ts`
 
-- [x] Write a source-contract test that reads the eight listed source files and fails if any contains `http://localhost:3000/api/v1`.
-- [x] Run the source-contract test; it must fail because those feature files currently duplicate the local host.
-- [x] Replace every local `createMiniClient` implementation and page-local client with the shared `createMiniApiClient` export. Feature files must not own an API base URL or authorization header.
-- [x] Run typecheck, the full test suite, and the Mini Program build verifier; then commit `refactor: centralize mini program API configuration`.
+- [x] 编写源码契约测试：以上八个消费者文件不得出现 `http://localhost:3000/api/v1` 或开发授权头。
+- [x] 先运行测试，确认旧代码因重复本地地址而失败。
+- [x] 将页面本地客户端和各 feature 的 `createMiniClient` 全部替换为 `createMiniApiClient`；业务文件不再拥有 API 地址和授权头。
+- [x] 运行类型检查、全量测试和小程序构建校验，再提交 `refactor: centralize mini program API configuration`。
 
-### Task 4: Document environment configuration
+### 任务 4：说明环境配置边界
 
-**Files:**
-- Modify: `.env.example`
-- Modify: `README.md`
-- Modify: `docs/engineering/local-development.md`
+**文件：**
+- 修改：`.env.example`
+- 新增：`apps/mini/.env.example`
+- 修改：`README.md`
+- 修改：`docs/engineering/local-development.md`
 
-- [x] Document `VITE_MINI_API_BASE_URL` as a public build-time URL, with separate local and Azure examples.
-- [x] Keep `CLOUDBASE_ENV_ID`, Tencent credentials, and database credentials explicitly server-only.
-- [x] Run `rg -n "VITE_MINI_API_BASE_URL|CLOUDBASE_ENV_ID|localhost:3000/api/v1" README.md docs .env.example` and confirm the output labels each value's boundary.
-- [x] Commit `docs: clarify runtime configuration boundaries`.
+- [x] 将 `VITE_MINI_API_BASE_URL` 标注为公开构建地址，并给出本地与 Azure 示例。
+- [x] 明确 `CLOUDBASE_ENV_ID`、腾讯云凭证和数据库凭证只能用于服务端。
+- [x] 使用 `rg` 交叉检查 `VITE_MINI_API_BASE_URL`、`CLOUDBASE_ENV_ID` 和本地地址的文档归属。
+- [x] 随配置收口提交完成。
 
-### Task 5: Plan Azure test deployment after API configuration is stable
+### 任务 5：完成 Azure 测试环境方案
 
-**Files:**
-- Create: `infra/azure/README.md`
-- Create: `docs/superpowers/plans/2026-08-27-azure-test-environment.md`
+**文件：**
+- 新增：`infra/azure/README.md`
+- 新增：`docs/superpowers/plans/2026-08-27-azure-test-environment.md`
 
-- [x] Specify an Azure Container Apps deployment for the NestJS API, Azure Database for PostgreSQL Flexible Server, server-only environment variables, Prisma migration execution, `/health` verification, and an authenticated profile request.
-- [x] Explicitly defer automatic provisioning and Azure credentials until the Mini Program has stable API configuration and test acceptance.
-- [x] Commit `docs: plan Azure test environment deployment`.
+- [x] 明确 Azure Container Apps、Azure PostgreSQL、服务端环境变量、Prisma migration、`/health` 和已登录档案接口的验收标准。
+- [x] 明确在小程序 API 配置稳定与功能验收前，不自动创建 Azure 资源，也不写入 Azure 凭证。
+- [x] 提交 `docs: plan Azure test environment`。
