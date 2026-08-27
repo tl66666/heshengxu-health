@@ -27,7 +27,12 @@ describe('weekly health insights', () => {
     const meal = await client
       .post('/api/v1/meal-entries')
       .set(owner)
-      .send({ foodId: food.id, grams: 100, mealType: 'lunch', recordedAt: '2026-08-25T00:00:00.000Z' })
+      .send({
+        foodId: food.id,
+        grams: 100,
+        mealType: 'lunch',
+        recordedAt: '2026-08-25T00:00:00.000Z',
+      })
       .expect(201);
     await client
       .patch(`/api/v1/meal-entries/${meal.body.data.id}`)

@@ -29,7 +29,10 @@ export class FoodImportService {
         },
         aliases: [...new Set((row.aliases ?? []).map((alias) => alias.trim()).filter(Boolean))],
         servings: (row.servings ?? [])
-          .filter((serving) => serving.label.trim() && Number.isFinite(serving.grams) && serving.grams > 0)
+          .filter(
+            (serving) =>
+              serving.label.trim() && Number.isFinite(serving.grams) && serving.grams > 0,
+          )
           .map((serving) => ({ label: serving.label.trim(), grams: serving.grams })),
         provenance: { ...license },
       };

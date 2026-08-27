@@ -47,33 +47,48 @@ export class MealEntriesService {
 
   async replace(userId: string, recordId: string, dto: ReplaceMealEntryDto) {
     return this.prisma.$transaction(async (tx) => {
-      const old = await tx.mealEntry.findFirst({ where: { id: recordId, userId, isCurrent: true } });
+      const old = await tx.mealEntry.findFirst({
+        where: { id: recordId, userId, isCurrent: true },
+      });
       if (!old) throw new NotFoundException('未找到可修改的餐食记录');
       const foodId = dto.foodId ?? old.foodId;
       if (!foodId) throw new NotFoundException('原食品已不可用，请重新记录');
-      const food = await tx.foodItem.findFirst({ where: { id: foodId, isActive: true }, include: { nutrition: true } });
+      const food = await tx.foodItem.findFirst({
+        where: { id: foodId, isActive: true },
+        include: { nutrition: true },
+      });
       if (!food?.nutrition) throw new NotFoundException('食品不存在或暂未完善');
       const grams = dto.grams ?? old.grams;
       const nutrition = calculateNutritionForGrams(food.nutrition, grams);
-      await tx.mealEntry.update({ where: { id: old.id }, data: { isCurrent: false, supersededAt: new Date() } });
-      return tx.mealEntry.create({ data: {
-        userId,
-        mealType: dto.mealType ?? old.mealType,
-        foodId: food.id,
-        foodNameSnapshot: food.name,
-        grams,
-        ...nutrition,
-        source: old.source,
-        recordedAt: dto.recordedAt ? new Date(dto.recordedAt) : old.recordedAt,
-        note: dto.note ?? old.note ?? undefined,
-        previousRecordId: old.id,
-      } });
+      await tx.mealEntry.update({
+        where: { id: old.id },
+        data: { isCurrent: false, supersededAt: new Date() },
+      });
+      return tx.mealEntry.create({
+        data: {
+          userId,
+          mealType: dto.mealType ?? old.mealType,
+          foodId: food.id,
+          foodNameSnapshot: food.name,
+          grams,
+          ...nutrition,
+          source: old.source,
+          recordedAt: dto.recordedAt ? new Date(dto.recordedAt) : old.recordedAt,
+          note: dto.note ?? old.note ?? undefined,
+          previousRecordId: old.id,
+        },
+      });
     });
   }
 
   async remove(userId: string, recordId: string) {
-    const current = await this.prisma.mealEntry.findFirst({ where: { id: recordId, userId, isCurrent: true } });
+    const current = await this.prisma.mealEntry.findFirst({
+      where: { id: recordId, userId, isCurrent: true },
+    });
     if (!current) throw new NotFoundException('未找到可删除的餐食记录');
-    await this.prisma.mealEntry.update({ where: { id: current.id }, data: { isCurrent: false, supersededAt: new Date(), deletedAt: new Date() } });
+    await this.prisma.mealEntry.update({
+      where: { id: current.id },
+      data: { isCurrent: false, supersededAt: new Date(), deletedAt: new Date() },
+    });
   }
 }

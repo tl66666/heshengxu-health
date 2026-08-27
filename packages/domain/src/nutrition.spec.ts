@@ -24,6 +24,8 @@ describe('nutrition calculation', () => {
 
   it('rejects zero and negative grams', () => {
     expect(() => calculateNutritionForGrams(per100g, 0)).toThrow('grams must be greater than zero');
-    expect(() => calculateNutritionForGrams(per100g, -10)).toThrow('grams must be greater than zero');
+    expect(() => calculateNutritionForGrams(per100g, -10)).toThrow(
+      'grams must be greater than zero',
+    );
   });
 });

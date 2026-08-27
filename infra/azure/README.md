@@ -4,13 +4,13 @@
 
 ## 选用服务
 
-| 职责 | Azure 服务 | 选择原因 |
-| --- | --- | --- |
-| NestJS API | Azure Container Apps | 以容器运行现有 Node.js API，提供 HTTPS，并可在空闲时缩容。 |
-| 容器镜像 | Azure Container Registry | 私有保存 API 镜像，供 Azure 部署。 |
-| 业务数据库 | Azure Database for PostgreSQL Flexible Server | 托管现有 Prisma schema 与 migration 所需的 PostgreSQL。 |
-| 密钥 | Container Apps secret，后续可接 Key Vault | 防止数据库与 CloudBase 凭证进入 Git 和小程序构建产物。 |
-| Redis | 初期不创建 | 当前 MVP 没有托管缓存的刚性需求，出现可量化需求后再接入。 |
+| 职责       | Azure 服务                                    | 选择原因                                                   |
+| ---------- | --------------------------------------------- | ---------------------------------------------------------- |
+| NestJS API | Azure Container Apps                          | 以容器运行现有 Node.js API，提供 HTTPS，并可在空闲时缩容。 |
+| 容器镜像   | Azure Container Registry                      | 私有保存 API 镜像，供 Azure 部署。                         |
+| 业务数据库 | Azure Database for PostgreSQL Flexible Server | 托管现有 Prisma schema 与 migration 所需的 PostgreSQL。    |
+| 密钥       | Container Apps secret，后续可接 Key Vault     | 防止数据库与 CloudBase 凭证进入 Git 和小程序构建产物。     |
+| Redis      | 初期不创建                                    | 当前 MVP 没有托管缓存的刚性需求，出现可量化需求后再接入。  |
 
 ## 建议命名
 

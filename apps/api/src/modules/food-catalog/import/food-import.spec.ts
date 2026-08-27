@@ -12,7 +12,16 @@ describe('FoodImportService', () => {
 
   it('normalizes nutrition fields and removes duplicate aliases', () => {
     const [food] = service.normalizeRows(
-      [{ name: ' 燕麦 ', energyKcal: 389, proteinG: 16.9, fatG: 6.9, carbohydrateG: 66.3, aliases: ['燕麦', ' 燕麦 '] }],
+      [
+        {
+          name: ' 燕麦 ',
+          energyKcal: 389,
+          proteinG: 16.9,
+          fatG: 6.9,
+          carbohydrateG: 66.3,
+          aliases: ['燕麦', ' 燕麦 '],
+        },
+      ],
       license,
     );
     expect(food.name).toBe('燕麦');

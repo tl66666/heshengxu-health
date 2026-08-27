@@ -32,6 +32,9 @@ export function calculateNutritionForGrams(
       nutrition.dietaryFiberG === null || nutrition.dietaryFiberG === undefined
         ? null
         : scale(nutrition.dietaryFiberG),
-    sodiumMg: nutrition.sodiumMg === null || nutrition.sodiumMg === undefined ? null : scale(nutrition.sodiumMg),
+    sodiumMg:
+      nutrition.sodiumMg === null || nutrition.sodiumMg === undefined
+        ? null
+        : scale(nutrition.sodiumMg),
   };
 }

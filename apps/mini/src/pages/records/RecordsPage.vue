@@ -42,9 +42,34 @@
       </button>
 
       <view v-if="foodEntries.length" class="food-summary">
-        <view class="food-summary-head"><view><text class="food-summary-title">今天的食物</text><text class="food-summary-caption">已记录 {{ foodEntries.length }} 份 · 以保存时的营养快照为准</text></view><text class="food-kcal">{{ foodSummary.energyKcal }} 千卡</text></view>
-        <view class="macro-strip"><view><text>{{ foodSummary.proteinG }}g</text><text>蛋白质</text></view><view><text>{{ foodSummary.fatG }}g</text><text>脂肪</text></view><view><text>{{ foodSummary.carbohydrateG }}g</text><text>碳水</text></view></view>
-        <view class="food-list"><view v-for="entry in foodEntries" :key="entry.id" class="food-item"><view class="food-dot" /><view class="food-copy"><text>{{ entry.foodNameSnapshot }}</text><text>{{ mealLabel(entry.mealType) }} · {{ entry.grams }}g</text></view><view class="food-actions"><text class="food-item-kcal">{{ entry.energyKcal }} kcal</text><button class="food-more" @tap="manageFood(entry)">管理</button></view></view></view>
+        <view class="food-summary-head"
+          ><view
+            ><text class="food-summary-title">今天的食物</text
+            ><text class="food-summary-caption"
+              >已记录 {{ foodEntries.length }} 份 · 以保存时的营养快照为准</text
+            ></view
+          ><text class="food-kcal">{{ foodSummary.energyKcal }} 千卡</text></view
+        >
+        <view class="macro-strip"
+          ><view
+            ><text>{{ foodSummary.proteinG }}g</text><text>蛋白质</text></view
+          ><view
+            ><text>{{ foodSummary.fatG }}g</text><text>脂肪</text></view
+          ><view
+            ><text>{{ foodSummary.carbohydrateG }}g</text><text>碳水</text></view
+          ></view
+        >
+        <view class="food-list"
+          ><view v-for="entry in foodEntries" :key="entry.id" class="food-item"
+            ><view class="food-dot" /><view class="food-copy"
+              ><text>{{ entry.foodNameSnapshot }}</text
+              ><text>{{ mealLabel(entry.mealType) }} · {{ entry.grams }}g</text></view
+            ><view class="food-actions"
+              ><text class="food-item-kcal">{{ entry.energyKcal }} kcal</text
+              ><button class="food-more" @tap="manageFood(entry)">管理</button></view
+            ></view
+          ></view
+        >
       </view>
 
       <view class="form-section">
@@ -344,21 +369,44 @@ function openFoodSearch() {
   uni.navigateTo({ url: '/pages/food-search/FoodSearchPage' });
 }
 async function loadFoods() {
-  try { foodEntries.value = await loadMealEntries(date); } catch { foodEntries.value = []; }
+  try {
+    foodEntries.value = await loadMealEntries(date);
+  } catch {
+    foodEntries.value = [];
+  }
 }
 function mealLabel(type: MealEntry['mealType']) {
-  return ({ breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' })[type];
+  return { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' }[type];
 }
 function manageFood(entry: MealEntry) {
   uni.showActionSheet({
     itemList: ['编辑这份记录', '删除这份记录'],
     success: ({ tapIndex }) => {
       if (tapIndex === 0) {
-        if (!entry.foodId) { uni.showToast({ title: '原食品不可用，请重新记录', icon: 'none' }); return; }
-        uni.navigateTo({ url: `/pages/food-confirm/FoodConfirmPage?entryId=${encodeURIComponent(entry.id)}&foodId=${encodeURIComponent(entry.foodId)}&grams=${entry.grams}&mealType=${entry.mealType}&note=${encodeURIComponent(entry.note || '')}` });
+        if (!entry.foodId) {
+          uni.showToast({ title: '原食品不可用，请重新记录', icon: 'none' });
+          return;
+        }
+        uni.navigateTo({
+          url: `/pages/food-confirm/FoodConfirmPage?entryId=${encodeURIComponent(entry.id)}&foodId=${encodeURIComponent(entry.foodId)}&grams=${entry.grams}&mealType=${entry.mealType}&note=${encodeURIComponent(entry.note || '')}`,
+        });
         return;
       }
-      uni.showModal({ title: '删除这份记录？', content: '删除后不会出现在当天营养汇总中。', confirmColor: '#b85e43', success: async ({ confirm }) => { if (!confirm) return; try { await deleteMealEntry(entry.id); await loadFoods(); uni.showToast({ title: '已删除', icon: 'success' }); } catch { uni.showToast({ title: '删除失败，请稍后重试', icon: 'none' }); } } });
+      uni.showModal({
+        title: '删除这份记录？',
+        content: '删除后不会出现在当天营养汇总中。',
+        confirmColor: '#b85e43',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await deleteMealEntry(entry.id);
+            await loadFoods();
+            uni.showToast({ title: '已删除', icon: 'success' });
+          } catch {
+            uni.showToast({ title: '删除失败，请稍后重试', icon: 'none' });
+          }
+        },
+      });
     },
   });
 }
@@ -486,33 +534,137 @@ onShow(() => {
   background: #76a77d;
   font-size: 34rpx;
 }
-.food-entry-copy { min-width: 0; flex: 1; }
-.food-entry text { display: block; }
-.food-entry text:first-child { color: #31543e; font-size: 25rpx; font-weight: 700; }
-.food-entry text:last-child { margin-top: 5rpx; color: #7d9584; font-size: 20rpx; }
-.food-entry-arrow { width: 32rpx; height: 32rpx; flex: none; margin-left: 14rpx; opacity: 0.68; }
-.food-summary { margin: 0 0 24rpx; padding: 20rpx 18rpx; border: 1rpx solid #dceadd; border-radius: 18rpx; background: #fff; }
-.food-summary-head { display: flex; align-items: flex-start; justify-content: space-between; }
-.food-summary-title, .food-summary-caption { display: block; }
-.food-summary-title { color: #31543e; font-size: 27rpx; font-weight: 700; }
-.food-summary-caption { margin-top: 5rpx; color: #82968a; font-size: 19rpx; }
-.food-kcal { color: #2e7d4f; font-size: 26rpx; font-weight: 700; }
-.macro-strip { display: flex; justify-content: space-around; margin-top: 18rpx; padding: 14rpx 0; border-top: 1rpx solid #e3eee4; border-bottom: 1rpx solid #e3eee4; }
-.macro-strip view { text-align: center; }
-.macro-strip text { display: block; }
-.macro-strip text:first-child { color: #466d50; font-size: 23rpx; font-weight: 700; }
-.macro-strip text:last-child { margin-top: 4rpx; color: #8a9d90; font-size: 18rpx; }
-.food-list { margin-top: 4rpx; }
-.food-item { display: flex; align-items: center; gap: 10rpx; padding: 14rpx 0; border-bottom: 1rpx solid #edf3ed; }
-.food-item:last-child { border-bottom: 0; }
-.food-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #7eae86; }
-.food-copy { flex: 1; min-width: 0; }
-.food-copy text { display: block; }
-.food-copy text:first-child { color: #46664e; font-size: 23rpx; font-weight: 700; }
-.food-copy text:last-child { margin-top: 4rpx; color: #8a9d90; font-size: 18rpx; }
-.food-item-kcal { color: #658570; font-size: 20rpx; }
-.food-actions { display: flex; align-items: flex-end; flex-direction: column; gap: 6rpx; }
-.food-more { padding: 4rpx 8rpx; color: #4d7f5a; background: #edf6ee; font-size: 18rpx; }
+.food-entry-copy {
+  min-width: 0;
+  flex: 1;
+}
+.food-entry text {
+  display: block;
+}
+.food-entry text:first-child {
+  color: #31543e;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+.food-entry text:last-child {
+  margin-top: 5rpx;
+  color: #7d9584;
+  font-size: 20rpx;
+}
+.food-entry-arrow {
+  width: 32rpx;
+  height: 32rpx;
+  flex: none;
+  margin-left: 14rpx;
+  opacity: 0.68;
+}
+.food-summary {
+  margin: 0 0 24rpx;
+  padding: 20rpx 18rpx;
+  border: 1rpx solid #dceadd;
+  border-radius: 18rpx;
+  background: #fff;
+}
+.food-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.food-summary-title,
+.food-summary-caption {
+  display: block;
+}
+.food-summary-title {
+  color: #31543e;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+.food-summary-caption {
+  margin-top: 5rpx;
+  color: #82968a;
+  font-size: 19rpx;
+}
+.food-kcal {
+  color: #2e7d4f;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.macro-strip {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 18rpx;
+  padding: 14rpx 0;
+  border-top: 1rpx solid #e3eee4;
+  border-bottom: 1rpx solid #e3eee4;
+}
+.macro-strip view {
+  text-align: center;
+}
+.macro-strip text {
+  display: block;
+}
+.macro-strip text:first-child {
+  color: #466d50;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+.macro-strip text:last-child {
+  margin-top: 4rpx;
+  color: #8a9d90;
+  font-size: 18rpx;
+}
+.food-list {
+  margin-top: 4rpx;
+}
+.food-item {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #edf3ed;
+}
+.food-item:last-child {
+  border-bottom: 0;
+}
+.food-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #7eae86;
+}
+.food-copy {
+  flex: 1;
+  min-width: 0;
+}
+.food-copy text {
+  display: block;
+}
+.food-copy text:first-child {
+  color: #46664e;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+.food-copy text:last-child {
+  margin-top: 4rpx;
+  color: #8a9d90;
+  font-size: 18rpx;
+}
+.food-item-kcal {
+  color: #658570;
+  font-size: 20rpx;
+}
+.food-actions {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 6rpx;
+}
+.food-more {
+  padding: 4rpx 8rpx;
+  color: #4d7f5a;
+  background: #edf6ee;
+  font-size: 18rpx;
+}
 .form-section {
   padding: 6rpx 0 24rpx;
   border-top: 1rpx solid #dceadd;

@@ -1,4 +1,15 @@
-import { Controller, Delete, Get, Inject, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ValidatedBody, ValidatedQuery } from '../../common/http/validated-request.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
@@ -39,12 +50,24 @@ export class MealEntriesController {
   }
 
   @Patch(':recordId')
-  async replace(@Req() request: AuthenticatedRequest, @Param('recordId') recordId: string, @ValidatedBody(ReplaceMealEntryDto) body: ReplaceMealEntryDto, @Res() response: Response) {
-    return response.send({ data: await this.entries.replace(request.user.id, recordId, body), meta: { requestId: response.locals.requestId } });
+  async replace(
+    @Req() request: AuthenticatedRequest,
+    @Param('recordId') recordId: string,
+    @ValidatedBody(ReplaceMealEntryDto) body: ReplaceMealEntryDto,
+    @Res() response: Response,
+  ) {
+    return response.send({
+      data: await this.entries.replace(request.user.id, recordId, body),
+      meta: { requestId: response.locals.requestId },
+    });
   }
 
   @Delete(':recordId')
-  async remove(@Req() request: AuthenticatedRequest, @Param('recordId') recordId: string, @Res() response: Response) {
+  async remove(
+    @Req() request: AuthenticatedRequest,
+    @Param('recordId') recordId: string,
+    @Res() response: Response,
+  ) {
     await this.entries.remove(request.user.id, recordId);
     return response.status(204).send();
   }

@@ -23,10 +23,22 @@ export class HealthInsightsService {
 
     return buildWeeklyReview({
       anchorDate: date,
-      weights: weights.map((item) => ({ recordedAt: item.recordedAt.toISOString(), valueKg: item.valueKg })),
-      meals: meals.map((item) => ({ recordedAt: item.recordedAt.toISOString(), energyKcal: item.energyKcal })),
-      activities: activities.map((item) => ({ recordedAt: item.recordedAt.toISOString(), durationMinutes: item.durationMinutes })),
-      sleeps: sleeps.map((item) => ({ recordedAt: item.recordedAt.toISOString(), durationMinutes: item.durationMinutes })),
+      weights: weights.map((item) => ({
+        recordedAt: item.recordedAt.toISOString(),
+        valueKg: item.valueKg,
+      })),
+      meals: meals.map((item) => ({
+        recordedAt: item.recordedAt.toISOString(),
+        energyKcal: item.energyKcal,
+      })),
+      activities: activities.map((item) => ({
+        recordedAt: item.recordedAt.toISOString(),
+        durationMinutes: item.durationMinutes,
+      })),
+      sleeps: sleeps.map((item) => ({
+        recordedAt: item.recordedAt.toISOString(),
+        durationMinutes: item.durationMinutes,
+      })),
       tasks: tasks.map((item) => ({ status: item.status })),
     });
   }

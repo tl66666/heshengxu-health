@@ -11,7 +11,10 @@ export class FoodCatalogController {
   constructor(@Inject(FoodCatalogService) private readonly foods: FoodCatalogService) {}
 
   @Get('search')
-  async search(@ValidatedQuery(SearchFoodsQueryDto) query: SearchFoodsQueryDto, @Res() response: Response) {
+  async search(
+    @ValidatedQuery(SearchFoodsQueryDto) query: SearchFoodsQueryDto,
+    @Res() response: Response,
+  ) {
     return response.send(envelope(await this.foods.search(query.q), response));
   }
 

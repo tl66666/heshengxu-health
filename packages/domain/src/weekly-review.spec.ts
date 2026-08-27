@@ -17,7 +17,12 @@ describe('buildWeeklyReview', () => {
 
     expect(review.range).toEqual({ startDate: '2026-08-24', endDate: '2026-08-30' });
     expect(review.coverage).toEqual({ recordedDayCount: 3, requiredDayCount: 3, status: 'ready' });
-    expect(review.weight).toMatchObject({ recordCount: 2, firstKg: 62, lastKg: 61.6, changeKg: -0.4 });
+    expect(review.weight).toMatchObject({
+      recordCount: 2,
+      firstKg: 62,
+      lastKg: 61.6,
+      changeKg: -0.4,
+    });
     expect(review.weight.points).toEqual([
       { date: '2026-08-24', valueKg: 62 },
       { date: '2026-08-26', valueKg: 61.6 },
@@ -40,7 +45,11 @@ describe('buildWeeklyReview', () => {
       tasks: [],
     });
 
-    expect(review.coverage).toEqual({ recordedDayCount: 2, requiredDayCount: 3, status: 'insufficient' });
+    expect(review.coverage).toEqual({
+      recordedDayCount: 2,
+      requiredDayCount: 3,
+      status: 'insufficient',
+    });
     expect(review.weight).toEqual({
       recordCount: 1,
       points: [{ date: '2026-08-26', valueKg: 61.6 }],

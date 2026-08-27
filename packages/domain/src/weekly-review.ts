@@ -28,7 +28,9 @@ export type WeeklyReview = {
 
 export function buildWeeklyReview(input: WeeklyReviewInput): WeeklyReview {
   const range = weekRangeForShanghai(input.anchorDate);
-  const weights = inWeek(input.weights, range).sort((left, right) => left.recordedAt.localeCompare(right.recordedAt));
+  const weights = inWeek(input.weights, range).sort((left, right) =>
+    left.recordedAt.localeCompare(right.recordedAt),
+  );
   const meals = inWeek(input.meals, range);
   const activities = inWeek(input.activities, range);
   const sleeps = inWeek(input.sleeps, range);

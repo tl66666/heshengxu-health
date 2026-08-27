@@ -10,7 +10,16 @@ import { FoodRecognitionModule } from './modules/food-recognition/food-recogniti
 import { HealthInsightsModule } from './modules/health-insights/health-insights.module.js';
 
 @Module({
-  imports: [HealthProfileModule, HealthRecordsModule, HealthPlansModule, DailyHomeModule, FoodCatalogModule, MealEntriesModule, FoodRecognitionModule, HealthInsightsModule],
+  imports: [
+    HealthProfileModule,
+    HealthRecordsModule,
+    HealthPlansModule,
+    DailyHomeModule,
+    FoodCatalogModule,
+    MealEntriesModule,
+    FoodRecognitionModule,
+    HealthInsightsModule,
+  ],
   controllers: [SystemController],
 })
 export class AppModule {}
