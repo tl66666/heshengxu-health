@@ -1,12 +1,12 @@
 <template>
   <view class="nav-bar">
     <button v-if="!backDisabled" class="icon-action" aria-label="返回" @tap="back">
-      <image src="/static/icons/back.svg" mode="aspectFit" />
+      <image class="icon-image" src="/static/icons/back.svg" mode="aspectFit" />
     </button>
     <view v-else class="placeholder" />
     <text class="title">{{ title }}</text>
     <button v-if="closeLabel" class="icon-action close" aria-label="退出" @tap="close">
-      <image src="/static/icons/close.svg" mode="aspectFit" />
+      <image class="icon-image" src="/static/icons/close.svg" mode="aspectFit" />
     </button>
     <view v-else class="placeholder" />
   </view>
@@ -64,7 +64,7 @@ function close() {
   color: #8d685b;
   background: #fff4ef;
 }
-.icon-action image {
+.icon-image {
   width: 34rpx;
   height: 34rpx;
 }

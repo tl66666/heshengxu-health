@@ -16,7 +16,7 @@
       @tap="switchTab(xuxu.path)"
     >
       <view class="xuxu-orbit">
-        <image src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
+        <image class="xuxu-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
       </view>
       <text>序序</text>
     </button>
@@ -110,7 +110,7 @@ function switchTab(url: string) {
   background: #fffdf1;
   box-shadow: 0 6rpx 14rpx rgba(90, 74, 27, 0.14);
 }
-.xuxu-orbit image {
+.xuxu-avatar {
   width: 100%;
   height: 100%;
   border-radius: 50%;
