@@ -13,6 +13,12 @@ describe('navigation contracts', () => {
     expect(ordinaryBackTarget('/pages/onboarding/OnboardingPage')).toBe(
       '/pages/bootstrap/BootstrapPage',
     );
+    expect(ordinaryBackTarget('/pages/food-confirm/FoodConfirmPage')).toBe(
+      '/pages/food-search/FoodSearchPage',
+    );
+    expect(ordinaryBackTarget('/pages/food-candidates/FoodCandidatesPage')).toBe(
+      '/pages/food-recognition/FoodRecognitionPage',
+    );
   });
 
   it('only confirms exit from the first onboarding step', () => {
