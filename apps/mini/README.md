@@ -56,3 +56,12 @@ pnpm --filter @heban/mini clean:dist
 然后在微信开发者工具删除旧项目，重新导入 `apps/mini`。日常开发只保留 `dist/dev/mp-weixin`；发布前才会生成 `dist/build/mp-weixin`。
 
 `manifest.json` 中的 AppID 当前为空，发布前再填入微信公众平台申请的正式 AppID；AppSecret 不进入小程序工程或 Git 仓库。
+
+## 重置演示数据（重新体验建档）
+
+建档完成后，本机会保存 `heshengxu.local.health-profile` 和 `heshengxu.local.health-plan` 两个演示数据，再次编译会直接进入首页，这是预期行为。想回到建档流程有两种方式：
+
+1. **应用内入口（推荐）**：「我的 → 数据与隐私 → 重置演示数据」，确认后清除本机建档与计划，并直接重新进入建档流程。
+2. **开发者工具手动清理**：微信开发者工具工具栏「清缓存 → 清除数据缓存」（或调试器 Storage 面板删除上述两个 `heshengxu.local.*` 键），然后点击「重新编译」。
+
+注意：如果本地演示 API（PostgreSQL）正在运行且已有服务端档案，工具清缓存后 Bootstrap 页仍可能因服务端档案直接跳转首页；此时使用应用内入口即可，重新建档会覆盖服务端演示档案。

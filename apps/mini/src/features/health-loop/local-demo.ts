@@ -65,6 +65,11 @@ export function loadLocalPlan(): PersonalPlanDto | null {
   return (uni.getStorageSync(PLAN_KEY) as PersonalPlanDto | null) || null;
 }
 
+export function resetLocalDemoData() {
+  uni.removeStorageSync(PROFILE_KEY);
+  uni.removeStorageSync(PLAN_KEY);
+}
+
 export function completeLocalTask(taskId: string) {
   const plan = loadLocalPlan();
   if (!plan) return;

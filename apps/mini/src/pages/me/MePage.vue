@@ -41,6 +41,13 @@
           >
           <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
         </button>
+        <button class="row" @tap="resetDemo">
+          <view class="row-copy"
+            ><text class="reset-title">重置演示数据</text
+            ><text>清除本机保存的建档与计划，重新体验建档流程</text></view
+          >
+          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+        </button>
         <view class="row row--last row--disabled">
           <view class="row-copy"
             ><text>记录提醒</text><text>将在账号与通知能力接入后开放</text></view
@@ -59,8 +66,9 @@
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
-import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
+import { loadLocalProfile, resetLocalDemoData } from '../../features/health-loop/local-demo.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { resetOnboarding } from '../../stores/onboarding.js';
 import { mePrimaryActions } from './me-actions.js';
 
 const date = localDate();
@@ -87,6 +95,19 @@ function manageData() {
     title: '数据管理',
     content: '当前版本支持查看和修改自己的健康记录。数据导出与彻底删除会在真实微信身份接入后开放。',
     showCancel: false,
+  });
+}
+function resetDemo() {
+  uni.showModal({
+    title: '重置演示数据',
+    content: '将清除本机保存的建档与计划数据，并重新进入建档流程。仅影响当前设备的演示数据。',
+    confirmText: '重置',
+    success: (result) => {
+      if (!result.confirm) return;
+      resetLocalDemoData();
+      resetOnboarding();
+      uni.reLaunch({ url: '/pages/onboarding/OnboardingPage' });
+    },
   });
 }
 function localDate() {
@@ -230,6 +251,9 @@ onShow(() => healthLoopState.loadToday(date));
 }
 .row--disabled {
   opacity: 0.62;
+}
+.reset-title {
+  color: #b85e43;
 }
 .coming {
   padding: 6rpx 10rpx;
