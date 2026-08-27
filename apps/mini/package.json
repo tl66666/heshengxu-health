@@ -17,6 +17,7 @@
   "devDependencies": {
     "@dcloudio/types": "3.4.31",
     "@dcloudio/uni-app": "3.0.0-5020420260813003",
+    "@dcloudio/uni-components": "3.0.0-5020420260813003",
     "@dcloudio/uni-mp-weixin": "^3.0.0-5020420260813003",
     "@dcloudio/vite-plugin-uni": "3.0.0-5020420260813003",
     "typescript": "5.9.3",
