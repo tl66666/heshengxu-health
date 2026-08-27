@@ -2,6 +2,8 @@
 
 ## 当前边界
 
+部署目标以 [ADR-005](../architecture/adr-005-target-runtime-and-deployment.md) 为准：NestJS 和 PostgreSQL 将部署到 Azure；CloudBase 不承载第二套健康业务数据库。
+
 和生序当前以 NestJS + PostgreSQL 作为唯一业务后端：健康档案、计划、饮食记录和 AI 审计都由它保存。微信云开发不会再建立第二套业务数据库。
 
 本阶段接入微信云开发的目标只有两个：

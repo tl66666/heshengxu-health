@@ -43,6 +43,10 @@ npx serve .
 
 ## 文档入口
 
+- [目标运行架构与上线方案](docs/architecture/adr-005-target-runtime-and-deployment.md)
+- [微信 CloudBase 准备清单](docs/engineering/cloudbase-preparation.md)
+- [本地开发说明](docs/engineering/local-development.md)
+
 - [权威产品蓝图](docs/product/heshengxu-product-blueprint.md)
 - [阶段 2A 每日健康闭环实施计划](docs/superpowers/plans/2026-08-25-stage-2a-daily-health-loop.md)
 - [历史平台探索](docs/product/archive/2026-08-24-platform-exploration.md)

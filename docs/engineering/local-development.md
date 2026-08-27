@@ -7,6 +7,14 @@
 - 仅开发微信小程序前端：不需要 Docker Desktop，直接使用 `apps/mini` 和本地构建。
 - 联调 NestJS API、PostgreSQL、Redis：需要 Docker Desktop，启动本地基础设施后再运行 API。
 
+## 三种开发方式
+
+1. 只检查小程序页面：运行 `./scripts/dev-mini.ps1` 并在微信开发者工具中重新编译。此方式不需要 Docker；当页面请求真实数据时会显示其已有的加载或失败状态。
+2. 联调真实接口：启动 Docker Desktop、PostgreSQL、Redis 和 NestJS API。小程序默认请求 `http://localhost:3000/api/v1`，仅用于这台电脑的开发联调。
+3. 测试或正式上线：小程序构建时设置 `VITE_MINI_API_BASE_URL=https://你的-api-域名/api/v1`。这个值是公开地址，不是密钥；数据库、CloudBase、混元和 Azure 凭证只存在服务端。
+
+正式运行架构以 [ADR-005](../architecture/adr-005-target-runtime-and-deployment.md) 为准：NestJS 和 PostgreSQL 部署到 Azure，CloudBase 提供微信和 AI 相关能力。上线后用户和开发者电脑都不需要运行 Docker。
+
 ## 启动本地服务
 
 本项目当前以 NestJS + PostgreSQL 为本地事实后端。微信云开发不是本地 API 的前置条件；只有未来把服务部署到腾讯云时，才按部署方案启用云函数、云数据库或云存储。

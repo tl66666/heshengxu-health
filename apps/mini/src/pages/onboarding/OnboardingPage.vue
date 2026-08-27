@@ -165,7 +165,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { createApiClient } from '../../services/api-client.js';
+import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import {
   canAdvanceOnboarding,
@@ -290,21 +290,7 @@ async function save() {
     goals: form.goals,
   });
   try {
-    const client = createApiClient({
-      baseUrl: 'http://localhost:3000/api/v1',
-      request: ({ url, method, data }) =>
-        new Promise((resolve, reject) =>
-          uni.request({
-            url,
-            method: method as never,
-            data: data as Record<string, unknown>,
-            header: { Authorization: 'Bearer dev-mini-user' },
-            success: (response) =>
-              resolve({ statusCode: response.statusCode, data: response.data as never }),
-            fail: reject,
-          }),
-        ),
-    });
+    const client = createMiniApiClient();
     await client.update('/health-profiles/me', {
       displayName: form.displayName || undefined,
       sex: form.sex,

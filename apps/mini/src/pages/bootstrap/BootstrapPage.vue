@@ -1,6 +1,10 @@
 <template>
   <view class="page">
-    <image class="hero" src="/static/illustrations/onboarding-hero-vertical.png" mode="aspectFill" />
+    <image
+      class="hero"
+      src="/static/illustrations/onboarding-hero-vertical.png"
+      mode="aspectFill"
+    />
     <view class="wash" />
     <view class="copy">
       <view class="xuxu"
@@ -17,26 +21,12 @@
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app';
-import { createApiClient } from '../../services/api-client.js';
+import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
 
 onShow(async () => {
-  const client = createApiClient({
-    baseUrl: 'http://localhost:3000/api/v1',
-    request: ({ url, method, data }) =>
-      new Promise((resolve, reject) => {
-        uni.request({
-          url,
-          method: method as never,
-          data: data as Record<string, unknown>,
-          header: { Authorization: 'Bearer dev-mini-user' },
-          success: (response) =>
-            resolve({ statusCode: response.statusCode, data: response.data as never }),
-          fail: reject,
-        });
-      }),
-  });
+  const client = createMiniApiClient();
   try {
     const profile = await client.get<{
       heightCm: number | null;

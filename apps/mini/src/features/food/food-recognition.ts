@@ -1,4 +1,4 @@
-import { createApiClient } from '../../services/api-client.js';
+import { createMiniApiClient } from '../../services/mini-api.js';
 import type { MealType } from './food.types.js';
 
 export type RecognitionCandidate = {
@@ -44,48 +44,32 @@ export function imageContentType(imagePath: string): RecognitionUpload['contentT
   return 'image/jpeg';
 }
 
-function client() {
-  return createApiClient({
-    baseUrl: 'http://localhost:3000/api/v1',
-    request: ({ url, method, data }) =>
-      new Promise((resolve, reject) => {
-        uni.request({
-          url,
-          method: method as never,
-          data: data as Record<string, unknown>,
-          header: { Authorization: 'Bearer dev-mini-user' },
-          success: (response) =>
-            resolve({ statusCode: response.statusCode, data: response.data as never }),
-          fail: reject,
-        });
-      }),
-  });
-}
-
 export function createRecognitionUpload(input: {
   contentType: RecognitionUpload['contentType'];
   sizeBytes: number;
 }) {
-  return client().post<RecognitionUpload>('/food-recognition/uploads', input);
+  return createMiniApiClient().post<RecognitionUpload>('/food-recognition/uploads', input);
 }
 
 export function completeRecognitionUpload(uploadId: string) {
-  return client().post<RecognitionUpload>(
+  return createMiniApiClient().post<RecognitionUpload>(
     `/food-recognition/uploads/${encodeURIComponent(uploadId)}/complete`,
     {},
   );
 }
 
 export function createRecognitionJob(uploadId: string) {
-  return client().post<RecognitionJob>('/food-recognition/jobs', { uploadId });
+  return createMiniApiClient().post<RecognitionJob>('/food-recognition/jobs', { uploadId });
 }
 
 export function grantFoodRecognitionConsent() {
-  return client().post('/food-recognition/consents', {});
+  return createMiniApiClient().post('/food-recognition/consents', {});
 }
 
 export function loadRecognitionJob(jobId: string) {
-  return client().get<RecognitionJob>(`/food-recognition/jobs/${encodeURIComponent(jobId)}`);
+  return createMiniApiClient().get<RecognitionJob>(
+    `/food-recognition/jobs/${encodeURIComponent(jobId)}`,
+  );
 }
 
 export function confirmRecognition(input: {
@@ -95,5 +79,5 @@ export function confirmRecognition(input: {
   recordedAt: string;
   note?: string;
 }) {
-  return client().post('/food-recognition/confirm', input);
+  return createMiniApiClient().post('/food-recognition/confirm', input);
 }
