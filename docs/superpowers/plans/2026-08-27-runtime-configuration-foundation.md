@@ -69,6 +69,6 @@
 - Create: `infra/azure/README.md`
 - Create: `docs/superpowers/plans/2026-08-27-azure-test-environment.md`
 
-- [ ] Specify an Azure Container Apps or App Service deployment for the NestJS API, Azure Database for PostgreSQL Flexible Server, server-only environment variables, Prisma migration execution, `/health` verification, and an authenticated profile request.
-- [ ] Explicitly defer automatic provisioning and Azure credentials until the Mini Program has stable API configuration and test acceptance.
-- [ ] Commit `docs: plan Azure test environment deployment`.
+- [x] Specify an Azure Container Apps deployment for the NestJS API, Azure Database for PostgreSQL Flexible Server, server-only environment variables, Prisma migration execution, `/health` verification, and an authenticated profile request.
+- [x] Explicitly defer automatic provisioning and Azure credentials until the Mini Program has stable API configuration and test acceptance.
+- [x] Commit `docs: plan Azure test environment deployment`.
