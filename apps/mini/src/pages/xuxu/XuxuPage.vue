@@ -30,7 +30,7 @@ function localDate() {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 0;
+  padding: 0;
   background: #f7fbf8;
   color: #1d3d2a;
 }
@@ -38,7 +38,7 @@ function localDate() {
   display: flex;
   flex: none;
   width: 100%;
-  height: calc(100vh - 148rpx);
+  height: calc(100vh - 116rpx - env(safe-area-inset-bottom));
   min-height: 0;
   min-width: 0;
   overflow: hidden;
