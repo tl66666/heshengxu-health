@@ -31,6 +31,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@heban/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@heban/domain':
         specifier: workspace:*
         version: link:../../packages/domain

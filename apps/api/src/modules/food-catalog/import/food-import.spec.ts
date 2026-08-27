@@ -24,8 +24,8 @@ describe('FoodImportService', () => {
       ],
       license,
     );
-    expect(food.name).toBe('燕麦');
-    expect(food.aliases).toEqual(['燕麦']);
-    expect(food.nutrition.basisGrams).toBe(100);
+    expect(food?.name).toBe('燕麦');
+    expect(food?.aliases).toEqual(['燕麦']);
+    expect(food?.nutrition.basisGrams).toBe(100);
   });
 });

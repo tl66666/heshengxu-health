@@ -18,6 +18,7 @@
     "seed": "node --experimental-strip-types prisma/seed.ts"
   },
   "dependencies": {
+    "@heban/contracts": "workspace:*",
     "@prisma/client": "6.16.0",
     "@heban/domain": "workspace:*",
     "@nestjs/common": "^11.2.1",
