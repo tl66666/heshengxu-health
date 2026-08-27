@@ -1,41 +1,46 @@
 <template>
   <view class="page">
-    <view class="page-header">
-      <view><text class="date-label">和生序</text><text class="page-title">我的</text></view>
-      <image class="header-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
-    </view>
+    <view class="page-header"><text>我的</text><text>健康管理</text></view>
 
-    <button class="profile-line" @tap="openProfile">
-      <image class="profile-avatar" src="/static/illustrations/xuxu-avatar.jpg" mode="aspectFill" />
-      <view class="profile-copy"
-        ><text class="profile-name">{{ displayName }}</text
-        ><text class="profile-subtitle">{{ profileText }}</text></view
+    <button class="profile-summary" @tap="openProfile">
+      <view class="initial-avatar"
+        ><text>{{ initial }}</text></view
       >
-      <image class="forward-icon" src="/static/icons/forward.svg" mode="aspectFit" />
+      <view class="profile-copy"
+        ><text>{{ displayName }}</text
+        ><text>{{ profileText }}</text></view
+      >
+      <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
     </button>
 
-    <view class="group">
-      <text class="group-title">健康管理</text>
-      <button v-for="item in healthItems" :key="item.label" class="row" @tap="item.action">
-        <view class="row-icon"><image :src="item.icon" mode="aspectFit" /></view>
+    <view class="section">
+      <text class="section-title">健康管理</text>
+      <button
+        v-for="item in mePrimaryActions"
+        :key="item.label"
+        class="row"
+        @tap="openAction(item)"
+      >
         <view class="row-copy"
-          ><text class="row-title">{{ item.label }}</text
-          ><text class="row-desc">{{ item.desc }}</text></view
+          ><text>{{ item.label }}</text
+          ><text>{{ item.detail }}</text></view
         >
-        <image class="forward-icon" src="/static/icons/forward.svg" mode="aspectFit" />
+        <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
     </view>
 
-    <view class="group">
-      <text class="group-title">数据与隐私</text>
-      <button v-for="item in dataItems" :key="item.label" class="row" @tap="item.action">
-        <view class="row-icon"><image :src="item.icon" mode="aspectFit" /></view>
+    <view class="section">
+      <text class="section-title">数据与隐私</text>
+      <button class="row" @tap="manageData">
         <view class="row-copy"
-          ><text class="row-title">{{ item.label }}</text
-          ><text class="row-desc">{{ item.desc }}</text></view
+          ><text>数据管理说明</text><text>当前可以查看和修改自己的健康记录</text></view
         >
-        <image class="forward-icon" src="/static/icons/forward.svg" mode="aspectFit" />
+        <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
       </button>
+      <view class="row row--disabled">
+        <view class="row-copy"><text>记录提醒</text><text>将在账号与通知能力接入后开放</text></view>
+        <text class="coming">准备中</text>
+      </view>
     </view>
 
     <text class="foot">和生序提供健康管理参考，不提供疾病诊断或治疗建议。</text>
@@ -47,64 +52,39 @@
 import { computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
+import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { mePrimaryActions } from './me-actions.js';
 
 const date = localDate();
-const displayName = computed(() => healthLoopState.today.value?.displayName || '健康管理者');
+const localProfile = computed(() => loadLocalProfile());
+const displayName = computed(
+  () => healthLoopState.today.value?.displayName || localProfile.value?.displayName || '健康管理者',
+);
+const initial = computed(() => displayName.value.trim().slice(0, 1) || '我');
 const profileText = computed(() => {
   const plan = healthLoopState.today.value?.activePlan;
-  return plan ? (plan.kind === 'sleep' ? '睡眠与精力计划' : '体重管理计划') : '还没有设置计划';
+  if (plan) return plan.kind === 'sleep' ? '睡眠与精力计划进行中' : '体重管理计划进行中';
+  return '查看并调整自己的健康档案';
 });
-const healthItems = [
-  {
-    label: '我的健康档案',
-    desc: '基础资料与健康目标',
-    icon: '/static/icons/profile.svg',
-    action: () => uni.navigateTo({ url: '/pages/profile/ProfilePage' }),
-  },
-  {
-    label: '调整当前计划',
-    desc: '目标方向和每日行动',
-    icon: '/static/icons/plan.svg',
-    action: () => uni.navigateTo({ url: '/pages/plan-setup/PlanSetupPage' }),
-  },
-  {
-    label: '提醒设置',
-    desc: '记录提醒会在后续开放',
-    icon: '/static/icons/journal.svg',
-    action: () => notice('提醒设置'),
-  },
-];
-const dataItems = [
-  {
-    label: '我的健康数据',
-    desc: '记录只用于你的健康管理',
-    icon: '/static/icons/journal.svg',
-    action: () => uni.switchTab({ url: '/pages/records/RecordsPage' }),
-  },
-  {
-    label: '数据导出与删除',
-    desc: '查看当前版本的数据管理范围',
-    icon: '/static/icons/profile.svg',
-    action: manageData,
-  },
-];
+
 function openProfile() {
   uni.navigateTo({ url: '/pages/profile/ProfilePage' });
+}
+function openAction(item: (typeof mePrimaryActions)[number]) {
+  if (item.mode === 'tab') uni.switchTab({ url: item.route });
+  else uni.navigateTo({ url: item.route });
 }
 function manageData() {
   uni.showModal({
     title: '数据管理',
-    content: '当前版本支持查看和修改自己的健康记录。导出与彻底删除功能将在身份认证接入后开放。',
+    content: '当前版本支持查看和修改自己的健康记录。数据导出与彻底删除会在真实微信身份接入后开放。',
     showCancel: false,
   });
 }
-function notice(label: string) {
-  uni.showToast({ title: `${label}正在准备中`, icon: 'none' });
-}
 function localDate() {
-  const n = new Date();
-  return new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 onShow(() => healthLoopState.loadToday(date));
 </script>
@@ -121,121 +101,121 @@ onShow(() => healthLoopState.loadToday(date));
 }
 .page-header {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 26rpx;
+  flex-direction: column;
+  margin-bottom: 24rpx;
 }
-.date-label {
-  display: block;
-  color: #789181;
-  font-size: 22rpx;
-}
-.page-title {
-  display: block;
-  margin-top: 7rpx;
-  color: #214632;
+.page-header text:first-child {
+  color: #244735;
   font-size: 40rpx;
   font-weight: 700;
 }
-.header-avatar {
-  width: 64rpx;
-  height: 64rpx;
-  border: 3rpx solid #efd98d;
-  border-radius: 50%;
+.page-header text:last-child {
+  margin-top: 6rpx;
+  color: #809486;
+  font-size: 21rpx;
 }
-.profile-line {
+.profile-summary {
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  padding: 20rpx 0 26rpx;
+  width: 100%;
+  padding: 0 0 24rpx;
+  border: 0;
   border-bottom: 1rpx solid #dfeae0;
-  border-left: 0;
-  border-right: 0;
-  border-top: 0;
   text-align: left;
   background: transparent;
 }
-.profile-avatar {
-  width: 86rpx;
-  height: 86rpx;
-  border: 3rpx solid #efd98d;
+.initial-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 82rpx;
+  height: 82rpx;
+  border: 2rpx solid #d9e7d8;
   border-radius: 50%;
+  color: #52745c;
+  background: #edf5ea;
+  font-size: 32rpx;
+  font-weight: 700;
 }
 .profile-copy {
+  min-width: 0;
   flex: 1;
+  margin-left: 18rpx;
 }
-.profile-name,
-.profile-subtitle {
+.profile-copy text,
+.row-copy text {
   display: block;
 }
-.profile-name {
+.profile-copy text:first-child {
+  overflow: hidden;
   color: #284d36;
   font-size: 30rpx;
   font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.profile-subtitle {
+.profile-copy text:last-child {
   margin-top: 7rpx;
+  overflow: hidden;
   color: #748b7d;
-  font-size: 22rpx;
+  font-size: 21rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.forward-icon {
+.arrow {
   width: 30rpx;
   height: 30rpx;
-  opacity: 0.68;
+  flex: none;
+  margin-left: 16rpx;
+  opacity: 0.66;
 }
-.group {
-  margin-top: 30rpx;
+.section {
+  margin-top: 32rpx;
 }
-.group-title {
+.section-title {
   display: block;
-  margin: 0 0 8rpx 2rpx;
-  color: #5f806b;
+  margin: 0 0 7rpx 2rpx;
+  color: #63806d;
   font-size: 22rpx;
   font-weight: 700;
 }
 .row {
   display: flex;
   align-items: center;
-  gap: 16rpx;
   width: 100%;
-  min-height: 88rpx;
-  padding: 14rpx 2rpx;
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
+  min-height: 102rpx;
+  padding: 16rpx 2rpx;
+  border: 0;
   border-bottom: 1rpx solid #e2ebe3;
   text-align: left;
   background: transparent;
 }
-.row-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42rpx;
-  height: 42rpx;
-  flex: none;
-}
-.row-icon image {
-  width: 38rpx;
-  height: 38rpx;
-  opacity: 0.72;
-}
 .row-copy {
-  flex: 1;
   min-width: 0;
+  flex: 1;
 }
-.row-title,
-.row-desc {
-  display: block;
-}
-.row-title {
+.row-copy text:first-child {
   color: #31543e;
   font-size: 26rpx;
+  font-weight: 700;
 }
-.row-desc {
-  margin-top: 4rpx;
+.row-copy text:last-child {
+  margin-top: 6rpx;
+  overflow: hidden;
   color: #7b9181;
-  font-size: 21rpx;
+  font-size: 20rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row--disabled {
+  opacity: 0.62;
+}
+.coming {
+  padding: 6rpx 10rpx;
+  border: 1rpx solid #d8e2d8;
+  border-radius: 8rpx;
+  color: #7f9384;
+  font-size: 18rpx;
 }
 .foot {
   display: block;
