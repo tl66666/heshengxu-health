@@ -94,7 +94,7 @@ function signed(value?: number) {
   return value === undefined ? '' : `${value > 0 ? '+' : ''}${value}`;
 }
 function goRecords() {
-  uni.navigateTo({ url: '/pages/records/RecordsPage' });
+  uni.switchTab({ url: '/pages/records/RecordsPage' });
 }
 function localDate() {
   const now = new Date();
