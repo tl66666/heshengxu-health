@@ -18,14 +18,21 @@
       <template v-else>
         <view class="banner"
           ><image src="/static/illustrations/insight-report-banner.png" mode="aspectFit" /><view
-            ><text>本周覆盖 {{ review.coverage.recordedDayCount }} 天</text
-            ><text>{{ review.range.startDate }} 至 {{ review.range.endDate }}</text></view
+            class="banner-copy"
+            ><text class="banner-days"
+              ><text class="days-num">{{ review.coverage.recordedDayCount }}</text
+              ><text class="days-unit">天记录</text></text
+            ><text class="banner-range"
+              >{{ review.range.startDate }} 至 {{ review.range.endDate }}</text
+            ></view
           ></view
         >
-        <view class="section"
+        <view class="section card"
           ><text class="section-title">体重记录</text
           ><view v-if="review.weight.recordCount >= 2"
-            ><text class="metric">{{ review.weight.lastKg }} kg</text
+            ><view class="metric-line"
+              ><text class="metric">{{ review.weight.lastKg }}</text
+              ><text class="metric-unit">kg · 最新体重</text></view
             ><text class="caption"
               >较本周首次记录 {{ signed(review.weight.changeKg) }} kg</text
             ></view
@@ -38,20 +45,30 @@
             ></view
           ></view
         >
-        <view class="section"
+        <view class="section card"
           ><text class="section-title">这一周的节律</text
           ><view class="facts"
-            ><view
-              ><text>{{ review.food.energyKcal }} kcal</text><text>已记录食物</text></view
-            ><view
-              ><text>{{ review.activity.durationMinutes }} 分钟</text><text>活动</text></view
-            ><view
-              ><text>{{
-                review.sleep.recordCount
-                  ? `${Math.round((review.sleep.durationMinutes / 60) * 10) / 10} 小时`
-                  : '未记录'
-              }}</text
-              ><text>睡眠</text></view
+            ><view class="fact"
+              ><view class="fact-top"
+                ><text class="fact-value">{{ review.food.energyKcal }}</text
+                ><text class="fact-unit">kcal</text></view
+              ><text class="fact-label">已记录食物</text></view
+            ><view class="fact"
+              ><view class="fact-top"
+                ><text class="fact-value">{{ review.activity.durationMinutes }}</text
+                ><text class="fact-unit">分钟</text></view
+              ><text class="fact-label">活动</text></view
+            ><view class="fact"
+              ><view class="fact-top"
+                ><text class="fact-value">{{
+                  review.sleep.recordCount
+                    ? Math.round((review.sleep.durationMinutes / 60) * 10) / 10
+                    : '—'
+                }}</text
+                ><text v-if="review.sleep.recordCount" class="fact-unit">小时</text></view
+              ><text class="fact-label"
+                >睡眠{{ review.sleep.recordCount ? '' : '未记录' }}</text
+              ></view
             ></view
           ></view
         >
@@ -124,52 +141,81 @@ onLoad(load);
   font-size: 21rpx;
 }
 .banner,
-.section,
+.section.card,
 .xuxu {
   box-sizing: border-box;
-  border: 1rpx solid #dceadd;
-  border-radius: 16rpx;
+  border-radius: var(--hz-radius-card);
   background: #fff;
+  box-shadow: var(--hz-shadow-card);
 }
 .banner {
   display: flex;
   align-items: center;
-  min-height: 160rpx;
+  min-height: 168rpx;
   overflow: hidden;
   background: #fffdf5;
 }
 .banner image {
-  width: 230rpx;
+  width: 220rpx;
   height: 160rpx;
   flex: none;
 }
-.banner view text {
-  display: block;
+.banner-copy {
+  flex: 1;
+  min-width: 0;
+  padding-right: 20rpx;
+}
+.banner-days {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
   color: #41684c;
-  font-size: 25rpx;
+}
+.days-num {
+  color: #2f6140;
+  font-size: 52rpx;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.days-unit {
+  font-size: 22rpx;
   font-weight: 700;
 }
-.banner view text:last-child {
-  margin-top: 9rpx;
+.banner-range {
+  display: block;
+  margin-top: 8rpx;
+  overflow: hidden;
   color: #7b9181;
-  font-size: 20rpx;
-  font-weight: 400;
+  font-size: 19rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .section {
   margin-top: 20rpx;
-  padding: 24rpx;
+  padding: 26rpx 24rpx;
 }
 .section-title {
   margin-bottom: 18rpx;
   font-size: 28rpx;
   font-weight: 700;
 }
+.metric-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10rpx;
+}
 .metric {
-  font-size: 42rpx;
+  color: #2f6140;
+  font-size: 48rpx;
   font-weight: 700;
+  line-height: 1.1;
+}
+.metric-unit {
+  color: #799080;
+  font-size: 21rpx;
 }
 .caption {
-  margin-top: 7rpx;
+  margin-top: 9rpx;
   color: #799080;
   font-size: 22rpx;
   line-height: 1.5;
@@ -181,21 +227,19 @@ onLoad(load);
   margin-top: 20rpx;
 }
 .point,
-.facts view {
+.fact {
   min-width: 0;
   flex: 1;
   padding: 14rpx 10rpx;
-  border-radius: 10rpx;
-  background: #f1f7f1;
+  border-radius: var(--hz-radius-tile);
+  background: #f4f9f4;
 }
-.point text,
-.facts text {
+.point text {
   display: block;
   font-size: 19rpx;
   color: #6f8777;
 }
-.point text:last-child,
-.facts text:first-child {
+.point text:last-child {
   margin-top: 5rpx;
   color: #345a41;
   font-size: 23rpx;
@@ -204,8 +248,36 @@ onLoad(load);
 .facts {
   gap: 10rpx;
 }
-.facts view {
-  padding: 16rpx 12rpx;
+.fact {
+  padding: 16rpx 14rpx 18rpx;
+}
+.fact-top {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+.fact-value {
+  overflow: hidden;
+  max-width: 100%;
+  color: #2f6140;
+  font-size: 34rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fact-unit {
+  flex: none;
+  color: #7d9585;
+  font-size: 18rpx;
+}
+.fact-label {
+  display: block;
+  margin-top: 6rpx;
+  overflow: hidden;
+  color: #6f8777;
+  font-size: 19rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .state {
   display: flex;
@@ -234,9 +306,9 @@ onLoad(load);
 }
 .insufficient {
   min-height: 360rpx;
-  border: 1rpx solid #dceadd;
-  border-radius: 16rpx;
+  border-radius: var(--hz-radius-card);
   background: #fffdf5;
+  box-shadow: var(--hz-shadow-card);
 }
 .xuxu {
   display: flex;

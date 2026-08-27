@@ -15,31 +15,38 @@
 
     <view class="section">
       <text class="section-title">健康管理</text>
-      <button
-        v-for="item in mePrimaryActions"
-        :key="item.label"
-        class="row"
-        @tap="openAction(item)"
-      >
-        <view class="row-copy"
-          ><text>{{ item.label }}</text
-          ><text>{{ item.detail }}</text></view
+      <view class="card">
+        <button
+          v-for="(item, index) in mePrimaryActions"
+          :key="item.label"
+          class="row"
+          :class="{ 'row--last': index === mePrimaryActions.length - 1 }"
+          @tap="openAction(item)"
         >
-        <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-      </button>
+          <view class="row-copy"
+            ><text>{{ item.label }}</text
+            ><text>{{ item.detail }}</text></view
+          >
+          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+        </button>
+      </view>
     </view>
 
     <view class="section">
       <text class="section-title">数据与隐私</text>
-      <button class="row" @tap="manageData">
-        <view class="row-copy"
-          ><text>数据管理说明</text><text>当前可以查看和修改自己的健康记录</text></view
-        >
-        <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-      </button>
-      <view class="row row--disabled">
-        <view class="row-copy"><text>记录提醒</text><text>将在账号与通知能力接入后开放</text></view>
-        <text class="coming">准备中</text>
+      <view class="card">
+        <button class="row" @tap="manageData">
+          <view class="row-copy"
+            ><text>数据管理说明</text><text>当前可以查看和修改自己的健康记录</text></view
+          >
+          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+        </button>
+        <view class="row row--last row--disabled">
+          <view class="row-copy"
+            ><text>记录提醒</text><text>将在账号与通知能力接入后开放</text></view
+          >
+          <text class="coming">准备中</text>
+        </view>
       </view>
     </view>
 
@@ -110,31 +117,37 @@ onShow(() => healthLoopState.loadToday(date));
   font-weight: 700;
 }
 .page-header text:last-child {
-  margin-top: 6rpx;
-  color: #809486;
-  font-size: 21rpx;
+  align-self: flex-start;
+  margin-top: 12rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  color: #4c7d5a;
+  background: #e3f2e4;
+  font-size: 20rpx;
+  font-weight: 600;
 }
 .profile-summary {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0 0 24rpx;
-  border: 0;
-  border-bottom: 1rpx solid #dfeae0;
+  padding: 26rpx 24rpx;
+  border-radius: var(--hz-radius-card);
   text-align: left;
-  background: transparent;
+  background: #fff;
+  box-shadow: var(--hz-shadow-card);
 }
 .initial-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 82rpx;
-  height: 82rpx;
+  width: 92rpx;
+  height: 92rpx;
+  flex: none;
   border: 2rpx solid #d9e7d8;
   border-radius: 50%;
   color: #52745c;
   background: #edf5ea;
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 700;
 }
 .profile-copy {
@@ -170,25 +183,33 @@ onShow(() => healthLoopState.loadToday(date));
   opacity: 0.66;
 }
 .section {
-  margin-top: 32rpx;
+  margin-top: 30rpx;
 }
 .section-title {
   display: block;
-  margin: 0 0 7rpx 2rpx;
+  margin: 0 4rpx 12rpx;
   color: #63806d;
   font-size: 22rpx;
   font-weight: 700;
+}
+.card {
+  overflow: hidden;
+  border-radius: var(--hz-radius-card);
+  background: #fff;
+  box-shadow: var(--hz-shadow-card);
 }
 .row {
   display: flex;
   align-items: center;
   width: 100%;
   min-height: 102rpx;
-  padding: 16rpx 2rpx;
-  border: 0;
-  border-bottom: 1rpx solid #e2ebe3;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid #eef4ef;
   text-align: left;
   background: transparent;
+}
+.row--last {
+  border-bottom: 0;
 }
 .row-copy {
   min-width: 0;

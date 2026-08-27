@@ -54,25 +54,27 @@
 
       <view class="section">
         <text class="section-title">档案信息</text>
-        <button class="row" @tap="edit('basic')">
-          <view class="row-copy"
-            ><text>基础资料</text
-            ><text>{{ sexLabel }} · {{ profile.displayName || '未填写称呼' }}</text></view
-          >
-          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-        </button>
-        <button class="row" @tap="edit('body')">
-          <view class="row-copy"
-            ><text>身体指标</text><text>{{ bodySummary }}</text></view
-          >
-          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-        </button>
-        <button class="row" @tap="edit('goal')">
-          <view class="row-copy"
-            ><text>健康目标</text><text>{{ goalLabel }}</text></view
-          >
-          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-        </button>
+        <view class="card">
+          <button class="row" @tap="edit('basic')">
+            <view class="row-copy"
+              ><text>基础资料</text
+              ><text>{{ sexLabel }} · {{ profile.displayName || '未填写称呼' }}</text></view
+            >
+            <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          </button>
+          <button class="row" @tap="edit('body')">
+            <view class="row-copy"
+              ><text>身体指标</text><text>{{ bodySummary }}</text></view
+            >
+            <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          </button>
+          <button class="row row--last" @tap="edit('goal')">
+            <view class="row-copy"
+              ><text>健康目标</text><text>{{ goalLabel }}</text></view
+            >
+            <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          </button>
+        </view>
       </view>
 
       <view class="privacy-note">
@@ -242,29 +244,27 @@ onShow(load);
 }
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12rpx;
   margin: 24rpx 0 30rpx;
-  border-top: 1rpx solid #e1ebe2;
-  border-bottom: 1rpx solid #e1ebe2;
 }
 .metric {
   min-width: 0;
-  padding: 20rpx 8rpx 18rpx;
+  padding: 22rpx 8rpx 20rpx;
+  border-radius: var(--hz-radius-tile);
+  background: #f4f9f4;
   text-align: center;
-}
-.metric + .metric {
-  border-left: 1rpx solid #e1ebe2;
 }
 .metric text:first-child {
   overflow: hidden;
   color: #2f6140;
-  font-size: 31rpx;
+  font-size: 33rpx;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .metric text:last-child {
-  margin-top: 6rpx;
+  margin-top: 7rpx;
   color: #819586;
   font-size: 18rpx;
 }
@@ -273,21 +273,29 @@ onShow(load);
 }
 .section-title {
   display: block;
-  margin: 0 0 6rpx 2rpx;
+  margin: 0 4rpx 12rpx;
   color: #63806d;
   font-size: 22rpx;
   font-weight: 700;
+}
+.card {
+  overflow: hidden;
+  border-radius: var(--hz-radius-card);
+  background: #fff;
+  box-shadow: var(--hz-shadow-card);
 }
 .row {
   display: flex;
   align-items: center;
   width: 100%;
   min-height: 104rpx;
-  padding: 16rpx 2rpx;
-  border: 0;
-  border-bottom: 1rpx solid #e1ebe2;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid #eef4ef;
   text-align: left;
   background: transparent;
+}
+.row--last {
+  border-bottom: 0;
 }
 .row-copy {
   flex: 1;

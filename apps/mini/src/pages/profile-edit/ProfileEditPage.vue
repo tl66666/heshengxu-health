@@ -368,14 +368,15 @@ onLoad((options) => {
 }
 .save {
   width: 100%;
-  height: 80rpx;
-  margin-top: 22rpx;
-  border: 1rpx solid #b9d2bb;
+  height: 84rpx;
+  margin-top: 24rpx;
   border-radius: 14rpx;
-  color: #426a4e;
-  background: #eef6ee;
-  font-size: 26rpx;
-  line-height: 80rpx;
+  color: #fff;
+  background: #347c50;
+  box-shadow: 0 8rpx 20rpx rgba(40, 92, 60, 0.2);
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 84rpx;
 }
 .save[disabled] {
   opacity: 0.55;
