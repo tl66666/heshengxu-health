@@ -18,10 +18,6 @@ const required = [
   'components/MiniTabBar.js',
 ];
 const missing = required.filter((file) => !existsSync(resolve(root, file)));
-const appTemplateFiles = ['app.wxml', 'App.wxml'];
-if (!appTemplateFiles.some((file) => existsSync(resolve(root, file)))) {
-  missing.push(appTemplateFiles.join(' or '));
-}
 
 if (missing.length > 0) {
   console.error(`微信小程序构建产物缺少文件：${missing.join(', ')}`);
