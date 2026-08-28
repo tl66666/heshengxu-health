@@ -15,72 +15,135 @@
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
-      <!-- 体重进度卡片：照搬薄荷健康的圆形进度图 -->
-      <view class="weight-progress-card hz-rise">
-        <view class="card-header">
-          <text class="card-title">体重管理</text>
-          <text v-if="today.activePlan" class="card-subtitle">第 1 周</text>
+      <!-- 1. 体重管理方案卡片：完全照搬薄荷健康 -->
+      <view class="weight-management-card hz-rise">
+        <view class="card-header-row">
+          <view class="card-title-group">
+            <text class="card-title">体重管理方案</text>
+            <text class="eye-icon">👁</text>
+          </view>
+          <text class="card-week">第 1 周</text>
         </view>
         
-        <view class="circle-progress-section">
-          <view class="progress-start">
-            <text class="progress-value">{{
-              today.activePlan?.healthTarget?.startWeightKg || '--'
+        <view class="circle-progress-wrapper">
+          <view class="progress-side">
+            <text class="progress-num">{{
+              today.activePlan?.healthTarget?.startWeightKg || 72.5
             }}</text>
-            <text class="progress-label">初始</text>
+            <text class="progress-text">初始</text>
           </view>
           
-          <view class="progress-circle">
-            <text v-if="today.todayRecords?.weight && today.activePlan?.healthTarget?.startWeightKg" class="progress-center">
-              已减 {{ (today.activePlan.healthTarget.startWeightKg - today.todayRecords.weight.valueKg).toFixed(1) }}kg
+          <view class="progress-circle-view">
+            <text v-if="today.todayRecords?.weight && today.activePlan?.healthTarget?.startWeightKg" 
+                  class="progress-center-text">
+              已减去<br />{{
+                (today.activePlan.healthTarget.startWeightKg - today.todayRecords.weight.valueKg).toFixed(2)
+              }}<text class="progress-unit-small">公斤</text>
             </text>
-            <text v-else class="progress-center">开始记录</text>
+            <text v-else class="progress-center-text">开始记录</text>
           </view>
           
-          <view class="progress-end">
-            <text class="progress-value">{{
-              today.activePlan?.healthTarget?.targetWeightKg || '--'
+          <view class="progress-side">
+            <text class="progress-num">{{
+              today.activePlan?.healthTarget?.targetWeightKg || 65.0
             }}</text>
-            <text class="progress-label">目标</text>
+            <text class="progress-text">目标</text>
           </view>
         </view>
       </view>
 
-      <!-- 今日记录卡片：照搬薄荷饮食热量卡片结构 -->
-      <view class="daily-record-card hz-rise hz-rise-1">
-        <view class="card-header">
+      <!-- 2. 今日记录卡片：完全照搬薄荷饮食热量结构 -->
+      <view class="daily-record-big-card hz-rise hz-rise-1">
+        <view class="card-header-row">
           <text class="card-title">今日记录</text>
-        </view>
-        
-        <view class="record-summary">
-          <text class="summary-label">已记录</text>
-          <view class="summary-value-wrap">
-            <text class="summary-value">{{ experience.recording.completed }}</text>
-            <text class="summary-unit">/4 项</text>
+          <view class="record-badge">
+            <text class="badge-icon">✓</text>
+            <text class="badge-text">{{ experience.recording.completed }}/4</text>
           </view>
         </view>
         
-        <view class="quick-actions">
-          <button
-            v-for="cell in overviewCells"
-            :key="cell.key"
-            class="quick-action-btn"
-            @tap="go(cell.route)"
-          >
-            <view class="quick-icon-wrap" :class="{ 'quick-icon-wrap--done': cell.done }">
-              <image class="quick-icon" :src="cell.icon" mode="aspectFit" />
+        <!-- 超大数字展示区 -->
+        <view class="main-data-display">
+          <text class="data-label-small">体重</text>
+          <view class="data-big-number">
+            <text class="big-num">{{
+              today.todayRecords?.weight?.valueKg || '--'
+            }}</text>
+            <text class="big-unit">kg</text>
+          </view>
+        </view>
+        
+        <!-- 3个小数据 -->
+        <view class="sub-data-row">
+          <view class="sub-item">
+            <text class="sub-label">目标</text>
+            <text class="sub-val">{{
+              today.activePlan?.healthTarget?.targetWeightKg || '--'
+            }}kg</text>
+          </view>
+          <view class="sub-item">
+            <text class="sub-label">饮食</text>
+            <text class="sub-val">{{
+              today.todayRecords?.food ? '1/3' : '0/3'
+            }}</text>
+          </view>
+          <view class="sub-item">
+            <text class="sub-label">活动</text>
+            <text class="sub-val">{{
+              today.todayRecords?.activity?.durationMin || 0
+            }}分钟</text>
+          </view>
+        </view>
+        
+        <!-- 横向滑动点 -->
+        <view class="slide-indicator">
+          <view class="dot active-dot" />
+          <view class="dot" />
+          <view class="dot" />
+        </view>
+        
+        <!-- 5个快捷按钮横向排列 -->
+        <view class="five-quick-actions">
+          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=weight')">
+            <view class="quick-icon-circle">
+              <text class="icon-emoji">⚖️</text>
             </view>
-            <text class="quick-label">{{ cell.label }}</text>
+            <text class="quick-text">体重</text>
+          </button>
+          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=food')">
+            <view class="quick-icon-circle">
+              <text class="icon-emoji">🍚</text>
+            </view>
+            <text class="quick-text">饮食</text>
+          </button>
+          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=water')">
+            <view class="quick-icon-circle">
+              <text class="icon-emoji">💧</text>
+            </view>
+            <text class="quick-text">水</text>
+          </button>
+          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=activity')">
+            <view class="quick-icon-circle">
+              <text class="icon-emoji">🏃</text>
+            </view>
+            <text class="quick-text">活动</text>
+          </button>
+          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=sleep')">
+            <view class="quick-icon-circle">
+              <text class="icon-emoji">🌙</text>
+            </view>
+            <text class="quick-text">睡眠</text>
           </button>
         </view>
         
-        <button class="card-bottom-btn" @tap="go('/pages/records/RecordsPage')">
-          <image class="btn-icon" src="/static/icons/timeline.svg" mode="aspectFit" />
-          <text class="btn-text">查看记录时间线</text>
+        <!-- 底部按钮 -->
+        <button class="big-bottom-btn" @tap="go('/pages/records/RecordsPage')">
+          <text class="btn-icon-emoji">📋</text>
+          <text class="btn-label">记录时间线</text>
         </button>
       </view>
 
-      <!-- 和序序聊聊：简洁卡片 -->
+      <!-- 3. 序序卡片 -->
       <button class="chat-card hz-rise hz-rise-1" @tap="toXuxu">
         <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <view class="chat-content">
@@ -277,25 +340,31 @@ onShow(() => {
   font-size: 28rpx;
 }
 
-/* 页面背景：浅薄荷绿（照搬薄荷的浅灰背景） */
+/* 页面背景：浅薄荷绿 */
 .page {
   background: #f5f8f6;
 }
 
-/* 体重进度卡片：照搬薄荷健康的圆形进度图 */
-.weight-progress-card {
+/* 1. 体重管理方案卡片：完全照搬薄荷 */
+.weight-management-card {
   margin-bottom: 24rpx;
-  padding: 36rpx 32rpx;
+  padding: 32rpx;
   border-radius: 32rpx;
-  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
-  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.12);
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
 }
 
-.card-header {
+.card-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32rpx;
+  margin-bottom: 28rpx;
+}
+
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .card-title {
@@ -304,112 +373,191 @@ onShow(() => {
   font-weight: 800;
 }
 
-.card-subtitle {
+.eye-icon {
+  font-size: 28rpx;
+  opacity: 0.6;
+}
+
+.card-week {
   color: #76907d;
   font-size: 24rpx;
   font-weight: 600;
 }
 
-.circle-progress-section {
+.circle-progress-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20rpx 0;
 }
 
-.progress-start,
-.progress-end {
+.progress-side {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8rpx;
 }
 
-.progress-value {
+.progress-num {
   color: #2d6943;
-  font-size: 56rpx;
+  font-size: 52rpx;
   font-weight: 900;
   line-height: 1;
 }
 
-.progress-label {
+.progress-text {
   color: #76907d;
   font-size: 22rpx;
-  font-weight: 600;
 }
 
-.progress-circle {
+.progress-circle-view {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 280rpx;
-  height: 280rpx;
-  border: 16rpx solid #e8f7ed;
+  width: 260rpx;
+  height: 260rpx;
+  border: 14rpx solid #e8f7ed;
   border-top-color: #7fcc8f;
   border-right-color: #7fcc8f;
   border-radius: 50%;
   background: #fafcfb;
 }
 
-.progress-center {
+.progress-center-text {
   color: #5a9572;
-  font-size: 26rpx;
-  font-weight: 700;
-  text-align: center;
-}
-
-/* 今日记录卡片：照搬薄荷饮食热量结构 */
-.daily-record-card {
-  margin-bottom: 24rpx;
-  padding: 36rpx 32rpx;
-  border-radius: 32rpx;
-  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
-  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.12);
-}
-
-.record-summary {
-  display: flex;
-  align-items: baseline;
-  gap: 16rpx;
-  margin-bottom: 36rpx;
-  padding: 0 8rpx;
-}
-
-.summary-label {
-  color: #76907d;
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: 600;
+  text-align: center;
+  line-height: 1.5;
 }
 
-.summary-value-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 4rpx;
+.progress-unit-small {
+  font-size: 20rpx;
 }
 
-.summary-value {
-  color: #2d6943;
-  font-size: 88rpx;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.02em;
+/* 2. 今日记录大卡片：完全照搬薄荷饮食热量 */
+.daily-record-big-card {
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
 }
 
-.summary-unit {
-  color: #5a9572;
-  font-size: 32rpx;
-  font-weight: 700;
-}
-
-.quick-actions {
+.record-badge {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  margin-bottom: 28rpx;
-  padding: 20rpx 0;
+  gap: 6rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.quick-action-btn {
+.badge-icon {
+  color: #7fcc8f;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.badge-text {
+  color: #5a9572;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* 超大数字展示区（像薄荷的1787） */
+.main-data-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 0;
+}
+
+.data-label-small {
+  color: #76907d;
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.data-big-number {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.big-num {
+  color: #2d6943;
+  font-size: 120rpx;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.big-unit {
+  color: #5a9572;
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+/* 3个小数据（像薄荷的0饮食、0运动） */
+.sub-data-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 24rpx 0;
+  border-top: 2rpx solid rgba(232, 247, 237, 0.6);
+  border-bottom: 2rpx solid rgba(232, 247, 237, 0.6);
+  margin: 20rpx 0;
+}
+
+.sub-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.sub-label {
+  color: #9ba8a0;
+  font-size: 22rpx;
+}
+
+.sub-val {
+  color: #5a9572;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+/* 横向滑动点 */
+.slide-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 12rpx;
+  margin: 20rpx 0;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #d4e8db;
+  transition: all 0.3s;
+}
+
+.active-dot {
+  background: #7fcc8f;
+  width: 16rpx;
+}
+
+/* 5个快捷按钮横向排列（像薄荷的早午晚加运动） */
+.five-quick-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 28rpx 0;
+}
+
+.quick-circle-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -419,34 +567,34 @@ onShow(() => {
   border: 0;
 }
 
-.quick-icon-wrap {
+.quick-icon-circle {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 88rpx;
   height: 88rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.8) 100%);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.08) 0%, rgba(232, 247, 237, 0.6) 100%);
+  transition: all 0.3s;
 }
 
-.quick-icon-wrap--done {
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.25) 0%, rgba(95, 158, 118, 0.2) 100%);
-  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.25);
+.quick-circle-btn:active .quick-icon-circle {
+  transform: scale(0.95);
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.quick-icon {
-  width: 44rpx;
-  height: 44rpx;
+.icon-emoji {
+  font-size: 40rpx;
 }
 
-.quick-label {
-  color: #284d36;
+.quick-text {
+  color: #4a6b56;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 600;
 }
 
-.card-bottom-btn {
+/* 底部大按钮（像薄荷的"薄荷相机"） */
+.big-bottom-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -455,26 +603,25 @@ onShow(() => {
   padding: 24rpx;
   border-radius: 999rpx;
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
-  transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
+  transition: all 0.3s;
 }
 
-.card-bottom-btn:active {
+.big-bottom-btn:active {
   transform: scale(0.98);
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.18) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.btn-icon {
-  width: 32rpx;
-  height: 32rpx;
+.btn-icon-emoji {
+  font-size: 28rpx;
 }
 
-.btn-text {
+.btn-label {
   color: #5a9572;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 700;
 }
 
-/* 和序序聊聊：白卡片风格 */
+/* 3. 序序卡片：白卡片风格 */
 .chat-card {
   display: flex;
   align-items: center;
