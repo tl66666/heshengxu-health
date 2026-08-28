@@ -384,6 +384,9 @@ function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
 }
 
 function startOnboarding() {
+  // 初始化默认身高体重，确保 BMI 立即显示
+  if (!form.heightCm) form.heightCm = '168';
+  if (!form.weightKg) form.weightKg = '60.0';
   step.value = 1;
 }
 
