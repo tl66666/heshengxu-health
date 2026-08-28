@@ -15,56 +15,69 @@
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
-      <!-- 主视觉区：参考建档页，图片完整显示 -->
-      <view class="hero-fullscreen">
-        <!-- 背景插画：widthFix 完整显示 -->
-        <image
-          class="hero-illustration"
-          src="/static/illustrations/home-hero-morning.png"
-          mode="widthFix"
-        />
-        <!-- 渐变遮罩：确保底部文字清晰 -->
-        <view class="hero-gradient" />
+      <!-- 体重进度卡片：照搬薄荷健康的圆形进度图 -->
+      <view class="weight-progress-card hz-rise">
+        <view class="card-header">
+          <text class="card-title">体重管理</text>
+          <text v-if="today.activePlan" class="card-subtitle">第 1 周</text>
+        </view>
         
-        <!-- 底部浮动信息：今日摘要 -->
-        <view class="hero-body">
-          <view class="today-summary hz-rise">
-            <view class="summary-row">
-              <text class="summary-label">今日体重</text>
-              <view class="summary-value-wrap">
-                <text v-if="today.todayRecords?.weight" class="summary-value-num">
-                  {{ today.todayRecords.weight.valueKg }}
-                </text>
-                <text v-else class="summary-value-num summary-value-num--empty">--</text>
-                <text class="summary-value-unit">kg</text>
-              </view>
-            </view>
-            <view class="summary-row">
-              <text class="summary-label">今日进度</text>
-              <text class="summary-value">{{ experience.recording.completed }}/4 已记录</text>
-            </view>
+        <view class="circle-progress-section">
+          <view class="progress-start">
+            <text class="progress-value">{{
+              today.activePlan?.healthTarget?.startWeightKg || '--'
+            }}</text>
+            <text class="progress-label">初始</text>
+          </view>
+          
+          <view class="progress-circle">
+            <text v-if="today.todayRecords?.weight && today.activePlan?.healthTarget?.startWeightKg" class="progress-center">
+              已减 {{ (today.activePlan.healthTarget.startWeightKg - today.todayRecords.weight.valueKg).toFixed(1) }}kg
+            </text>
+            <text v-else class="progress-center">开始记录</text>
+          </view>
+          
+          <view class="progress-end">
+            <text class="progress-value">{{
+              today.activePlan?.healthTarget?.targetWeightKg || '--'
+            }}</text>
+            <text class="progress-label">目标</text>
           </view>
         </view>
       </view>
 
-      <!-- 今日行动：合并今日记录和快捷记录 -->
-      <view class="actions-section">
-        <view class="section-title">今日行动</view>
-        <view class="actions-grid">
+      <!-- 今日记录卡片：照搬薄荷饮食热量卡片结构 -->
+      <view class="daily-record-card hz-rise hz-rise-1">
+        <view class="card-header">
+          <text class="card-title">今日记录</text>
+        </view>
+        
+        <view class="record-summary">
+          <text class="summary-label">已记录</text>
+          <view class="summary-value-wrap">
+            <text class="summary-value">{{ experience.recording.completed }}</text>
+            <text class="summary-unit">/4 项</text>
+          </view>
+        </view>
+        
+        <view class="quick-actions">
           <button
             v-for="cell in overviewCells"
             :key="cell.key"
-            class="action-btn"
-            :class="{ 'action-btn--done': cell.done }"
+            class="quick-action-btn"
             @tap="go(cell.route)"
           >
-            <view class="action-icon-wrap">
-              <image class="action-icon" :src="cell.icon" mode="aspectFit" />
+            <view class="quick-icon-wrap" :class="{ 'quick-icon-wrap--done': cell.done }">
+              <image class="quick-icon" :src="cell.icon" mode="aspectFit" />
             </view>
-            <text class="action-label">{{ cell.label }}</text>
-            <view v-if="cell.done" class="action-badge">已记录</view>
+            <text class="quick-label">{{ cell.label }}</text>
           </button>
         </view>
+        
+        <button class="card-bottom-btn" @tap="go('/pages/records/RecordsPage')">
+          <image class="btn-icon" src="/static/icons/timeline.svg" mode="aspectFit" />
+          <text class="btn-text">查看记录时间线</text>
+        </button>
       </view>
 
       <!-- 和序序聊聊：简洁卡片 -->
@@ -264,62 +277,106 @@ onShow(() => {
   font-size: 28rpx;
 }
 
-/* 主视觉区：参考建档页，图片完整显示 */
-.hero-fullscreen {
-  position: relative;
-  width: 100%;
-  margin-bottom: 32rpx;
+/* 页面背景：浅薄荷绿（照搬薄荷的浅灰背景） */
+.page {
+  background: #f5f8f6;
 }
 
-.hero-illustration {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.hero-gradient {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60%;
-  background: linear-gradient(
-    to top,
-    rgba(232, 247, 237, 0.96) 0%,
-    rgba(232, 247, 237, 0.88) 35%,
-    rgba(232, 247, 237, 0) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero-body {
-  position: absolute;
-  bottom: 32rpx;
-  left: 32rpx;
-  right: 32rpx;
-  z-index: 2;
-}
-
-.today-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-  padding: 32rpx 36rpx;
+/* 体重进度卡片：照搬薄荷健康的圆形进度图 */
+.weight-progress-card {
+  margin-bottom: 24rpx;
+  padding: 36rpx 32rpx;
   border-radius: 32rpx;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24rpx);
-  box-shadow: 0 12rpx 40rpx rgba(46, 97, 64, 0.15);
+  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
+  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.12);
 }
 
-.summary-row {
+.card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 32rpx;
+}
+
+.card-title {
+  color: #2d6943;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.card-subtitle {
+  color: #76907d;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.circle-progress-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+}
+
+.progress-start,
+.progress-end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.progress-value {
+  color: #2d6943;
+  font-size: 56rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.progress-label {
+  color: #76907d;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.progress-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 280rpx;
+  height: 280rpx;
+  border: 16rpx solid #e8f7ed;
+  border-top-color: #7fcc8f;
+  border-right-color: #7fcc8f;
+  border-radius: 50%;
+  background: #fafcfb;
+}
+
+.progress-center {
+  color: #5a9572;
+  font-size: 26rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 今日记录卡片：照搬薄荷饮食热量结构 */
+.daily-record-card {
+  margin-bottom: 24rpx;
+  padding: 36rpx 32rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
+  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.12);
+}
+
+.record-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+  margin-bottom: 36rpx;
+  padding: 0 8rpx;
 }
 
 .summary-label {
-  color: #5a9572;
+  color: #76907d;
   font-size: 26rpx;
   font-weight: 600;
 }
@@ -327,167 +384,145 @@ onShow(() => {
 .summary-value-wrap {
   display: flex;
   align-items: baseline;
-  gap: 6rpx;
+  gap: 4rpx;
 }
 
-.summary-value-num {
+.summary-value {
   color: #2d6943;
-  font-size: 48rpx;
+  font-size: 88rpx;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
-.summary-value-num--empty {
-  color: #a8c4b3;
+.summary-unit {
+  color: #5a9572;
+  font-size: 32rpx;
+  font-weight: 700;
 }
 
-.summary-value-unit {
-  color: #5a9572;
+.quick-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 28rpx;
+  padding: 20rpx 0;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.quick-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.8) 100%);
+  transition: all 0.3s ease;
+}
+
+.quick-icon-wrap--done {
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.25) 0%, rgba(95, 158, 118, 0.2) 100%);
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.25);
+}
+
+.quick-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.quick-label {
+  color: #284d36;
   font-size: 24rpx;
   font-weight: 700;
 }
 
-.summary-value {
-  color: #2d6943;
-  font-size: 28rpx;
-  font-weight: 700;
-}
-
-/* 今日行动：2x2 大按钮 */
-.actions-section {
-  margin-bottom: 32rpx;
-}
-
-.section-title {
-  margin-bottom: 20rpx;
-  padding: 0 4rpx;
-  color: #274a35;
-  font-size: 30rpx;
-  font-weight: 800;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
-}
-
-.action-btn {
-  position: relative;
+.card-bottom-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 36rpx 20rpx;
-  border-radius: 28rpx;
-  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
-  box-shadow: 0 6rpx 24rpx rgba(46, 97, 64, 0.08);
+  gap: 12rpx;
+  width: 100%;
+  padding: 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
   transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 
-.action-btn:active {
-  transform: translateY(-4rpx) scale(0.97);
-  box-shadow: 0 10rpx 32rpx rgba(46, 97, 64, 0.12);
+.card-bottom-btn:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.18) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.action-btn--done {
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 244, 234, 0.8) 100%);
-  box-shadow: 0 6rpx 24rpx rgba(127, 204, 143, 0.18);
+.btn-icon {
+  width: 32rpx;
+  height: 32rpx;
 }
 
-.action-icon-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 96rpx;
-  height: 96rpx;
-  margin-bottom: 16rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 244, 234, 0.9) 100%);
-  transition: all 0.3s ease;
-}
-
-.action-btn--done .action-icon-wrap {
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.25) 0%, rgba(95, 158, 118, 0.2) 100%);
-  box-shadow: 0 6rpx 20rpx rgba(127, 204, 143, 0.25);
-}
-
-.action-icon {
-  width: 48rpx;
-  height: 48rpx;
-}
-
-.action-label {
-  color: #284d36;
+.btn-text {
+  color: #5a9572;
   font-size: 26rpx;
   font-weight: 700;
-  margin-bottom: 8rpx;
 }
 
-.action-badge {
-  position: absolute;
-  top: 16rpx;
-  right: 16rpx;
-  padding: 6rpx 12rpx;
-  border-radius: 999rpx;
-  background: linear-gradient(135deg, #7fcc8f 0%, #67a37b 100%);
-  color: #ffffff;
-  font-size: 20rpx;
-  font-weight: 600;
-  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.3);
-}
-
-/* 和序序聊聊：简洁卡片 */
+/* 和序序聊聊：白卡片风格 */
 .chat-card {
   display: flex;
   align-items: center;
   gap: 20rpx;
   width: 100%;
-  margin-bottom: 28rpx;
-  padding: 28rpx 32rpx;
+  margin-bottom: 24rpx;
+  padding: 32rpx;
   border-radius: 32rpx;
   text-align: left;
-  background: linear-gradient(135deg, #fff9e6 0%, #fffdf1 100%);
-  box-shadow: 0 8rpx 24rpx rgba(239, 214, 137, 0.18);
+  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
+  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.12);
   transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 .chat-card:active {
-  transform: translateY(-3rpx) scale(0.98);
-  box-shadow: 0 12rpx 32rpx rgba(239, 214, 137, 0.24);
+  transform: translateY(-2rpx) scale(0.99);
+  box-shadow: 0 12rpx 36rpx rgba(127, 204, 143, 0.16);
 }
 .chat-avatar {
-  width: 64rpx;
-  height: 64rpx;
+  width: 72rpx;
+  height: 72rpx;
   flex: none;
-  border: 4rpx solid #f4e3a0;
+  border: 3rpx solid #e8f7ed;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow: 0 8rpx 24rpx rgba(239, 214, 137, 0.35);
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.2);
 }
 .chat-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 6rpx;
 }
 .chat-title {
   display: block;
-  color: #6f5a27;
+  color: #2d6943;
   font-size: 28rpx;
   font-weight: 700;
 }
 .chat-desc {
   display: block;
-  color: #9e8a5e;
+  color: #76907d;
   font-size: 22rpx;
 }
 .chat-arrow {
   width: 28rpx;
   height: 28rpx;
   flex: none;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .task-copy text {
