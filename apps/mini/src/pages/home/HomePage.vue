@@ -5,138 +5,122 @@
         ><text class="date-chip">{{ dateLabel }}</text
         ><text class="title">{{ greeting }}，{{ displayName }}</text></view
       >
-      <image
-        class="avatar"
-        src="/static/illustrations/xuxu-avatar.png"
-        mode="aspectFill"
-        @tap="toXuxu"
-      />
+      <button class="avatar-btn" @tap="toXuxu">
+        <image
+          class="avatar"
+          src="/static/illustrations/xuxu-avatar.png"
+          mode="aspectFill"
+        />
+        <text class="avatar-hint">和序序聊聊</text>
+      </button>
     </view>
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
-      <!-- 1. 体重管理方案卡片 -->
+      <!-- 1. 体重管理方案卡片：缩小，半圆进度条 -->
       <view class="weight-management-card hz-rise">
         <view class="card-header-row">
-          <view class="card-title-group">
-            <text class="card-title">体重管理方案</text>
-            <view class="eye-icon-svg"></view>
-          </view>
+          <text class="card-title-compact">体重管理</text>
           <text class="card-week">第 1 周</text>
         </view>
         
-        <view class="circle-progress-wrapper">
-          <view class="progress-side">
-            <text class="progress-num">{{
-              today.activePlan?.healthTarget?.startWeightKg?.toFixed(2) || '--'
-            }}</text>
-            <text class="progress-text">初始</text>
+        <view class="semicircle-progress">
+          <view class="progress-data-row">
+            <view class="progress-data-item">
+              <text class="data-num">{{
+                today.activePlan?.healthTarget?.startWeightKg?.toFixed(1) || '--'
+              }}</text>
+              <text class="data-text">初始</text>
+            </view>
+            <view class="progress-data-item">
+              <text class="data-num highlight">{{
+                today.todayRecords?.weight?.valueKg?.toFixed(1) || '--'
+              }}</text>
+              <text class="data-text">当前</text>
+            </view>
+            <view class="progress-data-item">
+              <text class="data-num">{{
+                today.activePlan?.healthTarget?.targetWeightKg?.toFixed(1) || '--'
+              }}</text>
+              <text class="data-text">目标</text>
+            </view>
           </view>
-          
-          <view class="progress-circle-view">
-            <text v-if="today.todayRecords?.weight && today.activePlan?.healthTarget?.startWeightKg" 
-                  class="progress-center-text">
-              已减去<br />{{
-                (today.activePlan.healthTarget.startWeightKg - today.todayRecords.weight.valueKg).toFixed(2)
-              }}<text class="progress-unit-small">公斤</text>
-            </text>
-            <text v-else class="progress-center-text">开始记录</text>
-          </view>
-          
-          <view class="progress-side">
-            <text class="progress-num">{{
-              today.activePlan?.healthTarget?.targetWeightKg?.toFixed(2) || '--'
-            }}</text>
-            <text class="progress-text">目标</text>
+          <!-- 半圆进度条 -->
+          <view class="semicircle-track">
+            <view class="semicircle-fill" :style="`transform: rotate(${calculateProgress()}deg)`"></view>
           </view>
         </view>
       </view>
 
-      <!-- 2. 今日记录大卡片 -->
-      <view class="daily-record-big-card hz-rise hz-rise-1">
+      <!-- 2. 饮食热量卡片：完全照搬薄荷 -->
+      <view class="food-calorie-card hz-rise hz-rise-1">
         <view class="card-header-row">
-          <text class="card-title">今日记录</text>
-          <view class="record-badge">
-            <text class="badge-check">✓</text>
-            <text class="badge-text">{{ experience.recording.completed }}/4</text>
-          </view>
+          <text class="card-title">饮食热量</text>
         </view>
         
-        <!-- 当前体重大数字 -->
-        <view class="main-data-display">
-          <text class="data-label-small">当前体重</text>
-          <view class="data-big-number">
-            <text class="big-num">{{
-              today.todayRecords?.weight?.valueKg || '--'
-            }}</text>
-            <text class="big-unit">kg</text>
+        <!-- 还可吃大数字 -->
+        <view class="calorie-main">
+          <text class="calorie-label">还可吃</text>
+          <view class="calorie-big">
+            <text class="calorie-num">1500</text>
+            <text class="calorie-unit">千卡</text>
           </view>
         </view>
         
         <!-- 3个小数据 -->
-        <view class="sub-data-row">
-          <view class="sub-item">
-            <text class="sub-label">目标</text>
-            <text class="sub-val">{{
-              today.activePlan?.healthTarget?.targetWeightKg || '--'
-            }}kg</text>
+        <view class="calorie-stats">
+          <view class="stat-box">
+            <text class="stat-val">0</text>
+            <text class="stat-label">饮食</text>
           </view>
-          <view class="sub-item">
-            <text class="sub-label">饮食</text>
-            <text class="sub-val">{{
-              today.todayRecords?.food ? '1' : '0'
-            }}/3</text>
-          </view>
-          <view class="sub-item">
-            <text class="sub-label">活动</text>
-            <text class="sub-val">{{
-              today.todayRecords?.activity?.durationMin || 0
-            }}分钟</text>
+          <view class="stat-box">
+            <text class="stat-val">0</text>
+            <text class="stat-label">运动</text>
           </view>
         </view>
         
-        <!-- 5个快捷按钮：用CSS绘制精致图标 -->
-        <view class="five-quick-actions">
-          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=weight')">
-            <view class="quick-icon-circle">
-              <view class="icon-svg icon-weight"></view>
+        <!-- 5个快捷按钮 -->
+        <view class="meal-actions">
+          <button class="meal-btn" @tap="go('/pages/records/RecordsPage?type=food')">
+            <view class="meal-icon">
+              <view class="icon-svg icon-breakfast"></view>
             </view>
-            <text class="quick-text">体重</text>
+            <text class="meal-text">早餐</text>
           </button>
-          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=food')">
-            <view class="quick-icon-circle">
-              <view class="icon-svg icon-food"></view>
+          <button class="meal-btn" @tap="go('/pages/records/RecordsPage?type=food')">
+            <view class="meal-icon">
+              <view class="icon-svg icon-lunch"></view>
             </view>
-            <text class="quick-text">饮食</text>
+            <text class="meal-text">午餐</text>
           </button>
-          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=water')">
-            <view class="quick-icon-circle">
-              <view class="icon-svg icon-water"></view>
+          <button class="meal-btn" @tap="go('/pages/records/RecordsPage?type=food')">
+            <view class="meal-icon">
+              <view class="icon-svg icon-dinner"></view>
             </view>
-            <text class="quick-text">水</text>
+            <text class="meal-text">晚餐</text>
           </button>
-          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=activity')">
-            <view class="quick-icon-circle">
-              <view class="icon-svg icon-activity"></view>
+          <button class="meal-btn" @tap="go('/pages/records/RecordsPage?type=food')">
+            <view class="meal-icon">
+              <view class="icon-svg icon-snack"></view>
             </view>
-            <text class="quick-text">活动</text>
+            <text class="meal-text">加餐</text>
           </button>
-          <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=sleep')">
-            <view class="quick-icon-circle">
-              <view class="icon-svg icon-sleep"></view>
+          <button class="meal-btn" @tap="go('/pages/records/RecordsPage?type=activity')">
+            <view class="meal-icon">
+              <view class="icon-svg icon-exercise"></view>
             </view>
-            <text class="quick-text">睡眠</text>
+            <text class="meal-text">运动</text>
           </button>
         </view>
         
-        <!-- 底部按钮 -->
-        <button class="big-bottom-btn" @tap="go('/pages/records/RecordsPage')">
-          <view class="btn-icon-svg"></view>
-          <text class="btn-label">记录时间线</text>
+        <!-- 底部按钮：序序相机 -->
+        <button class="camera-btn" @tap="toXuxu">
+          <view class="camera-icon"></view>
+          <text class="camera-text">序序相机</text>
         </button>
       </view>
 
-      <!-- 3. 体重记录卡片（参考图1） -->
+      <!-- 3. 体重记录卡片 -->
       <view class="weight-record-card hz-rise hz-rise-2">
         <view class="card-header-row">
           <view class="title-with-time">
@@ -159,18 +143,57 @@
         </view>
       </view>
 
-      <!-- 4. 序序陪伴卡片（参考图2的轻断食卡片） -->
-      <view class="companion-big-card hz-rise hz-rise-3">
-        <view class="card-header-row">
-          <text class="card-title">序序陪伴</text>
-        </view>
-        <button class="companion-content" @tap="toXuxu">
-          <image class="companion-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
-          <view class="companion-text">
-            <text class="companion-title">和序序聊聊</text>
-            <text class="companion-desc">分享今天的心情和困惑</text>
+      <!-- 4. 2x2功能卡片区域（参考图2） -->
+      <view class="feature-grid hz-rise hz-rise-3">
+        <!-- 水分记录 -->
+        <button class="feature-card" @tap="go('/pages/records/RecordsPage?type=water')">
+          <view class="feature-header">
+            <text class="feature-title">喝水</text>
+            <view class="feature-add-btn">+</view>
           </view>
-          <image class="companion-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          <view class="feature-body">
+            <text class="feature-value">0</text>
+            <text class="feature-unit">毫升</text>
+          </view>
+          <view class="feature-icon icon-water-large"></view>
+        </button>
+        
+        <!-- 睡眠记录 -->
+        <button class="feature-card" @tap="go('/pages/records/RecordsPage?type=sleep')">
+          <view class="feature-header">
+            <text class="feature-title">睡眠</text>
+            <view class="feature-add-btn">+</view>
+          </view>
+          <view class="feature-body">
+            <text class="feature-hint">没有记录</text>
+          </view>
+          <view class="feature-icon icon-sleep-large"></view>
+        </button>
+        
+        <!-- 活动记录 -->
+        <button class="feature-card" @tap="go('/pages/records/RecordsPage?type=activity')">
+          <view class="feature-header">
+            <text class="feature-title">活动</text>
+            <view class="feature-add-btn">+</view>
+          </view>
+          <view class="feature-body">
+            <text class="feature-value">{{
+              today.todayRecords?.activity?.durationMin || 0
+            }}</text>
+            <text class="feature-unit">分钟</text>
+          </view>
+          <view class="feature-icon icon-activity-large"></view>
+        </button>
+        
+        <!-- 心情记录 -->
+        <button class="feature-card" @tap="toXuxu">
+          <view class="feature-header">
+            <text class="feature-title">心情</text>
+          </view>
+          <view class="feature-body">
+            <text class="feature-hint">记录今天</text>
+          </view>
+          <view class="feature-icon icon-mood-large"></view>
         </button>
       </view>
     </template>
@@ -243,6 +266,23 @@ const overviewCells = computed(() => {
     },
   ];
 });
+
+// 计算进度条角度（半圆180度）
+const calculateProgress = () => {
+  if (!today.value?.todayRecords?.weight || !today.value?.activePlan?.healthTarget) {
+    return 0;
+  }
+  const start = today.value.activePlan.healthTarget.startWeightKg;
+  const current = today.value.todayRecords.weight.valueKg;
+  const target = today.value.activePlan.healthTarget.targetWeightKg;
+  
+  if (start === target) return 0;
+  
+  const progress = (start - current) / (start - target);
+  const clampedProgress = Math.max(0, Math.min(1, progress));
+  return clampedProgress * 180; // 180度半圆
+};
+
 const planText = computed(() =>
   today.value?.activePlan
     ? '今天的小行动正在等你慢慢完成。'
@@ -306,72 +346,77 @@ onShow(() => {
 });
 </script>
 
+
 <style scoped>
-/* 页面基础 */
+/* 页面背景 */
 .page {
+  background: #f5f8f6;
   min-height: 100vh;
-  box-sizing: border-box;
-  min-width: 0;
-  overflow-x: hidden;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
-  background: #f6faf7;
-  color: #183425;
+  padding: 32rpx;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 32rpx);
 }
 
-/* 顶部区域 */
+/* 顶部样式 */
 .head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32rpx;
+  margin-bottom: 24rpx;
 }
+
 .date-chip {
-  display: block;
-  align-self: flex-start;
-  padding: 8rpx 18rpx;
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  margin-bottom: 8rpx;
   border-radius: 999rpx;
-  color: #4c7d5a;
-  background: #e3f2e4;
+  background: rgba(127, 204, 143, 0.12);
+  color: #5a9572;
   font-size: 22rpx;
   font-weight: 600;
 }
+
 .title {
   display: block;
-  margin-top: 12rpx;
   color: #2d6943;
-  font-size: 48rpx;
+  font-size: 36rpx;
   font-weight: 800;
 }
-.avatar {
-  width: 88rpx;
-  height: 88rpx;
-  border: 4rpx solid #efd98d;
-  border-radius: 50%;
-  box-shadow: 0 8rpx 20rpx rgba(239, 214, 137, 0.3);
-  transition: transform 0.25s ease;
-}
-.avatar:active {
-  transform: scale(0.95);
+
+.avatar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  padding: 0;
+  background: transparent;
+  border: 0;
 }
 
-/* 加载状态 */
+.avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50%;
+}
+
+.avatar-hint {
+  color: #76907d;
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
 .loading {
   padding: 120rpx 32rpx;
   text-align: center;
-  color: #76907d;
+  color: #9ba8a0;
   font-size: 28rpx;
 }
 
-/* 页面背景 */
-.page {
-  background: #f5f8f6;
-}
-
-/* 1. 体重管理方案卡片 */
+/* 1. 体重管理卡片 */
 .weight-management-card {
-  margin-bottom: 24rpx;
-  padding: 32rpx;
-  border-radius: 32rpx;
+  margin-bottom: 20rpx;
+  padding: 24rpx 28rpx 20rpx;
+  border-radius: 28rpx;
   background: #ffffff;
   box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
 }
@@ -380,13 +425,13 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28rpx;
+  margin-bottom: 16rpx;
 }
 
-.card-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
+.card-title-compact {
+  color: #2d6943;
+  font-size: 28rpx;
+  font-weight: 800;
 }
 
 .card-title {
@@ -395,378 +440,314 @@ onShow(() => {
   font-weight: 800;
 }
 
-/* CSS绘制眼睛图标 */
-.eye-icon-svg {
-  width: 28rpx;
-  height: 16rpx;
-  border: 3rpx solid #7fcc8f;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  position: relative;
-  opacity: 0.6;
-}
-
-.eye-icon-svg::after {
-  content: '';
-  position: absolute;
-  width: 8rpx;
-  height: 8rpx;
-  background: #7fcc8f;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .card-week {
   color: #76907d;
-  font-size: 24rpx;
+  font-size: 22rpx;
   font-weight: 600;
 }
 
-.circle-progress-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20rpx 0;
+.semicircle-progress {
+  position: relative;
+  padding: 16rpx 0 0;
 }
 
-.progress-side {
+.progress-data-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20rpx;
+}
+
+.progress-data-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
+  gap: 6rpx;
 }
 
-.progress-num {
-  color: #2d6943;
-  font-size: 52rpx;
+.data-num {
+  color: #5a9572;
+  font-size: 36rpx;
   font-weight: 900;
   line-height: 1;
 }
 
-.progress-text {
-  color: #76907d;
-  font-size: 22rpx;
+.data-num.highlight {
+  color: #2d6943;
+  font-size: 44rpx;
 }
 
-.progress-circle-view {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 260rpx;
-  height: 260rpx;
-  border: 14rpx solid #e8f7ed;
-  border-top-color: #7fcc8f;
-  border-right-color: #7fcc8f;
-  border-radius: 50%;
-  background: #fafcfb;
-}
-
-.progress-center-text {
-  color: #5a9572;
-  font-size: 24rpx;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.progress-unit-small {
+.data-text {
+  color: #9ba8a0;
   font-size: 20rpx;
 }
 
-/* 2. 今日记录大卡片 */
-.daily-record-big-card {
-  margin-bottom: 24rpx;
+.semicircle-track {
+  position: relative;
+  width: 200rpx;
+  height: 100rpx;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.semicircle-track::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200rpx;
+  height: 100rpx;
+  border: 12rpx solid #e8f7ed;
+  border-radius: 200rpx 200rpx 0 0;
+  border-bottom: 0;
+}
+
+.semicircle-fill {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 200rpx;
+  height: 100rpx;
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotate(0deg);
+  transition: transform 0.6s ease;
+}
+
+.semicircle-fill::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200rpx;
+  height: 100rpx;
+  border: 12rpx solid #7fcc8f;
+  border-radius: 200rpx 200rpx 0 0;
+  border-bottom: 0;
+  border-right-color: transparent;
+}
+
+/* 2. 饮食热量卡片 */
+.food-calorie-card {
+  margin-bottom: 20rpx;
   padding: 32rpx;
-  border-radius: 32rpx;
+  border-radius: 28rpx;
   background: #ffffff;
   box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
 }
 
-.record-badge {
-  display: flex;
-  align-items: center;
-  gap: 6rpx;
-  padding: 8rpx 16rpx;
-  border-radius: 999rpx;
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 247, 237, 0.8) 100%);
-}
-
-.badge-check {
-  color: #7fcc8f;
-  font-size: 20rpx;
-  font-weight: 700;
-}
-
-.badge-text {
-  color: #5a9572;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-
-.main-data-display {
+.calorie-main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32rpx 0;
+  padding: 24rpx 0 32rpx;
 }
 
-.data-label-small {
+.calorie-label {
   color: #76907d;
   font-size: 24rpx;
   font-weight: 600;
   margin-bottom: 12rpx;
 }
 
-.data-big-number {
+.calorie-big {
   display: flex;
   align-items: baseline;
   gap: 8rpx;
 }
 
-.big-num {
+.calorie-num {
   color: #2d6943;
-  font-size: 120rpx;
+  font-size: 96rpx;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
 }
 
-.big-unit {
+.calorie-unit {
   color: #5a9572;
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 700;
-  margin-bottom: 12rpx;
+  margin-bottom: 10rpx;
 }
 
-.sub-data-row {
+.calorie-stats {
   display: flex;
-  justify-content: space-around;
-  padding: 24rpx 0;
-  border-top: 2rpx solid rgba(232, 247, 237, 0.6);
-  border-bottom: 2rpx solid rgba(232, 247, 237, 0.6);
-  margin: 20rpx 0;
+  justify-content: center;
+  gap: 32rpx;
+  padding: 20rpx 0;
+  margin-bottom: 24rpx;
 }
 
-.sub-item {
+.stat-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8rpx;
+  padding: 16rpx 32rpx;
+  border-radius: 16rpx;
+  background: rgba(232, 247, 237, 0.4);
 }
 
-.sub-label {
+.stat-val {
+  color: #2d6943;
+  font-size: 36rpx;
+  font-weight: 900;
+}
+
+.stat-label {
   color: #9ba8a0;
   font-size: 22rpx;
 }
 
-.sub-val {
-  color: #5a9572;
-  font-size: 28rpx;
-  font-weight: 700;
-}
-
-/* 5个快捷按钮 */
-.five-quick-actions {
+.meal-actions {
   display: flex;
   justify-content: space-around;
-  padding: 28rpx 0;
+  padding: 20rpx 0;
+  margin-bottom: 20rpx;
 }
 
-.quick-circle-btn {
+.meal-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  gap: 10rpx;
   padding: 0;
   background: transparent;
   border: 0;
 }
 
-.quick-icon-circle {
+.meal-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 88rpx;
-  height: 88rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.08) 0%, rgba(232, 247, 237, 0.6) 100%);
-  transition: all 0.3s;
 }
 
-.quick-circle-btn:active .quick-icon-circle {
-  transform: scale(0.95);
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 247, 237, 0.8) 100%);
-}
-
-/* CSS绘制图标 */
-.icon-svg {
-  width: 44rpx;
-  height: 44rpx;
-  position: relative;
-}
-
-/* 体重秤图标 */
-.icon-weight {
-  border: 3rpx solid #7fcc8f;
-  border-radius: 8rpx;
-  background: linear-gradient(180deg, rgba(127, 204, 143, 0.1) 0%, rgba(127, 204, 143, 0.2) 100%);
-}
-
-.icon-weight::after {
-  content: '';
-  position: absolute;
-  width: 20rpx;
-  height: 3rpx;
-  background: #7fcc8f;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 2rpx;
-}
-
-/* 饮食碗图标 */
-.icon-food {
-  border: 3rpx solid #7fcc8f;
-  border-radius: 0 0 50% 50%;
-  border-top: 0;
-  background: linear-gradient(180deg, rgba(127, 204, 143, 0.1) 0%, rgba(127, 204, 143, 0.2) 100%);
-}
-
-.icon-food::before {
-  content: '';
-  position: absolute;
-  width: 3rpx;
-  height: 20rpx;
-  background: #7fcc8f;
-  top: -8rpx;
-  left: 8rpx;
-  border-radius: 2rpx;
-}
-
-.icon-food::after {
-  content: '';
-  position: absolute;
-  width: 3rpx;
-  height: 20rpx;
-  background: #7fcc8f;
-  top: -8rpx;
-  right: 8rpx;
-  border-radius: 2rpx;
-}
-
-/* 水滴图标 */
-.icon-water {
-  width: 32rpx;
-  height: 44rpx;
-  border: 3rpx solid #7fcc8f;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: linear-gradient(180deg, rgba(165, 216, 243, 0.2) 0%, rgba(127, 204, 143, 0.2) 100%);
-}
-
-/* 跑步图标 */
-.icon-activity {
-  width: 40rpx;
-  height: 44rpx;
-}
-
-.icon-activity::before {
-  content: '';
-  position: absolute;
-  width: 16rpx;
-  height: 16rpx;
-  border: 3rpx solid #7fcc8f;
-  border-radius: 50%;
-  top: 0;
-  left: 8rpx;
-}
-
-.icon-activity::after {
-  content: '';
-  position: absolute;
-  width: 3rpx;
-  height: 24rpx;
-  background: #7fcc8f;
-  top: 16rpx;
-  left: 14rpx;
-  border-radius: 2rpx;
-  transform: rotate(15deg);
-}
-
-/* 月亮图标 */
-.icon-sleep {
-  width: 36rpx;
-  height: 40rpx;
-  border: 3rpx solid #C5B8E8;
-  border-radius: 50%;
-  border-right-color: transparent;
-  background: linear-gradient(90deg, rgba(197, 184, 232, 0.2) 0%, transparent 100%);
-}
-
-.quick-text {
+.meal-text {
   color: #4a6b56;
-  font-size: 24rpx;
+  font-size: 22rpx;
   font-weight: 600;
 }
 
-/* 底部按钮 */
-.big-bottom-btn {
+/* CSS图标 */
+.icon-svg {
+  width: 36rpx;
+  height: 36rpx;
+  position: relative;
+}
+
+.icon-breakfast {
+  width: 28rpx;
+  height: 32rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: linear-gradient(180deg, rgba(127, 204, 143, 0.2) 0%, rgba(127, 204, 143, 0.1) 100%);
+}
+
+.icon-lunch {
+  width: 32rpx;
+  height: 28rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 8rpx;
+  background: linear-gradient(180deg, rgba(127, 204, 143, 0.2) 0%, rgba(127, 204, 143, 0.1) 100%);
+}
+
+.icon-dinner {
+  width: 28rpx;
+  height: 28rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 0 0 50% 50%;
+  border-top: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(127, 204, 143, 0.2) 100%);
+}
+
+.icon-snack {
+  width: 24rpx;
+  height: 28rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50% 50% 40% 60%;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.2) 0%, rgba(127, 204, 143, 0.1) 100%);
+}
+
+.icon-exercise {
+  width: 32rpx;
+  height: 36rpx;
+}
+
+.icon-exercise::before {
+  content: '';
+  position: absolute;
+  width: 12rpx;
+  height: 12rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50%;
+  top: 0;
+  left: 6rpx;
+}
+
+.icon-exercise::after {
+  content: '';
+  position: absolute;
+  width: 3rpx;
+  height: 20rpx;
+  background: #7fcc8f;
+  top: 12rpx;
+  left: 10rpx;
+  border-radius: 2rpx;
+  transform: rotate(10deg);
+}
+
+.camera-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12rpx;
   width: 100%;
-  padding: 24rpx;
+  padding: 20rpx;
   border-radius: 999rpx;
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
   transition: all 0.3s;
 }
 
-.big-bottom-btn:active {
+.camera-btn:active {
   transform: scale(0.98);
 }
 
-.btn-icon-svg {
-  width: 28rpx;
-  height: 28rpx;
+.camera-icon {
+  width: 24rpx;
+  height: 20rpx;
   border: 3rpx solid #7fcc8f;
   border-radius: 6rpx;
   position: relative;
 }
 
-.btn-icon-svg::before {
+.camera-icon::before {
   content: '';
   position: absolute;
-  width: 18rpx;
-  height: 3rpx;
-  background: #7fcc8f;
-  top: 6rpx;
-  left: 2rpx;
-  border-radius: 2rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border: 2rpx solid #7fcc8f;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.btn-icon-svg::after {
-  content: '';
-  position: absolute;
-  width: 18rpx;
-  height: 3rpx;
-  background: #7fcc8f;
-  top: 14rpx;
-  left: 2rpx;
-  border-radius: 2rpx;
-}
-
-.btn-label {
+.camera-text {
   color: #5a9572;
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 700;
 }
 
 /* 3. 体重记录卡片 */
 .weight-record-card {
-  margin-bottom: 24rpx;
-  padding: 32rpx;
-  border-radius: 32rpx;
+  margin-bottom: 20rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 28rpx;
   background: #ffffff;
   box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
 }
@@ -783,14 +764,14 @@ onShow(() => {
 }
 
 .add-round-btn {
-  width: 56rpx;
-  height: 56rpx;
+  width: 52rpx;
+  height: 52rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
   color: #7fcc8f;
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 300;
-  line-height: 56rpx;
+  line-height: 52rpx;
   padding: 0;
   display: flex;
   align-items: center;
@@ -801,7 +782,7 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 20rpx;
+  margin-top: 16rpx;
 }
 
 .weight-value-large {
@@ -812,20 +793,20 @@ onShow(() => {
 
 .large-num {
   color: #2d6943;
-  font-size: 72rpx;
+  font-size: 64rpx;
   font-weight: 900;
   line-height: 1;
 }
 
 .large-unit {
   color: #76907d;
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 600;
 }
 
 .mini-chart {
-  width: 200rpx;
-  height: 80rpx;
+  width: 180rpx;
+  height: 70rpx;
   border: 2rpx solid #e8f7ed;
   border-radius: 12rpx;
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.05) 0%, rgba(232, 247, 237, 0.3) 100%);
@@ -837,193 +818,208 @@ onShow(() => {
   content: '';
   position: absolute;
   width: 100%;
-  height: 3rpx;
+  height: 2rpx;
   background: linear-gradient(90deg, transparent 0%, #7fcc8f 20%, #7fcc8f 80%, transparent 100%);
   top: 50%;
   left: 0;
   transform: translateY(-50%);
 }
 
-/* 4. 序序陪伴卡片 */
-.companion-big-card {
-  margin-bottom: 24rpx;
-  padding: 32rpx;
-  border-radius: 32rpx;
-  background: #ffffff;
-  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
+/* 4. 2x2功能卡片 */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  margin-bottom: 20rpx;
 }
 
-.companion-content {
+.feature-card {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 20rpx;
-  width: 100%;
-  padding: 24rpx;
+  flex-direction: column;
+  padding: 24rpx 20rpx;
+  min-height: 160rpx;
   border-radius: 24rpx;
-  background: linear-gradient(135deg, rgba(255, 249, 230, 0.4) 0%, rgba(255, 253, 241, 0.2) 100%);
-  border: 2rpx solid rgba(244, 227, 160, 0.3);
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
   text-align: left;
+  overflow: hidden;
   transition: all 0.3s;
 }
 
-.companion-content:active {
-  transform: scale(0.98);
-  background: linear-gradient(135deg, rgba(255, 249, 230, 0.6) 0%, rgba(255, 253, 241, 0.4) 100%);
+.feature-card:active {
+  transform: scale(0.97);
 }
 
-.companion-avatar {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  border: 3rpx solid #f4e3a0;
-  flex: none;
-}
-
-.companion-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-
-.companion-title {
-  color: #6f5a27;
-  font-size: 28rpx;
-  font-weight: 700;
-}
-
-.companion-desc {
-  color: #9e8a5e;
-  font-size: 22rpx;
-}
-
-.companion-arrow {
-  width: 28rpx;
-  height: 28rpx;
-  opacity: 0.4;
-  flex: none;
-}
-
-.chat-card {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  width: 100%;
-  margin-bottom: 24rpx;
-  padding: 32rpx;
-  border-radius: 32rpx;
-  text-align: left;
-  background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
-  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.12);
-  transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
-}
-.chat-card:active {
-  transform: translateY(-2rpx) scale(0.99);
-  box-shadow: 0 12rpx 36rpx rgba(127, 204, 143, 0.16);
-}
-.chat-avatar {
-  width: 72rpx;
-  height: 72rpx;
-  flex: none;
-  border: 3rpx solid #e8f7ed;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.2);
-}
-.chat-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-.chat-title {
-  display: block;
-  color: #2d6943;
-  font-size: 28rpx;
-  font-weight: 700;
-}
-.chat-desc {
-  display: block;
-  color: #76907d;
-  font-size: 22rpx;
-}
-.chat-arrow {
-  width: 28rpx;
-  height: 28rpx;
-  flex: none;
-  opacity: 0.4;
-}
-
-.task-copy text {
-  display: block;
-}
-.task-copy text:first-child {
-  color: #284d36;
-  font-size: 28rpx;
-  font-weight: 700;
-  margin-bottom: 6rpx;
-}
-.task-copy text:last-child {
-  color: #758c7d;
-  font-size: 24rpx;
-}
-.arrow {
-  width: 32rpx;
-  height: 32rpx;
-  flex: none;
-  opacity: 0.4;
-}
-
-/* 区块标题 */
-.section-head {
+.feature-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 36rpx 4rpx 20rpx;
-}
-.section-head text:first-child {
-  color: #274a35;
-  font-size: 34rpx;
-  font-weight: 800;
-}
-.section-head text:last-child {
-  color: #76907d;
-  font-size: 24rpx;
+  margin-bottom: 16rpx;
 }
 
-/* 入场动画 */
-.hz-rise {
-  animation: riseIn 0.7s cubic-bezier(0.22, 0.8, 0.36, 1) forwards;
-  opacity: 0;
+.feature-title {
+  color: #2d6943;
+  font-size: 26rpx;
+  font-weight: 700;
 }
+
+.feature-add-btn {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
+  color: #7fcc8f;
+  font-size: 28rpx;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-body {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+  margin-bottom: 12rpx;
+}
+
+.feature-value {
+  color: #2d6943;
+  font-size: 48rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.feature-unit {
+  color: #76907d;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.feature-hint {
+  color: #9ba8a0;
+  font-size: 22rpx;
+}
+
+.feature-icon {
+  position: absolute;
+  bottom: 16rpx;
+  right: 16rpx;
+  width: 60rpx;
+  height: 60rpx;
+  opacity: 0.3;
+}
+
+.icon-water-large {
+  width: 40rpx;
+  height: 56rpx;
+  border: 4rpx solid #7fcc8f;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: linear-gradient(180deg, rgba(165, 216, 243, 0.2) 0%, rgba(127, 204, 143, 0.2) 100%);
+}
+
+.icon-sleep-large {
+  width: 48rpx;
+  height: 54rpx;
+  border: 4rpx solid #C5B8E8;
+  border-radius: 50%;
+  border-right-color: transparent;
+  background: linear-gradient(90deg, rgba(197, 184, 232, 0.2) 0%, transparent 100%);
+}
+
+.icon-activity-large {
+  width: 54rpx;
+  height: 60rpx;
+}
+
+.icon-activity-large::before {
+  content: '';
+  position: absolute;
+  width: 20rpx;
+  height: 20rpx;
+  border: 4rpx solid #7fcc8f;
+  border-radius: 50%;
+  top: 0;
+  left: 10rpx;
+}
+
+.icon-activity-large::after {
+  content: '';
+  position: absolute;
+  width: 4rpx;
+  height: 32rpx;
+  background: #7fcc8f;
+  top: 20rpx;
+  left: 18rpx;
+  border-radius: 2rpx;
+  transform: rotate(15deg);
+}
+
+.icon-mood-large {
+  width: 50rpx;
+  height: 50rpx;
+  border: 4rpx solid #f4a460;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(244, 164, 96, 0.2) 0%, rgba(244, 164, 96, 0.1) 100%);
+  position: relative;
+}
+
+.icon-mood-large::before {
+  content: '';
+  position: absolute;
+  width: 16rpx;
+  height: 8rpx;
+  border: 3rpx solid #f4a460;
+  border-top: 0;
+  border-radius: 0 0 16rpx 16rpx;
+  bottom: 12rpx;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.load-failed {
+  padding: 80rpx 32rpx;
+  text-align: center;
+}
+
+.load-failed text {
+  display: block;
+  color: #9ba8a0;
+  font-size: 26rpx;
+  margin-bottom: 12rpx;
+}
+
+.load-failed button {
+  margin-top: 24rpx;
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
+  color: #5a9572;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+@keyframes hz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+}
+
+.hz-rise {
+  animation: hz-rise 0.6s cubic-bezier(0.22, 0.8, 0.36, 1) both;
+}
+
 .hz-rise-1 {
   animation-delay: 0.1s;
 }
+
 .hz-rise-2 {
   animation-delay: 0.2s;
 }
+
 .hz-rise-3 {
   animation-delay: 0.3s;
-}
-@keyframes riseIn {
-  from {
-    opacity: 0;
-    transform: translateY(32rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 浮动动画 */
-@keyframes hz-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6rpx);
-  }
 }
 </style>
