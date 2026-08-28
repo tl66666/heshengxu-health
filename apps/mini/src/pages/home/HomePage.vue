@@ -15,12 +15,12 @@
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
-      <!-- 1. 体重管理方案卡片：完全照搬薄荷健康 -->
+      <!-- 1. 体重管理方案卡片 -->
       <view class="weight-management-card hz-rise">
         <view class="card-header-row">
           <view class="card-title-group">
             <text class="card-title">体重管理方案</text>
-            <text class="eye-icon">👁</text>
+            <view class="eye-icon-svg"></view>
           </view>
           <text class="card-week">第 1 周</text>
         </view>
@@ -28,7 +28,7 @@
         <view class="circle-progress-wrapper">
           <view class="progress-side">
             <text class="progress-num">{{
-              today.activePlan?.healthTarget?.startWeightKg || 72.5
+              today.activePlan?.healthTarget?.startWeightKg?.toFixed(2) || '--'
             }}</text>
             <text class="progress-text">初始</text>
           </view>
@@ -45,26 +45,26 @@
           
           <view class="progress-side">
             <text class="progress-num">{{
-              today.activePlan?.healthTarget?.targetWeightKg || 65.0
+              today.activePlan?.healthTarget?.targetWeightKg?.toFixed(2) || '--'
             }}</text>
             <text class="progress-text">目标</text>
           </view>
         </view>
       </view>
 
-      <!-- 2. 今日记录卡片：完全照搬薄荷饮食热量结构 -->
+      <!-- 2. 今日记录大卡片 -->
       <view class="daily-record-big-card hz-rise hz-rise-1">
         <view class="card-header-row">
           <text class="card-title">今日记录</text>
           <view class="record-badge">
-            <text class="badge-icon">✓</text>
+            <text class="badge-check">✓</text>
             <text class="badge-text">{{ experience.recording.completed }}/4</text>
           </view>
         </view>
         
-        <!-- 超大数字展示区 -->
+        <!-- 当前体重大数字 -->
         <view class="main-data-display">
-          <text class="data-label-small">体重</text>
+          <text class="data-label-small">当前体重</text>
           <view class="data-big-number">
             <text class="big-num">{{
               today.todayRecords?.weight?.valueKg || '--'
@@ -84,8 +84,8 @@
           <view class="sub-item">
             <text class="sub-label">饮食</text>
             <text class="sub-val">{{
-              today.todayRecords?.food ? '1/3' : '0/3'
-            }}</text>
+              today.todayRecords?.food ? '1' : '0'
+            }}/3</text>
           </view>
           <view class="sub-item">
             <text class="sub-label">活动</text>
@@ -95,42 +95,35 @@
           </view>
         </view>
         
-        <!-- 横向滑动点 -->
-        <view class="slide-indicator">
-          <view class="dot active-dot" />
-          <view class="dot" />
-          <view class="dot" />
-        </view>
-        
-        <!-- 5个快捷按钮横向排列 -->
+        <!-- 5个快捷按钮：用CSS绘制精致图标 -->
         <view class="five-quick-actions">
           <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=weight')">
             <view class="quick-icon-circle">
-              <text class="icon-emoji">⚖️</text>
+              <view class="icon-svg icon-weight"></view>
             </view>
             <text class="quick-text">体重</text>
           </button>
           <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=food')">
             <view class="quick-icon-circle">
-              <text class="icon-emoji">🍚</text>
+              <view class="icon-svg icon-food"></view>
             </view>
             <text class="quick-text">饮食</text>
           </button>
           <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=water')">
             <view class="quick-icon-circle">
-              <text class="icon-emoji">💧</text>
+              <view class="icon-svg icon-water"></view>
             </view>
             <text class="quick-text">水</text>
           </button>
           <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=activity')">
             <view class="quick-icon-circle">
-              <text class="icon-emoji">🏃</text>
+              <view class="icon-svg icon-activity"></view>
             </view>
             <text class="quick-text">活动</text>
           </button>
           <button class="quick-circle-btn" @tap="go('/pages/records/RecordsPage?type=sleep')">
             <view class="quick-icon-circle">
-              <text class="icon-emoji">🌙</text>
+              <view class="icon-svg icon-sleep"></view>
             </view>
             <text class="quick-text">睡眠</text>
           </button>
@@ -138,12 +131,49 @@
         
         <!-- 底部按钮 -->
         <button class="big-bottom-btn" @tap="go('/pages/records/RecordsPage')">
-          <text class="btn-icon-emoji">📋</text>
+          <view class="btn-icon-svg"></view>
           <text class="btn-label">记录时间线</text>
         </button>
       </view>
 
-      <!-- 3. 序序卡片 -->
+      <!-- 3. 体重记录卡片（参考图1） -->
+      <view class="weight-record-card hz-rise hz-rise-2">
+        <view class="card-header-row">
+          <view class="title-with-time">
+            <text class="card-title">体重记录</text>
+            <text v-if="today.todayRecords?.weight" class="update-time">
+              {{ new Date(today.todayRecords.weight.recordedAt).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}) }} 更新
+            </text>
+          </view>
+          <button class="add-round-btn" @tap="go('/pages/records/RecordsPage?type=weight')">+</button>
+        </view>
+        
+        <view class="weight-display-row">
+          <view class="weight-value-large">
+            <text class="large-num">{{
+              today.todayRecords?.weight?.valueKg?.toFixed(2) || '--'
+            }}</text>
+            <text class="large-unit">公斤</text>
+          </view>
+          <view class="mini-chart"></view>
+        </view>
+      </view>
+
+      <!-- 4. 序序陪伴卡片（参考图2的轻断食卡片） -->
+      <view class="companion-big-card hz-rise hz-rise-3">
+        <view class="card-header-row">
+          <text class="card-title">序序陪伴</text>
+        </view>
+        <button class="companion-content" @tap="toXuxu">
+          <image class="companion-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
+          <view class="companion-text">
+            <text class="companion-title">和序序聊聊</text>
+            <text class="companion-desc">分享今天的心情和困惑</text>
+          </view>
+          <image class="companion-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+        </button>
+      </view>
+    </template>
       <button class="chat-card hz-rise hz-rise-1" @tap="toXuxu">
         <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <view class="chat-content">
@@ -340,12 +370,12 @@ onShow(() => {
   font-size: 28rpx;
 }
 
-/* 页面背景：浅薄荷绿 */
+/* 页面背景 */
 .page {
   background: #f5f8f6;
 }
 
-/* 1. 体重管理方案卡片：完全照搬薄荷 */
+/* 1. 体重管理方案卡片 */
 .weight-management-card {
   margin-bottom: 24rpx;
   padding: 32rpx;
@@ -373,9 +403,26 @@ onShow(() => {
   font-weight: 800;
 }
 
-.eye-icon {
-  font-size: 28rpx;
+/* CSS绘制眼睛图标 */
+.eye-icon-svg {
+  width: 28rpx;
+  height: 16rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  position: relative;
   opacity: 0.6;
+}
+
+.eye-icon-svg::after {
+  content: '';
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  background: #7fcc8f;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .card-week {
@@ -435,7 +482,7 @@ onShow(() => {
   font-size: 20rpx;
 }
 
-/* 2. 今日记录大卡片：完全照搬薄荷饮食热量 */
+/* 2. 今日记录大卡片 */
 .daily-record-big-card {
   margin-bottom: 24rpx;
   padding: 32rpx;
@@ -453,7 +500,7 @@ onShow(() => {
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.badge-icon {
+.badge-check {
   color: #7fcc8f;
   font-size: 20rpx;
   font-weight: 700;
@@ -465,7 +512,6 @@ onShow(() => {
   font-weight: 700;
 }
 
-/* 超大数字展示区（像薄荷的1787） */
 .main-data-display {
   display: flex;
   flex-direction: column;
@@ -501,7 +547,6 @@ onShow(() => {
   margin-bottom: 12rpx;
 }
 
-/* 3个小数据（像薄荷的0饮食、0运动） */
 .sub-data-row {
   display: flex;
   justify-content: space-around;
@@ -529,28 +574,7 @@ onShow(() => {
   font-weight: 700;
 }
 
-/* 横向滑动点 */
-.slide-indicator {
-  display: flex;
-  justify-content: center;
-  gap: 12rpx;
-  margin: 20rpx 0;
-}
-
-.dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-  background: #d4e8db;
-  transition: all 0.3s;
-}
-
-.active-dot {
-  background: #7fcc8f;
-  width: 16rpx;
-}
-
-/* 5个快捷按钮横向排列（像薄荷的早午晚加运动） */
+/* 5个快捷按钮 */
 .five-quick-actions {
   display: flex;
   justify-content: space-around;
@@ -583,8 +607,108 @@ onShow(() => {
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.icon-emoji {
-  font-size: 40rpx;
+/* CSS绘制图标 */
+.icon-svg {
+  width: 44rpx;
+  height: 44rpx;
+  position: relative;
+}
+
+/* 体重秤图标 */
+.icon-weight {
+  border: 3rpx solid #7fcc8f;
+  border-radius: 8rpx;
+  background: linear-gradient(180deg, rgba(127, 204, 143, 0.1) 0%, rgba(127, 204, 143, 0.2) 100%);
+}
+
+.icon-weight::after {
+  content: '';
+  position: absolute;
+  width: 20rpx;
+  height: 3rpx;
+  background: #7fcc8f;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 2rpx;
+}
+
+/* 饮食碗图标 */
+.icon-food {
+  border: 3rpx solid #7fcc8f;
+  border-radius: 0 0 50% 50%;
+  border-top: 0;
+  background: linear-gradient(180deg, rgba(127, 204, 143, 0.1) 0%, rgba(127, 204, 143, 0.2) 100%);
+}
+
+.icon-food::before {
+  content: '';
+  position: absolute;
+  width: 3rpx;
+  height: 20rpx;
+  background: #7fcc8f;
+  top: -8rpx;
+  left: 8rpx;
+  border-radius: 2rpx;
+}
+
+.icon-food::after {
+  content: '';
+  position: absolute;
+  width: 3rpx;
+  height: 20rpx;
+  background: #7fcc8f;
+  top: -8rpx;
+  right: 8rpx;
+  border-radius: 2rpx;
+}
+
+/* 水滴图标 */
+.icon-water {
+  width: 32rpx;
+  height: 44rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: linear-gradient(180deg, rgba(165, 216, 243, 0.2) 0%, rgba(127, 204, 143, 0.2) 100%);
+}
+
+/* 跑步图标 */
+.icon-activity {
+  width: 40rpx;
+  height: 44rpx;
+}
+
+.icon-activity::before {
+  content: '';
+  position: absolute;
+  width: 16rpx;
+  height: 16rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 50%;
+  top: 0;
+  left: 8rpx;
+}
+
+.icon-activity::after {
+  content: '';
+  position: absolute;
+  width: 3rpx;
+  height: 24rpx;
+  background: #7fcc8f;
+  top: 16rpx;
+  left: 14rpx;
+  border-radius: 2rpx;
+  transform: rotate(15deg);
+}
+
+/* 月亮图标 */
+.icon-sleep {
+  width: 36rpx;
+  height: 40rpx;
+  border: 3rpx solid #C5B8E8;
+  border-radius: 50%;
+  border-right-color: transparent;
+  background: linear-gradient(90deg, rgba(197, 184, 232, 0.2) 0%, transparent 100%);
 }
 
 .quick-text {
@@ -593,7 +717,7 @@ onShow(() => {
   font-weight: 600;
 }
 
-/* 底部大按钮（像薄荷的"薄荷相机"） */
+/* 底部按钮 */
 .big-bottom-btn {
   display: flex;
   align-items: center;
@@ -608,11 +732,36 @@ onShow(() => {
 
 .big-bottom-btn:active {
   transform: scale(0.98);
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.18) 0%, rgba(232, 247, 237, 0.8) 100%);
 }
 
-.btn-icon-emoji {
-  font-size: 28rpx;
+.btn-icon-svg {
+  width: 28rpx;
+  height: 28rpx;
+  border: 3rpx solid #7fcc8f;
+  border-radius: 6rpx;
+  position: relative;
+}
+
+.btn-icon-svg::before {
+  content: '';
+  position: absolute;
+  width: 18rpx;
+  height: 3rpx;
+  background: #7fcc8f;
+  top: 6rpx;
+  left: 2rpx;
+  border-radius: 2rpx;
+}
+
+.btn-icon-svg::after {
+  content: '';
+  position: absolute;
+  width: 18rpx;
+  height: 3rpx;
+  background: #7fcc8f;
+  top: 14rpx;
+  left: 2rpx;
+  border-radius: 2rpx;
 }
 
 .btn-label {
@@ -621,7 +770,148 @@ onShow(() => {
   font-weight: 700;
 }
 
-/* 3. 序序卡片：白卡片风格 */
+/* 3. 体重记录卡片 */
+.weight-record-card {
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
+}
+
+.title-with-time {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.update-time {
+  color: #9ba8a0;
+  font-size: 22rpx;
+}
+
+.add-round-btn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
+  color: #7fcc8f;
+  font-size: 36rpx;
+  font-weight: 300;
+  line-height: 56rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weight-display-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.weight-value-large {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.large-num {
+  color: #2d6943;
+  font-size: 72rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.large-unit {
+  color: #76907d;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.mini-chart {
+  width: 200rpx;
+  height: 80rpx;
+  border: 2rpx solid #e8f7ed;
+  border-radius: 12rpx;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.05) 0%, rgba(232, 247, 237, 0.3) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.mini-chart::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 3rpx;
+  background: linear-gradient(90deg, transparent 0%, #7fcc8f 20%, #7fcc8f 80%, transparent 100%);
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+/* 4. 序序陪伴卡片 */
+.companion-big-card {
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
+}
+
+.companion-content {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  width: 100%;
+  padding: 24rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, rgba(255, 249, 230, 0.4) 0%, rgba(255, 253, 241, 0.2) 100%);
+  border: 2rpx solid rgba(244, 227, 160, 0.3);
+  text-align: left;
+  transition: all 0.3s;
+}
+
+.companion-content:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(255, 249, 230, 0.6) 0%, rgba(255, 253, 241, 0.4) 100%);
+}
+
+.companion-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  border: 3rpx solid #f4e3a0;
+  flex: none;
+}
+
+.companion-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.companion-title {
+  color: #6f5a27;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.companion-desc {
+  color: #9e8a5e;
+  font-size: 22rpx;
+}
+
+.companion-arrow {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.4;
+  flex: none;
+}
+
 .chat-card {
   display: flex;
   align-items: center;
