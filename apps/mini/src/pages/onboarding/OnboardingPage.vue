@@ -1,228 +1,275 @@
 <template>
-  <view class="onboarding-page">
-    <!-- 欢迎屏：全屏沉浸插画 + 底部浮动文案卡 -->
+  <view class="onboarding-container">
+    <!-- 欢迎屏：薄荷式全屏沉浸 -->
     <template v-if="step === 0">
-      <view class="welcome-immersive">
+      <view class="welcome-fullscreen">
+        <!-- 背景插画：完整显示不裁切 -->
         <image
           src="/static/illustrations/onboarding-guide-vertical.png"
-          class="welcome-bg"
-          mode="aspectFill"
+          class="welcome-illustration"
+          mode="widthFix"
         />
-        <view class="welcome-overlay" />
-        <view class="welcome-content hz-rise">
-          <view class="xuxu-intro hz-rise-1">
-            <image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
-            <view class="xuxu-speech">
-              <text class="xuxu-greeting">你好，我是序序</text>
-              <text class="xuxu-subtitle">你的健康陪伴助手</text>
+        <!-- 渐变遮罩：确保文字可读 -->
+        <view class="welcome-gradient" />
+
+        <!-- 内容区：底部浮动 -->
+        <view class="welcome-body">
+          <!-- 序序介绍：小气泡 -->
+          <view class="xuxu-bubble hz-rise">
+            <image
+              src="/static/illustrations/xuxu-avatar.png"
+              class="xuxu-avatar"
+              mode="aspectFill"
+            />
+            <view class="bubble-content">
+              <text class="bubble-greeting">你好，我是序序</text>
+              <text class="bubble-role">你的健康陪伴助手</text>
             </view>
           </view>
-          <text class="brand hz-rise-2">和生序</text>
-          <text class="welcome-slogan hz-rise-2">让健康回到自己的节律</text>
-          <text class="welcome-desc hz-rise-3"
-            >花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text
-          >
-          <button class="btn-start hz-rise-3" @tap="next">开始了解我</button>
-          <text class="disclaimer hz-rise-4"
-            >和生序提供健康管理与生活方式参考，不替代医生诊疗。</text
-          >
+
+          <!-- 品牌 + 标语 -->
+          <view class="welcome-message hz-rise hz-rise-1">
+            <text class="brand-name">和生序</text>
+            <text class="brand-slogan">让健康回到自己的节律</text>
+            <text class="brand-desc">花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text>
+          </view>
+
+          <!-- 开始按钮 -->
+          <button class="btn-large btn-primary hz-rise hz-rise-2" @tap="startOnboarding">
+            开始了解我
+          </button>
+
+          <!-- 声明 -->
+          <text class="legal-disclaimer hz-rise hz-rise-3">
+            和生序提供健康管理与生活方式参考，不替代医生诊疗。
+          </text>
         </view>
       </view>
     </template>
 
-    <!-- 步骤页：纯色渐变背景 + 清爽表单卡 -->
+    <!-- 步骤页：薄荷式轻盈卡片 -->
     <template v-else>
+      <!-- 顶部导航 -->
       <AppNavBar
-        title="开始了解自己"
+        title="完善资料"
         close-label="退出"
         :back-disabled="false"
         route="/pages/onboarding/OnboardingPage"
         back-mode="emit"
-        @back="back"
-        @close="exitOnboarding"
+        @back="prevStep"
+        @close="confirmExit"
       />
 
-      <view class="step-container">
-        <view class="step-progress">
-          <view class="progress-dots">
-            <view v-for="i in 4" :key="i" :class="['dot', { active: step >= i }]" />
-          </view>
-          <text class="progress-text">第 {{ step }}/4 步</text>
-        </view>
-
-        <!-- Step 1: 性别 -->
-        <view v-if="step === 1" class="step-form hz-rise">
-          <view class="form-head">
-            <text class="form-label">基本信息</text>
-            <text class="form-title">先从性别开始</text>
-            <text class="form-hint">这会影响基础代谢率和健康建议的准确性</text>
-          </view>
-          <view class="sex-options">
-            <button
-              v-for="option in sexOptions"
-              :key="option.value"
-              :class="['sex-btn', { selected: form.sex === option.value }]"
-              @tap="form.sex = option.value"
-            >
-              <view :class="['sex-icon', `sex-icon--${option.value}`]">
-                <text>{{ option.icon }}</text>
-              </view>
-              <text class="sex-label">{{ option.label }}</text>
-            </button>
-          </view>
-        </view>
-
-        <!-- Step 2: 身高体重 -->
-        <view v-else-if="step === 2" class="step-form hz-rise">
-          <view class="form-head">
-            <text class="form-label">了解身体基础</text>
-            <text class="form-title">你的 BMI 会实时变化</text>
-            <text class="form-hint">输入身高和体重，看看当前身体状态</text>
-          </view>
-
-          <view class="measure-card">
-            <view class="measure-item">
-              <text class="measure-name">身高</text>
-              <view class="measure-input-wrap">
-                <input
-                  v-model="form.heightCm"
-                  type="number"
-                  placeholder="168"
-                  class="measure-input"
-                />
-                <text class="measure-unit">cm</text>
-              </view>
-            </view>
-            <slider
-              :value="Number(form.heightCm) || 168"
-              min="140"
-              max="210"
-              step="1"
-              activeColor="#79ac8c"
-              backgroundColor="#eef4ef"
-              block-color="#ffffff"
-              block-size="24"
-              @changing="setHeight"
-              @change="setHeight"
+      <view class="steps-container">
+        <!-- 进度指示 -->
+        <view class="step-indicator">
+          <view class="indicator-dots">
+            <view
+              v-for="i in 4"
+              :key="i"
+              :class="['dot', { active: step === i, completed: step > i }]"
             />
           </view>
-
-          <view class="measure-card">
-            <view class="measure-item">
-              <text class="measure-name">体重</text>
-              <view class="measure-input-wrap">
-                <input
-                  v-model="form.weightKg"
-                  type="digit"
-                  placeholder="60.0"
-                  class="measure-input"
-                />
-                <text class="measure-unit">kg</text>
-              </view>
-            </view>
-            <slider
-              :value="Number(form.weightKg) || 60"
-              min="35"
-              max="150"
-              step="0.1"
-              activeColor="#79ac8c"
-              backgroundColor="#eef4ef"
-              block-color="#ffffff"
-              block-size="24"
-              @changing="setWeight"
-              @change="setWeight"
-            />
-          </view>
-
-          <view v-if="bmi" class="bmi-result">
-            <view class="bmi-main">
-              <text class="bmi-value">{{ bmi }}</text>
-              <view class="bmi-badge">
-                <text>{{ bmiLabel }}</text>
-              </view>
-            </view>
-            <view class="bmi-scale">
-              <view class="scale-track">
-                <view class="scale-segment segment--underweight" />
-                <view class="scale-segment segment--normal" />
-                <view class="scale-segment segment--overweight" />
-                <view class="scale-segment segment--obese" />
-              </view>
-              <view class="scale-pointer" :style="{ left: bmiPointerPosition }" />
-              <view class="scale-labels">
-                <text>偏瘦</text>
-                <text>正常</text>
-                <text>超重</text>
-                <text>肥胖</text>
-              </view>
-            </view>
-            <text class="bmi-hint">当前 BMI · { bmiCategory }</text>
-          </view>
+          <text class="indicator-text">{{ step }}/4</text>
         </view>
 
-        <!-- Step 3: 生日 -->
-        <view v-else-if="step === 3" class="step-form hz-rise">
-          <view class="form-head">
-            <text class="form-label">生日</text>
-            <text class="form-title">记录时光的起点</text>
-            <text class="form-hint">用于计算年龄相关的健康参考范围</text>
-          </view>
-          <picker mode="date" :value="form.birthDate" :end="today" @change="setBirthdate">
-            <view class="date-selector">
-              <text v-if="form.birthDate" class="date-value">{{ form.birthDate }}</text>
-              <text v-else class="date-placeholder">选择生日</text>
-              <image src="/static/icons/forward.svg" class="date-arrow" mode="aspectFit" />
+        <scroll-view scroll-y class="step-scroll">
+          <!-- Step 1: 性别 -->
+          <view v-if="step === 1" class="step-content hz-rise">
+            <view class="step-header">
+              <text class="step-title">你的性别</text>
+              <text class="step-subtitle">帮助计算更准确的健康指标</text>
             </view>
-          </picker>
-          <text v-if="age" class="age-result">你今年 {{ age }} 岁</text>
-        </view>
 
-        <!-- Step 4: 健康目标 -->
-        <view v-else class="step-form hz-rise">
-          <view class="form-head">
-            <text class="form-label">健康目标</text>
-            <text class="form-title">想在哪个方向开始</text>
-            <text class="form-hint">可以多选，之后随时调整</text>
+            <view class="sex-grid">
+              <button
+                v-for="option in sexOptions"
+                :key="option.value"
+                :class="['sex-card', { selected: form.sex === option.value }]"
+                @tap="form.sex = option.value"
+              >
+                <view class="sex-icon-wrap">
+                  <text class="sex-icon">{{ option.icon }}</text>
+                </view>
+                <text class="sex-label">{{ option.label }}</text>
+              </button>
+            </view>
           </view>
-          <view class="goal-grid">
-            <button
-              v-for="goal in goalOptions"
-              :key="goal.value"
-              :class="['goal-tile', { selected: form.goals.includes(goal.value) }]"
-              @tap="toggleGoal(goal.value)"
-            >
-              <view class="goal-check">
-                <image
-                  v-if="form.goals.includes(goal.value)"
-                  src="/static/icons/check.svg"
-                  mode="aspectFit"
-                />
+
+          <!-- Step 2: 身高体重 + BMI 可视化 -->
+          <view v-else-if="step === 2" class="step-content hz-rise">
+            <view class="step-header">
+              <text class="step-title">身高和体重</text>
+              <text class="step-subtitle">用于计算 BMI 和推荐每日目标</text>
+            </view>
+
+            <!-- 身高输入 -->
+            <view class="input-group">
+              <view class="input-label-row">
+                <text class="input-label">身高</text>
+                <view class="input-value-wrap">
+                  <input
+                    v-model="form.heightCm"
+                    type="number"
+                    placeholder="168"
+                    class="input-field"
+                  />
+                  <text class="input-unit">cm</text>
+                </view>
               </view>
-              <text class="goal-name">{{ goal.label }}</text>
-              <text class="goal-desc">{{ goal.detail }}</text>
-            </button>
+              <slider
+                :value="Number(form.heightCm) || 168"
+                min="140"
+                max="210"
+                step="1"
+                activeColor="#7fcc8f"
+                backgroundColor="#e8f4ea"
+                block-color="#ffffff"
+                block-size="24"
+                @changing="updateHeight"
+                @change="updateHeight"
+              />
+            </view>
+
+            <!-- 体重输入 -->
+            <view class="input-group">
+              <view class="input-label-row">
+                <text class="input-label">体重</text>
+                <view class="input-value-wrap">
+                  <input
+                    v-model="form.weightKg"
+                    type="digit"
+                    placeholder="60.0"
+                    class="input-field"
+                  />
+                  <text class="input-unit">kg</text>
+                </view>
+              </view>
+              <slider
+                :value="Number(form.weightKg) || 60"
+                min="35"
+                max="150"
+                step="0.1"
+                activeColor="#7fcc8f"
+                backgroundColor="#e8f4ea"
+                block-color="#ffffff"
+                block-size="24"
+                @changing="updateWeight"
+                @change="updateWeight"
+              />
+            </view>
+
+            <!-- BMI 可视化：薄荷风格 -->
+            <view v-if="bmi" class="bmi-visual">
+              <view class="bmi-header">
+                <text class="bmi-title">你的 BMI</text>
+                <view class="bmi-value-group">
+                  <text class="bmi-number">{{ bmi }}</text>
+                  <text :class="['bmi-status', `bmi-status--${bmiCategory}`]">{{ bmiLabel }}</text>
+                </view>
+              </view>
+
+              <!-- 彩色刻度尺：4段式 -->
+              <view class="bmi-ruler">
+                <view class="ruler-track">
+                  <view class="ruler-segment segment-underweight" />
+                  <view class="ruler-segment segment-normal" />
+                  <view class="ruler-segment segment-overweight" />
+                  <view class="ruler-segment segment-obese" />
+                </view>
+                <view class="ruler-pointer" :style="{ left: bmiPointerLeft }" />
+              </view>
+
+              <!-- 刻度标签 -->
+              <view class="bmi-labels">
+                <text class="bmi-label-item">偏瘦</text>
+                <text class="bmi-label-item">正常</text>
+                <text class="bmi-label-item">超重</text>
+                <text class="bmi-label-item">肥胖</text>
+              </view>
+
+              <text class="bmi-hint">BMI 是参考指标，不代表健康的全部</text>
+            </view>
           </view>
 
-          <view class="profile-summary">
-            <text class="summary-title">你的档案</text>
-            <text class="summary-row"
-              >{{ sexOptions.find((s) => s.value === form.sex)?.label }} · {{ form.birthDate }}（{{
-                age
-              }}岁）</text
-            >
-            <text class="summary-row"
-              >{{ form.heightCm }} cm · {{ form.weightKg }} kg · BMI {{ bmi }} ·
-              {{ bmiLabel }}</text
-            >
-          </view>
-          <text class="form-hint">保存后会解锁首页，之后每天记下一点真实生活就好。</text>
-          <text v-if="error" class="error-box">{{ error }}</text>
-        </view>
+          <!-- Step 3: 生日 -->
+          <view v-else-if="step === 3" class="step-content hz-rise">
+            <view class="step-header">
+              <text class="step-title">你的生日</text>
+              <text class="step-subtitle">用于计算年龄相关的健康建议</text>
+            </view>
 
-        <view class="step-actions">
-          <button v-if="step > 1" class="btn-back" @tap="back">上一步</button>
-          <button class="btn-next" :disabled="!canAdvance || saving" @tap="next">
-            {{ saving ? '保存中...' : step === 4 ? '保存并进入首页' : '继续' }}
+            <picker mode="date" :value="form.birthDate" :end="todayStr" @change="updateBirthDate">
+              <view class="date-picker-btn">
+                <text v-if="form.birthDate" class="date-picked">{{ form.birthDate }}</text>
+                <text v-else class="date-placeholder">选择生日</text>
+                <image src="/static/icons/forward.svg" class="date-arrow" mode="aspectFit" />
+              </view>
+            </picker>
+
+            <text v-if="age" class="age-display">今年 {{ age }} 岁</text>
+          </view>
+
+          <!-- Step 4: 健康目标 -->
+          <view v-else class="step-content hz-rise">
+            <view class="step-header">
+              <text class="step-title">你的健康目标</text>
+              <text class="step-subtitle">可以多选，随时调整</text>
+            </view>
+
+            <view class="goal-list">
+              <button
+                v-for="goal in goalOptions"
+                :key="goal.value"
+                :class="['goal-item', { selected: form.goals.includes(goal.value) }]"
+                @tap="toggleGoal(goal.value)"
+              >
+                <view class="goal-check-wrap">
+                  <view :class="['goal-check', { checked: form.goals.includes(goal.value) }]">
+                    <image
+                      v-if="form.goals.includes(goal.value)"
+                      src="/static/icons/check.svg"
+                      class="check-icon"
+                      mode="aspectFit"
+                    />
+                  </view>
+                </view>
+                <view class="goal-text">
+                  <text class="goal-name">{{ goal.label }}</text>
+                  <text class="goal-detail">{{ goal.detail }}</text>
+                </view>
+              </button>
+            </view>
+
+            <!-- 档案预览 -->
+            <view class="profile-preview">
+              <text class="preview-title">档案预览</text>
+              <view class="preview-row">
+                <text class="preview-label">基本信息</text>
+                <text class="preview-value"
+                  >{{ sexLabel }} · {{ form.birthDate }} ({{ age }}岁)</text
+                >
+              </view>
+              <view class="preview-row">
+                <text class="preview-label">身体数据</text>
+                <text class="preview-value"
+                  >{{ form.heightCm }}cm · {{ form.weightKg }}kg · BMI {{ bmi }}</text
+                >
+              </view>
+              <view class="preview-row">
+                <text class="preview-label">健康目标</text>
+                <text class="preview-value">{{ selectedGoalsText }}</text>
+              </view>
+            </view>
+
+            <text v-if="error" class="error-message">{{ error }}</text>
+          </view>
+        </scroll-view>
+
+        <!-- 底部按钮 -->
+        <view class="step-footer">
+          <button class="btn-large btn-primary" :disabled="!canProceed || saving" @tap="nextStep">
+            {{ saving ? '保存中...' : step === 4 ? '完成并进入首页' : '继续' }}
           </button>
         </view>
       </view>
@@ -232,26 +279,16 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
-import {
-  canAdvanceOnboarding,
-  onboardingProgress,
-  toggleOnboardingGoal,
-} from './onboarding-flow.js';
+import { toggleOnboardingGoal } from './onboarding-flow.js';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { shouldConfirmOnboardingExit } from '../../components/navigation.js';
 import { saveLocalProfile } from '../../features/health-loop/local-demo.js';
 
 const { form, bmi, bmiCategory } = onboardingState;
-const step = ref(onboardingState.step.value);
+const step = ref(0);
 const saving = ref(false);
 const error = ref('');
-const heroImage = ref('/static/illustrations/onboarding-guide-vertical.png');
-
-function useFallbackHero() {
-  heroImage.value = '/static/illustrations/onboarding-hero-vertical.png';
-}
 
 const sexOptions = [
   { value: 'female' as const, label: '女性', icon: '♀' },
@@ -274,7 +311,8 @@ const goalOptions = [
   { value: 'sleep' as const, label: '改善睡眠', detail: '建立规律作息和睡眠习惯' },
 ];
 
-const today = computed(() => new Date().toISOString().slice(0, 10));
+const todayStr = computed(() => new Date().toISOString().slice(0, 10));
+
 const age = computed(() => {
   if (!form.birthDate) return null;
   const birth = new Date(form.birthDate);
@@ -285,13 +323,8 @@ const age = computed(() => {
   return age;
 });
 
-const canAdvance = computed(() => {
-  if (step.value === 1) return !!form.sex;
-  if (step.value === 2) return bmi.value !== null;
-  if (step.value === 3) return !!form.birthDate;
-  if (step.value === 4) return form.goals.length > 0;
-  return true;
-});
+const sexLabel = computed(() => sexOptions.find((s) => s.value === form.sex)?.label || '');
+
 const bmiLabel = computed(() => {
   if (!bmiCategory.value) return '';
   const labels: Record<string, string> = {
@@ -303,33 +336,45 @@ const bmiLabel = computed(() => {
   return labels[bmiCategory.value] || '';
 });
 
-const bmiPointerPosition = computed(() => {
+const bmiPointerLeft = computed(() => {
   if (!bmi.value) return '0%';
   const value = bmi.value;
-  // BMI 刻度：<18.5 偏瘦 | 18.5-23.9 正常 | 24-27.9 超重 | ≥28 肥胖
-  // 映射到 0-100% 位置
+  // BMI: <18.5 偏瘦 | 18.5-23.9 正常 | 24-27.9 超重 | ≥28 肥胖
   if (value < 18.5) {
-    // 偏瘦区 0-25%，15-18.5 映射
     return `${Math.max(0, ((value - 15) / 3.5) * 25)}%`;
   } else if (value < 24) {
-    // 正常区 25-50%，18.5-24 映射
     return `${25 + ((value - 18.5) / 5.5) * 25}%`;
   } else if (value < 28) {
-    // 超重区 50-75%，24-28 映射
     return `${50 + ((value - 24) / 4) * 25}%`;
   } else {
-    // 肥胖区 75-100%，28-35 映射
     return `${Math.min(100, 75 + ((value - 28) / 7) * 25)}%`;
   }
 });
 
-function setHeight(e: any) {
+const selectedGoalsText = computed(() => {
+  return (
+    form.goals
+      .map((g) => goalOptions.find((opt) => opt.value === g)?.label)
+      .filter(Boolean)
+      .join('、') || '未选择'
+  );
+});
+
+const canProceed = computed(() => {
+  if (step.value === 1) return !!form.sex;
+  if (step.value === 2) return bmi.value !== null;
+  if (step.value === 3) return !!form.birthDate;
+  if (step.value === 4) return form.goals.length > 0;
+  return true;
+});
+
+function updateHeight(e: any) {
   form.heightCm = String(e.detail.value);
 }
-function setWeight(e: any) {
+function updateWeight(e: any) {
   form.weightKg = String(e.detail.value);
 }
-function setBirthdate(e: any) {
+function updateBirthDate(e: any) {
   form.birthDate = e.detail.value;
 }
 function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
@@ -337,11 +382,15 @@ function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
   form.goals = result.goals as any;
 }
 
-function back() {
+function startOnboarding() {
+  step.value = 1;
+}
+
+function prevStep() {
   if (step.value > 1) step.value -= 1;
 }
 
-async function next() {
+async function nextStep() {
   if (step.value < 4) {
     step.value += 1;
     return;
@@ -367,7 +416,7 @@ async function next() {
   }
 }
 
-function exitOnboarding() {
+function confirmExit() {
   if (shouldConfirmOnboardingExit(step.value)) {
     uni.showModal({
       title: '确定退出？',
@@ -387,480 +436,541 @@ function exitOnboarding() {
 </script>
 
 <style scoped>
-.onboarding-page {
+/* === 全局容器 === */
+.onboarding-container {
   min-height: 100vh;
   background: linear-gradient(180deg, #f9fcfa 0%, #f3f8f4 100%);
 }
 
-/* ===== 欢迎屏：全屏沉浸插画 ===== */
-.welcome-immersive {
+/* === 欢迎屏：全屏沉浸 === */
+.welcome-fullscreen {
   position: relative;
   display: flex;
   min-height: 100vh;
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
+  background: linear-gradient(180deg, #e8f4ea 0%, #f7fbf8 100%);
 }
-.welcome-bg {
+.welcome-illustration {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
   width: 100%;
-  height: 100%;
-  object-position: center bottom;
+  transform: translateX(-50%);
   z-index: 0;
 }
-.welcome-overlay {
+.welcome-gradient {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(247, 251, 248, 0) 0%, rgba(247, 251, 248, 0.92) 60%);
+  height: 60%;
+  background: linear-gradient(180deg, rgba(247, 251, 248, 0) 0%, rgba(247, 251, 248, 0.98) 70%);
   z-index: 1;
 }
-.welcome-content {
+.welcome-body {
   position: relative;
   z-index: 2;
   padding: 0 36rpx 88rpx;
 }
-.xuxu-intro {
+.xuxu-bubble {
   display: flex;
   align-items: flex-start;
   gap: 20rpx;
   margin-bottom: 32rpx;
 }
-.xuxu-intro image {
-  width: 88rpx;
-  height: 88rpx;
+.xuxu-avatar {
+  width: 92rpx;
+  height: 92rpx;
   border: 4rpx solid #f4e3a0;
   border-radius: 50%;
-  box-shadow: 0 8rpx 24rpx rgba(239, 214, 137, 0.4);
+  box-shadow: 0 8rpx 28rpx rgba(239, 214, 137, 0.45);
 }
-.xuxu-speech {
+.bubble-content {
   flex: 1;
-  padding: 20rpx 24rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(20rpx);
+  padding: 24rpx 28rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(24rpx);
+  box-shadow: 0 8rpx 32rpx rgba(46, 97, 64, 0.12);
 }
-.xuxu-greeting {
+.bubble-greeting {
   display: block;
   color: #2d6943;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 700;
   line-height: 1.4;
 }
-.xuxu-subtitle {
+.bubble-role {
   display: block;
-  margin-top: 4rpx;
+  margin-top: 6rpx;
   color: #6f8879;
-  font-size: 24rpx;
+  font-size: 25rpx;
   line-height: 1.5;
 }
-.brand {
+.welcome-message {
+  margin-bottom: 36rpx;
+}
+.brand-name {
   display: block;
   margin-bottom: 12rpx;
   color: #5a9572;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
-.welcome-slogan {
+.brand-slogan {
   display: block;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
   color: #183425;
-  font-size: 52rpx;
+  font-size: 56rpx;
   font-weight: 800;
   line-height: 1.28;
   letter-spacing: -0.02em;
 }
-.welcome-desc {
+.brand-desc {
   display: block;
-  margin-bottom: 32rpx;
   color: #4a6853;
   font-size: 28rpx;
-  line-height: 1.68;
+  line-height: 1.72;
 }
-.btn-start {
+.btn-large {
   width: 100%;
-  height: 104rpx;
+  height: 112rpx;
   border-radius: 999rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 112rpx;
+}
+.btn-primary {
   color: var(--hz-primary-ink);
   background: var(--hz-primary-soft);
   border: 2rpx solid var(--hz-primary-border);
-  box-shadow: 0 12rpx 32rpx rgba(47, 124, 80, 0.18);
-  font-size: 34rpx;
-  font-weight: 700;
-  line-height: 104rpx;
+  box-shadow: 0 12rpx 40rpx rgba(47, 124, 80, 0.2);
 }
-.disclaimer {
+.legal-disclaimer {
   display: block;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
   color: #96a89d;
   font-size: 22rpx;
   line-height: 1.6;
   text-align: center;
 }
 
-/* ===== 步骤页：清爽表单卡 ===== */
-.step-container {
+/* === 步骤页 === */
+.steps-container {
+  display: flex;
   min-height: calc(100vh - var(--status-bar-height) - 88rpx);
-  padding: 32rpx 32rpx 88rpx;
+  flex-direction: column;
+  padding-top: 24rpx;
 }
-.step-progress {
+.step-indicator {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32rpx;
+  padding: 0 36rpx 24rpx;
 }
-.progress-dots {
+.indicator-dots {
   display: flex;
   gap: 12rpx;
 }
 .dot {
-  width: 32rpx;
-  height: 8rpx;
-  border-radius: 8rpx;
+  width: 36rpx;
+  height: 10rpx;
+  border-radius: 10rpx;
   background: #dfe9e1;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 .dot.active {
-  width: 64rpx;
-  background: linear-gradient(90deg, #79ac8c, #5f9e76);
+  width: 72rpx;
+  background: linear-gradient(90deg, #7fcc8f, #5f9e76);
 }
-.progress-text {
+.dot.completed {
+  background: #b8d8c1;
+}
+.indicator-text {
   color: #6f8879;
-  font-size: 24rpx;
+  font-size: 25rpx;
   font-weight: 600;
 }
-
-.step-form {
-  padding: 44rpx 36rpx;
+.step-scroll {
+  flex: 1;
+  padding: 0 36rpx;
+}
+.step-content {
+  padding: 44rpx 40rpx;
   border-radius: 32rpx;
   background: #ffffff;
-  box-shadow: 0 8rpx 40rpx rgba(46, 97, 64, 0.08);
+  box-shadow: 0 8rpx 48rpx rgba(46, 97, 64, 0.09);
 }
-.form-head {
+.step-header {
   margin-bottom: 40rpx;
 }
-.form-label {
+.step-title {
   display: block;
   margin-bottom: 12rpx;
-  color: #5a9572;
-  font-size: 24rpx;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.form-title {
-  display: block;
-  margin-bottom: 16rpx;
   color: #183425;
-  font-size: 48rpx;
+  font-size: 52rpx;
   font-weight: 800;
   line-height: 1.3;
   letter-spacing: -0.02em;
 }
-.form-hint {
+.step-subtitle {
   display: block;
   color: #6f8879;
-  font-size: 26rpx;
+  font-size: 27rpx;
   line-height: 1.68;
 }
 
 /* 性别选择 */
-.sex-options {
+.sex-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
+  gap: 18rpx;
 }
-.sex-btn {
+.sex-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 140rpx;
-  padding: 24rpx;
+  height: 148rpx;
+  padding: 28rpx 20rpx;
   border: 3rpx solid #e8f0e9;
-  border-radius: 24rpx;
+  border-radius: 26rpx;
   background: #fafcfb;
-  transition: all 0.25s ease;
+  transition: all 0.28s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
-.sex-btn.selected {
+.sex-card.selected {
   border-color: #9ec6ab;
   background: var(--hz-primary-soft);
-  transform: translateY(-4rpx);
-  box-shadow: 0 12rpx 32rpx rgba(46, 125, 79, 0.16);
+  transform: translateY(-6rpx) scale(1.02);
+  box-shadow: 0 16rpx 40rpx rgba(46, 125, 79, 0.18);
 }
-.sex-icon {
+.sex-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64rpx;
-  height: 64rpx;
-  margin-bottom: 12rpx;
+  width: 72rpx;
+  height: 72rpx;
+  margin-bottom: 14rpx;
   border-radius: 50%;
   background: #f3f8f4;
-  font-size: 36rpx;
-  transition: all 0.25s ease;
+  transition: all 0.28s ease;
 }
-.sex-btn.selected .sex-icon {
+.sex-card.selected .sex-icon-wrap {
   background: #fff;
+}
+.sex-icon {
+  font-size: 40rpx;
+  color: #5a9572;
 }
 .sex-label {
   color: #355b41;
-  font-size: 26rpx;
+  font-size: 27rpx;
   font-weight: 600;
 }
 
-/* 身高体重 */
-.measure-card {
-  margin-bottom: 32rpx;
-  padding: 32rpx 28rpx;
-  border-radius: 24rpx;
+/* 身高体重输入 */
+.input-group {
+  margin-bottom: 36rpx;
+  padding: 32rpx 32rpx 28rpx;
+  border-radius: 26rpx;
   background: #f9fcfa;
 }
-.measure-item {
+.input-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
-.measure-name {
+.input-label {
   color: #355b41;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
 }
-.measure-input-wrap {
+.input-value-wrap {
   display: flex;
   align-items: center;
   gap: 12rpx;
 }
-.measure-input {
-  width: 160rpx;
-  height: 72rpx;
-  padding: 0 20rpx;
-  border: 2rpx solid #e8f0e9;
+.input-field {
+  width: 180rpx;
+  height: 80rpx;
+  padding: 0 24rpx;
+  border: 3rpx solid #e8f0e9;
   border-radius: 20rpx;
   background: #fff;
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 600;
   text-align: right;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
-.measure-input:focus {
+.input-field:focus {
   border-color: #b9d6c3;
-  box-shadow: 0 4rpx 20rpx rgba(46, 97, 64, 0.1);
+  box-shadow: 0 6rpx 24rpx rgba(46, 97, 64, 0.12);
 }
-.measure-unit {
+.input-unit {
   color: #6f8879;
-  font-size: 28rpx;
+  font-size: 29rpx;
 }
 
-.bmi-result {
-  margin-top: 40rpx;
-  padding: 36rpx 32rpx;
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, rgba(232, 247, 237, 0.7), rgba(225, 241, 230, 0.5));
-  text-align: center;
+/* BMI 可视化 */
+.bmi-visual {
+  margin-top: 48rpx;
+  padding: 40rpx 36rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, rgba(232, 247, 237, 0.8), rgba(225, 241, 230, 0.5));
 }
-.bmi-main {
+.bmi-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
 }
-.bmi-value {
+.bmi-title {
+  color: #4a6853;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.bmi-value-group {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.bmi-number {
   background: linear-gradient(135deg, #4a8f5e, #347c50);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: 88rpx;
+  font-size: 64rpx;
   font-weight: 900;
   line-height: 1;
 }
-.bmi-badge {
-  padding: 12rpx 20rpx;
+.bmi-status {
+  padding: 10rpx 18rpx;
   border-radius: 999rpx;
-  background: #e3f2e6;
-  color: #3f7953;
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: 700;
 }
+.bmi-status--underweight {
+  color: #4a8fb7;
+  background: #ddf2fb;
+}
+.bmi-status--normal {
+  color: #3f7953;
+  background: #e3f2e6;
+}
+.bmi-status--overweight {
+  color: #c98640;
+  background: #fff6e8;
+}
+.bmi-status--obese {
+  color: #c86060;
+  background: #ffe8e8;
+}
+.bmi-ruler {
+  position: relative;
+  margin-bottom: 16rpx;
+}
+.ruler-track {
+  display: flex;
+  height: 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.ruler-segment {
+  flex: 1;
+}
+.segment-underweight {
+  background: linear-gradient(90deg, #a8d5e2, #89c7da);
+}
+.segment-normal {
+  background: linear-gradient(90deg, #7fcc8f, #6bbe7f);
+}
+.segment-overweight {
+  background: linear-gradient(90deg, #f9c66b, #f7b84f);
+}
+.segment-obese {
+  background: linear-gradient(90deg, #f28c8c, #ee7070);
+}
+.ruler-pointer {
+  position: absolute;
+  top: -14rpx;
+  width: 0;
+  height: 0;
+  margin-left: -14rpx;
+  border-left: 14rpx solid transparent;
+  border-right: 14rpx solid transparent;
+  border-top: 24rpx solid #2d6943;
+  transition: left 0.5s cubic-bezier(0.22, 0.8, 0.36, 1);
+}
+.bmi-labels {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 16rpx;
+}
+.bmi-label-item {
+  flex: 1;
+  color: #8a9b90;
+  font-size: 21rpx;
+  text-align: center;
+}
 .bmi-hint {
-  color: #6f8879;
-  font-size: 24rpx;
+  display: block;
+  color: #96a89d;
+  font-size: 22rpx;
+  line-height: 1.6;
+  text-align: center;
 }
 
-/* 生日 */
-.date-selector {
+/* 生日选择 */
+.date-picker-btn {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 108rpx;
-  padding: 0 32rpx;
+  height: 112rpx;
+  padding: 0 36rpx;
   border: 3rpx solid #e8f0e9;
-  border-radius: 24rpx;
+  border-radius: 26rpx;
   background: #fafcfb;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
-.date-value {
+.date-picked {
   color: #183425;
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 600;
 }
 .date-placeholder {
   color: #96a89d;
-  font-size: 32rpx;
+  font-size: 34rpx;
 }
 .date-arrow {
-  width: 32rpx;
-  height: 32rpx;
-  opacity: 0.3;
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.35;
 }
-.age-result {
+.age-display {
   display: block;
-  margin-top: 24rpx;
+  margin-top: 28rpx;
   color: #4a6853;
-  font-size: 26rpx;
+  font-size: 27rpx;
   text-align: center;
 }
 
 /* 健康目标 */
-.goal-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
-  margin-bottom: 32rpx;
+.goal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  margin-bottom: 40rpx;
 }
-.goal-tile {
-  position: relative;
-  padding: 28rpx 24rpx;
+.goal-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  padding: 32rpx 28rpx;
   border: 3rpx solid #e8f0e9;
-  border-radius: 24rpx;
+  border-radius: 26rpx;
   background: #fafcfb;
   text-align: left;
-  transition: all 0.25s ease;
+  transition: all 0.28s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
-.goal-tile.selected {
+.goal-item.selected {
   border-color: #9ec6ab;
   background: var(--hz-primary-soft);
   transform: translateY(-4rpx);
-  box-shadow: 0 12rpx 32rpx rgba(46, 125, 79, 0.16);
+  box-shadow: 0 12rpx 36rpx rgba(46, 125, 79, 0.16);
+}
+.goal-check-wrap {
+  flex-shrink: 0;
+  padding-top: 4rpx;
 }
 .goal-check {
-  position: absolute;
-  top: 16rpx;
-  right: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40rpx;
-  height: 40rpx;
+  width: 44rpx;
+  height: 44rpx;
   border: 3rpx solid #d4e2d7;
   border-radius: 50%;
   background: #fff;
-  transition: all 0.25s ease;
+  transition: all 0.28s ease;
 }
-.goal-tile.selected .goal-check {
+.goal-check.checked {
   border-color: #79ac8c;
   background: #79ac8c;
 }
-.goal-check image {
-  width: 20rpx;
-  height: 20rpx;
+.check-icon {
+  width: 24rpx;
+  height: 24rpx;
   filter: brightness(10);
+}
+.goal-text {
+  flex: 1;
 }
 .goal-name {
   display: block;
   margin-bottom: 8rpx;
   color: #183425;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 700;
   line-height: 1.4;
 }
-.goal-desc {
+.goal-detail {
   display: block;
   color: #6f8879;
-  font-size: 22rpx;
-  line-height: 1.6;
-}
-
-.profile-summary {
-  margin-bottom: 24rpx;
-  padding: 28rpx 32rpx;
-  border-radius: 20rpx;
-  background: #f9fcfa;
-}
-.summary-title {
-  display: block;
-  margin-bottom: 12rpx;
-  color: #5a9572;
-  font-size: 22rpx;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.summary-row {
-  display: block;
-  margin-bottom: 6rpx;
-  color: #355b41;
-  font-size: 26rpx;
-  line-height: 1.6;
-}
-.error-box {
-  display: block;
-  margin-top: 24rpx;
-  padding: 24rpx 28rpx;
-  border: 2rpx solid #fcd9cd;
-  border-radius: 20rpx;
-  color: #a85f4b;
-  background: #fff8f5;
   font-size: 24rpx;
   line-height: 1.6;
 }
 
-.step-actions {
+/* 档案预览 */
+.profile-preview {
+  padding: 32rpx 36rpx;
+  border-radius: 24rpx;
+  background: #f9fcfa;
+}
+.preview-title {
+  display: block;
+  margin-bottom: 20rpx;
+  color: #5a9572;
+  font-size: 24rpx;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.preview-row {
   display: flex;
-  gap: 16rpx;
-  margin-top: 32rpx;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
 }
-.btn-back,
-.btn-next {
-  height: 104rpx;
-  border-radius: 999rpx;
-  font-size: 32rpx;
-  font-weight: 700;
-  line-height: 104rpx;
+.preview-label {
+  color: #6f8879;
+  font-size: 27rpx;
 }
-.btn-back {
-  width: 180rpx;
-  color: #4d6e58;
-  background: #ffffff;
-  border: 3rpx solid #dfe9e1;
+.preview-value {
+  color: #355b41;
+  font-size: 27rpx;
+  font-weight: 600;
 }
-.btn-next {
-  flex: 1;
-  color: var(--hz-primary-ink);
-  background: var(--hz-primary-soft);
-  border: 2rpx solid var(--hz-primary-border);
-  box-shadow: 0 12rpx 32rpx rgba(47, 124, 80, 0.18);
+.error-message {
+  display: block;
+  margin-top: 28rpx;
+  padding: 24rpx 32rpx;
+  border: 2rpx solid #fcd9cd;
+  border-radius: 22rpx;
+  color: #a85f4b;
+  background: #fff8f5;
+  font-size: 25rpx;
+  line-height: 1.6;
 }
-.btn-next[disabled] {
-  opacity: 0.5;
-  filter: grayscale(0.4);
+
+/* 底部按钮 */
+.step-footer {
+  padding: 24rpx 36rpx 88rpx;
+}
+.btn-primary[disabled] {
+  opacity: 0.4;
+  filter: grayscale(0.5);
 }
 </style>
-
-/* BMI 横向刻度条 */ .bmi-scale { margin: 24rpx 0 16rpx; } .scale-track { display: flex; height:
-16rpx; border-radius: 16rpx; overflow: hidden; } .scale-segment { flex: 1; } .segment--underweight {
-background: #a8d5e2; } .segment--normal { background: #7fcc8f; } .segment--overweight { background:
-#f9c66b; } .segment--obese { background: #f28c8c; } .scale-pointer { position: relative; width: 0;
-height: 0; margin-top: -12rpx; margin-left: -12rpx; border-left: 12rpx solid transparent;
-border-right: 12rpx solid transparent; border-top: 20rpx solid #2d6943; transition: left 0.4s
-cubic-bezier(0.22, 0.8, 0.36, 1); } .scale-labels { display: flex; justify-content: space-around;
-margin-top: 12rpx; } .scale-labels text { flex: 1; color: #8a9b90; font-size: 20rpx; text-align:
-center; }
