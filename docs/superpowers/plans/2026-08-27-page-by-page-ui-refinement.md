@@ -114,6 +114,7 @@
 - [x] 首页主视觉改为按日轮换图池（`home-hero-art.ts`）：`home-hero-morning` 与原 `home-companion-banner` 隔天轮换、各自带文案侧，测试覆盖池覆盖性与当日稳定性
 - [x] 接入 `onboarding-guide-vertical.png`（双角色书桌指引场景，2:3 竖构图，1.8MB）
 - [x] 建档页 Apple 风格打磨：欢迎大图 640rpx + 留白扩大 + 标题字号放大到 48rpx（欢迎）/46rpx（步骤）+ letter-spacing 呼吸感 + 输入框增高到 98rpx 圆角 20rpx 柔和投影 + 滑杆卡片化 + BMI 数字渐变 78rpx + 选中态抬升投影 + 单选框内嵌白圈动效 + 序序头像放大到 72rpx 金边投影
+- [x] 建档页背景氛围层：固定铺满、按 step 0–4 切换五张插画（guide-vertical/mood/weight/complete/companion）、35% 透明度 + 渐变遮罩、欢迎文案区改半透明白卡（96% 白 + 28rpx 模糊）
 - [ ] 双尺寸真机截图对比（390x844 / 430x932）
 - [ ] 接入 `onboarding-guide-vertical.png`（等下一批生图）
 - [x] 更新 roadmap-status.md

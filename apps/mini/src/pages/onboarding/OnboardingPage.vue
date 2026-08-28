@@ -1,5 +1,11 @@
 <template>
   <view class="page">
+    <!-- 背景氛围层：固定铺满，插画按步骤切换 -->
+    <view class="onboarding-bg">
+      <image :src="bgArt" class="bg-art" mode="aspectFill" />
+      <view class="bg-overlay" />
+    </view>
+
     <AppNavBar
       title="开始了解自己"
       close-label="退出"
@@ -190,6 +196,18 @@ const step = ref(onboardingState.step.value);
 const saving = ref(false);
 const error = ref('');
 const heroImage = ref('/static/illustrations/onboarding-guide-vertical.png');
+
+// 背景插画按步骤切换
+const bgArt = computed(() => {
+  const arts = [
+    '/static/illustrations/onboarding-guide-vertical.png',
+    '/static/illustrations/program-mood.png',
+    '/static/illustrations/program-weight.png',
+    '/static/illustrations/xuxu-complete.png',
+    '/static/illustrations/home-companion-banner.png',
+  ];
+  return arts[step.value] || arts[0];
+});
 const sexOptions = [
   { value: 'female' as const, label: '女性' },
   { value: 'male' as const, label: '男性' },
@@ -349,8 +367,11 @@ async function save() {
   display: flex;
   flex: none;
   flex-direction: column;
-  padding: 28rpx 20rpx 32rpx;
-  background: #f7fbf8;
+  padding: 32rpx 28rpx 36rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(28rpx);
+  box-shadow: 0 12rpx 48rpx rgba(46, 97, 64, 0.14);
   position: relative;
 }
 .xuxu {
