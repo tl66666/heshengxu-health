@@ -174,15 +174,7 @@
         </button>
       </view>
     </template>
-      <button class="chat-card hz-rise hz-rise-1" @tap="toXuxu">
-        <image class="chat-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
-        <view class="chat-content">
-          <text class="chat-title">和序序聊聊</text>
-          <text class="chat-desc">分享今天的心情和困惑</text>
-        </view>
-        <image class="chat-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
-      </button>
-    </template>
+    
     <view v-else-if="error" class="load-failed"
       ><text>今天的状态还没有加载出来</text><text>检查服务连接后，再试一次就好。</text
       ><button @tap="load">重新加载</button></view
