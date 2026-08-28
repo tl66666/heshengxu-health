@@ -20,8 +20,8 @@
         <view class="weight-header">
           <view class="weight-title-group">
             <text class="weight-label">当前体重</text>
-            <text v-if="today.profile" class="weight-value"
-              >{{ today.profile.weightKg }}<text class="weight-unit">kg</text></text
+            <text v-if="today.records?.weight" class="weight-value"
+              >{{ today.records.weight.weightKg }}<text class="weight-unit">kg</text></text
             >
             <text v-else class="weight-empty">未记录</text>
           </view>
@@ -30,9 +30,9 @@
             <text>记录</text>
           </button>
         </view>
-        <view v-if="today.profile" class="weight-meta">
-          <text class="meta-item">目标: {{ today.profile.weightKg - 2 }}kg</text>
-          <text class="meta-item">BMI: {{ bmiValue }}</text>
+        <view v-if="today.records?.weight" class="weight-meta">
+          <text class="meta-item">目标: {{ today.records.weight.weightKg - 2 }}kg</text>
+          <text class="meta-item">BMI: {{ currentBmi }}</text>
         </view>
         <view v-else class="weight-prompt">
           <text>开始记录体重，追踪你的健康节律</text>
@@ -209,11 +209,11 @@ const planText = computed(() =>
     : '选择体重或睡眠方向，从一个小目标开始。',
 );
 
-const bmiValue = computed(() => {
-  const profile = today.value?.profile;
-  if (!profile || !profile.heightCm || !profile.weightKg) return null;
-  const heightM = profile.heightCm / 100;
-  const bmi = profile.weightKg / (heightM * heightM);
+const currentBmi = computed(() => {
+  const weight = today.value?.records?.weight;
+  if (!weight || !weight.heightCm || !weight.weightKg) return null;
+  const heightM = weight.heightCm / 100;
+  const bmi = weight.weightKg / (heightM * heightM);
   return bmi.toFixed(1);
 });
 
