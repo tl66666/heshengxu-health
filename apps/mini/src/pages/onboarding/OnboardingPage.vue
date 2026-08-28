@@ -1,179 +1,216 @@
 <template>
-  <view class="page">
-    <!-- 背景氛围层：固定铺满，插画按步骤切换 -->
-    <view class="onboarding-bg">
-      <image :src="bgArt" class="bg-art" mode="aspectFill" />
-      <view class="bg-overlay" />
-    </view>
-
-    <AppNavBar
-      title="开始了解自己"
-      close-label="退出"
-      :back-disabled="step === 0"
-      route="/pages/onboarding/OnboardingPage"
-      back-mode="emit"
-      @back="back"
-      @close="exitOnboarding"
-    />
+  <view class="onboarding-page">
+    <!-- 欢迎屏：全屏沉浸插画 + 底部浮动文案卡 -->
     <template v-if="step === 0">
-      <view class="welcome-screen">
-        <view class="welcome-art-frame hz-rise">
-          <image
-            class="welcome-art hz-float"
-            :src="heroImage"
-            mode="aspectFit"
-            @error="useFallbackHero"
-          />
-        </view>
-        <view class="welcome-copy">
-          <view class="xuxu hz-rise hz-rise-1"
-            ><image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" /><view
-              ><text>你好，我是序序</text><text>你的健康陪伴助手</text></view
-            ></view
-          >
-          <text class="brand hz-rise hz-rise-2">和生序</text>
-          <text class="welcome-title hz-rise hz-rise-2">让健康回到自己的节律</text>
-          <text class="hint hz-rise hz-rise-3"
+      <view class="welcome-immersive">
+        <image
+          src="/static/illustrations/onboarding-guide-vertical.png"
+          class="welcome-bg"
+          mode="aspectFill"
+        />
+        <view class="welcome-overlay" />
+        <view class="welcome-content hz-rise">
+          <view class="xuxu-intro hz-rise-1">
+            <image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
+            <view class="xuxu-speech">
+              <text class="xuxu-greeting">你好，我是序序</text>
+              <text class="xuxu-subtitle">你的健康陪伴助手</text>
+            </view>
+          </view>
+          <text class="brand hz-rise-2">和生序</text>
+          <text class="welcome-slogan hz-rise-2">让健康回到自己的节律</text>
+          <text class="welcome-desc hz-rise-3"
             >花一点时间认识你，之后每一步都会围绕你的真实生活展开。</text
           >
-          <button class="primary hz-rise hz-rise-3" @tap="next">开始了解我</button>
-          <text class="disclaimer hz-rise hz-rise-4"
+          <button class="btn-start hz-rise-3" @tap="next">开始了解我</button>
+          <text class="disclaimer hz-rise-4"
             >和生序提供健康管理与生活方式参考，不替代医生诊疗。</text
           >
         </view>
       </view>
     </template>
+
+    <!-- 步骤页：纯色渐变背景 + 清爽表单卡 -->
     <template v-else>
-      <view class="head"
-        ><text class="brand">和生序 · 健康管理</text
-        ><view class="progress"
-          ><view class="progress-fill" :style="{ width: `${progress}%` }" /></view
-      ></view>
-      <view v-if="step === 1" class="step hz-rise">
-        <text class="eyebrow">先认识一下你</text><text class="title">从今天开始，照顾好自己</text
-        ><text class="hint">这些信息只用于生成更适合你的健康管理参考。</text>
-        <input
-          v-model="form.displayName"
-          class="input"
-          maxlength="40"
-          placeholder="怎么称呼你？（选填）"
-        />
-        <text class="label">性别</text
-        ><view class="choices"
-          ><button
-            v-for="item in sexOptions"
-            :key="item.value"
-            :class="['choice', { selected: form.sex === item.value }]"
-            @tap="form.sex = item.value"
-          >
-            {{ item.label }}
-          </button></view
-        >
-      </view>
-      <view v-else-if="step === 2" class="step hz-rise">
-        <text class="eyebrow">了解身体基础</text><text class="title">你的 BMI 会实时变化</text
-        ><text class="hint">输入身高和体重，看看当前身体状态。</text>
-        <view class="input-row"
-          ><input
-            v-model="form.heightCm"
-            class="input"
-            type="number"
-            placeholder="身高（cm）"
-          /><text>cm</text></view
-        >
-        <view class="measure-slider"
-          ><view class="measure-label"
-            ><text>身高</text><text>{{ form.heightCm || '--' }} cm</text></view
-          ><slider
-            :value="Number(form.heightCm) || 168"
-            min="140"
-            max="210"
-            step="1"
-            activeColor="#79ac8c"
-            backgroundColor="#e2eedd"
-            block-color="#ffffff"
-            block-size="22"
-            @changing="setHeight"
-        /></view>
-        <view class="input-row"
-          ><input
-            v-model="form.weightKg"
-            class="input"
-            type="digit"
-            placeholder="体重（kg）"
-          /><text>kg</text></view
-        >
-        <view class="measure-slider"
-          ><view class="measure-label"
-            ><text>体重</text><text>{{ form.weightKg || '--' }} kg</text></view
-          ><slider
-            :value="Number(form.weightKg) || 62"
-            min="35"
-            max="150"
-            step="0.1"
-            activeColor="#79ac8c"
-            backgroundColor="#e2eedd"
-            block-color="#ffffff"
-            block-size="22"
-            @changing="setWeight"
-        /></view>
-        <view v-if="bmi !== null" class="bmi-card"
-          ><text class="bmi-value">{{ bmi.toFixed(1) }}</text
-          ><text class="bmi-label">BMI · {{ bmiLabel }}</text
-          ><text class="bmi-advice">{{ bmiAdvice }}</text
-          ><view class="bmi-scale"
-            ><view class="bmi-scale-fill" :style="{ width: `${bmiProgress}%` }" /></view
-          ><view class="bmi-scale-labels"
-            ><text>偏瘦</text><text>正常</text><text>偏重</text><text>肥胖</text></view
-          ><text class="bmi-note">这是健康管理参考，不是医疗诊断</text></view
-        ><view v-else class="empty-card">填写身高和体重后查看 BMI</view>
-      </view>
-      <view v-else-if="step === 3" class="step hz-rise">
-        <text class="eyebrow">选你现在最想改善的方向</text
-        ><text class="title">给生活设定 1—3 个小目标</text
-        ><text class="hint">可以多选，序序会按第一个目标安排优先建议，之后随时都能调整。</text>
-        <view class="goal-meta"
-          ><text>已选择 {{ form.goals.length }}/3</text><text>可多选</text></view
-        >
-        <view class="goal-list"
-          ><button
-            v-for="item in goalOptions"
-            :key="item.value"
-            :class="[
-              'goal',
-              { selected: form.goals.includes(item.value), blocked: isGoalBlocked(item.value) },
-            ]"
-            @tap="toggleGoal(item.value)"
-          >
-            <view class="goal-copy"
-              ><text class="goal-label">{{ item.label }}</text
-              ><text class="goal-detail">{{ item.detail }}</text></view
+      <AppNavBar
+        title="开始了解自己"
+        close-label="退出"
+        :back-disabled="false"
+        route="/pages/onboarding/OnboardingPage"
+        back-mode="emit"
+        @back="back"
+        @close="exitOnboarding"
+      />
+
+      <view class="step-container">
+        <view class="step-progress">
+          <view class="progress-dots">
+            <view v-for="i in 4" :key="i" :class="['dot', { active: step >= i }]" />
+          </view>
+          <text class="progress-text">第 {{ step }}/4 步</text>
+        </view>
+
+        <!-- Step 1: 性别 -->
+        <view v-if="step === 1" class="step-form hz-rise">
+          <view class="form-head">
+            <text class="form-label">基本信息</text>
+            <text class="form-title">先从性别开始</text>
+            <text class="form-hint">这会影响基础代谢率和健康建议的准确性</text>
+          </view>
+          <view class="sex-options">
+            <button
+              v-for="option in sexOptions"
+              :key="option.value"
+              :class="['sex-btn', { selected: form.sex === option.value }]"
+              @tap="form.sex = option.value"
             >
-            <image
-              v-if="form.goals.includes(item.value)"
-              src="/static/icons/check.svg"
-              mode="aspectFit"
-              class="goal-check"
-            /><view v-else class="goal-radio" /></button
-        ></view>
+              <view :class="['sex-icon', `sex-icon--${option.value}`]">
+                <text>{{ option.icon }}</text>
+              </view>
+              <text class="sex-label">{{ option.label }}</text>
+            </button>
+          </view>
+        </view>
+
+        <!-- Step 2: 身高体重 -->
+        <view v-else-if="step === 2" class="step-form hz-rise">
+          <view class="form-head">
+            <text class="form-label">了解身体基础</text>
+            <text class="form-title">你的 BMI 会实时变化</text>
+            <text class="form-hint">输入身高和体重，看看当前身体状态</text>
+          </view>
+
+          <view class="measure-card">
+            <view class="measure-item">
+              <text class="measure-name">身高</text>
+              <view class="measure-input-wrap">
+                <input
+                  v-model="form.heightCm"
+                  type="number"
+                  placeholder="168"
+                  class="measure-input"
+                />
+                <text class="measure-unit">cm</text>
+              </view>
+            </view>
+            <slider
+              :value="Number(form.heightCm) || 168"
+              min="140"
+              max="210"
+              step="1"
+              activeColor="#79ac8c"
+              backgroundColor="#eef4ef"
+              block-color="#ffffff"
+              block-size="24"
+              @changing="setHeight"
+              @change="setHeight"
+            />
+          </view>
+
+          <view class="measure-card">
+            <view class="measure-item">
+              <text class="measure-name">体重</text>
+              <view class="measure-input-wrap">
+                <input
+                  v-model="form.weightKg"
+                  type="digit"
+                  placeholder="60.0"
+                  class="measure-input"
+                />
+                <text class="measure-unit">kg</text>
+              </view>
+            </view>
+            <slider
+              :value="Number(form.weightKg) || 60"
+              min="35"
+              max="150"
+              step="0.1"
+              activeColor="#79ac8c"
+              backgroundColor="#eef4ef"
+              block-color="#ffffff"
+              block-size="24"
+              @changing="setWeight"
+              @change="setWeight"
+            />
+          </view>
+
+          <view v-if="bmi" class="bmi-result">
+            <view class="bmi-main">
+              <text class="bmi-value">{{ bmi }}</text>
+              <view class="bmi-badge">
+                <text>{{ bmiLabel }}</text>
+              </view>
+            </view>
+            <text class="bmi-hint">当前 BMI · {{ bmiCategory }}</text>
+          </view>
+        </view>
+
+        <!-- Step 3: 生日 -->
+        <view v-else-if="step === 3" class="step-form hz-rise">
+          <view class="form-head">
+            <text class="form-label">生日</text>
+            <text class="form-title">记录时光的起点</text>
+            <text class="form-hint">用于计算年龄相关的健康参考范围</text>
+          </view>
+          <picker mode="date" :value="form.birthdate" :end="today" @change="setBirthdate">
+            <view class="date-selector">
+              <text v-if="form.birthdate" class="date-value">{{ form.birthdate }}</text>
+              <text v-else class="date-placeholder">选择生日</text>
+              <image src="/static/icons/forward.svg" class="date-arrow" mode="aspectFit" />
+            </view>
+          </picker>
+          <text v-if="age" class="age-result">你今年 {{ age }} 岁</text>
+        </view>
+
+        <!-- Step 4: 健康目标 -->
+        <view v-else class="step-form hz-rise">
+          <view class="form-head">
+            <text class="form-label">健康目标</text>
+            <text class="form-title">想在哪个方向开始</text>
+            <text class="form-hint">可以多选，之后随时调整</text>
+          </view>
+          <view class="goal-grid">
+            <button
+              v-for="goal in goalOptions"
+              :key="goal.value"
+              :class="['goal-tile', { selected: form.goals.includes(goal.value) }]"
+              @tap="toggleGoal(goal.value)"
+            >
+              <view class="goal-check">
+                <image
+                  v-if="form.goals.includes(goal.value)"
+                  src="/static/icons/check.svg"
+                  mode="aspectFit"
+                />
+              </view>
+              <text class="goal-name">{{ goal.label }}</text>
+              <text class="goal-desc">{{ goal.detail }}</text>
+            </button>
+          </view>
+
+          <view class="profile-summary">
+            <text class="summary-title">你的档案</text>
+            <text class="summary-row"
+              >{{ sexOptions.find((s) => s.value === form.sex)?.label }} · {{ form.birthdate }}（{{
+                age
+              }}岁）</text
+            >
+            <text class="summary-row"
+              >{{ form.heightCm }} cm · {{ form.weightKg }} kg · BMI {{ bmi }} ·
+              {{ bmiLabel }}</text
+            >
+          </view>
+          <text class="form-hint">保存后会解锁首页，之后每天记下一点真实生活就好。</text>
+          <text v-if="error" class="error-box">{{ error }}</text>
+        </view>
+
+        <view class="step-actions">
+          <button v-if="step > 1" class="btn-back" @tap="back">上一步</button>
+          <button class="btn-next" :disabled="!canAdvance || saving" @tap="next">
+            {{ saving ? '保存中...' : step === 4 ? '保存并进入首页' : '继续' }}
+          </button>
+        </view>
       </view>
-      <view v-else class="step hz-rise">
-        <text class="eyebrow">最后确认一下</text><text class="title">你的健康画像准备好了</text>
-        <view class="summary"
-          ><text>{{ form.displayName || '新朋友' }}</text
-          ><text>{{ form.heightCm }} cm · {{ form.weightKg }} kg</text
-          ><text>目标：{{ selectedGoalLabel }}</text
-          ><text>BMI {{ bmi?.toFixed(1) }} · {{ bmiLabel }}</text></view
-        >
-        <text class="hint">保存后会解锁首页，之后每天记下一点真实生活就好。</text>
-        <text v-if="error" class="error">{{ error }}</text>
-      </view>
-      <view class="actions"
-        ><button v-if="step > 1" class="back" @tap="back">上一步</button
-        ><button class="primary" :disabled="!canAdvance || saving" @tap="next">
-          {{ saving ? '保存中...' : step === 4 ? '保存并进入首页' : '继续' }}
-        </button></view
-      >
     </template>
   </view>
 </template>
@@ -197,22 +234,16 @@ const saving = ref(false);
 const error = ref('');
 const heroImage = ref('/static/illustrations/onboarding-guide-vertical.png');
 
-// 背景插画按步骤切换
-const bgArt = computed(() => {
-  const arts = [
-    '/static/illustrations/onboarding-guide-vertical.png',
-    '/static/illustrations/program-mood.png',
-    '/static/illustrations/program-weight.png',
-    '/static/illustrations/xuxu-complete.png',
-    '/static/illustrations/home-companion-banner.png',
-  ];
-  return arts[step.value] || arts[0];
-});
+function useFallbackHero() {
+  heroImage.value = '/static/illustrations/onboarding-hero-vertical.png';
+}
+
 const sexOptions = [
-  { value: 'female' as const, label: '女性' },
-  { value: 'male' as const, label: '男性' },
-  { value: 'unspecified' as const, label: '不方便说' },
+  { value: 'female' as const, label: '女性', icon: '♀' },
+  { value: 'male' as const, label: '男性', icon: '♂' },
+  { value: 'unspecified' as const, label: '不方便说', icon: '·' },
 ];
+
 const goalOptions = [
   {
     value: 'weight_management' as const,
@@ -224,501 +255,560 @@ const goalOptions = [
     label: '保持当前状态',
     detail: '稳定体重，也稳定生活的节律',
   },
-  { value: 'muscle_gain' as const, label: '力量与体能', detail: '让身体更有力量，行动更有底气' },
-  { value: 'sleep' as const, label: '睡眠与精力', detail: '找回更规律的作息和白天状态' },
-  { value: 'energy' as const, label: '饮食与活动', detail: '吃得更明白，动得更自然' },
-  { value: 'mood' as const, label: '压力与情绪', detail: '给情绪留出被看见和照顾的空间' },
+  { value: 'fitness' as const, label: '增强体能', detail: '通过日常活动提升身体活力' },
+  { value: 'health_monitoring' as const, label: '健康监测', detail: '观察生活方式对身体的影响' },
 ];
-const bmiLabel = computed(
-  () =>
-    ({ underweight: '偏瘦', normal: '正常', overweight: '偏重', obesity: '肥胖' })[
-      bmiCategory.value || 'normal'
-    ],
-);
-const bmiAdvice = computed(() => {
-  return (
-    {
-      underweight: '可以把规律吃饭和充足休息放在第一位。',
-      normal: '你的身高体重处于较舒适的范围，继续保持规律节奏。',
-      overweight: '先从一件容易坚持的小行动开始，不需要急着改变全部。',
-      obesity: '建议优先建立规律记录，必要时咨询专业人士获得帮助。',
-    } as Record<string, string>
-  )[bmiCategory.value || 'normal'];
+
+const today = computed(() => new Date().toISOString().slice(0, 10));
+const age = computed(() => {
+  if (!form.birthdate) return null;
+  const birth = new Date(form.birthdate);
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const monthDiff = now.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) age -= 1;
+  return age;
 });
-const bmiProgress = computed(() => {
-  if (bmi.value === null) return 0;
-  return Math.max(4, Math.min(100, ((bmi.value - 14) / 22) * 100));
+
+const canAdvance = computed(() => canAdvanceOnboarding(form, step.value));
+const bmiLabel = computed(() => {
+  if (!bmiCategory.value) return '';
+  const labels: Record<string, string> = {
+    underweight: '偏瘦',
+    normal: '正常',
+    overweight: '超重',
+    obese: '肥胖',
+  };
+  return labels[bmiCategory.value] || '';
 });
-const selectedGoalLabel = computed(
-  () =>
-    form.goals
-      .map((goal) => goalOptions.find((item) => item.value === goal)?.label)
-      .filter(Boolean)
-      .join('、') || '还没有选择目标',
-);
-const progress = computed(() => onboardingProgress(step.value));
-const canAdvance = computed(() => canAdvanceOnboarding(step.value, bmi.value, form.goals));
-function useFallbackHero() {
-  if (heroImage.value !== '/static/illustrations/onboarding-hero-vertical.png') {
-    heroImage.value = '/static/illustrations/onboarding-hero-vertical.png';
-  }
+
+function setHeight(e: any) {
+  form.heightCm = String(e.detail.value);
 }
-function isGoalBlocked(value: (typeof goalOptions)[number]['value']) {
-  return form.goals.length >= 3 && !form.goals.includes(value);
+function setWeight(e: any) {
+  form.weightKg = String(e.detail.value);
 }
-function toggleGoal(value: (typeof goalOptions)[number]['value']) {
-  const result = toggleOnboardingGoal(form.goals, value);
-  if (result.limited) {
-    uni.showToast({ title: '最多选择 3 个方向', icon: 'none' });
-    return;
-  }
-  form.goals.splice(0, form.goals.length, ...(result.goals as typeof form.goals));
-  form.primaryGoal = form.goals[0] || '';
+function setBirthdate(e: any) {
+  form.birthdate = e.detail.value;
 }
+function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
+  toggleOnboardingGoal(form, goal);
+}
+
 function back() {
-  step.value -= 1;
-  onboardingState.step.value = step.value;
+  if (step.value > 1) step.value -= 1;
 }
-function exitOnboarding() {
-  if (!shouldConfirmOnboardingExit(step.value)) return;
-  uni.showModal({
-    title: '退出建档？',
-    content: '已填写的内容不会保存，之后仍可以重新开始。',
-    confirmText: '退出',
-    cancelText: '继续填写',
-    success: ({ confirm }) => {
-      if (confirm) uni.redirectTo({ url: '/pages/bootstrap/BootstrapPage' });
-    },
-  });
-}
-function setHeight(event: { detail: { value: number } }) {
-  form.heightCm = String(event.detail.value);
-}
-function setWeight(event: { detail: { value: number } }) {
-  form.weightKg = Number(event.detail.value).toFixed(1);
-}
-function next() {
-  if (!canAdvance.value) return;
+
+async function next() {
   if (step.value < 4) {
     step.value += 1;
-    onboardingState.step.value = step.value;
     return;
   }
-  save();
-}
-async function save() {
-  error.value = '';
+
   saving.value = true;
-  saveLocalProfile({
-    displayName: form.displayName || '新朋友',
-    heightCm: Number(form.heightCm),
-    weightKg: Number(form.weightKg),
-    primaryGoal: form.primaryGoal,
-    goals: form.goals,
-  });
+  error.value = '';
+
   try {
-    const client = createMiniApiClient();
-    await client.update('/health-profiles/me', {
-      displayName: form.displayName || undefined,
+    await saveLocalProfile({
       sex: form.sex,
+      birthdate: form.birthdate,
       heightCm: Number(form.heightCm),
       weightKg: Number(form.weightKg),
-      primaryGoal: form.primaryGoal,
+      goals: form.goals,
+      consentTimestamp: new Date().toISOString(),
     });
-    onboardingState.completed.value = true;
-    uni.switchTab({ url: '/pages/home/HomePage' });
-  } catch (reason) {
-    onboardingState.completed.value = true;
-    uni.showToast({ title: '已保存到本机', icon: 'success' });
-    uni.switchTab({ url: '/pages/home/HomePage' });
-  } finally {
+
+    onboardingState.step.value = 5;
+    uni.reLaunch({ url: '/pages/home/HomePage' });
+  } catch (err: any) {
+    error.value = err.message || '保存失败，请重试';
     saving.value = false;
+  }
+}
+
+function exitOnboarding() {
+  if (shouldConfirmOnboardingExit(step.value)) {
+    uni.showModal({
+      title: '确定退出？',
+      content: '当前填写的信息不会保存',
+      confirmText: '退出',
+      cancelText: '继续填写',
+      success: (res) => {
+        if (res.confirm) {
+          uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
+        }
+      },
+    });
+  } else {
+    uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
   }
 }
 </script>
 
 <style scoped>
-.page {
+.onboarding-page {
   min-height: 100vh;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  padding: 92rpx 32rpx 48rpx;
-  background: #f7fbf8;
-  color: #183425;
+  background: linear-gradient(180deg, #f9fcfa 0%, #f3f8f4 100%);
 }
-.welcome-screen {
+
+/* ===== 欢迎屏：全屏沉浸插画 ===== */
+.welcome-immersive {
+  position: relative;
   display: flex;
+  min-height: 100vh;
   flex-direction: column;
-  min-height: calc(100vh - 190rpx);
-}
-.welcome-art-frame {
-  width: 100%;
-  height: 640rpx;
+  justify-content: flex-end;
   overflow: hidden;
-  border-radius: 32rpx;
-  background: #fffdf5;
 }
-.welcome-art {
-  display: block;
+.welcome-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  z-index: 0;
 }
-.welcome-copy {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  padding: 32rpx 28rpx 36rpx;
-  border-radius: 28rpx;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(28rpx);
-  box-shadow: 0 12rpx 48rpx rgba(46, 97, 64, 0.14);
-  position: relative;
-}
-.xuxu {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-  color: #566e5c;
-  font-size: 22rpx;
-}
-.xuxu image {
-  width: 72rpx;
-  height: 72rpx;
-  border: 3rpx solid #f4e3a0;
-  border-radius: 50%;
-  box-shadow: 0 4rpx 12rpx rgba(239, 214, 137, 0.3);
-}
-.xuxu text {
-  display: block;
-  font-weight: 700;
-}
-.xuxu text:last-child {
-  margin-top: 3rpx;
-  color: #778a7d;
-  font-weight: 400;
-}
-.brand,
-.eyebrow,
-.title,
-.hint,
-.label {
-  display: block;
-}
-.brand,
-.eyebrow {
-  color: #5a9572;
-  font-size: 24rpx;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.88;
-}
-.welcome-copy .brand {
-  margin-top: 20rpx;
-  font-size: 28rpx;
-  letter-spacing: 0.06em;
-}
-.title {
-  margin-top: 16rpx;
-  font-size: 46rpx;
-  font-weight: 700;
-  line-height: 1.32;
-  letter-spacing: -0.01em;
-}
-.welcome-title {
-  display: block;
-  margin-top: 16rpx;
-  font-size: 48rpx;
-  font-weight: 700;
-  line-height: 1.32;
-  letter-spacing: -0.01em;
-}
-.welcome-copy .primary {
+.welcome-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 96rpx;
-  flex: none;
-  margin-top: 28rpx;
-  font-size: 32rpx;
-  line-height: 96rpx;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(247, 251, 248, 0) 0%, rgba(247, 251, 248, 0.92) 60%);
+  z-index: 1;
 }
-.hint {
-  margin-top: 20rpx;
+.welcome-content {
+  position: relative;
+  z-index: 2;
+  padding: 0 36rpx 88rpx;
+}
+.xuxu-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+.xuxu-intro image {
+  width: 88rpx;
+  height: 88rpx;
+  border: 4rpx solid #f4e3a0;
+  border-radius: 50%;
+  box-shadow: 0 8rpx 24rpx rgba(239, 214, 137, 0.4);
+}
+.xuxu-speech {
+  flex: 1;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20rpx);
+}
+.xuxu-greeting {
+  display: block;
+  color: #2d6943;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.xuxu-subtitle {
+  display: block;
+  margin-top: 4rpx;
   color: #6f8879;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+.brand {
+  display: block;
+  margin-bottom: 12rpx;
+  color: #5a9572;
   font-size: 26rpx;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.welcome-slogan {
+  display: block;
+  margin-bottom: 16rpx;
+  color: #183425;
+  font-size: 52rpx;
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+}
+.welcome-desc {
+  display: block;
+  margin-bottom: 32rpx;
+  color: #4a6853;
+  font-size: 28rpx;
   line-height: 1.68;
-  letter-spacing: 0.01em;
+}
+.btn-start {
+  width: 100%;
+  height: 104rpx;
+  border-radius: 999rpx;
+  color: var(--hz-primary-ink);
+  background: var(--hz-primary-soft);
+  border: 2rpx solid var(--hz-primary-border);
+  box-shadow: 0 12rpx 32rpx rgba(47, 124, 80, 0.18);
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 104rpx;
 }
 .disclaimer {
   display: block;
-  margin-top: 16rpx;
+  margin-top: 20rpx;
   color: #96a89d;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.6;
-  letter-spacing: 0.02em;
+  text-align: center;
 }
-.head {
+
+/* ===== 步骤页：清爽表单卡 ===== */
+.step-container {
+  min-height: calc(100vh - var(--status-bar-height) - 88rpx);
+  padding: 32rpx 32rpx 88rpx;
+}
+.step-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 32rpx;
 }
-.progress {
-  height: 10rpx;
-  margin-top: 28rpx;
-  overflow: hidden;
-  border-radius: 10rpx;
-  background: #dfebe1;
-}
-.progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #8fbf9d, #5f9e76);
-  transition: width 0.4s cubic-bezier(0.22, 0.8, 0.36, 1);
-}
-.input,
-.input-row {
-  box-sizing: border-box;
-  width: 100%;
-  height: 98rpx;
-  border: 2rpx solid #e0ebe3;
-  border-radius: 20rpx;
-  background: #fff;
-  box-shadow: 0 2rpx 12rpx rgba(46, 97, 64, 0.04);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-.input {
-  padding: 0 24rpx;
-  font-size: 30rpx;
-}
-.input:focus {
-  border-color: #c2dcc9;
-  box-shadow: 0 4rpx 18rpx rgba(46, 97, 64, 0.08);
-}
-.label {
-  margin: 32rpx 0 14rpx;
-  color: #506e5a;
-  font-size: 25rpx;
-}
-.choices {
+.progress-dots {
   display: flex;
   gap: 12rpx;
 }
-.choice {
-  flex: 1;
-  padding: 19rpx 6rpx;
-  border: 2rpx solid #dceadd;
-  border-radius: 14rpx;
-  color: #587362;
-  background: #fff;
+.dot {
+  width: 32rpx;
+  height: 8rpx;
+  border-radius: 8rpx;
+  background: #dfe9e1;
+  transition: all 0.3s ease;
+}
+.dot.active {
+  width: 64rpx;
+  background: linear-gradient(90deg, #79ac8c, #5f9e76);
+}
+.progress-text {
+  color: #6f8879;
   font-size: 24rpx;
+  font-weight: 600;
 }
-.selected {
-  border-color: #9ec6ab !important;
-  color: var(--hz-primary-ink) !important;
-  background: var(--hz-primary-soft) !important;
-  transform: translateY(-2rpx);
-  box-shadow: 0 8rpx 24rpx rgba(46, 125, 79, 0.12);
+
+.step-form {
+  padding: 44rpx 36rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 40rpx rgba(46, 97, 64, 0.08);
 }
-.input-row {
-  display: flex;
-  align-items: center;
-  margin-top: 18rpx;
+.form-head {
+  margin-bottom: 40rpx;
 }
-.input-row .input {
-  border: 0;
-}
-.input-row text {
-  padding-right: 22rpx;
-  color: #6d8879;
-}
-.measure-slider {
-  margin: 18rpx 2rpx 6rpx;
-  padding: 16rpx 18rpx 8rpx;
-  border-radius: 16rpx;
-  background: #f1f8f1;
-}
-.measure-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #557260;
-  font-size: 22rpx;
-}
-.measure-label text:last-child {
-  color: #2f7d50;
-  font-size: 25rpx;
-  font-weight: 700;
-}
-.measure-slider slider {
-  margin: 3rpx 0 0;
-}
-.bmi-card,
-.empty-card,
-.summary {
-  margin-top: 24rpx;
-  padding: 22rpx;
-  border-radius: 18rpx;
-  background: #e8f4e8;
-}
-.bmi-value,
-.bmi-label,
-.bmi-note {
+.form-label {
   display: block;
+  margin-bottom: 12rpx;
+  color: #5a9572;
+  font-size: 24rpx;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-.bmi-value {
-  color: #2c774d;
-  font-size: 60rpx;
-  font-weight: 700;
-}
-.bmi-label {
-  margin-top: 4rpx;
-  color: #447b59;
-  font-size: 27rpx;
-}
-.bmi-advice {
+.form-title {
   display: block;
-  margin-top: 12rpx;
-  color: #4f735a;
-  font-size: 23rpx;
-  line-height: 1.5;
+  margin-bottom: 16rpx;
+  color: #183425;
+  font-size: 48rpx;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
 }
-.bmi-scale {
-  height: 10rpx;
-  margin-top: 20rpx;
-  overflow: hidden;
-  border-radius: 10rpx;
-  background: linear-gradient(90deg, #9dc7a5 0 27%, #62a57b 27% 58%, #d3b76d 58% 78%, #d18a6b 78%);
+.form-hint {
+  display: block;
+  color: #6f8879;
+  font-size: 26rpx;
+  line-height: 1.68;
 }
-.bmi-scale-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: rgba(28, 75, 44, 0.16);
+
+/* 性别选择 */
+.sex-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
 }
-.bmi-scale-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 7rpx;
-  color: #7a9180;
-  font-size: 19rpx;
-}
-.bmi-note {
-  margin-top: 14rpx;
-  color: #718a7b;
-  font-size: 21rpx;
-}
-.empty-card {
-  color: #748b7b;
-  background: #fff;
-  font-size: 25rpx;
-}
-.goal-list {
+.sex-btn {
   display: flex;
   flex-direction: column;
-  gap: 13rpx;
-  margin-top: 26rpx;
+  align-items: center;
+  justify-content: center;
+  height: 140rpx;
+  padding: 24rpx;
+  border: 3rpx solid #e8f0e9;
+  border-radius: 24rpx;
+  background: #fafcfb;
+  transition: all 0.25s ease;
 }
-.goal {
+.sex-btn.selected {
+  border-color: #9ec6ab;
+  background: var(--hz-primary-soft);
+  transform: translateY(-4rpx);
+  box-shadow: 0 12rpx 32rpx rgba(46, 125, 79, 0.16);
+}
+.sex-icon {
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  min-height: 96rpx;
-  padding: 18rpx 20rpx;
-  border: 2rpx solid #dceadd;
-  border-radius: 17rpx;
-  color: #31543e;
-  text-align: left;
-  background: #fff;
-  font-size: 27rpx;
-}
-.goal-copy {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 5rpx;
-}
-.goal-label {
-  color: #31543e;
-  font-size: 27rpx;
-  font-weight: 700;
-}
-.goal-detail {
-  color: #7a9180;
-  font-size: 21rpx;
-  line-height: 1.35;
-}
-.goal-check,
-.goal-radio {
-  width: 36rpx;
-  height: 36rpx;
-  flex: 0 0 36rpx;
-}
-.goal-radio {
-  box-sizing: border-box;
-  border: 2rpx solid #c6d9c9;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  margin-bottom: 12rpx;
   border-radius: 50%;
+  background: #f3f8f4;
+  font-size: 36rpx;
+  transition: all 0.25s ease;
 }
-.goal.blocked {
-  opacity: 0.46;
+.sex-btn.selected .sex-icon {
+  background: #fff;
 }
-.goal-meta {
+.sex-label {
+  color: #355b41;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+/* 身高体重 */
+.measure-card {
+  margin-bottom: 32rpx;
+  padding: 32rpx 28rpx;
+  border-radius: 24rpx;
+  background: #f9fcfa;
+}
+.measure-item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 22rpx;
-  color: #6f8777;
-  font-size: 22rpx;
+  margin-bottom: 20rpx;
 }
-.goal-meta text:first-child {
-  color: #36794f;
-  font-weight: 700;
-}
-.goal-check {
-  margin-left: auto;
-}
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: 11rpx;
+.measure-name {
   color: #355b41;
   font-size: 28rpx;
+  font-weight: 600;
 }
-.actions {
+.measure-input-wrap {
   display: flex;
-  gap: 18rpx;
-  margin-top: 44rpx;
+  align-items: center;
+  gap: 12rpx;
 }
-.error {
+.measure-input {
+  width: 160rpx;
+  height: 72rpx;
+  padding: 0 20rpx;
+  border: 2rpx solid #e8f0e9;
+  border-radius: 20rpx;
+  background: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: right;
+  transition: all 0.2s ease;
+}
+.measure-input:focus {
+  border-color: #b9d6c3;
+  box-shadow: 0 4rpx 20rpx rgba(46, 97, 64, 0.1);
+}
+.measure-unit {
+  color: #6f8879;
+  font-size: 28rpx;
+}
+
+.bmi-result {
+  margin-top: 40rpx;
+  padding: 36rpx 32rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, rgba(232, 247, 237, 0.7), rgba(225, 241, 230, 0.5));
+  text-align: center;
+}
+.bmi-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+.bmi-value {
+  background: linear-gradient(135deg, #4a8f5e, #347c50);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 88rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+.bmi-badge {
+  padding: 12rpx 20rpx;
+  border-radius: 999rpx;
+  background: #e3f2e6;
+  color: #3f7953;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.bmi-hint {
+  color: #6f8879;
+  font-size: 24rpx;
+}
+
+/* 生日 */
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 108rpx;
+  padding: 0 32rpx;
+  border: 3rpx solid #e8f0e9;
+  border-radius: 24rpx;
+  background: #fafcfb;
+  transition: all 0.2s ease;
+}
+.date-value {
+  color: #183425;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+.date-placeholder {
+  color: #96a89d;
+  font-size: 32rpx;
+}
+.date-arrow {
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.3;
+}
+.age-result {
   display: block;
-  margin-top: 26rpx;
-  padding: 20rpx 24rpx;
-  border-radius: 18rpx;
-  border: 1rpx solid #fcd9cd;
+  margin-top: 24rpx;
+  color: #4a6853;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+/* 健康目标 */
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  margin-bottom: 32rpx;
+}
+.goal-tile {
+  position: relative;
+  padding: 28rpx 24rpx;
+  border: 3rpx solid #e8f0e9;
+  border-radius: 24rpx;
+  background: #fafcfb;
+  text-align: left;
+  transition: all 0.25s ease;
+}
+.goal-tile.selected {
+  border-color: #9ec6ab;
+  background: var(--hz-primary-soft);
+  transform: translateY(-4rpx);
+  box-shadow: 0 12rpx 32rpx rgba(46, 125, 79, 0.16);
+}
+.goal-check {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #d4e2d7;
+  border-radius: 50%;
+  background: #fff;
+  transition: all 0.25s ease;
+}
+.goal-tile.selected .goal-check {
+  border-color: #79ac8c;
+  background: #79ac8c;
+}
+.goal-check image {
+  width: 20rpx;
+  height: 20rpx;
+  filter: brightness(10);
+}
+.goal-name {
+  display: block;
+  margin-bottom: 8rpx;
+  color: #183425;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.goal-desc {
+  display: block;
+  color: #6f8879;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
+.profile-summary {
+  margin-bottom: 24rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 20rpx;
+  background: #f9fcfa;
+}
+.summary-title {
+  display: block;
+  margin-bottom: 12rpx;
+  color: #5a9572;
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.summary-row {
+  display: block;
+  margin-bottom: 6rpx;
+  color: #355b41;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+.error-box {
+  display: block;
+  margin-top: 24rpx;
+  padding: 24rpx 28rpx;
+  border: 2rpx solid #fcd9cd;
+  border-radius: 20rpx;
   color: #a85f4b;
   background: #fff8f5;
   font-size: 24rpx;
   line-height: 1.6;
 }
-.primary,
-.back {
-  height: 88rpx;
-  border-radius: 999rpx;
-  font-size: 29rpx;
-  font-weight: 600;
-  line-height: 88rpx;
+
+.step-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 32rpx;
 }
-.primary {
+.btn-back,
+.btn-next {
+  height: 104rpx;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 104rpx;
+}
+.btn-back {
+  width: 180rpx;
+  color: #4d6e58;
+  background: #ffffff;
+  border: 3rpx solid #dfe9e1;
+}
+.btn-next {
   flex: 1;
   color: var(--hz-primary-ink);
   background: var(--hz-primary-soft);
   border: 2rpx solid var(--hz-primary-border);
-  box-shadow: 0 8rpx 20rpx rgba(47, 124, 80, 0.1);
+  box-shadow: 0 12rpx 32rpx rgba(47, 124, 80, 0.18);
 }
-.back {
-  width: 190rpx;
-  color: #4d6e58;
-  background: #fff;
-  border: 2rpx solid #dfe9e1;
-}
-.primary[disabled] {
+.btn-next[disabled] {
   opacity: 0.5;
-  filter: grayscale(0.3);
+  filter: grayscale(0.4);
 }
 </style>
