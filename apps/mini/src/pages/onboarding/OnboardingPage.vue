@@ -167,9 +167,9 @@
             <text class="form-title">记录时光的起点</text>
             <text class="form-hint">用于计算年龄相关的健康参考范围</text>
           </view>
-          <picker mode="date" :value="form.birthdate" :end="today" @change="setBirthdate">
+          <picker mode="date" :value="form.birthDate" :end="today" @change="setBirthdate">
             <view class="date-selector">
-              <text v-if="form.birthdate" class="date-value">{{ form.birthdate }}</text>
+              <text v-if="form.birthDate" class="date-value">{{ form.birthDate }}</text>
               <text v-else class="date-placeholder">选择生日</text>
               <image src="/static/icons/forward.svg" class="date-arrow" mode="aspectFit" />
             </view>
@@ -206,7 +206,7 @@
           <view class="profile-summary">
             <text class="summary-title">你的档案</text>
             <text class="summary-row"
-              >{{ sexOptions.find((s) => s.value === form.sex)?.label }} · {{ form.birthdate }}（{{
+              >{{ sexOptions.find((s) => s.value === form.sex)?.label }} · {{ form.birthDate }}（{{
                 age
               }}岁）</text
             >
@@ -276,8 +276,8 @@ const goalOptions = [
 
 const today = computed(() => new Date().toISOString().slice(0, 10));
 const age = computed(() => {
-  if (!form.birthdate) return null;
-  const birth = new Date(form.birthdate);
+  if (!form.birthDate) return null;
+  const birth = new Date(form.birthDate);
   const now = new Date();
   let age = now.getFullYear() - birth.getFullYear();
   const monthDiff = now.getMonth() - birth.getMonth();
@@ -288,7 +288,7 @@ const age = computed(() => {
 const canAdvance = computed(() => {
   if (step.value === 1) return !!form.sex;
   if (step.value === 2) return bmi.value !== null;
-  if (step.value === 3) return !!form.birthdate;
+  if (step.value === 3) return !!form.birthDate;
   if (step.value === 4) return form.goals.length > 0;
   return true;
 });
@@ -330,10 +330,11 @@ function setWeight(e: any) {
   form.weightKg = String(e.detail.value);
 }
 function setBirthdate(e: any) {
-  form.birthdate = e.detail.value;
+  form.birthDate = e.detail.value;
 }
 function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
-  toggleOnboardingGoal(form, goal);
+  const result = toggleOnboardingGoal(form.goals, goal);
+  form.goals = result.goals;
 }
 
 function back() {
@@ -352,7 +353,7 @@ async function next() {
   try {
     await saveLocalProfile({
       sex: form.sex,
-      birthdate: form.birthdate,
+      birthdate: form.birthDate,
       heightCm: Number(form.heightCm),
       weightKg: Number(form.weightKg),
       goals: form.goals,
