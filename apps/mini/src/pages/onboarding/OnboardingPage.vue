@@ -189,7 +189,7 @@ const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(onboardingState.step.value);
 const saving = ref(false);
 const error = ref('');
-const heroImage = ref('/static/illustrations/onboarding-hero-square.png');
+const heroImage = ref('/static/illustrations/onboarding-guide-vertical.png');
 const sexOptions = [
   { value: 'female' as const, label: '女性' },
   { value: 'male' as const, label: '男性' },
@@ -337,9 +337,8 @@ async function save() {
   width: 100%;
   height: 640rpx;
   overflow: hidden;
-  border-radius: 28rpx;
+  border-radius: 32rpx;
   background: #fffdf5;
-  box-shadow: 0 18rpx 42rpx rgba(54, 102, 66, 0.08);
 }
 .welcome-art {
   display: block;
@@ -350,7 +349,7 @@ async function save() {
   display: flex;
   flex: none;
   flex-direction: column;
-  padding: 22rpx 12rpx 0;
+  padding: 28rpx 20rpx 32rpx;
   background: #f7fbf8;
   position: relative;
 }
@@ -362,10 +361,11 @@ async function save() {
   font-size: 22rpx;
 }
 .xuxu image {
-  width: 64rpx;
-  height: 64rpx;
-  border: 3rpx solid #efd689;
+  width: 72rpx;
+  height: 72rpx;
+  border: 3rpx solid #f4e3a0;
   border-radius: 50%;
+  box-shadow: 0 4rpx 12rpx rgba(239, 214, 137, 0.3);
 }
 .xuxu text {
   display: block;
@@ -385,54 +385,64 @@ async function save() {
 }
 .brand,
 .eyebrow {
-  color: #3f805a;
+  color: #5a9572;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.88;
 }
 .welcome-copy .brand {
-  margin-top: 18rpx;
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  letter-spacing: 0.06em;
 }
 .title {
-  margin-top: 13rpx;
-  font-size: 42rpx;
+  margin-top: 16rpx;
+  font-size: 46rpx;
   font-weight: 700;
-  line-height: 1.28;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
 }
 .welcome-title {
   display: block;
-  margin-top: 12rpx;
-  font-size: 42rpx;
+  margin-top: 16rpx;
+  font-size: 48rpx;
   font-weight: 700;
-  line-height: 1.24;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
 }
 .welcome-copy .primary {
   width: 100%;
-  height: 86rpx;
+  height: 96rpx;
   flex: none;
-  margin-top: 24rpx;
-  line-height: 86rpx;
+  margin-top: 28rpx;
+  font-size: 32rpx;
+  line-height: 96rpx;
 }
 .hint {
-  margin-top: 16rpx;
-  color: #687f71;
-  font-size: 24rpx;
-  line-height: 1.6;
+  margin-top: 20rpx;
+  color: #6f8879;
+  font-size: 26rpx;
+  line-height: 1.68;
+  letter-spacing: 0.01em;
 }
 .disclaimer {
   display: block;
-  margin-top: 12rpx;
-  color: #8a9b90;
-  font-size: 20rpx;
-  line-height: 1.55;
+  margin-top: 16rpx;
+  color: #96a89d;
+  font-size: 21rpx;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
 }
 .head {
   margin-bottom: 32rpx;
 }
 .progress {
-  height: 8rpx;
-  margin-top: 24rpx;
+  height: 10rpx;
+  margin-top: 28rpx;
   overflow: hidden;
-  border-radius: 8rpx;
+  border-radius: 10rpx;
   background: #dfebe1;
 }
 .progress-fill {
@@ -445,14 +455,22 @@ async function save() {
 .input-row {
   box-sizing: border-box;
   width: 100%;
-  height: 88rpx;
-  border: 2rpx solid #d9e8dc;
-  border-radius: 16rpx;
+  height: 98rpx;
+  border: 2rpx solid #e0ebe3;
+  border-radius: 20rpx;
   background: #fff;
+  box-shadow: 0 2rpx 12rpx rgba(46, 97, 64, 0.04);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .input {
-  padding: 0 22rpx;
-  font-size: 28rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+}
+.input:focus {
+  border-color: #c2dcc9;
+  box-shadow: 0 4rpx 18rpx rgba(46, 97, 64, 0.08);
 }
 .label {
   margin: 32rpx 0 14rpx;
@@ -476,6 +494,8 @@ async function save() {
   border-color: #9ec6ab !important;
   color: var(--hz-primary-ink) !important;
   background: var(--hz-primary-soft) !important;
+  transform: translateY(-2rpx);
+  box-shadow: 0 8rpx 24rpx rgba(46, 125, 79, 0.12);
 }
 .input-row {
   display: flex;
@@ -641,18 +661,19 @@ async function save() {
 }
 .actions {
   display: flex;
-  gap: 16rpx;
-  margin-top: 34rpx;
+  gap: 18rpx;
+  margin-top: 44rpx;
 }
 .error {
   display: block;
-  margin-top: 22rpx;
-  padding: 16rpx 18rpx;
-  border-radius: 14rpx;
+  margin-top: 26rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 18rpx;
+  border: 1rpx solid #fcd9cd;
   color: #a85f4b;
-  background: #fff1ed;
-  font-size: 22rpx;
-  line-height: 1.5;
+  background: #fff8f5;
+  font-size: 24rpx;
+  line-height: 1.6;
 }
 .primary,
 .back {
@@ -676,6 +697,7 @@ async function save() {
   border: 2rpx solid #dfe9e1;
 }
 .primary[disabled] {
-  opacity: 0.45;
+  opacity: 0.5;
+  filter: grayscale(0.3);
 }
 </style>
