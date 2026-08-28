@@ -139,7 +139,7 @@
             <text class="grid-num">0</text>
             <text class="grid-unit">毫升</text>
           </view>
-          <view class="grid-icon">💧</view>
+          <image class="grid-icon-img" src="/static/icons/water-drop.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=sleep')">
@@ -150,7 +150,7 @@
           <view class="grid-data">
             <text class="grid-hint">没有记录</text>
           </view>
-          <view class="grid-icon">🌙</view>
+          <image class="grid-icon-img" src="/static/icons/sleep.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=activity')">
@@ -162,7 +162,7 @@
             <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
             <text class="grid-unit">分钟</text>
           </view>
-          <view class="grid-icon">🏃</view>
+          <image class="grid-icon-img" src="/static/icons/activity.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" @tap="toXuxu">
@@ -172,7 +172,7 @@
           <view class="grid-data">
             <text class="grid-hint">记录今天</text>
           </view>
-          <view class="grid-icon">🙂</view>
+          <image class="grid-icon-img" src="/static/icons/mood-smile.jpg" mode="aspectFit" />
         </button>
       </view>
 
@@ -736,6 +736,16 @@ onShow(() => {
   opacity: 0.2;
 }
 
+.grid-icon-img {
+  position: absolute;
+  bottom: 12rpx;
+  right: 12rpx;
+  width: 56rpx;
+  height: 56rpx;
+  opacity: 0.25;
+  border-radius: 8rpx;
+}
+
 /* 5. 轻断食卡片 */
 .fasting-card {
   position: relative;
@@ -834,5 +844,24 @@ onShow(() => {
 
 /* 错误状态 */
 .error-state {
- 
+  padding: 80rpx 24rpx;
+  text-align: center;
+}
+
+.error-state text {
+  display: block;
+  color: #9ba8a0;
+  font-size: 24rpx;
+  margin-bottom: 12rpx;
+}
+
+.error-state button {
+  margin-top: 20rpx;
+  padding: 14rpx 28rpx;
+  border-radius: 999rpx;
+  background: rgba(127, 204, 143, 0.12);
+  color: #5a9572;
+  font-size: 24rpx;
+  font-weight: 700;
+}
 </style>
