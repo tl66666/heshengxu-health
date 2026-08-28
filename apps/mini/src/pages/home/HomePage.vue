@@ -196,6 +196,38 @@
           <view class="feature-icon icon-mood-large"></view>
         </button>
       </view>
+
+      <!-- 5. 轻断食卡片（参考图2） -->
+      <view class="intermittent-fasting-card hz-rise hz-rise-4">
+        <view class="card-header-row">
+          <text class="card-title">轻断食</text>
+          <view class="if-badge">16:8模式</view>
+        </view>
+        <view class="if-body">
+          <text class="if-label">用餐时间剩余</text>
+          <text class="if-countdown">01:04:08</text>
+        </view>
+        <view class="if-icon"></view>
+      </view>
+
+      <!-- 6. 血糖卡片 -->
+      <view class="blood-sugar-card hz-rise hz-rise-5">
+        <view class="card-header-row">
+          <text class="card-title">血糖</text>
+          <button class="add-round-btn" @tap="go('/pages/records/RecordsPage?type=blood-sugar')">+</button>
+        </view>
+        <view class="bs-body">
+          <text class="bs-hint">暂无记录</text>
+          <text class="bs-value">-- mmol/L</text>
+        </view>
+        <view class="bs-icon"></view>
+      </view>
+
+      <!-- 7. 编辑首页卡片（虚线框） -->
+      <button class="edit-home-card hz-rise hz-rise-6" @tap="go('/pages/home/edit-cards')">
+        <view class="edit-icon">✎</view>
+        <text class="edit-text">编辑首页卡片</text>
+      </button>
     </template>
     
     <view v-else-if="error" class="load-failed"
@@ -353,7 +385,7 @@ onShow(() => {
   background: #f5f8f6;
   min-height: 100vh;
   padding: 32rpx;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 32rpx);
+  padding-bottom: 200rpx; /* 修复：增加底部padding */
 }
 
 /* 顶部样式 */
@@ -527,10 +559,10 @@ onShow(() => {
   border-right-color: transparent;
 }
 
-/* 2. 饮食热量卡片 */
+/* 2. 饮食热量卡片 - 缩小 */
 .food-calorie-card {
   margin-bottom: 20rpx;
-  padding: 32rpx;
+  padding: 28rpx; /* 从32rpx缩小 */
   border-radius: 28rpx;
   background: #ffffff;
   box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
@@ -540,25 +572,25 @@ onShow(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24rpx 0 32rpx;
+  padding: 20rpx 0 24rpx; /* 从24rpx 0 32rpx缩小 */
 }
 
 .calorie-label {
   color: #76907d;
-  font-size: 24rpx;
+  font-size: 22rpx; /* 从24rpx缩小 */
   font-weight: 600;
-  margin-bottom: 12rpx;
+  margin-bottom: 10rpx; /* 从12rpx缩小 */
 }
 
 .calorie-big {
   display: flex;
   align-items: baseline;
-  gap: 8rpx;
+  gap: 6rpx;
 }
 
 .calorie-num {
   color: #2d6943;
-  font-size: 96rpx;
+  font-size: 80rpx; /* 从96rpx缩小 */
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -566,9 +598,9 @@ onShow(() => {
 
 .calorie-unit {
   color: #5a9572;
-  font-size: 32rpx;
+  font-size: 28rpx; /* 从32rpx缩小 */
   font-weight: 700;
-  margin-bottom: 10rpx;
+  margin-bottom: 8rpx;
 }
 
 .calorie-stats {
@@ -1021,5 +1053,165 @@ onShow(() => {
 
 .hz-rise-3 {
   animation-delay: 0.3s;
+}
+
+.hz-rise-4 {
+  animation-delay: 0.4s;
+}
+
+.hz-rise-5 {
+  animation-delay: 0.5s;
+}
+
+.hz-rise-6 {
+  animation-delay: 0.6s;
+}
+
+/* 5. 轻断食卡片 */
+.intermittent-fasting-card {
+  margin-bottom: 20rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.if-badge {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, rgba(100, 149, 237, 0.15) 0%, rgba(135, 206, 250, 0.1) 100%);
+  color: #5a8fd6;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.if-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.if-label {
+  color: #9ba8a0;
+  font-size: 22rpx;
+}
+
+.if-countdown {
+  color: #2d6943;
+  font-size: 52rpx;
+  font-weight: 900;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2rpx;
+}
+
+.if-icon {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(100, 149, 237, 0.3);
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.if-icon::before {
+  content: '';
+  position: absolute;
+  width: 3rpx;
+  height: 24rpx;
+  background: rgba(100, 149, 237, 0.5);
+  top: 8rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2rpx;
+}
+
+/* 6. 血糖卡片 */
+.blood-sugar-card {
+  margin-bottom: 20rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.bs-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.bs-hint {
+  color: #9ba8a0;
+  font-size: 22rpx;
+}
+
+.bs-value {
+  color: #2d6943;
+  font-size: 40rpx;
+  font-weight: 900;
+}
+
+.bs-icon {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  width: 50rpx;
+  height: 56rpx;
+  border: 4rpx solid rgba(220, 100, 100, 0.3);
+  border-radius: 12rpx;
+  opacity: 0.3;
+}
+
+.bs-icon::before {
+  content: '';
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  background: rgba(220, 100, 100, 0.5);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 7. 编辑首页卡片 */
+.edit-home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  width: 100%;
+  padding: 40rpx 32rpx;
+  margin-bottom: 20rpx;
+  border: 3rpx dashed #c8e6d0;
+  border-radius: 28rpx;
+  background: transparent;
+  transition: all 0.3s;
+}
+
+.edit-home-card:active {
+  transform: scale(0.98);
+  border-color: #7fcc8f;
+  background: rgba(232, 247, 237, 0.3);
+}
+
+.edit-icon {
+  font-size: 44rpx;
+  color: #7fcc8f;
+}
+
+.edit-text {
+  color: #5a9572;
+  font-size: 26rpx;
+  font-weight: 700;
 }
 </style>
