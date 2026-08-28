@@ -409,7 +409,8 @@ async function nextStep() {
     });
 
     onboardingState.step.value = 5;
-    uni.reLaunch({ url: '/pages/home/HomePage' });
+    onboardingState.completed.value = true;
+    uni.switchTab({ url: '/pages/home/HomePage' });
   } catch (err: any) {
     error.value = err.message || '保存失败，请重试';
     saving.value = false;
@@ -454,7 +455,7 @@ function confirmExit() {
 }
 .welcome-illustration {
   position: absolute;
-  top: 0;
+  top: -80rpx;
   left: 50%;
   width: 100%;
   transform: translateX(-50%);
@@ -465,8 +466,8 @@ function confirmExit() {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 60%;
-  background: linear-gradient(180deg, rgba(247, 251, 248, 0) 0%, rgba(247, 251, 248, 0.98) 70%);
+  height: 65%;
+  background: linear-gradient(180deg, rgba(247, 251, 248, 0) 0%, rgba(247, 251, 248, 0.96) 75%);
   z-index: 1;
 }
 .welcome-body {
@@ -491,8 +492,8 @@ function confirmExit() {
   flex: 1;
   padding: 24rpx 28rpx;
   border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(24rpx);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(28rpx);
   box-shadow: 0 8rpx 32rpx rgba(46, 97, 64, 0.12);
 }
 .bubble-greeting {
