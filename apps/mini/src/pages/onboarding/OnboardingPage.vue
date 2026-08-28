@@ -270,8 +270,8 @@ const goalOptions = [
     label: '保持当前状态',
     detail: '稳定体重，也稳定生活的节律',
   },
-  { value: 'fitness' as const, label: '增强体能', detail: '通过日常活动提升身体活力' },
-  { value: 'health_monitoring' as const, label: '健康监测', detail: '观察生活方式对身体的影响' },
+  { value: 'muscle_gain' as const, label: '增肌塑形', detail: '通过运动和营养增强体质' },
+  { value: 'sleep' as const, label: '改善睡眠', detail: '建立规律作息和睡眠习惯' },
 ];
 
 const today = computed(() => new Date().toISOString().slice(0, 10));
@@ -334,7 +334,7 @@ function setBirthdate(e: any) {
 }
 function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
   const result = toggleOnboardingGoal(form.goals, goal);
-  form.goals = result.goals;
+  form.goals = result.goals as any;
 }
 
 function back() {
@@ -352,12 +352,11 @@ async function next() {
 
   try {
     await saveLocalProfile({
-      sex: form.sex,
-      birthdate: form.birthDate,
+      displayName: form.displayName || '新朋友',
       heightCm: Number(form.heightCm),
       weightKg: Number(form.weightKg),
-      goals: form.goals,
-      consentTimestamp: new Date().toISOString(),
+      primaryGoal: form.primaryGoal || form.goals[0] || '',
+      goals: form.goals as string[],
     });
 
     onboardingState.step.value = 5;
