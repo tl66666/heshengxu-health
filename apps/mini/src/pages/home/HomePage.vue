@@ -360,8 +360,12 @@ onShow(() => {
 .loading {
   padding: 100rpx 24rpx;
   text-align: center;
-  color: #9ba8a0;
+  color: #2d6943;
   font-size: 26rpx;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24rpx;
+  margin: 40rpx 0;
 }
 
 /* 通用卡片样式 */
@@ -738,12 +742,12 @@ onShow(() => {
 
 .grid-icon-img {
   position: absolute;
-  bottom: 12rpx;
-  right: 12rpx;
-  width: 56rpx;
-  height: 56rpx;
-  opacity: 0.25;
-  border-radius: 8rpx;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+  border-radius: 12rpx;
 }
 
 /* 5. 轻断食卡片 */
@@ -773,10 +777,10 @@ onShow(() => {
 
 .fasting-icon {
   position: absolute;
-  bottom: 16rpx;
-  right: 16rpx;
-  font-size: 50rpx;
-  opacity: 0.2;
+  bottom: 12rpx;
+  right: 12rpx;
+  font-size: 64rpx;
+  opacity: 0.5;
 }
 
 /* 6. 血糖卡片 */
@@ -804,10 +808,10 @@ onShow(() => {
 
 .sugar-icon {
   position: absolute;
-  bottom: 16rpx;
-  right: 16rpx;
-  font-size: 44rpx;
-  opacity: 0.2;
+  bottom: 12rpx;
+  right: 12rpx;
+  font-size: 56rpx;
+  opacity: 0.5;
 }
 
 /* 7. 编辑卡片 */
