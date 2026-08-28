@@ -15,6 +15,30 @@
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
+      <!-- 体重卡片：薄荷风格 -->
+      <view class="weight-card hz-rise">
+        <view class="weight-header">
+          <view class="weight-title-group">
+            <text class="weight-label">当前体重</text>
+            <text v-if="today.profile" class="weight-value"
+              >{{ today.profile.weightKg }}<text class="weight-unit">kg</text></text
+            >
+            <text v-else class="weight-empty">未记录</text>
+          </view>
+          <button class="weight-record-btn" @tap="go('/pages/records/RecordsPage?type=weight')">
+            <image src="/static/icons/add.svg" class="btn-icon" mode="aspectFit" />
+            <text>记录</text>
+          </button>
+        </view>
+        <view v-if="today.profile" class="weight-meta">
+          <text class="meta-item">目标: {{ today.profile.weightKg - 2 }}kg</text>
+          <text class="meta-item">BMI: {{ bmiValue }}</text>
+        </view>
+        <view v-else class="weight-prompt">
+          <text>开始记录体重，追踪你的健康节律</text>
+        </view>
+      </view>
+
       <!-- 今日概览：只呈现真实记录状态，点击直达对应记录表单 -->
       <button class="overview hz-rise" @tap="go('/pages/records/RecordsPage')">
         <view class="overview-head">
@@ -184,6 +208,14 @@ const planText = computed(() =>
     ? '今天的小行动正在等你慢慢完成。'
     : '选择体重或睡眠方向，从一个小目标开始。',
 );
+
+const bmiValue = computed(() => {
+  const profile = today.value?.profile;
+  if (!profile || !profile.heightCm || !profile.weightKg) return null;
+  const heightM = profile.heightCm / 100;
+  const bmi = profile.weightKg / (heightM * heightM);
+  return bmi.toFixed(1);
+});
 
 function load() {
   if (onboardingState.completed.value) healthLoopState.loadToday(date);
@@ -594,6 +626,93 @@ onShow(() => {
   font-size: 20rpx;
   line-height: 1.4;
 }
+
+/* 体重卡片：薄荷风格 */
+.weight-card {
+  margin: 0 20rpx 24rpx;
+  padding: 36rpx 32rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #e8f7ed 0%, #f3fbf6 100%);
+  box-shadow: 0 8rpx 32rpx rgba(46, 97, 64, 0.08);
+}
+.weight-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+.weight-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.weight-label {
+  color: #5a9572;
+  font-size: 26rpx;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.weight-value {
+  color: #2d6943;
+  font-size: 72rpx;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.weight-unit {
+  margin-left: 8rpx;
+  color: #6f8879;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+.weight-empty {
+  color: #96a89d;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+.weight-record-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  height: 64rpx;
+  padding: 0 24rpx;
+  border: 2rpx solid #9ec6ab;
+  border-radius: 999rpx;
+  color: #3f7953;
+  background: #ffffff;
+  font-size: 28rpx;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+.weight-record-btn:active {
+  transform: scale(0.96);
+  background: #f9fcfa;
+}
+.btn-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+.weight-meta {
+  display: flex;
+  gap: 24rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid rgba(158, 198, 171, 0.2);
+}
+.meta-item {
+  color: #6f8879;
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+.weight-prompt {
+  padding-top: 20rpx;
+  border-top: 2rpx solid rgba(158, 198, 171, 0.2);
+}
+.weight-prompt text {
+  color: #8a9b90;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
 .loading {
   padding: 160rpx 20rpx;
   color: #70897a;
