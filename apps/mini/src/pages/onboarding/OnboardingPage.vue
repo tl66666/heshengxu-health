@@ -141,7 +141,22 @@
                 <text>{{ bmiLabel }}</text>
               </view>
             </view>
-            <text class="bmi-hint">当前 BMI · {{ bmiCategory }}</text>
+            <view class="bmi-scale">
+              <view class="scale-track">
+                <view class="scale-segment segment--underweight" />
+                <view class="scale-segment segment--normal" />
+                <view class="scale-segment segment--overweight" />
+                <view class="scale-segment segment--obese" />
+              </view>
+              <view class="scale-pointer" :style="{ left: bmiPointerPosition }" />
+              <view class="scale-labels">
+                <text>偏瘦</text>
+                <text>正常</text>
+                <text>超重</text>
+                <text>肥胖</text>
+              </view>
+            </view>
+            <text class="bmi-hint">当前 BMI · { bmiCategory }</text>
           </view>
         </view>
 
@@ -270,7 +285,13 @@ const age = computed(() => {
   return age;
 });
 
-const canAdvance = computed(() => canAdvanceOnboarding(form, step.value));
+const canAdvance = computed(() => {
+  if (step.value === 1) return !!form.sex;
+  if (step.value === 2) return bmi.value !== null;
+  if (step.value === 3) return !!form.birthdate;
+  if (step.value === 4) return form.goals.length > 0;
+  return true;
+});
 const bmiLabel = computed(() => {
   if (!bmiCategory.value) return '';
   const labels: Record<string, string> = {
@@ -280,6 +301,26 @@ const bmiLabel = computed(() => {
     obese: '肥胖',
   };
   return labels[bmiCategory.value] || '';
+});
+
+const bmiPointerPosition = computed(() => {
+  if (!bmi.value) return '0%';
+  const value = bmi.value;
+  // BMI 刻度：<18.5 偏瘦 | 18.5-23.9 正常 | 24-27.9 超重 | ≥28 肥胖
+  // 映射到 0-100% 位置
+  if (value < 18.5) {
+    // 偏瘦区 0-25%，15-18.5 映射
+    return `${Math.max(0, ((value - 15) / 3.5) * 25)}%`;
+  } else if (value < 24) {
+    // 正常区 25-50%，18.5-24 映射
+    return `${25 + ((value - 18.5) / 5.5) * 25}%`;
+  } else if (value < 28) {
+    // 超重区 50-75%，24-28 映射
+    return `${50 + ((value - 24) / 4) * 25}%`;
+  } else {
+    // 肥胖区 75-100%，28-35 映射
+    return `${Math.min(100, 75 + ((value - 28) / 7) * 25)}%`;
+  }
 });
 
 function setHeight(e: any) {
@@ -366,6 +407,7 @@ function exitOnboarding() {
   left: 0;
   width: 100%;
   height: 100%;
+  object-position: center bottom;
   z-index: 0;
 }
 .welcome-overlay {
@@ -812,3 +854,13 @@ function exitOnboarding() {
   filter: grayscale(0.4);
 }
 </style>
+
+/* BMI 横向刻度条 */ .bmi-scale { margin: 24rpx 0 16rpx; } .scale-track { display: flex; height:
+16rpx; border-radius: 16rpx; overflow: hidden; } .scale-segment { flex: 1; } .segment--underweight {
+background: #a8d5e2; } .segment--normal { background: #7fcc8f; } .segment--overweight { background:
+#f9c66b; } .segment--obese { background: #f28c8c; } .scale-pointer { position: relative; width: 0;
+height: 0; margin-top: -12rpx; margin-left: -12rpx; border-left: 12rpx solid transparent;
+border-right: 12rpx solid transparent; border-top: 20rpx solid #2d6943; transition: left 0.4s
+cubic-bezier(0.22, 0.8, 0.36, 1); } .scale-labels { display: flex; justify-content: space-around;
+margin-top: 12rpx; } .scale-labels text { flex: 1; color: #8a9b90; font-size: 20rpx; text-align:
+center; }
