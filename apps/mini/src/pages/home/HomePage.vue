@@ -20,8 +20,8 @@
         <view class="weight-header">
           <view class="weight-title-group">
             <text class="weight-label">当前体重</text>
-            <text v-if="today.records?.weight" class="weight-value"
-              >{{ today.records.weight.weightKg }}<text class="weight-unit">kg</text></text
+            <text v-if="today.todayRecords?.weight" class="weight-value"
+              >{{ today.todayRecords.weight.weightKg }}<text class="weight-unit">kg</text></text
             >
             <text v-else class="weight-empty">未记录</text>
           </view>
@@ -30,8 +30,8 @@
             <text>记录</text>
           </button>
         </view>
-        <view v-if="today.records?.weight" class="weight-meta">
-          <text class="meta-item">目标: {{ today.records.weight.weightKg - 2 }}kg</text>
+        <view v-if="today.todayRecords?.weight" class="weight-meta">
+          <text class="meta-item">目标: {{ today.todayRecords.weight.weightKg - 2 }}kg</text>
           <text class="meta-item">BMI: {{ currentBmi }}</text>
         </view>
         <view v-else class="weight-prompt">
@@ -210,7 +210,7 @@ const planText = computed(() =>
 );
 
 const currentBmi = computed(() => {
-  const weight = today.value?.records?.weight;
+  const weight = today.value?.todayRecords?.weight;
   if (!weight || !weight.heightCm || !weight.weightKg) return null;
   const heightM = weight.heightCm / 100;
   const bmi = weight.weightKg / (heightM * heightM);
