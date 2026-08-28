@@ -21,7 +21,7 @@
           <view class="weight-title-group">
             <text class="weight-label">当前体重</text>
             <text v-if="today.todayRecords?.weight" class="weight-value"
-              >{{ today.todayRecords.weight.weightKg }}<text class="weight-unit">kg</text></text
+              >{{ today.todayRecords.weight.valueKg }}<text class="weight-unit">kg</text></text
             >
             <text v-else class="weight-empty">未记录</text>
           </view>
@@ -31,8 +31,10 @@
           </button>
         </view>
         <view v-if="today.todayRecords?.weight" class="weight-meta">
-          <text class="meta-item">目标: {{ today.todayRecords.weight.weightKg - 2 }}kg</text>
-          <text class="meta-item">BMI: {{ currentBmi }}</text>
+          <text class="meta-item">记录于 {{ formatTime(today.todayRecords.weight.recordedAt) }}</text>
+          <text v-if="today.activePlan?.healthTarget?.targetWeightKg" class="meta-item"
+            >目标: {{ today.activePlan.healthTarget.targetWeightKg }}kg</text
+          >
         </view>
         <view v-else class="weight-prompt">
           <text>开始记录体重，追踪你的健康节律</text>
@@ -209,13 +211,12 @@ const planText = computed(() =>
     : '选择体重或睡眠方向，从一个小目标开始。',
 );
 
-const currentBmi = computed(() => {
-  const weight = today.value?.todayRecords?.weight;
-  if (!weight || !weight.heightCm || !weight.weightKg) return null;
-  const heightM = weight.heightCm / 100;
-  const bmi = weight.weightKg / (heightM * heightM);
-  return bmi.toFixed(1);
-});
+function formatTime(isoString: string): string {
+  const date = new Date(isoString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
 
 function load() {
   if (onboardingState.completed.value) healthLoopState.loadToday(date);
