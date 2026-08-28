@@ -15,43 +15,52 @@
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
     <template v-else-if="today && experience">
-      <!-- 主视觉区：参考建档页设计，图片完整显示 -->
-      <view class="hero-section hz-rise">
-        <!-- 插画：widthFix 确保完整显示不裁切 -->
-        <image
-          class="hero-illustration"
-          src="/static/illustrations/home-hero-morning.png"
-          mode="widthFix"
-        />
-        <!-- 渐变遮罩：确保底部文字清晰 -->
-        <view class="hero-gradient" />
-        <!-- 底部浮动信息：今日摘要 -->
-        <view class="hero-floating">
-          <view class="today-brief">
-            <view class="brief-row">
-              <text class="brief-label">体重</text>
-              <text v-if="today.todayRecords?.weight" class="brief-value">
-                {{ today.todayRecords.weight.valueKg }} kg
-              </text>
-              <text v-else class="brief-value brief-value--empty">未记录</text>
-            </view>
-            <view class="brief-row">
-              <text class="brief-label">今日进度</text>
-              <text class="brief-value">{{ experience.recording.completed }}/4 已记录</text>
-            </view>
+      <!-- 绿色主卡片：体重 + 进度（参考薄荷健康 20-35% 区域） -->
+      <view class="main-card hz-rise">
+        <view class="main-data">
+          <text class="main-label">今日体重</text>
+          <view class="main-value-row">
+            <text v-if="today.todayRecords?.weight" class="main-value">{{
+              today.todayRecords.weight.valueKg
+            }}</text>
+            <text v-else class="main-value main-value--empty">--</text>
+            <text class="main-unit">kg</text>
           </view>
+          <text v-if="today.activePlan?.healthTarget?.targetWeightKg" class="main-target"
+            >目标 {{ today.activePlan.healthTarget.targetWeightKg }}kg</text
+          >
         </view>
+        
+        <image 
+          class="main-deco"
+          src="/static/illustrations/home-companion-banner.png"
+          mode="aspectFill"
+        />
+        
+        <view class="main-progress">
+          <view class="progress-bar">
+            <view 
+              class="progress-fill" 
+              :style="`width: ${(experience.recording.completed / 4) * 100}%`"
+            />
+          </view>
+          <text class="progress-text">今日已记录 {{ experience.recording.completed }}/4 项</text>
+        </view>
+        
+        <button class="main-record-btn" @tap="go('/pages/records/RecordsPage?type=weight')">
+          快速记录
+        </button>
       </view>
 
-      <!-- 今日记录：四宫格大卡片 -->
+      <!-- 今日记录：横向滑动卡片 -->
       <view class="records-section">
         <view class="section-title">今日记录</view>
-        <view class="records-grid">
+        <scroll-view scroll-x class="records-scroll" show-scrollbar="{{false}}">
           <button
             v-for="cell in overviewCells"
             :key="cell.key"
-            class="record-card"
-            :class="{ 'record-card--done': cell.done }"
+            class="record-item"
+            :class="{ 'record-item--done': cell.done }"
             @tap="go(cell.route)"
           >
             <view class="record-icon-wrap">
@@ -62,7 +71,7 @@
             </view>
             <text class="record-label">{{ cell.label }}</text>
           </button>
-        </view>
+        </scroll-view>
       </view>
 
       <!-- 和序序聊聊：简洁卡片 -->
@@ -310,185 +319,232 @@ onShow(() => {
   font-size: 28rpx;
 }
 
-/* 主视觉区：参考建档页设计 */
-.hero-section {
+/* 绿色主卡片：体重 + 进度（参考薄荷健康） */
+.main-card {
   position: relative;
-  width: 100%;
-  margin-bottom: 32rpx;
-  border-radius: 40rpx;
+  display: flex;
+  flex-direction: column;
+  padding: 36rpx 32rpx;
+  margin-bottom: 28rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(135deg, #e8f7ed 0%, #d4f0dd 100%);
+  box-shadow: 0 12rpx 36rpx rgba(127, 204, 143, 0.2);
   overflow: hidden;
-  box-shadow: 0 16rpx 48rpx rgba(127, 204, 143, 0.18);
 }
 
-/* 插画：widthFix 确保完整显示 */
-.hero-illustration {
+.main-data {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 24rpx;
+}
+
+.main-label {
   display: block;
-  width: 100%;
-  height: auto;
+  margin-bottom: 12rpx;
+  color: #5a9572;
+  font-size: 24rpx;
+  font-weight: 600;
 }
 
-/* 渐变遮罩：从透明到薄荷绿，68% 高度 */
-.hero-gradient {
+.main-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.main-value {
+  color: #2d6943;
+  font-size: 96rpx;
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+
+.main-value--empty {
+  color: #a8c4b3;
+  font-weight: 700;
+}
+
+.main-unit {
+  color: #5a9572;
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.main-target {
+  display: block;
+  color: #76907d;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.main-deco {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 68%;
-  background: linear-gradient(
-    to top,
-    rgba(232, 247, 237, 0.96) 0%,
-    rgba(232, 247, 237, 0.85) 40%,
-    rgba(232, 247, 237, 0) 100%
-  );
-  pointer-events: none;
+  top: 0;
+  right: -40rpx;
+  width: 50%;
+  height: 100%;
+  opacity: 0.15;
+  object-fit: cover;
   z-index: 1;
 }
 
-/* 底部浮动信息：今日摘要 */
-.hero-floating {
-  position: absolute;
-  bottom: 32rpx;
-  left: 32rpx;
-  right: 32rpx;
+.main-progress {
+  position: relative;
   z-index: 2;
+  margin-bottom: 20rpx;
 }
 
-.today-brief {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-  padding: 28rpx 32rpx;
-  border-radius: 32rpx;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(24rpx);
-  box-shadow: 0 12rpx 36rpx rgba(46, 97, 64, 0.15);
+.progress-bar {
+  width: 100%;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  margin-bottom: 12rpx;
 }
 
-.brief-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.progress-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #7fcc8f 0%, #67a37b 100%);
+  transition: width 0.3s ease;
 }
 
-.brief-label {
+.progress-text {
+  display: block;
   color: #5a9572;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.main-record-btn {
+  position: relative;
+  z-index: 2;
+  align-self: flex-start;
+  padding: 20rpx 36rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #7fcc8f 0%, #67a37b 100%);
+  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.35);
+  color: #ffffff;
   font-size: 26rpx;
-  font-weight: 600;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 
-.brief-value {
-  color: #2d6943;
-  font-size: 32rpx;
-  font-weight: 800;
+.main-record-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.4);
 }
 
-.brief-value--empty {
-  color: #a8c4b3;
-  font-weight: 600;
-}
-
-/* 今日记录：四宫格大卡片 */
+/* 今日记录：横向滑动卡片 */
 .records-section {
-  margin-bottom: 36rpx;
+  margin-bottom: 32rpx;
 }
 .section-title {
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
   padding: 0 4rpx;
   color: #274a35;
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: 800;
 }
-.records-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20rpx;
+.records-scroll {
+  white-space: nowrap;
 }
-.record-card {
-  display: flex;
+.record-item {
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 240rpx;
-  padding: 52rpx 28rpx;
-  border-radius: 36rpx;
+  width: 200rpx;
+  height: 180rpx;
+  margin-right: 16rpx;
+  padding: 24rpx 16rpx;
+  border-radius: 28rpx;
   background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
-  box-shadow: 0 8rpx 28rpx rgba(46, 97, 64, 0.08);
+  box-shadow: 0 6rpx 20rpx rgba(46, 97, 64, 0.08);
   transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
+  vertical-align: top;
 }
-.record-card:active {
-  transform: translateY(-6rpx) scale(0.98);
-  box-shadow: 0 16rpx 40rpx rgba(46, 97, 64, 0.12);
+.record-item:last-child {
+  margin-right: 0;
 }
-.record-card--done {
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.1) 0%, rgba(232, 244, 234, 0.7) 100%);
-  box-shadow: 0 8rpx 28rpx rgba(127, 204, 143, 0.18);
+.record-item:active {
+  transform: translateY(-4rpx) scale(0.96);
+  box-shadow: 0 10rpx 28rpx rgba(46, 97, 64, 0.12);
+}
+.record-item--done {
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 244, 234, 0.8) 100%);
+  box-shadow: 0 6rpx 20rpx rgba(127, 204, 143, 0.18);
 }
 .record-icon-wrap {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 108rpx;
-  height: 108rpx;
-  margin-bottom: 24rpx;
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 16rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.15) 0%, rgba(232, 244, 234, 0.9) 100%);
   transition: all 0.3s ease;
 }
-.record-card--done .record-icon-wrap {
+.record-item--done .record-icon-wrap {
   background: linear-gradient(135deg, rgba(127, 204, 143, 0.25) 0%, rgba(95, 158, 118, 0.2) 100%);
-  box-shadow: 0 6rpx 20rpx rgba(127, 204, 143, 0.25);
+  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.25);
 }
 .record-icon {
-  width: 52rpx;
-  height: 52rpx;
+  width: 40rpx;
+  height: 40rpx;
 }
 .record-check {
   position: absolute;
-  top: -6rpx;
-  right: -6rpx;
+  top: -4rpx;
+  right: -4rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40rpx;
-  height: 40rpx;
-  border: 4rpx solid #ffffff;
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid #ffffff;
   border-radius: 50%;
   background: linear-gradient(135deg, #7fcc8f 0%, #67a37b 100%);
-  box-shadow: 0 6rpx 16rpx rgba(127, 204, 143, 0.45);
+  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.45);
 }
 .record-check image {
-  width: 20rpx;
-  height: 20rpx;
+  width: 16rpx;
+  height: 16rpx;
   filter: brightness(10);
 }
 .record-label {
   color: #284d36;
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 700;
 }
 
-/* 和序序聊聊：简洁卡片 */
+/* 和序序聊聊：缩小更紧凑 */
 .chat-card {
   display: flex;
   align-items: center;
-  gap: 24rpx;
+  gap: 20rpx;
   width: 100%;
-  margin-bottom: 36rpx;
-  padding: 36rpx;
-  border-radius: 36rpx;
+  margin-bottom: 28rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 32rpx;
   text-align: left;
   background: linear-gradient(135deg, #fff9e6 0%, #fffdf1 100%);
-  box-shadow: 0 10rpx 32rpx rgba(239, 214, 137, 0.2);
+  box-shadow: 0 8rpx 24rpx rgba(239, 214, 137, 0.18);
   transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 .chat-card:active {
-  transform: translateY(-4rpx) scale(0.98);
-  box-shadow: 0 16rpx 44rpx rgba(239, 214, 137, 0.28);
+  transform: translateY(-3rpx) scale(0.98);
+  box-shadow: 0 12rpx 32rpx rgba(239, 214, 137, 0.24);
 }
 .chat-avatar {
-  width: 80rpx;
-  height: 80rpx;
+  width: 64rpx;
+  height: 64rpx;
   flex: none;
   border: 4rpx solid #f4e3a0;
   border-radius: 50%;
@@ -504,61 +560,61 @@ onShow(() => {
 .chat-title {
   display: block;
   color: #6f5a27;
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 700;
 }
 .chat-desc {
   display: block;
   color: #9e8a5e;
-  font-size: 24rpx;
+  font-size: 22rpx;
 }
 .chat-arrow {
-  width: 32rpx;
-  height: 32rpx;
+  width: 28rpx;
+  height: 28rpx;
   flex: none;
   opacity: 0.5;
 }
 
-/* 快捷记录：大图标 */
+/* 快捷记录：缩小更紧凑 */
 .quick-section {
-  margin-bottom: 36rpx;
+  margin-bottom: 32rpx;
 }
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20rpx;
+  gap: 16rpx;
 }
 .quick-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16rpx;
-  padding: 32rpx 12rpx;
-  border-radius: 32rpx;
+  gap: 12rpx;
+  padding: 24rpx 8rpx;
+  border-radius: 28rpx;
   background: linear-gradient(135deg, #ffffff 0%, #fafcfb 100%);
-  box-shadow: 0 6rpx 24rpx rgba(46, 97, 64, 0.06);
+  box-shadow: 0 4rpx 16rpx rgba(46, 97, 64, 0.06);
   transition: all 0.3s cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 .quick-card:active {
-  transform: translateY(-6rpx) scale(0.95);
-  box-shadow: 0 12rpx 36rpx rgba(46, 97, 64, 0.12);
+  transform: translateY(-4rpx) scale(0.96);
+  box-shadow: 0 8rpx 24rpx rgba(46, 97, 64, 0.1);
 }
 .quick-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96rpx;
-  height: 96rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 .quick-icon {
-  width: 48rpx;
-  height: 48rpx;
+  width: 36rpx;
+  height: 36rpx;
 }
 .quick-label {
   color: #31543e;
-  font-size: 24rpx;
+  font-size: 22rpx;
   font-weight: 700;
   text-align: center;
 }
