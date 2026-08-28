@@ -87,28 +87,23 @@ onShow(async () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(180deg, #e8f4ea 0%, #f7fbf8 100%);
+  background: linear-gradient(180deg, #e8f4ea 0%, #f3f8f4 50%, #f9fcfa 100%);
 }
 
-/* 背景插画 */
+/* 背景插画：局部装饰 */
 .bg-illustration {
   position: absolute;
-  top: 0;
-  left: 50%;
-  width: 100%;
-  transform: translateX(-50%);
-  opacity: 0.6;
+  top: -20%;
+  right: -10%;
+  width: 60%;
+  transform: rotate(8deg);
+  opacity: 0.15;
   z-index: 0;
+  filter: blur(2rpx);
 }
 
 .bg-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(247, 251, 248, 0.4) 0%, rgba(247, 251, 248, 0.95) 100%);
-  z-index: 1;
+  display: none;
 }
 
 /* 内容区 */
@@ -118,7 +113,7 @@ onShow(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 64rpx;
+  gap: 72rpx;
   padding: 0 48rpx;
 }
 
@@ -127,36 +122,40 @@ onShow(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32rpx;
+  gap: 40rpx;
 }
 
 .xuxu-avatar {
-  width: 128rpx;
-  height: 128rpx;
-  border: 5rpx solid #f4e3a0;
+  width: 148rpx;
+  height: 148rpx;
+  border: 6rpx solid #f4e3a0;
   border-radius: 50%;
-  box-shadow: 0 12rpx 36rpx rgba(239, 214, 137, 0.5);
+  background: #ffffff;
+  box-shadow:
+    0 16rpx 48rpx rgba(239, 214, 137, 0.6),
+    0 4rpx 16rpx rgba(127, 204, 143, 0.2);
 }
 
 .brand-text {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
 .app-name {
   color: #2d6943;
-  font-size: 48rpx;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 56rpx;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2rpx 8rpx rgba(46, 97, 64, 0.08);
 }
 
 .app-tagline {
   color: #5a9572;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 
 /* 加载区 */
@@ -164,19 +163,20 @@ onShow(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24rpx;
+  gap: 28rpx;
 }
 
 .loading-spinner {
   display: flex;
-  gap: 16rpx;
+  gap: 20rpx;
 }
 
 .spinner-dot {
-  width: 16rpx;
-  height: 16rpx;
+  width: 20rpx;
+  height: 20rpx;
   border-radius: 50%;
-  background: #7fcc8f;
+  background: linear-gradient(135deg, #7fcc8f 0%, #5f9e76 100%);
+  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.4);
   animation: bounce 1.4s infinite ease-in-out;
 }
 
@@ -192,18 +192,19 @@ onShow(async () => {
   0%,
   80%,
   100% {
-    transform: scale(0.8);
-    opacity: 0.5;
+    transform: scale(0.7) translateY(0);
+    opacity: 0.6;
   }
   40% {
-    transform: scale(1.2);
+    transform: scale(1.2) translateY(-8rpx);
     opacity: 1;
   }
 }
 
 .loading-text {
   color: #6f8879;
-  font-size: 26rpx;
+  font-size: 28rpx;
+  font-weight: 500;
   line-height: 1.6;
 }
 
