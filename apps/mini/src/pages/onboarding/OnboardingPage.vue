@@ -372,7 +372,8 @@ function updateHeight(e: any) {
   form.heightCm = String(e.detail.value);
 }
 function updateWeight(e: any) {
-  form.weightKg = String(e.detail.value);
+  const value = Number(e.detail.value);
+  form.weightKg = String(Math.round(value * 10) / 10);
 }
 function updateBirthDate(e: any) {
   form.birthDate = e.detail.value;
