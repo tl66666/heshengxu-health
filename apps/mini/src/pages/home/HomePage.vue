@@ -186,7 +186,7 @@
           <text class="fasting-label">用餐时间剩余</text>
           <text class="fasting-time">01:04:08</text>
         </view>
-        <view class="fasting-icon">⏰</view>
+        <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.jpg" mode="aspectFit" />
       </view>
 
       <!-- 6. 血糖卡片 -->
@@ -220,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
@@ -282,16 +282,24 @@ const go = (url: string) => {
 };
 
 const toXuxu = () => {
-  uni.navigateTo({ url: '/pages/chat/ChatPage' });
+  uni.navigateTo({ url: '/pages/xuxu/XuxuPage' });
 };
 
 const load = () => {
   healthLoopState.load();
 };
 
-onShow(() => {
-  if (!loading.value && !today.value) {
+// 修复：首次进入立即加载
+onMounted(() => {
+  if (!today.value) {
     load();
+  }
+});
+
+// 每次显示时刷新
+onShow(() => {
+  if (today.value) {
+    healthLoopState.refresh();
   }
 });
 </script>
@@ -358,14 +366,30 @@ onShow(() => {
 }
 
 .loading {
-  padding: 100rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 40rpx;
   text-align: center;
+  min-height: 60vh;
+}
+
+.loading text {
   color: #2d6943;
-  font-size: 26rpx;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 24rpx;
-  margin: 40rpx 0;
+  font-size: 32rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* 通用卡片样式 */
@@ -781,6 +805,16 @@ onShow(() => {
   right: 12rpx;
   font-size: 64rpx;
   opacity: 0.5;
+}
+
+.fasting-icon-img {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+  border-radius: 12rpx;
 }
 
 /* 6. 血糖卡片 */

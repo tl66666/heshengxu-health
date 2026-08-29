@@ -34,15 +34,15 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ active: 'home' | 'records' | 'xuxu' | 'plan' | 'me' }>();
+defineProps<{ active: 'home' | 'data' | 'xuxu' | 'plan' | 'me' }>();
 
 const items = [
   { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: '/static/icons/svg/home.svg' },
   {
-    key: 'records',
-    path: '/pages/records/RecordsPage',
-    label: '记录',
-    icon: '/static/icons/svg/journal.svg',
+    key: 'data',
+    path: '/pages/weekly-review/WeeklyReviewPage',
+    label: '数据',
+    icon: '/static/icons/svg/review.svg',
   },
   { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: '/static/icons/svg/plan.svg' },
   { key: 'me', path: '/pages/me/MePage', label: '我的', icon: '/static/icons/svg/profile.svg' },
