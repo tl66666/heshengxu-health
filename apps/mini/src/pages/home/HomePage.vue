@@ -199,7 +199,7 @@
           <text class="sugar-hint">暂无记录</text>
           <text class="sugar-value">-- mmol/L</text>
         </view>
-        <view class="sugar-icon">🩸</view>
+        <!-- 血糖图标待生成 -->
       </view>
 
       <!-- 7. 经期记录卡片 -->
