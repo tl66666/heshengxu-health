@@ -78,29 +78,29 @@
         </view>
         
         <view class="meals">
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" @tap="go('/pages/records/RecordsPage?type=food')">
             <view class="meal-icon">🥚</view>
             <text class="meal-name">早餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" @tap="go('/pages/records/RecordsPage?type=food')">
             <view class="meal-icon">🍔</view>
             <text class="meal-name">午餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" @tap="go('/pages/records/RecordsPage?type=food')">
             <view class="meal-icon">🍜</view>
             <text class="meal-name">晚餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" @tap="go('/pages/records/RecordsPage?type=food')">
             <view class="meal-icon">🍎</view>
             <text class="meal-name">加餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=activity')">
+          <button class="meal-item" @tap="go('/pages/records/RecordsPage?type=activity')">
             <view class="meal-icon">👟</view>
             <text class="meal-name">运动</text>
           </button>
         </view>
         
-        <button class="camera-btn" hover-class="button-hover" @tap="toXuxu">
+        <button class="camera-btn" @tap="toXuxu">
           <text class="camera-icon">📷</text>
           <text class="camera-text">序序相机</text>
         </button>
@@ -115,7 +115,7 @@
               {{ formatTime(today.todayRecords.weight.recordedAt) }} 更新
             </text>
           </view>
-          <button class="add-btn" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=weight')">+</button>
+          <button class="add-btn" @tap="go('/pages/records/RecordsPage?type=weight')">+</button>
         </view>
         <view class="record-content">
           <view class="big-value">
@@ -130,7 +130,7 @@
 
       <!-- 4. 2x2功能卡片 -->
       <view class="grid-cards">
-        <button class="grid-item card" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=water')">
+        <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=water')">
           <view class="grid-top">
             <text class="grid-title">喝水</text>
             <text class="grid-add">+</text>
@@ -142,7 +142,7 @@
           <image class="grid-icon-img" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=sleep')">
+        <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=sleep')">
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
             <text class="grid-add">+</text>
@@ -153,7 +153,7 @@
           <image class="grid-icon-img" src="/static/icons/watercolor/sleep.jpg" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=activity')">
+        <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=activity')">
           <view class="grid-top">
             <text class="grid-title">活动</text>
             <text class="grid-add">+</text>
@@ -165,7 +165,7 @@
           <image class="grid-icon-img" src="/static/icons/watercolor/activity.jpg" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="toXuxu">
+        <button class="grid-item card" @tap="toXuxu">
           <view class="grid-top">
             <text class="grid-title">心情</text>
           </view>
@@ -193,7 +193,7 @@
       <view class="sugar-card card">
         <view class="card-top">
           <text class="card-title">血糖</text>
-          <button class="add-btn" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=blood-sugar')">+</button>
+          <button class="add-btn" @tap="go('/pages/records/RecordsPage?type=blood-sugar')">+</button>
         </view>
         <view class="sugar-content">
           <text class="sugar-hint">暂无记录</text>
@@ -203,11 +203,7 @@
       </view>
 
       <!-- 7. 编辑首页卡片 -->
-      <button 
-        class="edit-card" 
-        hover-class="button-hover"
-        @tap="go('/pages/home/edit-cards')"
-      >
+      <button class="edit-card" @tap="go('/pages/home/edit-cards')">
         <text class="edit-icon">✎</text>
         <text class="edit-text">编辑首页卡片</text>
       </button>
