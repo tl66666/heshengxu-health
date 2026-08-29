@@ -207,7 +207,7 @@
           <text class="period-hint">暂无记录</text>
           <text class="period-days">距离下次预计 -- 天</text>
         </view>
-        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.jpg" mode="aspectFit" />
+        <!-- 经期图标待生成 -->
       </view>
 
       <!-- 8. 用药打卡卡片 -->
@@ -222,7 +222,7 @@
             <text class="medication-item">暂无用药计划</text>
           </view>
         </view>
-        <image class="medication-icon-img" src="/static/icons/watercolor/medication.jpg" mode="aspectFit" />
+        <!-- 用药图标待生成 -->
       </view>
 
       <!-- 9. 编辑首页卡片 -->
