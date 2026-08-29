@@ -78,23 +78,23 @@
         </view>
         
         <view class="meals">
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
             <view class="meal-icon">🥚</view>
             <text class="meal-name">早餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
             <view class="meal-icon">🍔</view>
             <text class="meal-name">午餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
             <view class="meal-icon">🍜</view>
             <text class="meal-name">晚餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=food')">
+          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
             <view class="meal-icon">🍎</view>
             <text class="meal-name">加餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=activity')">
+          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('activity')">
             <view class="meal-icon">👟</view>
             <text class="meal-name">运动</text>
           </button>
@@ -115,7 +115,7 @@
               {{ formatTime(today.todayRecords.weight.recordedAt) }} 更新
             </text>
           </view>
-          <button class="add-btn" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=weight')">+</button>
+          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('weight')">+</button>
         </view>
         <view class="record-content">
           <view class="big-value">
@@ -130,7 +130,7 @@
 
       <!-- 4. 2x2功能卡片 -->
       <view class="grid-cards">
-        <button class="grid-item card" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=water')">
+        <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('water')">
           <view class="grid-top">
             <text class="grid-title">喝水</text>
             <text class="grid-add">+</text>
@@ -142,7 +142,7 @@
           <image class="grid-icon-img" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=sleep')">
+        <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('sleep')">
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
             <text class="grid-add">+</text>
@@ -153,7 +153,7 @@
           <image class="grid-icon-img" src="/static/icons/watercolor/sleep.jpg" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=activity')">
+        <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('activity')">
           <view class="grid-top">
             <text class="grid-title">活动</text>
             <text class="grid-add">+</text>
@@ -193,7 +193,7 @@
       <view class="sugar-card card">
         <view class="card-top">
           <text class="card-title">血糖</text>
-          <button class="add-btn" hover-class="button-hover" @tap="go('/pages/records/RecordsPage?type=blood-sugar')">+</button>
+          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('blood-sugar')">+</button>
         </view>
         <view class="sugar-content">
           <text class="sugar-hint">暂无记录</text>
@@ -202,7 +202,35 @@
         <view class="sugar-icon">🩸</view>
       </view>
 
-      <!-- 7. 编辑首页卡片 -->
+      <!-- 7. 经期记录卡片 -->
+      <view class="period-card card">
+        <view class="card-top">
+          <text class="card-title">经期</text>
+          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('menstruation')">+</button>
+        </view>
+        <view class="period-content">
+          <text class="period-hint">暂无记录</text>
+          <text class="period-days">距离下次预计 -- 天</text>
+        </view>
+        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.jpg" mode="aspectFit" />
+      </view>
+
+      <!-- 8. 用药打卡卡片 -->
+      <view class="medication-card card">
+        <view class="card-top">
+          <text class="card-title">用药打卡</text>
+          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('medication')">+</button>
+        </view>
+        <view class="medication-content">
+          <text class="medication-hint">今日待打卡</text>
+          <view class="medication-list">
+            <text class="medication-item">暂无用药计划</text>
+          </view>
+        </view>
+        <image class="medication-icon-img" src="/static/icons/watercolor/medication.jpg" mode="aspectFit" />
+      </view>
+
+      <!-- 9. 编辑首页卡片 -->
       <button 
         class="edit-card" 
         hover-class="button-hover"
@@ -285,8 +313,14 @@ const go = (url: string) => {
   uni.navigateTo({ url });
 };
 
+const goToRecord = (type: string) => {
+  // RecordsPage不是TabBar页，可以用navigateTo
+  uni.navigateTo({ url: `/pages/records/RecordsPage?type=${type}` });
+};
+
 const toXuxu = () => {
-  uni.navigateTo({ url: '/pages/xuxu/XuxuPage' });
+  // XuxuPage是TabBar页，必须用switchTab
+  uni.switchTab({ url: '/pages/xuxu/XuxuPage' });
 };
 
 const getTodayDate = () => {
@@ -855,7 +889,81 @@ onShow(() => {
   opacity: 0.5;
 }
 
-/* 7. 编辑卡片 */
+/* 7. 经期记录卡片 */
+.period-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff5f8 0%, #ffffff 100%);
+}
+
+.period-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.period-hint {
+  color: #9ba8a0;
+  font-size: 20rpx;
+}
+
+.period-days {
+  color: #e06c9f;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.period-icon-img {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+  border-radius: 12rpx;
+}
+
+/* 8. 用药打卡卡片 */
+.medication-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+}
+
+.medication-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.medication-hint {
+  color: #9ba8a0;
+  font-size: 20rpx;
+}
+
+.medication-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.medication-item {
+  color: #6495ed;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.medication-icon-img {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+  border-radius: 12rpx;
+}
+
+/* 9. 编辑卡片 */
 .edit-card {
   display: flex;
   flex-direction: column;

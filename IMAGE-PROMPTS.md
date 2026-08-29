@@ -68,6 +68,38 @@ A minimalist meal/food icon, watercolor painting style with soft edges, simple b
 
 ---
 
+## 5. 经期 (menstruation.jpg)
+
+**优先级**：🔴 高
+
+### 英文提示词（推荐）
+```
+A minimalist menstrual cycle icon, watercolor painting style with soft edges, gentle calendar or flower symbol representing feminine health, soft pink and rose gradient colors (#ffb6c1, #ffc0cb), delicate petals or circular cycle element, rounded shapes, caring and private design, healing Japanese aesthetic, warm and supportive, soft pastel colors, comforting atmosphere, white/transparent background, square format 200x200 pixels, suitable for mobile health app icon decoration
+```
+
+### 中文提示词
+```
+经期图标，水彩画风格，温柔的日历或花朵符号代表女性健康，柔和的粉色和玫瑰色渐变，精致的花瓣或循环元素，圆润的形状关怀且私密的设计，治愈系日式美学温暖且支持性，柔和的粉彩色调安慰性的氛围，边缘模糊水彩效果，白色或透明背景，正方形200x200像素
+```
+
+---
+
+## 6. 用药 (medication.jpg)
+
+**优先级**：🔴 高
+
+### 英文提示词（推荐）
+```
+A minimalist medication/pill icon, watercolor painting style with soft edges, simple pill bottle or tablet symbol with gentle cross element, soft blue and lavender gradient colors (#87ceeb, #b0c4de), rounded shapes, caring and reminder design, healing Japanese aesthetic, medical but friendly, soft pastel colors, trustworthy atmosphere, white/transparent background, square format 200x200 pixels, suitable for mobile health app icon decoration
+```
+
+### 中文提示词
+```
+用药图标，水彩画风格，简洁的药瓶或药片符号带温柔的十字元素，柔和的蓝色和淡紫色渐变，圆润的形状关怀且提醒性的设计，治愈系日式美学医疗但友好，柔和的粉彩色调值得信赖的氛围，边缘模糊水彩效果，白色或透明背景，正方形200x200像素
+```
+
+---
+
 ## 生成后的操作
 
 1. **保存图片**
