@@ -79,29 +79,24 @@
         
         <view class="meals">
           <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <view class="meal-icon">🥚</view>
             <text class="meal-name">早餐</text>
           </button>
           <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <view class="meal-icon">🍔</view>
             <text class="meal-name">午餐</text>
           </button>
           <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <view class="meal-icon">🍜</view>
             <text class="meal-name">晚餐</text>
           </button>
           <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <view class="meal-icon">🍎</view>
             <text class="meal-name">加餐</text>
           </button>
           <button class="meal-item" hover-class="button-hover" @tap="goToRecord('activity')">
-            <view class="meal-icon">👟</view>
             <text class="meal-name">运动</text>
           </button>
         </view>
         
         <button class="camera-btn" hover-class="button-hover" @tap="toXuxu">
-          <text class="camera-icon">📷</text>
+          <text class="camera-text">序序相机</text>
           <text class="camera-text">序序相机</text>
         </button>
       </view>
@@ -199,7 +194,7 @@
           <text class="sugar-hint">暂无记录</text>
           <text class="sugar-value">-- mmol/L</text>
         </view>
-        <!-- 血糖图标待生成 -->
+        <image class="sugar-icon-img" src="/static/icons/watercolor/blood-sugar.jpg" mode="aspectFit" />
       </view>
 
       <!-- 7. 经期记录卡片 -->
@@ -236,8 +231,7 @@
         hover-class="button-hover"
         @tap="go('/pages/home/edit-cards')"
       >
-        <text class="edit-icon">✎</text>
-        <text class="edit-text">编辑首页卡片</text>
+        <text class="edit-text">+ 编辑首页卡片</text>
       </button>
     </template>
 
@@ -901,12 +895,14 @@ onShow(() => {
   font-weight: 900;
 }
 
-.sugar-icon {
+.sugar-icon-img {
   position: absolute;
-  bottom: 12rpx;
-  right: 12rpx;
-  font-size: 56rpx;
-  opacity: 0.5;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+  border-radius: 12rpx;
 }
 
 /* 7. 经期记录卡片 */
