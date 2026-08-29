@@ -388,13 +388,13 @@ onLoad(async () => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 28rpx 32rpx 70rpx;
+  padding: 0 32rpx 140rpx;
   background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
 }
 
 /* 介绍区域 */
 .intro {
-  padding: 10rpx 2rpx 24rpx;
+  padding: 20rpx 2rpx 24rpx;
 }
 
 .eyebrow {

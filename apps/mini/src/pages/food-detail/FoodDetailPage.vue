@@ -358,12 +358,11 @@ onLoad((options: any) => {
 <style scoped>
 .page {
   min-height: 100vh;
-  padding-bottom: 120rpx;
   background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
 }
 
 .content {
-  padding: 28rpx 32rpx;
+  padding: 0 32rpx 140rpx;
 }
 
 .card {
