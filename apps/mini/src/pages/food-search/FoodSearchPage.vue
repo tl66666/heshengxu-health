@@ -5,29 +5,81 @@
     <view class="intro">
       <text class="eyebrow">记下一餐</text>
       <text class="title">从食物目录开始</text>
-      <text class="subtitle">选择食物和份量后，再确认保存到今天的记录。</text>
+      <text class="subtitle">支持中文、拼音搜索，9000+ 种食物任你选</text>
     </view>
 
+    <!-- 搜索框 -->
     <view class="search-box">
       <image class="search-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
       <input
         v-model="query"
         confirm-type="search"
-        placeholder="搜索米饭、鸡蛋、西兰花或拼音"
+        placeholder="搜索食物、菜品或拼音"
         @input="onSearchInput"
-        @confirm="load"
+        @confirm="handleSearch"
       />
       <button v-if="query" class="clear" aria-label="清空搜索" @tap="clearQuery">
         <image src="/static/icons/svg/close.svg" mode="aspectFit" />
       </button>
     </view>
 
+    <!-- 热门搜索 - 仅在未搜索时显示 -->
+    <view v-if="!query && !selectedCategory" class="hot-searches">
+      <view class="section-header">
+        <text class="section-icon">🔥</text>
+        <text class="section-title">热门搜索</text>
+      </view>
+      <view class="tag-list">
+        <button
+          v-for="keyword in hotKeywords"
+          :key="keyword"
+          class="tag-btn"
+          @tap="searchByKeyword(keyword)"
+        >
+          {{ keyword }}
+        </button>
+      </view>
+    </view>
+
+    <!-- 搜索历史 - 仅在未搜索时显示 -->
+    <view v-if="!query && !selectedCategory && searchHistory.length > 0" class="search-history">
+      <view class="section-header">
+        <view class="section-left">
+          <text class="section-icon">📚</text>
+          <text class="section-title">搜索历史</text>
+        </view>
+        <button class="clear-history" @tap="clearHistory">清空</button>
+      </view>
+      <view class="history-list">
+        <button
+          v-for="(item, index) in searchHistory"
+          :key="index"
+          class="history-item"
+          @tap="searchByKeyword(item)"
+        >
+          <text class="history-text">{{ item }}</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 快捷筛选 -->
+    <view v-if="!query && !selectedCategory" class="quick-filters">
+      <button class="filter-btn green" @tap="filterByHealthLight(1)">
+        <text class="filter-icon">🟢</text>
+        <text class="filter-text">绿灯食物</text>
+      </button>
+      <button class="filter-btn" @tap="selectCategory(null)">
+        <text class="filter-icon">🍽️</text>
+        <text class="filter-text">浏览全部</text>
+      </button>
+    </view>
+
     <!-- 分类筛选 -->
-    <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-x>
+    <scroll-view v-if="categories.length > 0 && (query || selectedCategory)" class="category-tabs" scroll-x>
       <view class="category-list">
         <view 
           v-for="cat in allCategories" 
-          :key="cat.id" 
+          :key="cat.id || 'all'" 
           :class="['category-tab', { active: selectedCategory === cat.id }]"
           @tap="selectCategory(cat.id)"
         >
@@ -37,44 +89,67 @@
       </view>
     </scroll-view>
 
-    <view class="result-caption">
+    <!-- 结果统计 -->
+    <view v-if="query || selectedCategory" class="result-caption">
       <text>{{ getResultText() }}</text>
       <text v-if="totalPages > 1" class="page-info">第 {{ currentPage }}/{{ totalPages }} 页</text>
-    </view>t>营养值按每 100 克展示</text>
     </view>
 
-    <view v-if="loading" class="state">正在整理食物...</view>
+    <!-- 加载状态 -->
+    <view v-if="loading" class="state">
+      <text>正在搜索...</text>
+    </view>
+
+    <!-- 错误状态 -->
     <view v-else-if="error" class="state state--error">
-      <text>食物目录暂时没有连接上</text>
+      <text>搜索出错了</text>
+      <text class="state-copy">请检查网络连接</text>
       <button class="retry" @tap="load">重新加载</button>
     </view>
-    <view v-else-if="!foods.length" class="state">
-      <text>还没有找到这份食物</text>
-      <text class="state-copy">可以试试更短的关键词，或换一个常用名称。</text>
+
+    <!-- 空状态 -->
+    <view v-else-if="(query || selectedCategory) && foods.length === 0" class="state">
+      <text>🔍</text>
+      <text class="state-copy">没有找到相关食物</text>
+      <text class="state-copy">试试换个关键词</text>
     </view>
-    <view v-else class="food-list">
-      <button v-for="food in foods" :key="food.id" class="food-row" @tap="choose(food)">
-        <view class="food-mark">{{ food.name.slice(0, 1) }}</view>
-        <view class="food-copy">
-          <text class="food-name">{{ food.name }}</text>
-          <text class="food-meta"
-            >{{ food.category?.name || '日常食物' }} · {{ food.nutrition.energyKcal }} 千卡 /
-            100g</text
-          >
+
+    <!-- 食物列表 -->
+    <view v-else-if="foods.length > 0" class="food-list">
+      <button
+        v-for="food in foods"
+        :key="food.id"
+        class="food-card"
+        hover-class="food-card-active"
+        @tap="choose(food)"
+      >
+        <view class="food-main">
+          <view class="food-icon">{{ getFoodEmoji(food.name, food.category?.slug) }}</view>
+          <view class="food-info">
+            <text class="food-name">{{ food.name }}</text>
+            <view v-if="getHighlights(food).length > 0" class="food-tags">
+              <text v-for="tag in getHighlights(food)" :key="tag" class="tag">{{ tag }}</text>
+            </view>
+            <text class="food-calories">
+              {{ food.nutrition?.energyKcal || 0 }} 千卡 / 100g
+            </text>
+          </view>
         </view>
-        <image class="forward" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        <view :class="['food-badge', 'badge-' + food.healthLight]">
+          {{ getHealthLabel(food.healthLight) }}
+        </view>
       </button>
     </view>
 
+    <!-- 拍照识别入口 -->
     <button class="photo-entry" @tap="openRecognition">
       <view class="camera-mark">
         <image src="/static/icons/svg/camera.svg" mode="aspectFit" />
       </view>
       <view class="photo-copy">
         <text>拍照识别食物</text>
-        <text>识别后先确认食物和份量，再保存记录</text>
+        <text>快速记录，AI 帮你识别</text>
       </view>
-      <image class="forward" src="/static/icons/svg/forward.svg" mode="aspectFit" />
     </button>
   </view>
 </template>
@@ -89,6 +164,11 @@ import {
   type FoodCategory 
 } from '../../features/food/food.service.js';
 import type { FoodItem } from '../../features/food/food.types.js';
+import { 
+  getFoodEmoji, 
+  generateNutritionHighlights, 
+  getHealthLightLabel 
+} from '../../utils/nutrition.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
@@ -101,6 +181,16 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = 20;
 
+// 搜索历史（localStorage）
+const searchHistory = ref<string[]>([]);
+const MAX_HISTORY = 10;
+
+// 热门搜索关键词
+const hotKeywords = [
+  '鸡胸肉', '鸡蛋', '燕麦', '西兰花', '苹果',
+  '牛奶', '香蕉', '番茄', '豆腐', '牛肉'
+];
+
 let searchTimer: number | null = null;
 
 // 所有分类（包含"全部"选项）
@@ -108,6 +198,54 @@ const allCategories = computed(() => {
   const all = { id: null, name: '全部', slug: 'all', sortOrder: 0, count: totalCount.value };
   return [all, ...categories.value];
 });
+
+// 加载搜索历史
+function loadSearchHistory() {
+  try {
+    const history = uni.getStorageSync('searchHistory');
+    if (history) {
+      searchHistory.value = JSON.parse(history);
+    }
+  } catch (e) {
+    console.error('加载搜索历史失败:', e);
+  }
+}
+
+// 保存搜索历史
+function saveSearchHistory(keyword: string) {
+  if (!keyword || keyword.trim() === '') return;
+  
+  const trimmed = keyword.trim();
+  const history = searchHistory.value.filter(item => item !== trimmed);
+  history.unshift(trimmed);
+  
+  // 限制数量
+  searchHistory.value = history.slice(0, MAX_HISTORY);
+  
+  try {
+    uni.setStorageSync('searchHistory', JSON.stringify(searchHistory.value));
+  } catch (e) {
+    console.error('保存搜索历史失败:', e);
+  }
+}
+
+// 清空搜索历史
+function clearHistory() {
+  uni.showModal({
+    title: '清空搜索历史',
+    content: '确定要清空所有搜索历史吗？',
+    success: (res) => {
+      if (res.confirm) {
+        searchHistory.value = [];
+        try {
+          uni.removeStorageSync('searchHistory');
+        } catch (e) {
+          console.error('清空搜索历史失败:', e);
+        }
+      }
+    }
+  });
+}
 
 // 加载分类数据
 async function loadCategories() {
@@ -135,6 +273,11 @@ async function load(page = 1) {
     totalCount.value = result.total;
     currentPage.value = result.page;
     totalPages.value = result.totalPages;
+    
+    // 保存搜索历史
+    if (query.value && query.value.trim()) {
+      saveSearchHistory(query.value.trim());
+    }
   } catch (err) {
     console.error('搜索失败:', err);
     error.value = true;
@@ -149,14 +292,33 @@ function onSearchInput() {
     clearTimeout(searchTimer);
   }
   searchTimer = setTimeout(() => {
+    if (query.value || selectedCategory.value) {
+      currentPage.value = 1;
+      load(1);
+    }
+  }, 500);
+}
+
+// 搜索确认
+function handleSearch() {
+  if (query.value || selectedCategory.value) {
     currentPage.value = 1;
     load(1);
-  }, 500);
+  }
 }
 
 // 清空搜索
 function clearQuery() {
   query.value = '';
+  selectedCategory.value = null;
+  foods.value = [];
+  currentPage.value = 1;
+}
+
+// 通过关键词搜索
+function searchByKeyword(keyword: string) {
+  query.value = keyword;
+  selectedCategory.value = null;
   currentPage.value = 1;
   load(1);
 }
@@ -168,11 +330,13 @@ function selectCategory(categoryId: string | null) {
   load(1);
 }
 
-// 加载更多（分页）
-function loadMore() {
-  if (currentPage.value < totalPages.value && !loading.value) {
-    load(currentPage.value + 1);
-  }
+// 按健康等级筛选
+function filterByHealthLight(level: number) {
+  // 这里可以扩展，暂时跳转到全部绿灯食物
+  selectedCategory.value = null;
+  currentPage.value = 1;
+  // TODO: 添加 healthLight 参数到搜索
+  load(1);
 }
 
 // 选择食物
@@ -186,6 +350,17 @@ function choose(food: FoodItem) {
 // 打开拍照识别
 function openRecognition() {
   uni.navigateTo({ url: '/pages/food-recognition/FoodRecognitionPage' });
+}
+
+// 获取营养亮点
+function getHighlights(food: FoodItem): string[] {
+  if (!food.nutrition) return [];
+  return generateNutritionHighlights(food.nutrition);
+}
+
+// 获取健康标签
+function getHealthLabel(level: number): string {
+  return getHealthLightLabel(level);
 }
 
 // 获取结果文本
@@ -204,8 +379,8 @@ function getResultText() {
 
 // 页面加载
 onLoad(async () => {
+  loadSearchHistory();
   await loadCategories();
-  await load(1);
 });
 </script>
 
@@ -214,205 +389,229 @@ onLoad(async () => {
   min-height: 100vh;
   box-sizing: border-box;
   padding: 28rpx 32rpx 70rpx;
-  background: #f6faf7;
-  color: #244735;
+  background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
 }
+
+/* 介绍区域 */
 .intro {
   padding: 10rpx 2rpx 24rpx;
 }
-.eyebrow,
-.title,
-.subtitle,
-.result-caption text,
-.food-name,
-.food-meta,
-.photo-copy text,
-.state text {
-  display: block;
-}
+
 .eyebrow {
+  display: block;
   color: #72927b;
   font-size: 21rpx;
   font-weight: 700;
+  margin-bottom: 6rpx;
 }
+
 .title {
+  display: block;
   margin-top: 6rpx;
   color: #244735;
   font-size: 39rpx;
   font-weight: 700;
 }
+
 .subtitle {
+  display: block;
   margin-top: 8rpx;
   color: #829587;
   font-size: 21rpx;
   line-height: 1.5;
 }
+
+/* 搜索框 */
 .search-box {
+  position: relative;
   display: flex;
   align-items: center;
-  height: 82rpx;
-  padding: 0 16rpx;
-  border: 1rpx solid #d8e7da;
-  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 20rpx 24rpx;
+  border: 2rpx solid #c8dcc8;
+  border-radius: 20rpx;
   background: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.08);
 }
+
 .search-icon {
-  width: 34rpx;
-  height: 34rpx;
-  flex: none;
-  margin-right: 12rpx;
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 16rpx;
+  opacity: 0.6;
 }
+
 .search-box input {
-  min-width: 0;
   flex: 1;
-  font-size: 25rpx;
+  color: #244735;
+  font-size: 28rpx;
 }
+
+.search-box input::placeholder {
+  color: #99b3a0;
+}
+
 .clear {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48rpx;
-  height: 48rpx;
-  flex: none;
-  margin: 0;
+  width: 40rpx;
+  height: 40rpx;
+  margin-left: 12rpx;
   padding: 0;
-  border: 1rpx solid #dfe8df;
+  border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.72);
+  background: #e8f3ea;
+  line-height: 1;
 }
+
+.clear::after {
+  border: none;
+}
+
 .clear image {
-  width: 25rpx;
-  height: 25rpx;
+  width: 20rpx;
+  height: 20rpx;
+  opacity: 0.6;
 }
-.result-caption {
-  margin: 16rpx 2rpx 12rpx;
-}
-.result-caption text:first-child {
-  color: #547561;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-.result-caption text:last-child {
-  margin-top: 4rpx;
-  color: #91a696;
-  font-size: 19rpx;
-}
-.food-list {
-  border-top: 1rpx solid #deebe0;
-}
-.food-row,
-.photo-entry {
+
+/* 区块标题 */
+.section-header {
   display: flex;
   align-items: center;
-  width: 100%;
-  text-align: left;
-  background: transparent;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
 }
-.food-row {
-  min-height: 112rpx;
-  padding: 16rpx 2rpx;
-  border-bottom: 1rpx solid #e2ece3;
-}
-.food-mark {
+
+.section-left {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 70rpx;
-  height: 70rpx;
-  flex: none;
-  margin-right: 16rpx;
-  border-radius: 18rpx;
-  color: #fff;
-  background: #7eae86;
-  font-size: 30rpx;
+}
+
+.section-icon {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+}
+
+.section-title {
+  color: #2d6943;
+  font-size: 26rpx;
   font-weight: 700;
 }
-.food-copy,
-.photo-copy {
-  min-width: 0;
-  flex: 1;
+
+/* 热门搜索 */
+.hot-searches {
+  margin-bottom: 28rpx;
 }
-.food-name {
-  overflow: hidden;
-  color: #31543e;
-  font-size: 27rpx;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.food-meta {
-  margin-top: 7rpx;
-  overflow: hidden;
-  color: #789080;
-  font-size: 20rpx;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.forward {
-  width: 32rpx;
-  height: 32rpx;
-  flex: none;
-  margin-left: 14rpx;
-  opacity: 0.72;
-}
-.photo-entry {
-  margin-top: 26rpx;
-  padding: 18rpx 2rpx;
-  border-top: 1rpx solid #dceadd;
-  border-bottom: 1rpx solid #dceadd;
-}
-.camera-mark {
+
+.tag-list {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64rpx;
-  height: 64rpx;
-  flex: none;
-  margin-right: 14rpx;
-  border: 1rpx solid #dceadd;
-  border-radius: 18rpx;
-  background: #eff6eb;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
-.camera-mark image {
-  width: 32rpx;
-  height: 32rpx;
-}
-.photo-copy text:first-child {
-  color: #426d50;
+
+.tag-btn {
+  padding: 14rpx 24rpx;
+  border: 2rpx solid #d4e5d4;
+  border-radius: 30rpx;
+  background: #fff;
+  color: #5c7a67;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 500;
+  line-height: 1;
 }
-.photo-copy text:last-child {
-  margin-top: 5rpx;
-  color: #859a8b;
-  font-size: 19rpx;
-  line-height: 1.4;
+
+.tag-btn::after {
+  border: none;
 }
-.state {
+
+.tag-btn:active {
+  background: #e8f3ea;
+  border-color: #6b9478;
+}
+
+/* 搜索历史 */
+.search-history {
+  margin-bottom: 28rpx;
+}
+
+.clear-history {
+  padding: 6rpx 16rpx;
+  border: none;
+  background: transparent;
+  color: #99b3a0;
+  font-size: 22rpx;
+  line-height: 1;
+}
+
+.clear-history::after {
+  border: none;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.history-item {
   display: flex;
   align-items: center;
-  flex-direction: column;
-  padding: 120rpx 20rpx;
-  color: #70897a;
-  text-align: center;
-  font-size: 25rpx;
-}
-.state-copy {
-  margin-top: 10rpx;
-  color: #9aaca0;
-  font-size: 21rpx;
-}
-.state--error {
-  color: #ad624e;
-}
-.retry {
-  margin-top: 20rpx;
-  padding: 12rpx 24rpx;
-  border: 1rpx solid #bfd6c1;
+  padding: 14rpx 20rpx;
+  border: none;
   border-radius: 12rpx;
-  color: #426a4e;
-  background: #eef6ee;
-  font-size: 22rpx;
+  background: #fff;
+  text-align: left;
+  line-height: 1;
+}
+
+.history-item::after {
+  border: none;
+}
+
+.history-text {
+  color: #5c7a67;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+/* 快捷筛选 */
+.quick-filters {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 28rpx;
+}
+
+.filter-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx;
+  border: 2rpx solid #d4e5d4;
+  border-radius: 16rpx;
+  background: #fff;
+  line-height: 1;
+}
+
+.filter-btn::after {
+  border: none;
+}
+
+.filter-btn.green {
+  border-color: #7fcc8f;
+  background: linear-gradient(135deg, #e8f3ea 0%, #d4e5d4 100%);
+}
+
+.filter-icon {
+  font-size: 32rpx;
+}
+
+.filter-text {
+  color: #2d6943;
+  font-size: 26rpx;
+  font-weight: 600;
 }
 
 /* 分类筛选 */
@@ -420,11 +619,13 @@ onLoad(async () => {
   margin-bottom: 20rpx;
   white-space: nowrap;
 }
+
 .category-list {
   display: inline-flex;
   gap: 12rpx;
   padding: 0 4rpx 12rpx;
 }
+
 .category-tab {
   display: inline-flex;
   align-items: center;
@@ -439,22 +640,224 @@ onLoad(async () => {
   white-space: nowrap;
   transition: all 0.2s ease;
 }
+
 .category-tab.active {
   border-color: #6b9478;
   background: linear-gradient(135deg, #e8f3ea 0%, #d4e5d4 100%);
   color: #244735;
   font-weight: 600;
 }
+
 .category-tab .count {
   color: #99b3a0;
   font-size: 20rpx;
 }
+
 .category-tab.active .count {
   color: #5c7a67;
 }
+
+/* 结果统计 */
+.result-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+  color: #6b9478;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
 .page-info {
   color: #99b3a0;
   font-size: 22rpx;
   font-weight: 500;
+}
+
+/* 食物列表 */
+.food-list {
+  margin-bottom: 100rpx;
+}
+
+.food-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 20rpx;
+  margin-bottom: 12rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 2rpx solid #e8f3ea;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.food-card::after {
+  border: none;
+}
+
+.food-card-active {
+  transform: scale(0.98);
+  background: #f8fdf9;
+  border-color: #7fcc8f;
+}
+
+.food-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.food-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 16rpx;
+  font-size: 32rpx;
+  line-height: 48rpx;
+  text-align: center;
+}
+
+.food-info {
+  flex: 1;
+}
+
+.food-name {
+  display: block;
+  color: #2d6943;
+  font-size: 26rpx;
+  font-weight: 700;
+  margin-bottom: 6rpx;
+}
+
+.food-tags {
+  display: flex;
+  gap: 8rpx;
+  margin-bottom: 6rpx;
+}
+
+.tag {
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  background: #e8f3ea;
+  color: #5a9572;
+  font-size: 18rpx;
+  font-weight: 600;
+}
+
+.food-calories {
+  display: block;
+  color: #76907d;
+  font-size: 22rpx;
+}
+
+.food-badge {
+  padding: 6rpx 12rpx;
+  border-radius: 8rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.badge-1 {
+  background: rgba(127, 204, 143, 0.15);
+  color: #5a9572;
+}
+
+.badge-2 {
+  background: rgba(245, 217, 154, 0.15);
+  color: #d4a748;
+}
+
+.badge-0 {
+  background: rgba(232, 155, 143, 0.15);
+  color: #d46a56;
+}
+
+/* 状态 */
+.state {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 120rpx 20rpx;
+  color: #70897a;
+  text-align: center;
+  font-size: 25rpx;
+}
+
+.state-copy {
+  margin-top: 10rpx;
+  color: #9aaca0;
+  font-size: 21rpx;
+}
+
+.state--error {
+  color: #ad624e;
+}
+
+.retry {
+  margin-top: 20rpx;
+  padding: 12rpx 24rpx;
+  border: 1rpx solid #bfd6c1;
+  border-radius: 12rpx;
+  color: #426a4e;
+  background: #eef6ee;
+  font-size: 22rpx;
+}
+
+.retry::after {
+  border: none;
+}
+
+/* 拍照入口 */
+.photo-entry {
+  position: fixed;
+  right: 32rpx;
+  bottom: 120rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 24rpx;
+  border: none;
+  border-radius: 40rpx;
+  background: linear-gradient(135deg, #7fcc8f 0%, #6bb97d 100%);
+  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.4);
+  line-height: 1;
+}
+
+.photo-entry::after {
+  border: none;
+}
+
+.camera-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.camera-mark image {
+  width: 24rpx;
+  height: 24rpx;
+  filter: brightness(0) invert(1);
+}
+
+.photo-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.photo-copy text:first-child {
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 700;
+  margin-bottom: 2rpx;
+}
+
+.photo-copy text:last-child {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 18rpx;
 }
 </style>
