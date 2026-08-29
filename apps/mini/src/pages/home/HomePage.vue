@@ -257,6 +257,12 @@ import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
+import { 
+  navigateTo,
+  navigateToFoodRecognition,
+  navigateToWeightDetail,
+  navigateToXuxu,
+} from '../../utils/router.js';
 
 const { today, loading, error } = healthLoopState;
 
@@ -310,38 +316,31 @@ const formatTime = (timestamp: string) => {
 };
 
 const go = (url: string) => {
-  uni.navigateTo({ url });
+  navigateTo(url);
 };
 
 const goToWeightDetail = () => {
-  // P0优先：体重详情页
-  uni.navigateTo({ url: '/pages/weight/WeightDetailPage' });
+  navigateToWeightDetail();
 };
 
 const goToFoodDetail = () => {
-  // P0优先：饮食详情页
-  uni.navigateTo({ url: '/pages/food/FoodDetailPage' });
+  navigateTo('/pages/food/FoodDetailPage');
 };
 
 const goToFoodRecognition = () => {
-  // 已存在：拍照识别
-  uni.navigateTo({ url: '/pages/food-recognition/FoodRecognitionPage' });
+  navigateToFoodRecognition();
 };
 
 const goToRecord = (type: string) => {
-  // 临时：通用记录页（待开发详细页面）
-  uni.navigateTo({ url: `/pages/records/RecordsPage?type=${type}` });
+  navigateTo(`/pages/records/RecordsPage?type=${type}`);
 };
 
 const showWaterDialog = () => {
-  // P1优先：喝水弹窗（待开发）
-  // 临时跳转到记录页
   goToRecord('water');
 };
 
 const toXuxu = () => {
-  // XuxuPage是TabBar页，必须用switchTab
-  uni.switchTab({ url: '/pages/xuxu/XuxuPage' });
+  navigateToXuxu();
 };
 
 const getTodayDate = () => {

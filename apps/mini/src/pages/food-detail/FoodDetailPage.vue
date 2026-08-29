@@ -258,6 +258,7 @@ import {
   getHealthLightIcon,
   formatNutrient,
 } from '../../utils/nutrition.js';
+import { navigateBack, navigateToFoodConfirm } from '../../utils/router.js';
 
 const food = ref<FoodItem | null>(null);
 const loading = ref(false);
@@ -336,15 +337,12 @@ function calculateCalories(grams: number): number {
 }
 
 function goBack() {
-  uni.navigateBack();
+  navigateBack();
 }
 
 function addToRecord() {
   if (!food.value) return;
-  
-  uni.navigateTo({
-    url: `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(food.value.id)}`,
-  });
+  navigateToFoodConfirm(food.value.id);
 }
 
 onLoad((options: any) => {

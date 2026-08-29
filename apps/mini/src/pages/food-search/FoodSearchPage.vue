@@ -169,6 +169,10 @@ import {
   generateNutritionHighlights, 
   getHealthLightLabel 
 } from '../../utils/nutrition.js';
+import { 
+  navigateToFoodConfirm,
+  navigateToFoodRecognition 
+} from '../../utils/router.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
@@ -341,15 +345,13 @@ function filterByHealthLight(level: number) {
 
 // 选择食物
 function choose(food: FoodItem) {
-  uni.navigateTo({
-    url: `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(food.id)}`,
-  });
+  navigateToFoodConfirm(food.id);
   uni.$emit('food-selected', food);
 }
 
 // 打开拍照识别
 function openRecognition() {
-  uni.navigateTo({ url: '/pages/food-recognition/FoodRecognitionPage' });
+  navigateToFoodRecognition();
 }
 
 // 获取营养亮点
