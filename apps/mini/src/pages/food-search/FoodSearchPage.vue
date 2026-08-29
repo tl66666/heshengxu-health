@@ -13,7 +13,8 @@
       <input
         v-model="query"
         confirm-type="search"
-        placeholder="搜索米饭、鸡蛋、西兰花"
+        placeholder="搜索米饭、鸡蛋、西兰花或拼音"
+        @input="onSearchInput"
         @confirm="load"
       />
       <button v-if="query" class="clear" aria-label="清空搜索" @tap="clearQuery">
@@ -21,9 +22,25 @@
       </button>
     </view>
 
+    <!-- 分类筛选 -->
+    <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-x>
+      <view class="category-list">
+        <view 
+          v-for="cat in allCategories" 
+          :key="cat.id" 
+          :class="['category-tab', { active: selectedCategory === cat.id }]"
+          @tap="selectCategory(cat.id)"
+        >
+          <text>{{ cat.name }}</text>
+          <text v-if="cat.count !== undefined" class="count">({{ cat.count }})</text>
+        </view>
+      </view>
+    </scroll-view>
+
     <view class="result-caption">
-      <text>{{ query ? `找到 ${foods.length} 种相关食物` : '浏览常见食物' }}</text>
-      <text>营养值按每 100 克展示</text>
+      <text>{{ getResultText() }}</text>
+      <text v-if="totalPages > 1" class="page-info">第 {{ currentPage }}/{{ totalPages }} 页</text>
+    </view>t>营养值按每 100 克展示</text>
     </view>
 
     <view v-if="loading" class="state">正在整理食物...</view>
@@ -64,42 +81,132 @@
 
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AppNavBar from '../../components/AppNavBar.vue';
-import { searchFoods } from '../../features/food/food.service.js';
+import { 
+  searchFoods, 
+  getCategoryStats,
+  type FoodCategory 
+} from '../../features/food/food.service.js';
 import type { FoodItem } from '../../features/food/food.types.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
 const loading = ref(false);
 const error = ref(false);
+const categories = ref<FoodCategory[]>([]);
+const selectedCategory = ref<string | null>(null);
+const totalCount = ref(0);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const pageSize = 20;
 
-async function load() {
+let searchTimer: number | null = null;
+
+// 所有分类（包含"全部"选项）
+const allCategories = computed(() => {
+  const all = { id: null, name: '全部', slug: 'all', sortOrder: 0, count: totalCount.value };
+  return [all, ...categories.value];
+});
+
+// 加载分类数据
+async function loadCategories() {
+  try {
+    categories.value = await getCategoryStats();
+    totalCount.value = categories.value.reduce((sum, cat) => sum + (cat.count || 0), 0);
+  } catch (err) {
+    console.error('加载分类失败:', err);
+  }
+}
+
+// 搜索食物
+async function load(page = 1) {
   loading.value = true;
   error.value = false;
   try {
-    foods.value = await searchFoods(query.value);
-  } catch {
+    const result = await searchFoods({
+      query: query.value || undefined,
+      categoryId: selectedCategory.value || undefined,
+      page,
+      pageSize,
+    });
+    
+    foods.value = result.items;
+    totalCount.value = result.total;
+    currentPage.value = result.page;
+    totalPages.value = result.totalPages;
+  } catch (err) {
+    console.error('搜索失败:', err);
     error.value = true;
   } finally {
     loading.value = false;
   }
 }
+
+// 搜索输入防抖
+function onSearchInput() {
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+  }
+  searchTimer = setTimeout(() => {
+    currentPage.value = 1;
+    load(1);
+  }, 500);
+}
+
+// 清空搜索
 function clearQuery() {
   query.value = '';
-  load();
+  currentPage.value = 1;
+  load(1);
 }
+
+// 选择分类
+function selectCategory(categoryId: string | null) {
+  selectedCategory.value = categoryId;
+  currentPage.value = 1;
+  load(1);
+}
+
+// 加载更多（分页）
+function loadMore() {
+  if (currentPage.value < totalPages.value && !loading.value) {
+    load(currentPage.value + 1);
+  }
+}
+
+// 选择食物
 function choose(food: FoodItem) {
   uni.navigateTo({
     url: `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(food.id)}`,
   });
   uni.$emit('food-selected', food);
 }
+
+// 打开拍照识别
 function openRecognition() {
   uni.navigateTo({ url: '/pages/food-recognition/FoodRecognitionPage' });
 }
 
-onLoad(load);
+// 获取结果文本
+function getResultText() {
+  if (loading.value) return '搜索中...';
+  if (error.value) return '搜索失败';
+  if (query.value) {
+    return `找到 ${totalCount.value} 种相关食物`;
+  }
+  if (selectedCategory.value) {
+    const cat = categories.value.find(c => c.id === selectedCategory.value);
+    return cat ? `${cat.name} - ${totalCount.value} 种食物` : `${totalCount.value} 种食物`;
+  }
+  return `共 ${totalCount.value} 种食物`;
+}
+
+// 页面加载
+onLoad(async () => {
+  await loadCategories();
+  await load(1);
+});
 </script>
 
 <style scoped>
@@ -306,5 +413,48 @@ onLoad(load);
   color: #426a4e;
   background: #eef6ee;
   font-size: 22rpx;
+}
+
+/* 分类筛选 */
+.category-tabs {
+  margin-bottom: 20rpx;
+  white-space: nowrap;
+}
+.category-list {
+  display: inline-flex;
+  gap: 12rpx;
+  padding: 0 4rpx 12rpx;
+}
+.category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 14rpx 24rpx;
+  border: 2rpx solid #d4e5d4;
+  border-radius: 30rpx;
+  background: #fff;
+  color: #5c7a67;
+  font-size: 24rpx;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.category-tab.active {
+  border-color: #6b9478;
+  background: linear-gradient(135deg, #e8f3ea 0%, #d4e5d4 100%);
+  color: #244735;
+  font-weight: 600;
+}
+.category-tab .count {
+  color: #99b3a0;
+  font-size: 20rpx;
+}
+.category-tab.active .count {
+  color: #5c7a67;
+}
+.page-info {
+  color: #99b3a0;
+  font-size: 22rpx;
+  font-weight: 500;
 }
 </style>
