@@ -19,6 +19,14 @@
       "style": { "navigationBarTitleText": "记录" }
     },
     {
+      "path": "pages/weight/WeightDetailPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "体重记录" }
+    },
+    {
+      "path": "pages/food/FoodDetailPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "饮食记录" }
+    },
+    {
       "path": "pages/xuxu/XuxuPage",
       "style": { "navigationBarTitleText": "序序" }
     },

@@ -46,7 +46,7 @@
       </view>
 
       <!-- 2. 饮食热量卡片 - 真正紧凑 -->
-      <view class="calorie-card card">
+      <view class="calorie-card card" @tap="goToFoodDetail">
         <view class="card-top">
           <text class="card-title">饮食热量</text>
           <view class="mode-tag">16:8饮食</view>
@@ -78,19 +78,19 @@
         </view>
         
         <view class="meals">
-          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
+          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
             <view class="meal-icon">🥚</view>
             <text class="meal-name">早餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
+          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
             <view class="meal-icon">🍔</view>
             <text class="meal-name">午餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
+          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
             <view class="meal-icon">🍜</view>
             <text class="meal-name">晚餐</text>
           </button>
-          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('food')">
+          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
             <view class="meal-icon">🍎</view>
             <text class="meal-name">加餐</text>
           </button>
@@ -107,7 +107,7 @@
       </view>
 
       <!-- 3. 体重记录卡片 -->
-      <view class="record-card card">
+      <view class="record-card card" @tap="goToWeightDetail">
         <view class="card-top">
           <view class="title-group">
             <text class="card-title">体重记录</text>
@@ -115,7 +115,7 @@
               {{ formatTime(today.todayRecords.weight.recordedAt) }} 更新
             </text>
           </view>
-          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('weight')">+</button>
+          <button class="add-btn" hover-class="button-hover" @tap.stop="goToWeightDetail()">+</button>
         </view>
         <view class="record-content">
           <view class="big-value">
@@ -130,7 +130,7 @@
 
       <!-- 4. 2x2功能卡片 -->
       <view class="grid-cards">
-        <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('water')">
+        <button class="grid-item card" hover-class="button-hover" @tap="showWaterDialog()">
           <view class="grid-top">
             <text class="grid-title">喝水</text>
             <text class="grid-add">+</text>
@@ -313,9 +313,30 @@ const go = (url: string) => {
   uni.navigateTo({ url });
 };
 
+const goToWeightDetail = () => {
+  // P0优先：体重详情页
+  uni.navigateTo({ url: '/pages/weight/WeightDetailPage' });
+};
+
+const goToFoodDetail = () => {
+  // P0优先：饮食详情页
+  uni.navigateTo({ url: '/pages/food/FoodDetailPage' });
+};
+
+const goToFoodRecognition = () => {
+  // 已存在：拍照识别
+  uni.navigateTo({ url: '/pages/food-recognition/FoodRecognitionPage' });
+};
+
 const goToRecord = (type: string) => {
-  // RecordsPage不是TabBar页，可以用navigateTo
+  // 临时：通用记录页（待开发详细页面）
   uni.navigateTo({ url: `/pages/records/RecordsPage?type=${type}` });
+};
+
+const showWaterDialog = () => {
+  // P1优先：喝水弹窗（待开发）
+  // 临时跳转到记录页
+  goToRecord('water');
 };
 
 const toXuxu = () => {
