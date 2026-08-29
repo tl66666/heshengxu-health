@@ -69,6 +69,10 @@
     {
       "path": "pages/food-candidates/FoodCandidatesPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "确认识别结果" }
+    },
+    {
+      "path": "pages/food-detail/FoodDetailPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "食物详情" }
     }
   ],
   "tabBar": {
