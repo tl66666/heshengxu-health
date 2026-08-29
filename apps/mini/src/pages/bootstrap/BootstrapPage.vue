@@ -1,16 +1,16 @@
 <template>
   <view class="bootstrap-page">
-    <!-- 背景插画：完整显示 -->
+    <!-- 背景插画：居中显示 -->
     <image
       class="bg-illustration"
       src="/static/illustrations/onboarding-guide-vertical.png"
-      mode="widthFix"
+      mode="aspectFill"
     />
 
-    <!-- 渐变遮罩 -->
+    <!-- 渐变遮罩：增强对比度 -->
     <view class="bg-overlay" />
 
-    <!-- 内容区 -->
+    <!-- 内容区：居中 -->
     <view class="content-wrapper">
       <!-- 序序头像 + 品牌 -->
       <view class="brand-section hz-rise">
@@ -90,20 +90,26 @@ onShow(async () => {
   background: linear-gradient(180deg, #e8f4ea 0%, #f3f8f4 50%, #f9fcfa 100%);
 }
 
-/* 背景插画：局部装饰 */
+/* 背景插画：居中显示，清晰可见 */
 .bg-illustration {
   position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 60%;
-  transform: rotate(8deg);
-  opacity: 0.15;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  opacity: 0.3;
   z-index: 0;
-  filter: blur(2rpx);
 }
 
 .bg-overlay {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.6) 100%);
+  z-index: 1;
 }
 
 /* 内容区 */

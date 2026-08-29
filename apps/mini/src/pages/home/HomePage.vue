@@ -285,21 +285,24 @@ const toXuxu = () => {
   uni.navigateTo({ url: '/pages/xuxu/XuxuPage' });
 };
 
+const getTodayDate = () => {
+  return new Date().toISOString().split('T')[0];
+};
+
 const load = () => {
-  healthLoopState.load();
+  const today = getTodayDate();
+  healthLoopState.loadToday(today);
 };
 
 // 修复：首次进入立即加载
 onMounted(() => {
-  if (!today.value) {
-    load();
-  }
+  load();
 });
 
 // 每次显示时刷新
 onShow(() => {
   if (today.value) {
-    healthLoopState.refresh();
+    load();
   }
 });
 </script>
