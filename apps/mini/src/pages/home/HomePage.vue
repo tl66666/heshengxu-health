@@ -184,20 +184,7 @@
         <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.jpg" mode="aspectFit" />
       </view>
 
-      <!-- 6. 血糖卡片 -->
-      <view class="sugar-card card">
-        <view class="card-top">
-          <text class="card-title">血糖</text>
-          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('blood-sugar')">+</button>
-        </view>
-        <view class="sugar-content">
-          <text class="sugar-hint">暂无记录</text>
-          <text class="sugar-value">-- mmol/L</text>
-        </view>
-        <image class="sugar-icon-img" src="/static/icons/watercolor/blood-sugar.jpg" mode="aspectFit" />
-      </view>
-
-      <!-- 7. 经期记录卡片 -->
+      <!-- 6. 经期记录卡片 -->
       <view class="period-card card">
         <view class="card-top">
           <text class="card-title">经期</text>
@@ -207,10 +194,10 @@
           <text class="period-hint">暂无记录</text>
           <text class="period-days">距离下次预计 -- 天</text>
         </view>
-        <!-- 经期图标待生成 -->
+        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.jpg" mode="aspectFit" />
       </view>
 
-      <!-- 8. 用药打卡卡片 -->
+      <!-- 7. 用药打卡卡片 -->
       <view class="medication-card card">
         <view class="card-top">
           <text class="card-title">用药打卡</text>
@@ -222,10 +209,10 @@
             <text class="medication-item">暂无用药计划</text>
           </view>
         </view>
-        <!-- 用药图标待生成 -->
+        <image class="medication-icon-img" src="/static/icons/watercolor/medication.jpg" mode="aspectFit" />
       </view>
 
-      <!-- 9. 编辑首页卡片 -->
+      <!-- 8. 编辑首页卡片 -->
       <button 
         class="edit-card" 
         hover-class="button-hover"
@@ -872,40 +859,7 @@ onShow(() => {
   border-radius: 12rpx;
 }
 
-/* 6. 血糖卡片 */
-.sugar-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.sugar-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-}
-
-.sugar-hint {
-  color: #9ba8a0;
-  font-size: 20rpx;
-}
-
-.sugar-value {
-  color: #2d6943;
-  font-size: 32rpx;
-  font-weight: 900;
-}
-
-.sugar-icon-img {
-  position: absolute;
-  bottom: 8rpx;
-  right: 8rpx;
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.6;
-  border-radius: 12rpx;
-}
-
-/* 7. 经期记录卡片 */
+/* 6. 经期记录卡片 */
 .period-card {
   position: relative;
   overflow: hidden;
@@ -939,7 +893,7 @@ onShow(() => {
   border-radius: 12rpx;
 }
 
-/* 8. 用药打卡卡片 */
+/* 7. 用药打卡卡片 */
 .medication-card {
   position: relative;
   overflow: hidden;
@@ -979,7 +933,7 @@ onShow(() => {
   border-radius: 12rpx;
 }
 
-/* 9. 编辑卡片 */
+/* 8. 编辑卡片 */
 .edit-card {
   display: flex;
   flex-direction: column;
