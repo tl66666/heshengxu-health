@@ -1,0 +1,86 @@
+[
+  {
+    "categoryId": 1,
+    "name": "主食类",
+    "slug": "staple",
+    "sortOrder": 1,
+    "description": "包装谷薯、天然谷薯、谷薯制品"
+  },
+  {
+    "categoryId": 2,
+    "name": "肉蛋类",
+    "slug": "meat-egg",
+    "sortOrder": 2,
+    "description": "白肉、红肉、蛋类"
+  },
+  {
+    "categoryId": 3,
+    "name": "大豆及制品",
+    "slug": "soy",
+    "sortOrder": 3,
+    "description": "大豆及制品"
+  },
+  {
+    "categoryId": 4,
+    "name": "蔬菜菌藻类",
+    "slug": "vegetable",
+    "sortOrder": 4,
+    "description": "菌藻、蔬菜"
+  },
+  {
+    "categoryId": 5,
+    "name": "水果类",
+    "slug": "fruit",
+    "sortOrder": 5,
+    "description": "水果"
+  },
+  {
+    "categoryId": 6,
+    "name": "奶类",
+    "slug": "dairy",
+    "sortOrder": 6,
+    "description": "鲜奶、酸奶、奶酪、奶粉、其它"
+  },
+  {
+    "categoryId": 7,
+    "name": "油脂类",
+    "slug": "oil",
+    "sortOrder": 7,
+    "description": "植物油、动物油"
+  },
+  {
+    "categoryId": 8,
+    "name": "坚果类",
+    "slug": "nut",
+    "sortOrder": 8,
+    "description": "坚果种子"
+  },
+  {
+    "categoryId": 9,
+    "name": "调味品",
+    "slug": "seasoning",
+    "sortOrder": 9,
+    "description": "调味料、调味酱、酱菜、糖和蜂蜜"
+  },
+  {
+    "categoryId": 10,
+    "name": "饮料类",
+    "slug": "beverage",
+    "sortOrder": 10,
+    "description": "酒精饮料、碳酸饮料、纯果蔬汁饮料、无糖茶饮、无糖咖啡、固体饮料、含糖饮料、乳饮料"
+  },
+  {
+    "categoryId": 11,
+    "name": "休闲零食",
+    "slug": "snack",
+    "sortOrder": 11,
+    "description": "休闲零食"
+  },
+  {
+    "categoryId": 12,
+    "name": "餐饮食品",
+    "slug": "restaurant",
+    "sortOrder": 12,
+    "description": "餐饮食品"
+  }
+]

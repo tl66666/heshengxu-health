@@ -45,6 +45,10 @@ model FoodItem {
   brand         String?
   categoryId    String?
   isActive      Boolean         @default(true)
+  pinyinCode    String?         // 拼音编码，用于搜索
+  thumbImageUrl String?         // 缩略图
+  isLiquid      Boolean         @default(false) // 是否流食
+  healthLight   Int             @default(0) // 健康灯：0未知 1绿 2黄 3红
   category      FoodCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   aliases       FoodAlias[]
   nutrition     FoodNutrition?
@@ -56,6 +60,7 @@ model FoodItem {
 
   @@index([isActive, name])
   @@index([categoryId, isActive])
+  @@index([pinyinCode])
 }
 
 model FoodAlias {
@@ -78,6 +83,31 @@ model FoodNutrition {
   carbohydrateG   Float
   dietaryFiberG   Float?
   sodiumMg        Float?
+  // 维生素
+  vitaminAUg      Float?   // 维生素A (μg)
+  thiamineMg      Float?   // 维生素B1 (mg)
+  riboflavinMg    Float?   // 维生素B2 (mg)
+  vitaminB6Mg     Float?   // 维生素B6 (mg)
+  vitaminCMg      Float?   // 维生素C (mg)
+  vitaminEMg      Float?   // 维生素E (mg)
+  niacinMg        Float?   // 烟酸 (mg)
+  folateMcg       Float?   // 叶酸 (μg)
+  // 矿物质
+  calciumMg       Float?   // 钙 (mg)
+  ironMg          Float?   // 铁 (mg)
+  potassiumMg     Float?   // 钾 (mg)
+  zincMg          Float?   // 锌 (mg)
+  seleniumUg      Float?   // 硒 (μg)
+  magnesiumMg     Float?   // 镁 (mg)
+  copperMg        Float?   // 铜 (mg)
+  manganeseMg     Float?   // 锰 (mg)
+  phosphorusMg    Float?   // 磷 (mg)
+  // 其他
+  cholesterolMg   Float?   // 胆固醇 (mg)
+  saturatedFatG   Float?   // 饱和脂肪 (g)
+  sugarG          Float?   // 糖 (g)
+  gi              Float?   // 升糖指数
+  gl              Float?   // 升糖负荷
   food            FoodItem @relation(fields: [foodId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
