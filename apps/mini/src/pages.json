@@ -73,6 +73,14 @@
     {
       "path": "pages/food-detail/FoodDetailPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "食物详情" }
+    },
+    {
+      "path": "pages/water/WaterPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "喝水记录" }
+    },
+    {
+      "path": "pages/water-goal/WaterGoalPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "喝水量推荐" }
     }
   ],
   "tabBar": {
