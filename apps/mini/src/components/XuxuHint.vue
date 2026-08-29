@@ -7,7 +7,7 @@
     >
     <view v-if="action" class="action"
       ><text>{{ action }}</text
-      ><image src="/static/icons/forward.svg" mode="aspectFit"
+      ><image src="/static/icons/svg/forward.svg" mode="aspectFit"
     /></view>
   </view>
 </template>

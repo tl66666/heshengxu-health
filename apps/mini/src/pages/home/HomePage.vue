@@ -123,7 +123,7 @@
             <text class="value-unit">公斤</text>
           </view>
           <view class="mini-chart">
-            <image class="chart-icon" src="/static/icons/scale.svg" mode="aspectFit" />
+            <image class="chart-icon" src="/static/icons/svg/scale.svg" mode="aspectFit" />
           </view>
         </view>
       </view>
@@ -139,7 +139,7 @@
             <text class="grid-num">0</text>
             <text class="grid-unit">毫升</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/water-drop.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=sleep')">
@@ -150,7 +150,7 @@
           <view class="grid-data">
             <text class="grid-hint">没有记录</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/sleep.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/sleep.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" @tap="go('/pages/records/RecordsPage?type=activity')">
@@ -162,7 +162,7 @@
             <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
             <text class="grid-unit">分钟</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/activity.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/activity.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" @tap="toXuxu">
@@ -172,7 +172,7 @@
           <view class="grid-data">
             <text class="grid-hint">记录今天</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/mood-smile.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/mood-smile.jpg" mode="aspectFit" />
         </button>
       </view>
 

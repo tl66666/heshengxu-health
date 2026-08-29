@@ -65,7 +65,7 @@
           >
             <image
               v-if="task.status === 'completed'"
-              src="/static/icons/check.svg"
+              src="/static/icons/svg/check.svg"
               mode="aspectFit"
             />
           </button>

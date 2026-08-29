@@ -41,7 +41,7 @@
         <view class="message-body">
           <text class="message-text">{{ message.text }}</text>
           <view v-if="message.sourceTitle" class="source-card"
-            ><image src="/static/icons/journal.svg" mode="aspectFit" /><text
+            ><image src="/static/icons/svg/journal.svg" mode="aspectFit" /><text
               >知识来源 · {{ message.sourceTitle }}</text
             ></view
           >
@@ -63,7 +63,7 @@
 
     <view class="composer">
       <button class="icon-button" aria-label="语音输入" @tap="voiceNotice">
-        <image src="/static/icons/mic.svg" mode="aspectFit" />
+        <image src="/static/icons/svg/mic.svg" mode="aspectFit" />
       </button>
       <input
         v-model="draft"
@@ -78,7 +78,7 @@
         aria-label="发送"
         @tap="send(draft)"
       >
-        <image src="/static/icons/send.svg" mode="aspectFit" />
+        <image src="/static/icons/svg/send.svg" mode="aspectFit" />
       </button>
     </view>
     <text class="disclaimer">序序提供健康管理与生活方式建议，不能替代医生诊疗。</text>

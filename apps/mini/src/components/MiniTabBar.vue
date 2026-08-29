@@ -37,15 +37,15 @@
 defineProps<{ active: 'home' | 'records' | 'xuxu' | 'plan' | 'me' }>();
 
 const items = [
-  { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: '/static/icons/home.svg' },
+  { key: 'home', path: '/pages/home/HomePage', label: '首页', icon: '/static/icons/svg/home.svg' },
   {
     key: 'records',
     path: '/pages/records/RecordsPage',
     label: '记录',
-    icon: '/static/icons/journal.svg',
+    icon: '/static/icons/svg/journal.svg',
   },
-  { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: '/static/icons/plan.svg' },
-  { key: 'me', path: '/pages/me/MePage', label: '我的', icon: '/static/icons/profile.svg' },
+  { key: 'plan', path: '/pages/plan/PlanPage', label: '计划', icon: '/static/icons/svg/plan.svg' },
+  { key: 'me', path: '/pages/me/MePage', label: '我的', icon: '/static/icons/svg/profile.svg' },
 ] as const;
 const xuxu = { path: '/pages/xuxu/XuxuPage' };
 

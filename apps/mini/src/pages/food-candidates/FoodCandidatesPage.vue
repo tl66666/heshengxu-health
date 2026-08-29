@@ -42,7 +42,7 @@
               ></view
             ><image
               v-if="candidate.id === candidateId"
-              src="/static/icons/check.svg"
+              src="/static/icons/svg/check.svg"
               mode="aspectFit"
             /></button
         ></view>

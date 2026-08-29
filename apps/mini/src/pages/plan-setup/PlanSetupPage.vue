@@ -11,7 +11,7 @@
         <image
           v-if="kind === 'weight'"
           class="choice-check"
-          src="/static/icons/check.svg"
+          src="/static/icons/svg/check.svg"
           mode="aspectFit"
         />
       </button>
@@ -21,7 +21,7 @@
         <image
           v-if="kind === 'sleep'"
           class="choice-check"
-          src="/static/icons/check.svg"
+          src="/static/icons/svg/check.svg"
           mode="aspectFit"
         />
       </button>

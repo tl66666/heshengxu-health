@@ -9,7 +9,7 @@
     </view>
 
     <view class="search-box">
-      <image class="search-icon" src="/static/icons/search.svg" mode="aspectFit" />
+      <image class="search-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
       <input
         v-model="query"
         confirm-type="search"
@@ -17,7 +17,7 @@
         @confirm="load"
       />
       <button v-if="query" class="clear" aria-label="清空搜索" @tap="clearQuery">
-        <image src="/static/icons/close.svg" mode="aspectFit" />
+        <image src="/static/icons/svg/close.svg" mode="aspectFit" />
       </button>
     </view>
 
@@ -45,19 +45,19 @@
             100g</text
           >
         </view>
-        <image class="forward" src="/static/icons/forward.svg" mode="aspectFit" />
+        <image class="forward" src="/static/icons/svg/forward.svg" mode="aspectFit" />
       </button>
     </view>
 
     <button class="photo-entry" @tap="openRecognition">
       <view class="camera-mark">
-        <image src="/static/icons/camera.svg" mode="aspectFit" />
+        <image src="/static/icons/svg/camera.svg" mode="aspectFit" />
       </view>
       <view class="photo-copy">
         <text>拍照识别食物</text>
         <text>识别后先确认食物和份量，再保存记录</text>
       </view>
-      <image class="forward" src="/static/icons/forward.svg" mode="aspectFit" />
+      <image class="forward" src="/static/icons/svg/forward.svg" mode="aspectFit" />
     </button>
   </view>
 </template>

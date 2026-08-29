@@ -203,7 +203,7 @@
               <view class="date-picker-btn">
                 <text v-if="form.birthDate" class="date-picked">{{ form.birthDate }}</text>
                 <text v-else class="date-placeholder">选择生日</text>
-                <image src="/static/icons/forward.svg" class="date-arrow" mode="aspectFit" />
+                <image src="/static/icons/svg/forward.svg" class="date-arrow" mode="aspectFit" />
               </view>
             </picker>
 
@@ -228,7 +228,7 @@
                   <view :class="['goal-check', { checked: form.goals.includes(goal.value) }]">
                     <image
                       v-if="form.goals.includes(goal.value)"
-                      src="/static/icons/check.svg"
+                      src="/static/icons/svg/check.svg"
                       class="check-icon"
                       mode="aspectFit"
                     />

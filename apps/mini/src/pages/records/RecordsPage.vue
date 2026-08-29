@@ -38,7 +38,7 @@
         <view class="food-entry-copy"
           ><text>记一份具体食物</text><text>搜索食物并按份量计算热量与营养</text></view
         >
-        <image class="food-entry-arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+        <image class="food-entry-arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
       </button>
 
       <view v-if="foodEntries.length" class="food-summary">

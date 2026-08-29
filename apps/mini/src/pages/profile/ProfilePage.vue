@@ -60,19 +60,19 @@
               ><text>基础资料</text
               ><text>{{ sexLabel }} · {{ profile.displayName || '未填写称呼' }}</text></view
             >
-            <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+            <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
           </button>
           <button class="row" @tap="edit('body')">
             <view class="row-copy"
               ><text>身体指标</text><text>{{ bodySummary }}</text></view
             >
-            <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+            <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
           </button>
           <button class="row row--last" @tap="edit('goal')">
             <view class="row-copy"
               ><text>健康目标</text><text>{{ goalLabel }}</text></view
             >
-            <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+            <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
           </button>
         </view>
       </view>

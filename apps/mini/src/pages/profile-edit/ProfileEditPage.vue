@@ -69,7 +69,7 @@
           >
           <image
             v-if="form.primaryGoal === item.value"
-            src="/static/icons/check.svg"
+            src="/static/icons/svg/check.svg"
             mode="aspectFit"
           />
         </button>

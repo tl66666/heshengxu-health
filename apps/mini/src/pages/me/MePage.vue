@@ -10,7 +10,7 @@
         ><text>{{ displayName }}</text
         ><text>{{ profileText }}</text></view
       >
-      <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+      <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
     </button>
 
     <view class="section">
@@ -27,7 +27,7 @@
             ><text>{{ item.label }}</text
             ><text>{{ item.detail }}</text></view
           >
-          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
       </view>
     </view>
@@ -39,14 +39,14 @@
           <view class="row-copy"
             ><text>数据管理说明</text><text>当前可以查看和修改自己的健康记录</text></view
           >
-          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
         <button class="row" @tap="resetDemo">
           <view class="row-copy"
             ><text class="reset-title">重置演示数据</text
             ><text>清除本机保存的建档与计划，重新体验建档流程</text></view
           >
-          <image class="arrow" src="/static/icons/forward.svg" mode="aspectFit" />
+          <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
         <view class="row row--last row--disabled">
           <view class="row-copy"

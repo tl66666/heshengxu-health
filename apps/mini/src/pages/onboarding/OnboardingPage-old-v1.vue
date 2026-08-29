@@ -171,7 +171,7 @@
             <view class="date-selector">
               <text v-if="form.birthDate" class="date-value">{{ form.birthDate }}</text>
               <text v-else class="date-placeholder">选择生日</text>
-              <image src="/static/icons/forward.svg" class="date-arrow" mode="aspectFit" />
+              <image src="/static/icons/svg/forward.svg" class="date-arrow" mode="aspectFit" />
             </view>
           </picker>
           <text v-if="age" class="age-result">你今年 {{ age }} 岁</text>
@@ -194,7 +194,7 @@
               <view class="goal-check">
                 <image
                   v-if="form.goals.includes(goal.value)"
-                  src="/static/icons/check.svg"
+                  src="/static/icons/svg/check.svg"
                   mode="aspectFit"
                 />
               </view>
