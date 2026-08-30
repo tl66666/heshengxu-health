@@ -14,6 +14,7 @@ const required = [
   'app.json',
   'app.js',
   'pages/onboarding/OnboardingPage.js',
+  'pages/onboarding/onboarding-flow.js',
   'pages/home/HomePage.js',
   'pages/records/RecordsPage.js',
   'pages/plan/PlanPage.js',

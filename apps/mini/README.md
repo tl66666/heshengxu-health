@@ -32,6 +32,8 @@ pnpm --filter @heban/mini build:mp-weixin:check
 ./scripts/dev-mini.ps1
 ```
 
+并行开发注意：`apps/mini/dist/dev/mp-weixin` 是共享输出目录，同一时间只能运行一个 `dev:mp-weixin` 监听器。遇到 `module is not defined` 时，先停止其他会话的监听器，再执行 `pnpm --filter @heban/mini clean:dist` 和 `./scripts/dev-mini.ps1`；看到 `Build complete` 后再在微信开发者工具点击“重新编译”。监听器运行期间不要执行生产构建，以免把不完整的模块写入 dev 目录。
+
 脚本会持续监听源码变化并生成 `apps/mini/dist/dev/mp-weixin`。微信开发者工具只需要导入一次 `apps/mini`，项目配置会自动把小程序根目录指向开发产物；之后保存源码后，在微信工具点击“重新编译”即可看到变化，不需要 HBuilderX 参与。
 
 ### 发布前构建

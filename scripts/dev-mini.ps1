@@ -4,9 +4,11 @@ Set-Location (Join-Path $PSScriptRoot '..')
 
 node scripts/sync-illustrations.mjs
 
-# Keep only one development output so WeChat never reads an old release build.
-if (Test-Path 'apps/mini/dist/build') {
-  Remove-Item -Recurse -Force 'apps/mini/dist/build'
+# Keep only one development output so WeChat never reads an interrupted or old build.
+foreach ($output in @('apps/mini/dist/dev', 'apps/mini/dist/build')) {
+  if (Test-Path $output) {
+    Remove-Item -Recurse -Force $output
+  }
 }
 
 Write-Host 'Starting Heshengxu WeChat Mini Program development watcher...' -ForegroundColor Green
