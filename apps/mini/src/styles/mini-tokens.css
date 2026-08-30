@@ -1,14 +1,14 @@
 page {
-  --hz-bg: #f7fbf8;
-  --hz-surface: #ffffff;
-  --hz-soft: #eef6ef;
-  --hz-warm: #fffdf5;
-  --hz-ink: #214632;
-  --hz-muted: #71897a;
-  --hz-green: #347c50;
-  --hz-green-soft: #e8f4e8;
-  --hz-rule: #dceadd;
-  --hz-rule-light: #e4eee5;
+  --hz-bg: #fff7f1;
+  --hz-surface: #fffdfb;
+  --hz-soft: #fff0f3;
+  --hz-warm: #fffaf0;
+  --hz-ink: #51484b;
+  --hz-muted: #98898b;
+  --hz-green: #7f9b88;
+  --hz-green-soft: #eef4ee;
+  --hz-rule: #efdfda;
+  --hz-rule-light: #f3e7e2;
   --hz-danger: #b85e43;
   --hz-danger-soft: #fff1ed;
   --hz-tabbar-height: 124rpx;
@@ -20,21 +20,21 @@ page {
   --hz-shadow-card: 0 8rpx 24rpx rgba(31, 74, 48, 0.07);
   --hz-shadow-float: 0 12rpx 32rpx rgba(24, 52, 37, 0.14);
   /* 功能色砖块底色（记录四项、工具入口） */
-  --hz-mint: #e8f4e8;
-  --hz-amber: #fff6dc;
-  --hz-amber-ink: #8a7434;
-  --hz-sky: #e9f2fb;
-  --hz-sky-ink: #4a6f96;
-  --hz-blush: #fdeee6;
-  --hz-blush-ink: #a06a4c;
+  --hz-mint: #eef4ee;
+  --hz-amber: #fff4d9;
+  --hz-amber-ink: #9a8050;
+  --hz-sky: #edf4fb;
+  --hz-sky-ink: #6986a3;
+  --hz-blush: #fff0f3;
+  --hz-blush-ink: #b36d80;
   /* 自定义 TabBar 占用空间（含离底间距），页面据此预留底部安全距离 */
   --hz-tabbar-offset: 0rpx;
   --hz-tabbar-height: 108rpx;
 }
 page {
   /* 柔和主按钮体系：与水彩插画同氛围，坚决不用实心深绿 */
-  --hz-primary-soft: #e9f5ec;
-  --hz-primary-soft-active: #dcede2;
-  --hz-primary-border: #cbe3d2;
-  --hz-primary-ink: #2f6140;
+  --hz-primary-soft: #fff0f3;
+  --hz-primary-soft-active: #f9dfe6;
+  --hz-primary-border: #e9c3cc;
+  --hz-primary-ink: #b45f78;
 }

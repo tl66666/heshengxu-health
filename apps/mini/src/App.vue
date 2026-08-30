@@ -6,8 +6,8 @@ export default {};
 @import './styles/mini-tokens.css';
 
 page {
-  background: #f7fbf8;
-  color: #183425;
+  background: #fff7f1;
+  color: #51484b;
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
   font-size: 28rpx;
   -webkit-font-smoothing: antialiased;

@@ -1034,6 +1034,19 @@ onShow(() => {
 }
 </style>
 <style scoped>
-.period-card,.medication-card{border:1rpx solid #dfeae1;box-shadow:0 4rpx 12rpx rgba(47,91,57,.05)}
-.period-card{background:#fff8fb}.medication-card{background:#f6fbff}.period-days{font-size:24rpx}.medication-item{font-size:22rpx}.period-icon-img,.medication-icon-img{width:72rpx;height:72rpx;opacity:.5}
+.page { background: #fff7f1; }
+.date-chip { border-radius: 12rpx; background: #fff0f3; color: #b66d80; }
+.greeting { color: #5a4c52; }
+.card { border: 1rpx solid #f0dfda; border-radius: 18rpx; background: #fffdfb; box-shadow: 0 8rpx 22rpx rgba(139, 102, 89, .06); }
+.card-title, .grid-title { color: #66545a; }
+.weight-card, .calorie-card, .record-card, .fasting-card { background: #fffdfb; }
+.mode-tag { background: #fff0f3; color: #b66d80; }
+.mode-tag.blue { background: #f0effb; color: #7c76b2; }
+.period-card { border-color: #efcbd4; background: #fff0f3; }
+.period-hint, .medication-hint { color: #9f858b; }
+.period-days { color: #c26f84; }
+.medication-card { border-color: #d9e5ed; background: #f1f6fb; }
+.medication-item { color: #6a88a5; }
+.edit-card { border-color: #e9cfd1; }.edit-icon, .edit-text { color: #b66d80; }
+.error-state button { background: #fff0f3; color: #b66d80; }
 </style>

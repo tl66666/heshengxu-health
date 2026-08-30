@@ -59,12 +59,12 @@ function close() {
 <style scoped>
 .nav-bar-wrapper {
   position: relative;
-  background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
+  background: #fff7f1;
 }
 
 .status-bar {
   width: 100%;
-  background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
+  background: #fff7f1;
 }
 
 .nav-bar {
@@ -83,10 +83,10 @@ function close() {
   width: 64rpx;
   height: 64rpx;
   padding: 0;
-  border: 2rpx solid #d4e5d4;
+  border: 2rpx solid #ead4d2;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2rpx 8rpx rgba(41, 66, 50, 0.08);
+  box-shadow: 0 2rpx 8rpx rgba(119, 91, 79, 0.08);
   transition: all 0.2s ease;
 }
 
@@ -106,7 +106,7 @@ function close() {
 
 .title {
   flex: 1;
-  color: #244735;
+  color: #564d51;
   font-size: 32rpx;
   font-weight: 700;
   text-align: center;
