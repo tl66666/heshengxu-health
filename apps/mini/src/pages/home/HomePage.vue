@@ -258,13 +258,13 @@ const dateLabel = computed(() => {
 });
 
 const displayName = computed(() => today.value?.displayName || '朋友');
-const menstruationCycle = ref<{ start?: string; cycleLength?: number } | null>(null);
+const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
 const periodStatusText = computed(() =>
-  menstruationCycle.value?.start ? `上次经期 ${menstruationCycle.value.start.slice(5).replace('-', '月')}日开始` : '还没有记录经期',
+  menstruationCycle.value?.lastPeriodStart ? `上次经期 ${menstruationCycle.value.lastPeriodStart.slice(5).replace('-', '月')}日开始` : '还没有记录经期',
 );
 const periodDaysText = computed(() => {
-  const start = menstruationCycle.value?.start;
+  const start = menstruationCycle.value?.lastPeriodStart;
   if (!start) return '点击记录你的周期';
   const next = new Date(`${start}T00:00:00`);
   next.setDate(next.getDate() + (menstruationCycle.value?.cycleLength || 28));
@@ -361,12 +361,14 @@ const loadPersonalSignals = () => {
   try {
     const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
     menstruationCycle.value = cycleRaw ? (typeof cycleRaw === 'string' ? JSON.parse(cycleRaw) : cycleRaw) : null;
-    const medicationsRaw = uni.getStorageSync('heban_medications');
-    const medications = medicationsRaw ? (typeof medicationsRaw === 'string' ? JSON.parse(medicationsRaw) : medicationsRaw) : [];
+    const remindersRaw = uni.getStorageSync('heban_medication_reminders');
+    const checkinsRaw = uni.getStorageSync('heban_medication_checkins');
+    const medications = remindersRaw ? (typeof remindersRaw === 'string' ? JSON.parse(remindersRaw) : remindersRaw) : [];
+    const checkins = checkinsRaw ? (typeof checkinsRaw === 'string' ? JSON.parse(checkinsRaw) : checkinsRaw) : [];
     const today = getTodayDate();
     medicationStats.value = {
       total: Array.isArray(medications) ? medications.length : 0,
-      done: Array.isArray(medications) ? medications.filter((item: { checkedDate?: string }) => item.checkedDate === today).length : 0,
+      done: Array.isArray(checkins) ? checkins.filter((item: { date?: string }) => item.date === today).length : 0,
     };
   } catch {
     menstruationCycle.value = null;

@@ -20,14 +20,15 @@ function validDate(value: unknown) {
 export function loadCycleSettings(): CycleSettings | null {
   const value = read<Partial<CycleSettings> | null>(CYCLE_KEY, null);
   if (!value || !validDate(value.lastPeriodStart)) return null;
+  const lastPeriodStart = value.lastPeriodStart as string;
   const cycleLength = Number(value.cycleLength);
   const periodLength = Number(value.periodLength);
   if (cycleLength < 20 || cycleLength > 45 || periodLength < 2 || periodLength > 10) return null;
   return {
     cycleLength,
     periodLength,
-    lastPeriodStart: value.lastPeriodStart,
-    lastPeriodEnd: validDate(value.lastPeriodEnd) ? value.lastPeriodEnd : undefined,
+    lastPeriodStart,
+    lastPeriodEnd: validDate(value.lastPeriodEnd) ? (value.lastPeriodEnd as string) : undefined,
     updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString(),
   };
 }

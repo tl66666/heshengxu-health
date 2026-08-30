@@ -24,21 +24,17 @@
 
     <!-- 水杯展示区 -->
     <view class="cup-area">
-      <!-- 使用首页的水滴图标 -->
-      <image class="water-drop-bg" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
-      
-      <!-- 水杯容器 -->
-      <view class="water-cup-container">
-        <!-- 水杯底座 -->
-        <view class="cup-base">
-          <!-- 水位填充 -->
-          <view class="water-level" :style="{ height: waterHeight + '%' }">
-            <!-- 水彩波纹效果 -->
-            <view class="water-ripple water-ripple-1"></view>
-            <view class="water-ripple water-ripple-2"></view>
-            <view class="water-ripple water-ripple-3"></view>
-          </view>
-        </view>
+      <!-- 水杯图片容器 -->
+      <view class="cup-wrapper">
+        <!-- 水杯图片 -->
+        <image 
+          class="cup-image" 
+          src="/static/illustrations/water-cup-watercolor.png" 
+          mode="aspectFit"
+        />
+        
+        <!-- 水位遮罩 -->
+        <view class="water-mask" :style="{ height: (100 - waterHeight) + '%' }"></view>
         
         <!-- 数字显示 -->
         <view class="amount-display">
@@ -443,97 +439,32 @@ onMounted(() => {
   align-items: center;
 }
 
-.water-drop-bg {
-  position: absolute;
-  width: 200rpx;
-  height: 200rpx;
-  opacity: 0.08;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-}
-
-.water-cup-container {
+.cup-wrapper {
   position: relative;
   width: 420rpx;
   height: 600rpx;
-  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.cup-base {
+.cup-image {
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    180deg, 
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(248, 251, 253, 0.8) 100%
-  );
-  border-radius: 40rpx;
-  overflow: hidden;
-  box-shadow: 
-    0 8rpx 32rpx rgba(74, 144, 226, 0.08),
-    inset 0 2rpx 8rpx rgba(255, 255, 255, 0.8),
-    inset 0 -2rpx 8rpx rgba(74, 144, 226, 0.05);
-  border: 3rpx solid rgba(74, 144, 226, 0.15);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
 }
 
-.water-level {
+.water-mask {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(135, 206, 250, 0.6) 0%,
-    rgba(74, 144, 226, 0.8) 50%,
-    rgba(65, 130, 208, 0.9) 100%
-  );
+  background: linear-gradient(180deg, #f8fbfd 0%, #f0f6f9 100%);
   transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0 0 38rpx 38rpx;
-  overflow: hidden;
-}
-
-/* 水彩波纹效果 */
-.water-ripple {
-  position: absolute;
-  width: 200%;
-  height: 80rpx;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.3) 0%,
-    transparent 70%
-  );
-  animation: ripple 4s ease-in-out infinite;
-}
-
-.water-ripple-1 {
-  top: -30rpx;
-  left: -50%;
-  animation-delay: 0s;
-}
-
-.water-ripple-2 {
-  top: -20rpx;
-  left: -50%;
-  animation-delay: 1.3s;
-}
-
-.water-ripple-3 {
-  top: -40rpx;
-  left: -50%;
-  animation-delay: 2.6s;
-}
-
-@keyframes ripple {
-  0%, 100% {
-    transform: translateX(0) translateY(0);
-    opacity: 0.3;
-  }
-  50% {
-    transform: translateX(25%) translateY(-10rpx);
-    opacity: 0.6;
-  }
+  z-index: 1;
 }
 
 .amount-display {
@@ -545,13 +476,13 @@ onMounted(() => {
   align-items: baseline;
   gap: 8rpx;
   z-index: 10;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 255, 255, 0.8));
 }
 
 .amount-number {
   font-size: 100rpx;
   font-weight: 800;
   color: #2d7ab8;
+  text-shadow: 0 2rpx 8rpx rgba(255, 255, 255, 0.9);
 }
 
 .amount-unit {

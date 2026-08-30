@@ -24,7 +24,7 @@
           <image v-if="item.checked" src="/static/icons/svg/check.svg" mode="aspectFit" />
         </button>
         <view class="med-icon"><image src="/static/icons/watercolor/medication.jpg" mode="aspectFit" /></view>
-        <view class="med-copy"><text class="med-name">{{ item.name }}</text><text class="med-meta">{{ item.dose }} · {{ item.frequency }} · {{ item.time }}</text></view>
+        <view class="med-copy"><text class="med-name">{{ item.name }}</text><text class="med-meta">{{ item.doseNote }} · {{ frequencyLabel(item.frequency) }} · {{ item.reminderTime || '未设置时间' }}</text></view>
         <button class="more-button" aria-label="删除用药" @tap="removeMedication(item.id)">⋯</button>
       </view>
     </view>
@@ -40,7 +40,7 @@
       <view class="form-head"><text class="section-title">添加用药提醒</text><button class="close-button" @tap="showForm = false">×</button></view>
       <input v-model="draft.name" class="field" maxlength="24" placeholder="药品或提醒名称" />
       <view class="field-row"><input v-model="draft.dose" class="field" maxlength="16" placeholder="剂量（如：按医嘱）" /><input v-model="draft.time" class="field time-field" type="time" /></view>
-      <view class="option-row"><button v-for="frequency in frequencies" :key="frequency" class="option-chip" :class="{ active: draft.frequency === frequency }" @tap="draft.frequency = frequency">{{ frequency }}</button></view>
+      <view class="option-row"><button v-for="frequency in frequencies" :key="frequency.value" class="option-chip" :class="{ active: draft.frequency === frequency.label }" @tap="draft.frequency = frequency.label">{{ frequency.label }}</button></view>
       <button class="primary-button" @tap="addMedication">保存提醒</button>
     </view>
 
@@ -52,29 +52,28 @@
 import { computed, reactive, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
+import { deleteMedicationReminder, loadCheckinsForDate, loadMedicationReminders, saveMedicationReminder, setMedicationCheckin } from '../../features/medication/medication.service.js';
+import type { MedicationFrequency, MedicationReminder } from '../../features/medication/medication.types.js';
 
-type Medication = { id: string; name: string; dose: string; frequency: string; time: string; checked: boolean; date: string; checkedDate?: string };
-const STORAGE_KEY = 'heban_medications';
-const medications = ref<Medication[]>([]);
+type MedicationView = MedicationReminder & { checked: boolean };
+const medications = ref<MedicationView[]>([]);
 const showForm = ref(false);
-const frequencies = ['每日', '每周', '按需'];
+const frequencies: Array<{ value: MedicationFrequency; label: string }> = [{ value: 'daily', label: '每日' }, { value: 'weekly', label: '每周' }, { value: 'as_needed', label: '按需' }];
 const draft = reactive({ name: '', dose: '按医嘱', frequency: '每日', time: '08:00' });
 const completedCount = computed(() => medications.value.filter(item => item.checked).length);
 const progress = computed(() => medications.value.length ? Math.round((completedCount.value / medications.value.length) * 100) : 0);
+function frequencyLabel(value: MedicationFrequency) {
+  return frequencies.find(item => item.value === value)?.label || '每日';
+}
 
 function load() {
-  const raw = uni.getStorageSync(STORAGE_KEY) as Medication[] | string | null;
-  const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
   const today = new Date().toISOString().slice(0, 10);
-  medications.value = Array.isArray(data) ? data.map(item => ({ ...item, checked: item.checkedDate === today })) : [];
+  const checked = new Set(loadCheckinsForDate(today).map(item => item.reminderId));
+  medications.value = loadMedicationReminders().sort((a, b) => (a.reminderTime || '').localeCompare(b.reminderTime || '')).map(item => ({ ...item, checked: checked.has(item.id) }));
 }
-function persist() {
-  uni.setStorageSync(STORAGE_KEY, JSON.stringify(medications.value));
-}
-function toggleChecked(item: Medication) {
+function toggleChecked(item: MedicationView) {
   item.checked = !item.checked;
-  item.checkedDate = item.checked ? new Date().toISOString().slice(0, 10) : undefined;
-  persist();
+  setMedicationCheckin(item.id, new Date().toISOString().slice(0, 10), item.checked);
   uni.showToast({ title: item.checked ? '已完成今天的提醒' : '已取消打卡', icon: 'none' });
 }
 function addMedication() {
@@ -82,8 +81,10 @@ function addMedication() {
     uni.showToast({ title: '先写一个提醒名称', icon: 'none' });
     return;
   }
-  medications.value.push({ id: `${Date.now()}`, name: draft.name.trim(), dose: draft.dose.trim() || '按医嘱', frequency: draft.frequency, time: draft.time || '08:00', checked: false, date: new Date().toISOString().slice(0, 10) });
-  persist();
+  const frequency = frequencies.find(item => item.label === draft.frequency)?.value || 'daily';
+  const reminder: MedicationReminder = { id: `${Date.now()}`, name: draft.name.trim(), doseNote: draft.dose.trim() || '按医嘱', frequency, reminderTime: draft.time || '08:00', active: true, createdAt: new Date().toISOString() };
+  saveMedicationReminder(reminder);
+  medications.value.push({ ...reminder, checked: false });
   draft.name = '';
   draft.dose = '按医嘱';
   draft.frequency = '每日';
@@ -92,7 +93,7 @@ function addMedication() {
   uni.showToast({ title: '提醒已添加', icon: 'success' });
 }
 function removeMedication(id: string) {
-  uni.showModal({ title: '删除这条提醒？', content: '只会删除本地记录，不影响实际用药。', confirmColor: '#c76b8d', success: ({ confirm }) => { if (!confirm) return; medications.value = medications.value.filter(item => item.id !== id); persist(); } });
+  uni.showModal({ title: '删除这条提醒？', content: '只会删除本地记录，不影响实际用药。', confirmColor: '#c76b8d', success: ({ confirm }) => { if (!confirm) return; deleteMedicationReminder(id); medications.value = medications.value.filter(item => item.id !== id); } });
 }
 onShow(load);
 </script>

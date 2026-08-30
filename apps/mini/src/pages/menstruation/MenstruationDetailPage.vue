@@ -120,13 +120,13 @@
 import { computed, reactive, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
+import { loadCycleSettings, saveCycleSettings, loadPeriodDay, savePeriodDay } from '../../features/menstruation/menstruation.service.js';
+import type { PainLevel } from '../../features/menstruation/menstruation.types.js';
 
 type DailyRecord = { pain: string; symptoms: string[]; note: string };
 type Cycle = { start: string; end: string; cycleLength: number; periodLength: number };
 type CalendarCell = { key: string; day: number; inMonth: boolean };
 
-const STORAGE_CYCLE = 'heban_menstruation_cycle';
-const STORAGE_DAILY = 'heban_menstruation_daily';
 const todayKey = formatDate(new Date());
 const selectedDate = ref(todayKey);
 const visibleMonth = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -176,12 +176,9 @@ const cycleDay = computed(() => {
   const delta = Math.floor((parseDate(todayKey).getTime() - parseDate(cycle.start).getTime()) / 86400000);
   return delta >= 0 ? (delta % cycle.cycleLength) + 1 : '--';
 });
-const nextPeriodDate = computed(() => {
-  if (!cycle.start) return new Date(parseDate(todayKey).getTime() + 8 * 86400000);
-  return new Date(parseDate(cycle.start).getTime() + cycle.cycleLength * 86400000);
-});
-const daysUntilNext = computed(() => Math.max(0, Math.ceil((nextPeriodDate.value.getTime() - parseDate(todayKey).getTime()) / 86400000)));
-const nextPeriodLabel = computed(() => `${nextPeriodDate.value.getMonth() + 1}月${nextPeriodDate.value.getDate()}日`);
+const nextPeriodDate = computed(() => cycle.start ? new Date(parseDate(cycle.start).getTime() + cycle.cycleLength * 86400000) : null);
+const daysUntilNext = computed(() => nextPeriodDate.value ? Math.max(0, Math.ceil((nextPeriodDate.value.getTime() - parseDate(todayKey).getTime()) / 86400000)) : '--');
+const nextPeriodLabel = computed(() => nextPeriodDate.value ? `${nextPeriodDate.value.getMonth() + 1}月${nextPeriodDate.value.getDate()}日` : '设置后生成');
 
 function formatDate(date: Date) {
   const y = date.getFullYear();
@@ -198,9 +195,8 @@ function changeMonth(delta: number) {
 }
 function selectDate(key: string) {
   selectedDate.value = key;
-  const all = uni.getStorageSync(STORAGE_DAILY) as Record<string, DailyRecord> | string | null;
-  const data = typeof all === 'string' ? JSON.parse(all) : all;
-  Object.assign(daily, data?.[key] || { pain: '', symptoms: [], note: '' });
+  const record = loadPeriodDay(key);
+  Object.assign(daily, record || { pain: '', symptoms: [], note: '' });
 }
 function isPeriodDay(key: string) {
   if (!cycle.start) return false;
@@ -210,6 +206,7 @@ function isPeriodDay(key: string) {
   return value >= start && value <= end;
 }
 function isPredictedDay(key: string) {
+  if (!nextPeriodDate.value) return false;
   const next = nextPeriodDate.value.getTime();
   const value = parseDate(key).getTime();
   return value >= next && value < next + cycle.periodLength * 86400000;
@@ -252,19 +249,23 @@ function editCycleSettings() {
   });
 }
 function saveCycle() {
-  uni.setStorageSync(STORAGE_CYCLE, JSON.stringify(cycle));
+  saveCycleSettings({ cycleLength: cycle.cycleLength, periodLength: cycle.periodLength, lastPeriodStart: cycle.start, lastPeriodEnd: cycle.end || undefined, updatedAt: new Date().toISOString() });
 }
 function saveAll() {
   saveCycle();
-  const raw = uni.getStorageSync(STORAGE_DAILY) as Record<string, DailyRecord> | string | null;
-  const data = (typeof raw === 'string' ? JSON.parse(raw) : raw) || {};
-  data[selectedDate.value] = { pain: daily.pain, symptoms: [...daily.symptoms], note: daily.note };
-  uni.setStorageSync(STORAGE_DAILY, JSON.stringify(data));
+  savePeriodDay({ date: selectedDate.value, isPeriod: isPeriodDay(selectedDate.value), pain: daily.pain ? (daily.pain as PainLevel) : undefined, symptoms: [...daily.symptoms], note: daily.note });
   uni.showToast({ title: '已保存', icon: 'success' });
 }
 function load() {
-  const rawCycle = uni.getStorageSync(STORAGE_CYCLE) as Cycle | string | null;
-  if (rawCycle) Object.assign(cycle, typeof rawCycle === 'string' ? JSON.parse(rawCycle) : rawCycle);
+  const settings = loadCycleSettings();
+  if (!settings) {
+    uni.redirectTo({ url: '/pages/menstruation/MenstruationSetupPage' });
+    return;
+  }
+  cycle.start = settings.lastPeriodStart;
+  cycle.end = settings.lastPeriodEnd || '';
+  cycle.cycleLength = settings.cycleLength;
+  cycle.periodLength = settings.periodLength;
   selectDate(selectedDate.value);
 }
 onShow(load);

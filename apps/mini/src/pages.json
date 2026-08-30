@@ -87,6 +87,10 @@
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "生理期记录" }
     },
     {
+      "path": "pages/menstruation/MenstruationSetupPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "设置生理期" }
+    },
+    {
       "path": "pages/medication/MedicationManagePage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "用药管理" }
     },
