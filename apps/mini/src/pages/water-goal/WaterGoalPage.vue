@@ -135,7 +135,8 @@ function selectGender() {
   uni.showActionSheet({
     itemList: genderOptions.map(o => o.label),
     success: (res) => {
-      gender.value = genderOptions[res.tapIndex].value as 'male' | 'female';
+      const option = genderOptions[res.tapIndex];
+      if (option) gender.value = option.value as 'male' | 'female';
     },
   });
 }
@@ -160,7 +161,8 @@ function selectActivity() {
   uni.showActionSheet({
     itemList: activityOptions.map(o => o.label),
     success: (res) => {
-      activity.value = activityOptions[res.tapIndex].value as any;
+      const option = activityOptions[res.tapIndex];
+      if (option) activity.value = option.value as 'none' | 'light' | 'moderate' | 'heavy';
     },
   });
 }
@@ -181,7 +183,8 @@ function selectCustomGoal() {
 }
 
 function onGenderChange(e: any) {
-  gender.value = genderOptions[e.detail.value].value as 'male' | 'female';
+  const option = genderOptions[e.detail.value];
+  if (option) gender.value = option.value as 'male' | 'female';
 }
 
 function saveGoal() {
@@ -422,4 +425,12 @@ onLoad(() => {
 .action-btn::after {
   border: none;
 }
+</style>
+<style scoped>
+.page { background: #fff8f2; color: #554b4f; }
+.intro { padding: 26rpx 30rpx 30rpx; }.eyebrow { color: #789c8d; }.title { color: #564d51; }.subtitle { color: #9b8e8d; }
+.form-section, .result-card, .tips-card { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(126, 104, 94, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
+.form-item { border-color: #f1e5df; }.form-label { color: #65595d; }.form-value { color: #9b8e8d; }.custom-goal-copy { display: flex; flex: 1; flex-direction: column; gap: 5rpx; }.form-hint { color: #b1a3a1; font-size: 18rpx; }
+.result-title, .tips-title { color: #62575b; }.result-value { color: #649889; }.result-unit, .result-hint, .tip-item { color: #9d8f8e; }
+.action-btn { border-radius: 42rpx; background: #78b8c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .2); }
 </style>

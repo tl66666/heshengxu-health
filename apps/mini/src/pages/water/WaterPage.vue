@@ -1051,6 +1051,10 @@ onShow(() => {
 .water-wrapper { width: 56%; max-height: 72%; bottom: 9%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(4% 0, 96% 0, 100% 91%, 92% 100%, 8% 100%, 0 91%); background: rgba(157, 206, 226, .42); z-index: 1; }
 .water-wrapper::before { content: ''; position: absolute; top: 0; right: 5%; left: 5%; height: 12rpx; border-radius: 50%; background: rgba(231, 247, 250, .72); z-index: 2; }
 .water-texture { top: -52%; bottom: auto; width: 100%; height: 150%; opacity: .9; }
+.water-texture { animation: water-drift 7s ease-in-out infinite alternate; transform-origin: center bottom; }
+.water-wrapper::before { animation: water-breathe 3.8s ease-in-out infinite; }
+@keyframes water-drift { from { transform: translateX(-3%) scaleX(1.03); } to { transform: translateX(3%) scaleX(1.08); } }
+@keyframes water-breathe { 0%, 100% { transform: scaleX(.94); opacity: .56; } 50% { transform: scaleX(1.02); opacity: .82; } }
 .amount-display { top: 52%; }.amount-num { color: #3e7468; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #6b9c8a; }
 .quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #5a7f73; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #73978b; }
 .record-btn { padding: 26rpx; border-radius: 48rpx; background: #76b7c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .22); }.record-text { letter-spacing: 0; }

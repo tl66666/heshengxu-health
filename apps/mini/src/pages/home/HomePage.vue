@@ -95,23 +95,11 @@
           </button>
         </view>
         
-        <!-- 快速记录区 -->
-        <view class="quick-actions">
-          <button class="quick-btn" hover-class="button-hover" @tap="goToMealAdd">
-            <image class="quick-icon" src="/static/icons/svg/meal.svg" mode="aspectFit" />
-            <text class="quick-text">记录饮食</text>
-          </button>
-          
-          <button class="quick-btn camera" hover-class="button-hover" @tap="goToXuxuCamera">
-            <image class="quick-icon" src="/static/icons/camera.jpg" mode="aspectFit" />
-            <text class="quick-text">序序相机</text>
-          </button>
-          
-          <button class="quick-btn" hover-class="button-hover" @tap="goToWeightDetail">
-            <image class="quick-icon" src="/static/icons/svg/scale.svg" mode="aspectFit" />
-            <text class="quick-text">记录体重</text>
-          </button>
-        </view>
+        <!-- 序序相机 -->
+        <button class="xuxu-camera-card card" hover-class="button-hover" @tap="goToXuxuCamera">
+          <image class="camera-decoration" src="/static/icons/camera.jpg" mode="aspectFit" />
+          <text class="camera-title">序序相机</text>
+        </button>
       </view>
 
       <!-- 3. 体重记录卡片 -->
@@ -147,7 +135,7 @@
             <text class="grid-num">{{ today.todayRecords?.water?.totalMilliliters || 0 }}</text>
             <text class="grid-unit">ml</text>
           </view>
-          <image class="grid-art" src="/static/illustrations/water-cup-watercolor.png" mode="aspectFit" />
+          <image class="grid-art" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card sleep-card" hover-class="button-hover" @tap="goToRecord('sleep')">
@@ -160,7 +148,7 @@
             <text v-if="today.todayRecords?.sleep" class="grid-unit">小时</text>
             <text v-else class="grid-hint">未记录</text>
           </view>
-          <image class="grid-art" src="/static/illustrations/xuxu-sleep-reminder.png" mode="aspectFit" />
+          <image class="grid-art" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card activity-card" hover-class="button-hover" @tap="goToRecord('activity')">
@@ -525,6 +513,8 @@ onShow(() => {
   border-radius: 32rpx;
   background: #ffffff;
   box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.07);
+  border: 1rpx solid rgba(127, 204, 143, 0.08);
+  backdrop-filter: blur(20rpx);
 }
 
 .card-top {
@@ -725,49 +715,36 @@ onShow(() => {
   font-weight: 600;
 }
 
-/* 快速记录区 */
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
-  margin-top: 24rpx;
-}
-
-.quick-btn {
+/* 序序相机卡片 */
+.xuxu-camera-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  padding: 28rpx 16rpx;
-  background: #ffffff;
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.07);
-  border: none;
-  transition: transform 0.12s ease;
+  gap: 20rpx;
+  padding: 28rpx 32rpx;
+  margin-top: 24rpx;
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.08) 0%, rgba(232, 247, 237, 0.6) 100%);
+  border: 2rpx solid rgba(127, 204, 143, 0.15);
+  transition: all 0.2s ease;
 }
 
-.quick-btn:active {
-  transform: scale(0.97);
+.xuxu-camera-card:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.7) 100%);
 }
 
-.quick-icon {
-  width: 56rpx;
-  height: 56rpx;
+.camera-decoration {
+  width: 64rpx;
+  height: 64rpx;
   border-radius: 50%;
   mix-blend-mode: multiply;
   flex-shrink: 0;
 }
 
-.quick-btn.camera .quick-icon {
-  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.2);
-}
-
-.quick-text {
-  font-size: 24rpx;
-  font-weight: 600;
+.camera-title {
+  font-size: 28rpx;
+  font-weight: 700;
   color: #2d6943;
-  line-height: 1.2;
+  letter-spacing: 1rpx;
 }
 
 /* 3. 体重记录卡片 */
@@ -920,9 +897,10 @@ onShow(() => {
   right: -8rpx;
   width: 120rpx;
   height: 120rpx;
-  opacity: 0.18;
+  opacity: 0.35;
   pointer-events: none;
   z-index: 1;
+  mix-blend-mode: multiply;
 }
 
 .grid-icon-img {
