@@ -71,4 +71,24 @@ describe('user foods', () => {
       .expect(400);
     await app.close();
   });
+
+  it('rejects whitespace-only names and serving labels', async () => {
+    const app = await createApp();
+    await app.init();
+    await request(app.getHttpServer())
+      .post('/api/v1/user-foods')
+      .set({ Authorization: `Bearer dev-user-food-whitespace-${Date.now()}` })
+      .send({
+        name: '   ',
+        source: 'manual',
+        energyKcal: 100,
+        proteinG: 1,
+        fatG: 1,
+        carbohydrateG: 1,
+        defaultServingLabel: '   ',
+        defaultServingGrams: 100,
+      })
+      .expect(400);
+    await app.close();
+  });
 });

@@ -1,8 +1,9 @@
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, Matches } from 'class-validator';
 
 export class CreateUserFoodDto {
   @IsString()
   @IsNotEmpty()
+  @Matches(/\S/u)
   @MaxLength(120)
   name!: string;
 
@@ -35,6 +36,7 @@ export class CreateUserFoodDto {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(/\S/u)
   @MaxLength(60)
   defaultServingLabel!: string;
 
