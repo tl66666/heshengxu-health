@@ -7,6 +7,7 @@
 - `apps/mini/src/pages/plan/PlanPage.vue` 重写为计划工作台：今日完成度、连续天数、后端健康计划摘要、自定义计划入口。
 - 新增 `apps/mini/src/components/plans/`：`PlanHero`、`PlanTaskList`、`PlanTemplateGrid`、`PlanCreateSheet`，页面只负责组合与导航。
 - 新增 `apps/mini/src/features/plans/`：本地习惯计划类型、模板、持久化和打卡逻辑。支持体重管理、健康饮食、戒奶茶、学习、运动、睡眠、情绪和自定义计划。
+- 素材适配复核：学习计划改用方形 `xuxu-record-reminder.png`，避免横幅图在缩略图中主体过小；全部图片均使用 `aspectFit` 或受控容器，不会裁切序序主体。
 - 所有本地数据写入 `heban.local.habit-plans.v1`，不会覆盖 `heshengxu.local.health-plan`，也没有修改 `packages/contracts` 或 `apps/api`。
 
 ## 与其他会话的边界

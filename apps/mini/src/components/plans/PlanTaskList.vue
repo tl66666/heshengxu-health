@@ -14,6 +14,10 @@
           <view class="task-copy"><text class="task-title">{{ task.title }}</text><text class="task-note">{{ done(task) ? '今天已经完成，做得很好' : task.note }}</text></view>
         </view>
       </view>
+      <view v-if="plan.tasks.length > 0 && planStats(plan).completed === plan.tasks.length" class="celebrate">
+        <image src="/static/illustrations/xuxu-complete.png" mode="aspectFit" />
+        <text>今天的节奏完成啦，给自己一个拥抱</text>
+      </view>
       <view class="week-dots"><text v-for="day in weekDays" :key="day.key" :class="{ active: plan.tasks.every((task) => task.doneDates.includes(day.key)) }">{{ day.label }}</text></view>
     </view>
   </view>
@@ -67,4 +71,6 @@ const weekDays = computed(() => {
 .week-dots { display:flex; gap:10rpx; margin-top:14rpx; }
 .week-dots text { display:flex; align-items:center; justify-content:center; width:34rpx; height:34rpx; border-radius:50%; color:#ae9698; font-size:17rpx; background:rgba(255,255,255,.66); }
 .week-dots text.active { color:#fff; background:#b66d80; }
+.celebrate { display:flex; align-items:center; gap:10rpx; margin-top:12rpx; padding:10rpx 12rpx; border-radius:12rpx; color:#a86a76; font-size:19rpx; background:rgba(255,255,255,.58); }
+.celebrate image { width:42rpx; height:42rpx; flex:none; }
 </style>

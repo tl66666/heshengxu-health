@@ -41,7 +41,7 @@ export const PLAN_TEMPLATES: PlanTemplate[] = [
     title: '专注学习',
     subtitle: '每天留一段只属于自己的安静时间',
     category: 'study',
-    icon: '/static/illustrations/record-desk-banner.png',
+    icon: '/static/illustrations/xuxu-record-reminder.png',
     tint: '#eee8f3',
     frequency: '每天 1 个小行动',
     tasks: [{ title: '专注学习 25 分钟', note: '完成后休息 5 分钟，再决定要不要继续' }],
