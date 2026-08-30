@@ -63,7 +63,7 @@
           <image 
             class="water-texture" 
             src="/static/illustrations/water-ripple-texture.png" 
-            mode="aspectFill"
+            mode="scaleToFill"
           />
         </view>
         
@@ -1039,11 +1039,11 @@ onMounted(() => {
 .setup-btn { border-color: #dfc8bd; color: #aa7772; background: #fff4ed; }
 .cup-display { padding: 12rpx 0 30rpx; }
 .progress-badge { top: 32rpx; right: 42rpx; color: #658d82; background: #e7f3ee; }
-.cup-container { width: 760rpx; height: 940rpx; }
-.cup-empty { z-index: 2; }
-.water-wrapper { width: 62%; max-height: 82%; bottom: 8%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(3% 0, 97% 0, 100% 92%, 92% 100%, 8% 100%, 0 92%); background: rgba(157, 206, 226, .42); z-index: 1; }
+.cup-container { width: 600rpx; height: 680rpx; overflow: hidden; }
+.cup-empty { top: -50%; left: -50%; width: 200%; height: 200%; z-index: 2; }
+.water-wrapper { width: 56%; max-height: 72%; bottom: 9%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(4% 0, 96% 0, 100% 91%, 92% 100%, 8% 100%, 0 91%); background: rgba(157, 206, 226, .42); z-index: 1; }
 .water-wrapper::before { content: ''; position: absolute; top: 0; right: 5%; left: 5%; height: 12rpx; border-radius: 50%; background: rgba(231, 247, 250, .72); z-index: 2; }
-.water-texture { width: 100%; height: 250%; bottom: -2%; opacity: .88; object-fit: cover; }
+.water-texture { top: -52%; bottom: auto; width: 100%; height: 150%; opacity: .9; }
 .amount-display { top: 52%; }.amount-num { color: #3e7468; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #6b9c8a; }
 .quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #5a7f73; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #73978b; }
 .record-btn { padding: 26rpx; border-radius: 48rpx; background: #76b7c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .22); }.record-text { letter-spacing: 0; }

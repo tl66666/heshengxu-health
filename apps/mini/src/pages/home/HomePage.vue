@@ -95,13 +95,23 @@
           </button>
         </view>
         
-        <button class="camera-btn" hover-class="button-hover" @tap="goToXuxuCamera">
-          <image class="camera-icon" src="/static/icons/camera.jpg" mode="aspectFit" />
-          <view class="camera-label">
-            <text class="camera-main">序序相机</text>
-            <text class="camera-sub">拍照识别食物</text>
-          </view>
-        </button>
+        <!-- 快速记录区 -->
+        <view class="quick-actions">
+          <button class="quick-btn" hover-class="button-hover" @tap="goToMealAdd">
+            <image class="quick-icon" src="/static/icons/svg/meal.svg" mode="aspectFit" />
+            <text class="quick-text">记录饮食</text>
+          </button>
+          
+          <button class="quick-btn camera" hover-class="button-hover" @tap="goToXuxuCamera">
+            <image class="quick-icon" src="/static/icons/camera.jpg" mode="aspectFit" />
+            <text class="quick-text">序序相机</text>
+          </button>
+          
+          <button class="quick-btn" hover-class="button-hover" @tap="goToWeightDetail">
+            <image class="quick-icon" src="/static/icons/svg/scale.svg" mode="aspectFit" />
+            <text class="quick-text">记录体重</text>
+          </button>
+        </view>
       </view>
 
       <!-- 3. 体重记录卡片 -->
@@ -357,6 +367,12 @@ const goToXuxuCamera = () => {
   });
 };
 
+const goToMealAdd = () => {
+  uni.navigateTo({
+    url: '/pages/meal-add/MealAddPage?mealType=lunch'
+  });
+};
+
 const getTodayDate = () => {
   return new Date().toISOString().slice(0, 10);
 };
@@ -490,11 +506,11 @@ onShow(() => {
 
 /* 通用卡片样式 */
 .card {
-  margin-bottom: 16rpx;
-  padding: 20rpx 24rpx;
-  border-radius: 24rpx;
+  margin-bottom: 32rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 32rpx;
   background: #ffffff;
-  box-shadow: 0 2rpx 12rpx rgba(127, 204, 143, 0.08);
+  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.07);
 }
 
 .card-top {
@@ -695,58 +711,49 @@ onShow(() => {
   font-weight: 600;
 }
 
-.camera-btn {
+/* 快速记录区 */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.quick-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 24rpx;
-  width: 100%;
-  padding: 32rpx 48rpx;
-  margin-top: 28rpx;
-  border-radius: 56rpx;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 28rpx 16rpx;
   background: #ffffff;
-  box-shadow: 0 12rpx 40rpx rgba(46, 125, 79, 0.08);
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.07);
   border: none;
   transition: transform 0.12s ease;
 }
 
-.camera-btn:active {
+.quick-btn:active {
   transform: scale(0.97);
 }
 
-.camera-icon {
-  width: 112rpx;
-  height: 112rpx;
+.quick-icon {
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
-  flex-shrink: 0;
   mix-blend-mode: multiply;
+  flex-shrink: 0;
 }
 
-.camera-label {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8rpx;
+.quick-btn.camera .quick-icon {
+  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.2);
 }
 
-.camera-main {
-  font-size: 52rpx;
-  font-weight: 800;
-  color: #23382b;
-  line-height: 1;
-}
-
-.camera-sub {
-  font-size: 40rpx;
-  font-weight: 600;
-  color: #68796d;
-  line-height: 1;
-}
-
-.camera-text {
-  color: #5a9572;
+.quick-text {
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 600;
+  color: #2d6943;
+  line-height: 1.2;
 }
 
 /* 3. 体重记录卡片 */
