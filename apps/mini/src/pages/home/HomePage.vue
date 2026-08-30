@@ -339,7 +339,9 @@ const openMedication = () => {
 };
 
 const showWaterDialog = () => {
-  goToRecord('water');
+  uni.navigateTo({
+    url: '/pages/water/WaterPage'
+  });
 };
 
 const toXuxu = () => {
@@ -347,7 +349,7 @@ const toXuxu = () => {
 };
 
 const getTodayDate = () => {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().slice(0, 10);
 };
 
 const load = () => {
