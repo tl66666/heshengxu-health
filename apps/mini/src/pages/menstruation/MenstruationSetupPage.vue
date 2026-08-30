@@ -9,7 +9,7 @@
     </view>
 
     <view class="paper">
-      <view class="paper-art"><image src="/static/icons/watercolor/menstruation.jpg" mode="aspectFit" /></view>
+      <view class="paper-art"><image src="/static/icons/watercolor/menstruation.png" mode="aspectFit" /></view>
       <view class="field-row">
         <view class="field"><text class="field-label">月经周期</text><view class="input-line"><input v-model="cycleLength" type="number" placeholder="28" /><text>天</text></view><text class="field-help">两次经期开始之间</text><text v-if="errors.cycleLength" class="error">{{ errors.cycleLength }}</text></view>
         <view class="field"><text class="field-label">经期天数</text><view class="input-line"><input v-model="periodLength" type="number" placeholder="5" /><text>天</text></view><text class="field-help">通常持续几天</text><text v-if="errors.periodLength" class="error">{{ errors.periodLength }}</text></view>
@@ -51,7 +51,7 @@ function submit() { if (!validate()) return; saveCycleSettings({ cycleLength: Nu
 .kicker { display: block; color: #b26c82; font-size: 20rpx; }
 .title { display: block; margin-top: 8rpx; color: #51454c; font-size: 34rpx; font-weight: 700; }
 .subtitle { display: block; max-width: 650rpx; margin-top: 10rpx; color: #98898b; font-size: 21rpx; line-height: 1.55; }
-.paper { padding: 24rpx; border: 1rpx solid #f0dfda; border-radius: 18rpx; background: #fffdfb; box-shadow: 0 10rpx 24rpx rgba(139, 102, 89, .07); }
+.paper { padding: 24rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .84); box-shadow: 0 12rpx 28rpx rgba(139, 102, 89, .08), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
 .paper-art { display: flex; justify-content: center; height: 116rpx; margin: -4rpx 0 8rpx; }
 .paper-art image { width: 150rpx; height: 116rpx; opacity: .8; mix-blend-mode: multiply; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }

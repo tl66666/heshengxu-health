@@ -95,9 +95,12 @@
           </button>
         </view>
         
-        <button class="camera-btn" hover-class="button-hover" @tap="toXuxu">
-          <text class="camera-text">序序相机</text>
-          <text class="camera-text">序序相机</text>
+        <button class="camera-btn" hover-class="button-hover" @tap="goToXuxuCamera">
+          <image class="camera-icon" src="/static/icons/camera.jpg" mode="aspectFit" />
+          <view class="camera-label">
+            <text class="camera-main">序序相机</text>
+            <text class="camera-sub">拍照识别食物</text>
+          </view>
         </button>
       </view>
 
@@ -134,7 +137,7 @@
             <text class="grid-num">0</text>
             <text class="grid-unit">毫升</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('sleep')">
@@ -145,7 +148,7 @@
           <view class="grid-data">
             <text class="grid-hint">没有记录</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/sleep.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('activity')">
@@ -157,7 +160,7 @@
             <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
             <text class="grid-unit">分钟</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/activity.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card" hover-class="button-hover" @tap="toXuxu">
@@ -167,7 +170,7 @@
           <view class="grid-data">
             <text class="grid-hint">记录今天</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/mood-smile.jpg" mode="aspectFit" />
+          <image class="grid-icon-img" src="/static/icons/watercolor/mood-smile.png" mode="aspectFit" />
         </button>
       </view>
 
@@ -181,7 +184,7 @@
           <text class="fasting-label">用餐时间剩余</text>
           <text class="fasting-time">01:04:08</text>
         </view>
-        <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.jpg" mode="aspectFit" />
+        <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.png" mode="aspectFit" />
       </view>
 
       <!-- 6. 经期记录卡片 -->
@@ -194,7 +197,7 @@
           <text class="period-hint">{{ periodStatusText }}</text>
           <text class="period-days">{{ periodDaysText }}</text>
         </view>
-        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.jpg" mode="aspectFit" />
+        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.png" mode="aspectFit" />
       </view>
 
       <!-- 7. 用药打卡卡片 -->
@@ -209,7 +212,7 @@
             <text class="medication-item">{{ medicationPlanText }}</text>
           </view>
         </view>
-        <image class="medication-icon-img" src="/static/icons/watercolor/medication.jpg" mode="aspectFit" />
+        <image class="medication-icon-img" src="/static/icons/watercolor/medication.png" mode="aspectFit" />
       </view>
 
       <!-- 8. 编辑首页卡片 -->
@@ -346,6 +349,12 @@ const showWaterDialog = () => {
 
 const toXuxu = () => {
   navigateToXuxu();
+};
+
+const goToXuxuCamera = () => {
+  uni.navigateTo({
+    url: '/pages/food-recognition/FoodRecognitionPage'
+  });
 };
 
 const getTodayDate = () => {
@@ -689,17 +698,49 @@ onShow(() => {
 .camera-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10rpx;
+  gap: 24rpx;
   width: 100%;
-  padding: 16rpx;
-  margin-top: 14rpx;
-  border-radius: 999rpx;
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.6) 100%);
+  padding: 32rpx 48rpx;
+  margin-top: 28rpx;
+  border-radius: 56rpx;
+  background: #ffffff;
+  box-shadow: 0 12rpx 40rpx rgba(46, 125, 79, 0.08);
+  border: none;
+  transition: transform 0.12s ease;
+}
+
+.camera-btn:active {
+  transform: scale(0.97);
 }
 
 .camera-icon {
-  font-size: 22rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  mix-blend-mode: multiply;
+}
+
+.camera-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8rpx;
+}
+
+.camera-main {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #23382b;
+  line-height: 1;
+}
+
+.camera-sub {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #68796d;
+  line-height: 1;
 }
 
 .camera-text {
@@ -1037,7 +1078,7 @@ onShow(() => {
 .page { background: #fff7f1; }
 .date-chip { border-radius: 12rpx; background: #fff0f3; color: #b66d80; }
 .greeting { color: #5a4c52; }
-.card { border: 1rpx solid #f0dfda; border-radius: 18rpx; background: #fffdfb; box-shadow: 0 8rpx 22rpx rgba(139, 102, 89, .06); }
+.card { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(139, 102, 89, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
 .card-title, .grid-title { color: #66545a; }
 .weight-card, .calorie-card, .record-card, .fasting-card { background: #fffdfb; }
 .mode-tag { background: #fff0f3; color: #b66d80; }
@@ -1047,6 +1088,7 @@ onShow(() => {
 .period-days { color: #c26f84; }
 .medication-card { border-color: #d9e5ed; background: #f1f6fb; }
 .medication-item { color: #6a88a5; }
+.period-icon-img, .medication-icon-img { width: 96rpx; height: 96rpx; opacity: .9; border-radius: 0; mix-blend-mode: normal; }
 .edit-card { border-color: #e9cfd1; }.edit-icon, .edit-text { color: #b66d80; }
 .error-state button { background: #fff0f3; color: #b66d80; }
 </style>

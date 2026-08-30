@@ -78,7 +78,7 @@
     <!-- 快捷记录 -->
     <view class="quick-section">
       <view class="section-header">
-        <image class="header-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+        <image class="header-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         <text class="header-text">快速记录</text>
       </view>
       
@@ -89,7 +89,7 @@
           class="quick-btn"
           @tap="quickAdd(amt)"
         >
-          <image class="btn-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+          <image class="btn-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
           <text class="btn-text">{{ amt }}ml</text>
         </button>
       </view>
@@ -98,7 +98,7 @@
     <!-- 记录喝水按钮 -->
     <view class="action-section">
       <button class="record-btn" @tap="openDialog">
-        <image class="record-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+        <image class="record-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         <text class="record-text">记录喝水</text>
       </button>
     </view>
@@ -106,7 +106,7 @@
     <!-- 今日记录 -->
     <view class="history-section">
       <view class="history-header">
-        <image class="history-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+        <image class="history-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         <text class="history-title">今日记录</text>
         <text class="history-count">({{ records.length }}次)</text>
         <button v-if="records.length > 0" class="edit-btn" @tap="toggleEdit">
@@ -125,7 +125,7 @@
           :key="record.id"
           class="record-item card"
         >
-          <image class="record-img" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+          <image class="record-img" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
           <view class="record-info">
             <text class="record-name">{{ getDrinkName(record.drinkType) }}</text>
             <text class="record-time">{{ formatTime(record.timestamp) }}</text>
@@ -1028,4 +1028,26 @@ onMounted(() => {
 }
 
 .confirm-btn::after { border: none; }
+</style>
+<style scoped>
+.page { background: #fff8f2; }
+.card { border: 1rpx solid rgba(255, 255, 255, .9); background: rgba(255, 253, 251, .78); box-shadow: 0 14rpx 34rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255, 255, 255, .9); backdrop-filter: blur(18px); }
+.date-section { margin: 0 24rpx; border-radius: 0 0 22rpx 22rpx; background: rgba(255, 253, 251, .72); }
+.date-btn { color: #7397a5; background: #edf5f5; }.date-text { color: #557a70; }
+.goal-card { margin-top: 18rpx; padding: 24rpx; border-radius: 22rpx; }.stat-label { color: #9d908f; }.stat-value { color: #6b9c8a; }.stat-value.primary { color: #4e7e73; }.stat-divider { background: #e6eeea; }
+.personalized-info { background: #eef6f2; }.info-badge { background: #dcefe4; }.badge-icon, .badge-text { color: #5d937c; }.info-desc { color: #8ba299; }.reset-btn { color: #668d7b; background: #fffdfb; }
+.setup-btn { border-color: #dfc8bd; color: #aa7772; background: #fff4ed; }
+.cup-display { padding: 12rpx 0 30rpx; }
+.progress-badge { top: 32rpx; right: 42rpx; color: #658d82; background: #e7f3ee; }
+.cup-container { width: 760rpx; height: 940rpx; }
+.cup-empty { z-index: 2; }
+.water-wrapper { width: 62%; max-height: 82%; bottom: 8%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(3% 0, 97% 0, 100% 92%, 92% 100%, 8% 100%, 0 92%); background: rgba(157, 206, 226, .42); z-index: 1; }
+.water-wrapper::before { content: ''; position: absolute; top: 0; right: 5%; left: 5%; height: 12rpx; border-radius: 50%; background: rgba(231, 247, 250, .72); z-index: 2; }
+.water-texture { width: 100%; height: 250%; bottom: -2%; opacity: .88; object-fit: cover; }
+.amount-display { top: 52%; }.amount-num { color: #3e7468; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #6b9c8a; }
+.quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #5a7f73; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #73978b; }
+.record-btn { padding: 26rpx; border-radius: 48rpx; background: #76b7c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .22); }.record-text { letter-spacing: 0; }
+.record-item { border-radius: 16rpx; }.record-name { color: #5f7b73; }.record-time, .history-count { color: #a39391; }.record-amount { color: #6c9b8c; }
+.dialog-mask { background: rgba(75, 56, 61, .26); }.dialog-content { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 28rpx 28rpx 0 0; background: rgba(255, 253, 251, .96); box-shadow: 0 -14rpx 36rpx rgba(100, 76, 75, .16); backdrop-filter: blur(20px); }.dialog-title { color: #5b4f54; }.close-btn { color: #9b8589; background: #f8efec; }.input-num { color: #5c8e82; }.input-unit { color: #a39391; }.drink-option { border-color: #efe1da; background: #fffaf7; }.drink-option.active { border-color: #b8d8d5; background: #edf7f4; }.drink-name { color: #9b8889; }.drink-option.active .drink-name { color: #5c8e82; }.key-btn { color: #5d8278; background: #f7f2ee; }.confirm-btn { background: #76b7c7; box-shadow: 0 10rpx 22rpx rgba(94, 157, 176, .2); }
+@media (min-width: 700px) { .page { max-width: 760px; margin: 0 auto; } }
 </style>

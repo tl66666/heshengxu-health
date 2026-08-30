@@ -14,7 +14,7 @@
         <button class="more-button" aria-label="管理提醒" @tap="manageMedication(item)">···</button>
       </view>
     </view>
-    <view v-else class="empty-state"><image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFit" /><text class="empty-title">还没有用药提醒</text><text class="empty-copy">把医生交代的时间记下来，和生序只帮你整理，不替你做用药决定。</text><button class="empty-action" @tap="openForm">添加第一条提醒</button></view>
+    <view v-else class="empty-state"><image src="/static/icons/watercolor/medication.png" mode="aspectFit" /><text class="empty-title">还没有用药提醒</text><text class="empty-copy">把医生交代的时间记下来，和生序只帮你整理，不替你做用药决定。</text><button class="empty-action" @tap="openForm">添加第一条提醒</button></view>
 
     <view v-if="showForm" class="form-scrim" @tap="closeForm" />
     <view v-if="showForm" class="form-panel" @tap.stop><view class="form-head"><view><text class="section-title">{{ editingId ? '修改提醒' : '添加提醒' }}</text><text class="section-caption">按处方填写，和生序只负责提醒</text></view><button class="close-button" aria-label="关闭" @tap="closeForm">×</button></view><input v-model="draft.name" class="field" maxlength="24" placeholder="药物或提醒名称" /><view class="field-grid"><input v-model="draft.doseNote" class="field" maxlength="20" placeholder="剂量说明，如：按医嘱" /><input v-model="draft.reminderTime" class="field" type="time" /></view><view class="frequency-row"><button v-for="item in frequencies" :key="item.value" class="frequency" :class="{ active: draft.frequency === item.value }" @tap="draft.frequency = item.value">{{ item.label }}</button></view><input v-model="draft.note" class="field" maxlength="50" placeholder="备注（选填）" /><button class="primary-button" @tap="saveMedication">保存提醒</button></view>
@@ -49,7 +49,7 @@ onShow(load);
 .kicker { display: block; color: #aa8f8d; font-size: 20rpx; }
 .title { display: block; margin-top: 8rpx; color: #51454c; font-size: 34rpx; font-weight: 700; }
 .head-add { width: 58rpx; height: 58rpx; border: 1rpx solid #e9cfd1; border-radius: 50%; color: #b96c7d; background: #fffdfb; font-size: 32rpx; line-height: 54rpx; }
-.summary-line { display: flex; align-items: flex-end; justify-content: space-between; padding: 22rpx 24rpx; border: 1rpx solid #f0dfda; border-radius: 18rpx; background: #fffdfb; box-shadow: 0 8rpx 22rpx rgba(139, 102, 89, .06); }
+.summary-line { display: flex; align-items: flex-end; justify-content: space-between; padding: 22rpx 24rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(139, 102, 89, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
 .summary-number { color: #b85e78; font-size: 44rpx; font-weight: 700; line-height: 1; }
 .summary-total { color: #b8a6a5; font-size: 24rpx; font-weight: 400; }
 .summary-label { display: block; margin-top: 8rpx; color: #9a898c; font-size: 19rpx; }

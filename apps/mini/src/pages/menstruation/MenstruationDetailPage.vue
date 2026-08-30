@@ -301,7 +301,7 @@ onShow(load);
 .section-caption { display: block; margin-top: 6rpx; color: #a29395; font-size: 19rpx; }
 .month-actions { display: flex; gap: 10rpx; }
 .month-button { width: 50rpx; height: 50rpx; border: 1rpx solid #ead4d2; border-radius: 50%; color: #bd7f8c; background: #fffdfb; font-size: 34rpx; line-height: 44rpx; }
-.calendar-card, .symptom-card, .cycle-editor { margin: 0 28rpx; padding: 22rpx 18rpx; border: 1rpx solid #f0e0dc; border-radius: 18rpx; background: #fffdfb; box-shadow: 0 8rpx 22rpx rgba(119, 91, 79, .06); }
+.calendar-card, .symptom-card, .cycle-editor { margin: 0 28rpx; padding: 22rpx 18rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(119, 91, 79, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
 .week-row, .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
 .week-row text { padding-bottom: 12rpx; color: #b2a3a0; font-size: 19rpx; text-align: center; }
 .day-cell { position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; width: 66rpx; height: 66rpx; margin: 3rpx auto; border-radius: 50%; color: #625b5e; background: transparent; font-size: 22rpx; line-height: 1; }
