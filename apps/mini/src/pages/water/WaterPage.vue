@@ -1,182 +1,173 @@
 <template>
   <view class="water-page">
     <!-- 自定义导航栏 -->
-    <view class="custom-navbar">
-      <button class="nav-back" @tap="goBack">
-        <text class="back-icon">‹</text>
+    <view class="nav-bar">
+      <button class="nav-back-btn" @tap="goBack">
+        <text class="back-arrow">←</text>
       </button>
       <text class="nav-title">喝水记录</text>
-      <view class="nav-placeholder"></view>
+      <view class="nav-space"></view>
     </view>
 
     <!-- 日期选择 -->
-    <view class="date-selector">
-      <button class="date-arrow" @tap="prevDay">‹</button>
-      <text class="current-date">{{ dateLabel }}</text>
-      <button class="date-arrow" @tap="nextDay">›</button>
+    <view class="date-section">
+      <button class="date-btn" @tap="prevDay">‹</button>
+      <text class="date-text">{{ dateLabel }}</text>
+      <button class="date-btn" @tap="nextDay">›</button>
     </view>
 
-    <!-- 目标卡片 -->
-    <view class="goal-card">
+    <!-- 目标信息卡片 -->
+    <view class="goal-section">
       <view class="goal-row">
-        <view class="goal-item">
+        <view class="goal-box">
           <text class="goal-label">每日目标</text>
-          <text class="goal-value">{{ dailyGoal }}ml</text>
+          <text class="goal-number">{{ dailyGoal }}ml</text>
         </view>
-        <view class="goal-divider"></view>
-        <view class="goal-item">
+        <view class="goal-box">
           <text class="goal-label">剩余</text>
-          <text class="goal-value remaining">{{ remainingAmount }}ml</text>
+          <text class="goal-number remaining">{{ remainingAmount }}ml</text>
         </view>
       </view>
-      <button class="adjust-btn" @tap="editGoal">
-        <text>调整目标</text>
-      </button>
+      <button class="adjust-goal-btn" @tap="editGoal">调整目标</button>
     </view>
 
-    <!-- 水杯展示 -->
-    <view class="cup-display">
-      <view class="cup-container">
-        <!-- 空杯子图片 -->
+    <!-- 进度徽章 -->
+    <view class="progress-indicator">
+      <text class="progress-text">{{ progressPercent }}%</text>
+    </view>
+
+    <!-- 水杯展示区域 -->
+    <view class="cup-section">
+      <view class="cup-wrapper">
+        <!-- 水杯图片（放大） -->
         <image 
-          class="cup-empty" 
+          class="cup-image" 
           src="/static/illustrations/water-cup-empty.png" 
           mode="aspectFit"
         />
         
-        <!-- 水位图片 -->
-        <view class="water-container" :style="{ height: waterHeight + '%' }">
+        <!-- 水位（用clip-path裁剪成杯子形状） -->
+        <view class="water-fill" :style="{ height: waterHeight + '%' }">
           <image 
-            class="water-texture" 
+            class="water-image" 
             src="/static/illustrations/water-ripple-texture.png" 
             mode="aspectFill"
           />
         </view>
         
         <!-- 数字显示 -->
-        <view class="amount-text">
-          <text class="amount-num">{{ totalAmount }}</text>
+        <view class="water-amount">
+          <text class="amount-value">{{ totalAmount }}</text>
           <text class="amount-unit">ml</text>
-        </view>
-        
-        <!-- 进度百分比 -->
-        <view class="progress-badge">
-          <text>{{ progressPercent }}%</text>
         </view>
       </view>
     </view>
 
-    <!-- 快捷添加 -->
-    <view class="quick-add-section">
-      <view class="section-label">
-        <image class="label-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
-        <text class="label-text">快速记录</text>
+    <!-- 快捷记录 -->
+    <view class="quick-section">
+      <view class="section-title">
+        <image class="title-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+        <text class="title-text">快速记录</text>
       </view>
       
-      <view class="quick-buttons">
+      <view class="quick-grid">
         <button 
-          v-for="item in quickAmounts" 
-          :key="item"
-          class="quick-btn"
-          @tap="quickAdd(item)"
+          v-for="amt in quickAmounts" 
+          :key="amt"
+          class="quick-item"
+          @tap="quickAdd(amt)"
         >
-          <image class="quick-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
-          <text class="quick-amount">{{ item }}ml</text>
+          <image class="item-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+          <text class="item-text">{{ amt }}ml</text>
         </button>
       </view>
     </view>
 
-    <!-- 主操作按钮 -->
-    <view class="main-action">
-      <button class="record-button" @tap="openDialog">
+    <!-- 记录喝水按钮 -->
+    <view class="action-section">
+      <button class="record-water-btn" @tap="openDialog">
         <image class="btn-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
-        <text class="btn-text">记录喝水</text>
+        <text class="btn-label">记录喝水</text>
       </button>
     </view>
 
     <!-- 今日记录 -->
-    <view class="records-section">
-      <view class="section-header">
-        <image class="section-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
-        <text class="section-title">今日记录</text>
-        <text class="record-count">({{ records.length }}次)</text>
-        <button v-if="records.length > 0" class="edit-toggle" @tap="toggleEdit">
+    <view class="history-section">
+      <view class="history-header">
+        <image class="header-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+        <text class="header-title">今日记录</text>
+        <text class="header-count">({{ records.length }}次)</text>
+        <button v-if="records.length > 0" class="header-edit" @tap="toggleEdit">
           {{ editMode ? '完成' : '编辑' }}
         </button>
       </view>
 
-      <view v-if="records.length === 0" class="empty-state">
-        <text class="empty-icon">🥤</text>
-        <text class="empty-text">还没有记录哦，快来喝一杯吧～</text>
+      <view v-if="records.length === 0" class="history-empty">
+        <text class="empty-emoji">🥤</text>
+        <text class="empty-tip">还没有记录哦，快来喝一杯吧～</text>
       </view>
 
-      <view v-else class="record-list">
+      <view v-else class="history-list">
         <view 
           v-for="record in records" 
           :key="record.id"
-          class="record-item"
+          class="history-item"
         >
-          <view class="record-left">
-            <image class="record-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
-            <view class="record-detail">
-              <text class="record-name">{{ getDrinkName(record.drinkType) }}</text>
-              <text class="record-time">{{ formatTime(record.timestamp) }}</text>
-            </view>
+          <image class="item-img" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+          <view class="item-content">
+            <text class="item-name">{{ getDrinkName(record.drinkType) }}</text>
+            <text class="item-time">{{ formatTime(record.timestamp) }}</text>
           </view>
-          <view class="record-right">
-            <text class="record-amount">{{ record.amount }}ml</text>
-            <button v-if="editMode" class="delete-btn" @tap="deleteRecord(record.id)">
-              <text>删除</text>
-            </button>
-          </view>
+          <text class="item-amount">{{ record.amount }}ml</text>
+          <button v-if="editMode" class="item-delete" @tap="deleteRecord(record.id)">
+            删除
+          </button>
         </view>
       </view>
     </view>
 
     <!-- 添加弹窗 -->
-    <view v-if="dialogVisible" class="dialog-overlay" @tap="closeDialog">
-      <view class="dialog-container" @tap.stop>
-        <view class="dialog-header">
-          <text class="dialog-title">添加饮水记录</text>
-          <button class="close-btn" @tap="closeDialog">✕</button>
+    <view v-if="dialogVisible" class="modal-mask" @tap="closeDialog">
+      <view class="modal-box" @tap.stop>
+        <view class="modal-header">
+          <text class="modal-title">添加饮水记录</text>
+          <button class="modal-close" @tap="closeDialog">✕</button>
         </view>
 
-        <view class="dialog-content">
-          <!-- 数量输入显示 -->
-          <view class="input-display">
-            <text class="input-value">{{ inputAmount }}</text>
-            <text class="input-unit">ml</text>
+        <view class="modal-body">
+          <!-- 输入显示 -->
+          <view class="input-show">
+            <text class="show-value">{{ inputAmount }}</text>
+            <text class="show-unit">ml</text>
           </view>
 
-          <!-- 饮品类型选择 -->
-          <view class="drink-selector">
+          <!-- 饮品选择 -->
+          <view class="drink-grid">
             <button 
               v-for="drink in drinkOptions" 
               :key="drink.id"
-              :class="['drink-option', selectedDrink === drink.id ? 'selected' : '']"
+              :class="['drink-item', selectedDrink === drink.id ? 'active' : '']"
               @tap="selectedDrink = drink.id"
             >
               <text class="drink-emoji">{{ drink.icon }}</text>
-              <text class="drink-name">{{ drink.name }}</text>
+              <text class="drink-label">{{ drink.name }}</text>
             </button>
           </view>
 
           <!-- 数字键盘 -->
-          <view class="number-keyboard">
+          <view class="keyboard">
             <button 
               v-for="key in numberKeys" 
               :key="key"
-              class="key-btn"
+              class="key"
               @tap="handleKey(key)"
             >
-              <text>{{ key }}</text>
+              {{ key }}
             </button>
           </view>
 
-          <!-- 确定按钮 -->
-          <button class="confirm-btn" @tap="confirmAdd">
-            <text>完成</text>
-          </button>
+          <!-- 确定 -->
+          <button class="modal-confirm" @tap="confirmAdd">完成</button>
         </view>
       </view>
     </view>
@@ -241,11 +232,6 @@ const progressPercent = computed(() => {
 const waterHeight = computed(() => {
   return Math.min((totalAmount.value / dailyGoal.value) * 100, 100);
 });
-
-function getDrinkIcon(type: string): string {
-  const drink = drinkOptions.find(d => d.id === type);
-  return drink?.icon || '💧';
-}
 
 function getDrinkName(type: string): string {
   const drink = drinkOptions.find(d => d.id === type);
@@ -390,147 +376,159 @@ onMounted(() => {
 <style scoped>
 .water-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f5faf7 0%, #eef5f1 100%);
+  background: linear-gradient(180deg, #fef9f5 0%, #f9f4ef 50%, #f5f0eb 100%);
   padding-bottom: 120rpx;
 }
 
-/* 自定义导航栏 */
-.custom-navbar {
+/* 导航栏 */
+.nav-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20rpx 32rpx;
   padding-top: calc(20rpx + env(safe-area-inset-top));
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10rpx);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20rpx);
+  border-bottom: 1rpx solid rgba(245, 240, 235, 0.6);
 }
 
-.nav-back {
-  width: 64rpx;
-  height: 64rpx;
+.nav-back-btn {
+  width: 60rpx;
+  height: 60rpx;
   padding: 0;
   border: none;
   background: transparent;
-  font-size: 44rpx;
-  color: #2d6943;
+  font-size: 40rpx;
+  color: #8b7355;
   line-height: 1;
 }
 
-.nav-back::after { border: none; }
+.nav-back-btn::after { border: none; }
 
 .nav-title {
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 700;
-  color: #2d6943;
+  color: #5d4a3a;
 }
 
-.nav-placeholder {
-  width: 64rpx;
+.nav-space {
+  width: 60rpx;
 }
 
-/* 日期选择 */
-.date-selector {
+/* 日期 */
+.date-section {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32rpx;
-  padding: 24rpx;
-  background: rgba(255, 255, 255, 0.8);
+  gap: 28rpx;
+  padding: 28rpx;
+  background: rgba(255, 255, 255, 0.7);
 }
 
-.date-arrow {
-  width: 56rpx;
-  height: 56rpx;
+.date-btn {
+  width: 52rpx;
+  height: 52rpx;
   padding: 0;
   border: none;
-  background: rgba(127, 204, 143, 0.1);
+  background: rgba(215, 196, 180, 0.15);
   border-radius: 50%;
-  font-size: 36rpx;
-  color: #5a9572;
+  font-size: 32rpx;
+  color: #a89080;
   line-height: 1;
 }
 
-.date-arrow::after { border: none; }
+.date-btn::after { border: none; }
 
-.current-date {
-  font-size: 30rpx;
+.date-text {
+  font-size: 28rpx;
   font-weight: 600;
-  color: #2d6943;
-  min-width: 140rpx;
+  color: #6d5a47;
+  min-width: 130rpx;
   text-align: center;
 }
 
-/* 目标卡片 */
-.goal-card {
+/* 目标 */
+.goal-section {
   margin: 24rpx 32rpx;
   padding: 28rpx;
   background: #ffffff;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 16rpx rgba(127, 204, 143, 0.08);
+  border-radius: 28rpx;
+  box-shadow: 0 8rpx 24rpx rgba(139, 115, 85, 0.06);
 }
 
 .goal-row {
   display: flex;
-  align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 
-.goal-item {
+.goal-box {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 10rpx;
 }
 
 .goal-label {
   font-size: 24rpx;
-  color: #9aaca0;
+  color: #b5a090;
 }
 
-.goal-value {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #5a9572;
+.goal-number {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #8fa898;
 }
 
-.goal-value.remaining {
-  color: #7fcc8f;
+.goal-number.remaining {
+  color: #b8c9a8;
 }
 
-.goal-divider {
-  width: 2rpx;
-  height: 40rpx;
-  background: rgba(127, 204, 143, 0.2);
-  margin: 0 24rpx;
-}
-
-.adjust-btn {
+.adjust-goal-btn {
   width: 100%;
-  padding: 18rpx;
+  padding: 20rpx;
   border: none;
-  background: rgba(127, 204, 143, 0.08);
-  border-radius: 12rpx;
+  background: linear-gradient(135deg, #f0ebe5 0%, #ebe4db 100%);
+  border-radius: 16rpx;
   font-size: 26rpx;
-  color: #5a9572;
+  color: #8b7355;
   font-weight: 600;
 }
 
-.adjust-btn::after { border: none; }
+.adjust-goal-btn::after { border: none; }
 
-/* 水杯展示 */
-.cup-display {
+/* 进度徽章 */
+.progress-indicator {
+  position: absolute;
+  top: 320rpx;
+  right: 60rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(184, 201, 168, 0.2);
+  border-radius: 40rpx;
+  backdrop-filter: blur(10rpx);
+  z-index: 10;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #8fa898;
+}
+
+/* 水杯区域 */
+.cup-section {
   padding: 40rpx 32rpx 60rpx;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
-.cup-container {
+.cup-wrapper {
   position: relative;
-  width: 380rpx;
-  height: 540rpx;
+  width: 520rpx;
+  height: 680rpx;
 }
 
-.cup-empty {
+.cup-image {
   position: absolute;
   top: 0;
   left: 0;
@@ -540,125 +538,113 @@ onMounted(() => {
   pointer-events: none;
 }
 
-.water-container {
+.water-fill {
   position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-height: 88%;
   overflow: hidden;
-  transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1;
-  border-radius: 0 0 20rpx 20rpx;
+  border-radius: 0 0 40rpx 40rpx;
 }
 
-.water-texture {
+.water-image {
   width: 100%;
-  height: 540rpx;
+  height: 680rpx;
   position: absolute;
   bottom: 0;
   left: 0;
   object-fit: cover;
 }
 
-.amount-text {
+.water-amount {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: baseline;
-  gap: 8rpx;
+  gap: 10rpx;
   z-index: 3;
 }
 
-.amount-num {
-  font-size: 96rpx;
-  font-weight: 800;
-  color: #2d6943;
-  text-shadow: 0 2rpx 8rpx rgba(255, 255, 255, 0.95);
+.amount-value {
+  font-size: 110rpx;
+  font-weight: 900;
+  color: #5d7a6a;
+  text-shadow: 0 4rpx 12rpx rgba(255, 255, 255, 0.8);
 }
 
 .amount-unit {
-  font-size: 32rpx;
-  color: #5a9572;
+  font-size: 36rpx;
+  color: #8fa898;
 }
 
-.progress-badge {
-  position: absolute;
-  top: 24rpx;
-  right: 24rpx;
-  padding: 8rpx 20rpx;
-  background: rgba(127, 204, 143, 0.15);
-  border-radius: 40rpx;
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #5a9572;
-  z-index: 3;
+/* 快捷记录 */
+.quick-section {
+  margin: 0 32rpx 28rpx;
 }
 
-/* 快捷添加 */
-.quick-add-section {
-  margin: 0 32rpx 24rpx;
-}
-
-.section-label {
+.section-title {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
 }
 
-.label-icon {
-  width: 40rpx;
-  height: 40rpx;
+.title-icon {
+  width: 36rpx;
+  height: 36rpx;
   border-radius: 8rpx;
 }
 
-.label-text {
+.title-text {
   font-size: 28rpx;
-  font-weight: 600;
-  color: #2d6943;
+  font-weight: 700;
+  color: #6d5a47;
 }
 
-.quick-buttons {
+.quick-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12rpx;
+  gap: 14rpx;
 }
 
-.quick-btn {
+.quick-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
-  padding: 20rpx 8rpx;
+  gap: 10rpx;
+  padding: 22rpx 10rpx;
   border: none;
   background: #ffffff;
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 8rpx rgba(127, 204, 143, 0.06);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(139, 115, 85, 0.04);
 }
 
-.quick-btn::after { border: none; }
+.quick-item::after { border: none; }
 
-.quick-icon {
-  width: 32rpx;
-  height: 32rpx;
+.item-icon {
+  width: 36rpx;
+  height: 36rpx;
   border-radius: 6rpx;
 }
 
-.quick-amount {
+.item-text {
   font-size: 22rpx;
-  color: #5a9572;
+  color: #8fa898;
   font-weight: 600;
 }
 
-/* 主操作按钮 */
-.main-action {
+/* 记录按钮 */
+.action-section {
   padding: 0 32rpx 32rpx;
 }
 
-.record-button {
+.record-water-btn {
   width: 100%;
   display: flex;
   align-items: center;
@@ -666,297 +652,286 @@ onMounted(() => {
   gap: 16rpx;
   padding: 32rpx;
   border: none;
-  background: linear-gradient(135deg, #7fcc8f 0%, #6bb97d 100%);
-  border-radius: 50rpx;
-  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.35);
+  background: linear-gradient(135deg, #a8c9a1 0%, #8fa898 100%);
+  border-radius: 60rpx;
+  box-shadow: 0 12rpx 32rpx rgba(143, 168, 152, 0.3);
 }
 
-.record-button::after { border: none; }
+.record-water-btn::after { border: none; }
 
 .btn-icon {
   width: 48rpx;
   height: 48rpx;
   border-radius: 8rpx;
+  filter: brightness(1.2);
 }
 
-.btn-text {
+.btn-label {
   font-size: 32rpx;
-  font-weight: 700;
+  font-weight: 800;
   color: #ffffff;
+  letter-spacing: 2rpx;
 }
 
-/* 记录列表 */
-.records-section {
+/* 历史记录 */
+.history-section {
   padding: 0 32rpx;
 }
 
-.section-header {
+.history-header {
   display: flex;
   align-items: center;
   gap: 12rpx;
   margin-bottom: 20rpx;
 }
 
-.section-icon {
+.header-icon {
   width: 32rpx;
   height: 32rpx;
   border-radius: 6rpx;
 }
 
-.section-title {
-  font-size: 30rpx;
+.header-title {
+  font-size: 28rpx;
   font-weight: 700;
-  color: #2d6943;
+  color: #6d5a47;
 }
 
-.record-count {
+.header-count {
   font-size: 24rpx;
-  color: #9aaca0;
+  color: #b5a090;
+  margin-right: auto;
 }
 
-.edit-toggle {
-  padding: 8rpx 20rpx;
+.header-edit {
+  padding: 10rpx 24rpx;
   border: none;
-  background: rgba(127, 204, 143, 0.1);
-  border-radius: 20rpx;
+  background: rgba(215, 196, 180, 0.15);
+  border-radius: 24rpx;
   font-size: 24rpx;
-  color: #5a9572;
+  color: #8b7355;
 }
 
-.edit-toggle::after { border: none; }
+.header-edit::after { border: none; }
 
-.empty-state {
+.history-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 80rpx 20rpx;
   background: #ffffff;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
 }
 
-.empty-icon {
+.empty-emoji {
   font-size: 80rpx;
   margin-bottom: 20rpx;
 }
 
-.empty-text {
+.empty-tip {
   font-size: 26rpx;
-  color: #9aaca0;
+  color: #b5a090;
 }
 
-.record-list {
+.history-list {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
 }
 
-.record-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24rpx;
-  background: #ffffff;
-  border-radius: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(127, 204, 143, 0.06);
-}
-
-.record-left {
+.history-item {
   display: flex;
   align-items: center;
   gap: 20rpx;
-  flex: 1;
+  padding: 24rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(139, 115, 85, 0.04);
 }
 
-.record-emoji {
-  font-size: 40rpx;
-}
-
-.record-icon {
+.item-img {
   width: 48rpx;
   height: 48rpx;
   border-radius: 8rpx;
+  flex-shrink: 0;
 }
 
-.record-detail {
+.item-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6rpx;
 }
 
-.record-name {
+.item-name {
   font-size: 28rpx;
-  color: #2d6943;
-  font-weight: 500;
+  color: #6d5a47;
+  font-weight: 600;
 }
 
-.record-time {
+.item-time {
   font-size: 24rpx;
-  color: #9aaca0;
+  color: #b5a090;
 }
 
-.record-right {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.record-amount {
+.item-amount {
   font-size: 32rpx;
-  font-weight: 700;
-  color: #5a9572;
+  font-weight: 800;
+  color: #8fa898;
 }
 
-.delete-btn {
-  padding: 8rpx 20rpx;
+.item-delete {
+  padding: 10rpx 20rpx;
   border: none;
-  background: rgba(255, 77, 79, 0.1);
+  background: rgba(232, 155, 143, 0.12);
   border-radius: 20rpx;
   font-size: 24rpx;
-  color: #ff4d4f;
+  color: #d48873;
 }
 
-.delete-btn::after { border: none; }
+.item-delete::after { border: none; }
 
 /* 弹窗 */
-.dialog-overlay {
+.modal-mask {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(45, 105, 67, 0.6);
+  background: rgba(93, 74, 58, 0.5);
   display: flex;
   align-items: flex-end;
   z-index: 1000;
 }
 
-.dialog-container {
+.modal-box {
   width: 100%;
   background: #ffffff;
-  border-radius: 32rpx 32rpx 0 0;
+  border-radius: 40rpx 40rpx 0 0;
   padding: 40rpx 32rpx;
   padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
 }
 
-.dialog-header {
+.modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32rpx;
+  margin-bottom: 36rpx;
 }
 
-.dialog-title {
+.modal-title {
   font-size: 32rpx;
-  font-weight: 700;
-  color: #2d6943;
+  font-weight: 800;
+  color: #5d4a3a;
 }
 
-.close-btn {
-  width: 48rpx;
-  height: 48rpx;
+.modal-close {
+  width: 52rpx;
+  height: 52rpx;
   padding: 0;
   border: none;
-  background: rgba(127, 204, 143, 0.1);
+  background: rgba(215, 196, 180, 0.15);
   border-radius: 50%;
   font-size: 28rpx;
-  color: #5a9572;
+  color: #8b7355;
   line-height: 1;
 }
 
-.close-btn::after { border: none; }
+.modal-close::after { border: none; }
 
-.dialog-content {
+.modal-body {
   display: flex;
   flex-direction: column;
   gap: 32rpx;
 }
 
-.input-display {
+.input-show {
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: 12rpx;
-  padding: 32rpx;
+  padding: 36rpx;
 }
 
-.input-value {
+.show-value {
   font-size: 120rpx;
-  font-weight: 800;
-  color: #2d6943;
+  font-weight: 900;
+  color: #5d4a3a;
 }
 
-.input-unit {
+.show-unit {
   font-size: 40rpx;
-  color: #9aaca0;
+  color: #b5a090;
 }
 
-.drink-selector {
+.drink-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16rpx;
 }
 
-.drink-option {
+.drink-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12rpx;
-  padding: 24rpx;
-  border: 2rpx solid #e8f3ea;
+  padding: 26rpx;
+  border: 2rpx solid #f0ebe5;
   background: #ffffff;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
 }
 
-.drink-option::after { border: none; }
+.drink-item::after { border: none; }
 
-.drink-option.selected {
-  border-color: #7fcc8f;
-  background: rgba(127, 204, 143, 0.05);
+.drink-item.active {
+  border-color: #a8c9a1;
+  background: rgba(168, 201, 161, 0.06);
 }
 
 .drink-emoji {
   font-size: 48rpx;
 }
 
-.drink-name {
+.drink-label {
   font-size: 24rpx;
-  color: #5a9572;
+  color: #8b7355;
 }
 
-.drink-option.selected .drink-name {
-  color: #2d6943;
-  font-weight: 600;
+.drink-item.active .drink-label {
+  color: #6d7a5d;
+  font-weight: 700;
 }
 
-.number-keyboard {
+.keyboard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16rpx;
 }
 
-.key-btn {
+.key {
   height: 100rpx;
   border: none;
-  background: #f5faf7;
+  background: #f9f6f2;
   border-radius: 20rpx;
   font-size: 40rpx;
-  color: #2d6943;
-  font-weight: 500;
+  color: #6d5a47;
+  font-weight: 600;
 }
 
-.key-btn::after { border: none; }
+.key::after { border: none; }
 
-.confirm-btn {
+.modal-confirm {
   width: 100%;
   padding: 32rpx;
   border: none;
-  background: linear-gradient(135deg, #7fcc8f 0%, #6bb97d 100%);
-  border-radius: 50rpx;
+  background: linear-gradient(135deg, #a8c9a1 0%, #8fa898 100%);
+  border-radius: 60rpx;
   color: #ffffff;
   font-size: 36rpx;
-  font-weight: 700;
-  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.35);
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  box-shadow: 0 12rpx 32rpx rgba(143, 168, 152, 0.3);
 }
 
-.confirm-btn::after { border: none; }
+.modal-confirm::after { border: none; }
 </style>
