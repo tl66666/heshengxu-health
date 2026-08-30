@@ -69,6 +69,21 @@ describe('user foods', () => {
         defaultServingGrams: -1,
       })
       .expect(400);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/user-foods')
+      .set({ Authorization: `Bearer dev-user-food-zero-${Date.now()}` })
+      .send({
+        name: '零热量食物',
+        source: 'manual',
+        energyKcal: 0,
+        proteinG: 1,
+        fatG: 1,
+        carbohydrateG: 1,
+        defaultServingLabel: '份',
+        defaultServingGrams: 100,
+      })
+      .expect(400);
     await app.close();
   });
 });
