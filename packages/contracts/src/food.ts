@@ -35,6 +35,7 @@ export type MealEntryDto = {
   id: string;
   mealType: MealType;
   foodId: string | null;
+  userFoodId: string | null;
   foodNameSnapshot: string;
   grams: number;
   nutritionSnapshot: MealEntryNutritionSnapshot;
@@ -45,7 +46,8 @@ export type MealEntryDto = {
 
 export type CreateMealEntryRequest = {
   mealType: MealType;
-  foodId: string;
+  foodId?: string;
+  userFoodId?: string;
   grams: number;
   recordedAt: string;
   note?: string;

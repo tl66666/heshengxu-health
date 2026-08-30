@@ -1,19 +1,24 @@
 <template>
   <view class="page">
     <AppNavBar title="序序相机" route="/pages/food-recognition/FoodRecognitionPage" />
-
-    <!-- 序序引导气泡 -->
-    <view class="xuxu-bubble">
-      <image class="xuxu-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFit" />
-      <view class="bubble-content">
-        <text class="bubble-text">拍一拍，我来帮你识别食物的营养～</text>
+    
+    <view class="camera-intro">
+      <image
+        class="camera-intro-art"
+        src="/static/illustrations/home-companion-banner.png"
+        mode="aspectFill"
+      />
+      <view class="camera-intro-copy">
+        <text class="camera-kicker">序序相机</text>
+        <text class="camera-title">拍下食物，先看热量再记录</text>
+        <text class="camera-caption">结果需要你亲自确认，不会自动写入</text>
       </view>
     </view>
 
     <!-- 图片选择区域 -->
     <view v-if="!imagePath" class="image-picker card" @tap="chooseImage">
       <view class="picker-icon-wrap">
-        <image class="picker-icon" src="/static/icons/camera.jpg" mode="aspectFit" />
+        <image class="picker-icon" src="/static/icons/svg/camera.svg" mode="aspectFit" />
       </view>
       <text class="picker-title">点击拍摄或选择照片</text>
       <text class="picker-hint">支持 JPG, PNG, WebP 格式</text>
@@ -23,7 +28,7 @@
     <view v-else class="image-preview card">
       <image class="preview-img" :src="imagePath" mode="aspectFill" />
       <button class="replace-btn" @tap="chooseImage">
-        <image class="replace-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        <image class="replace-icon" src="/static/icons/svg/camera.svg" mode="aspectFit" />
         <text class="replace-text">重新选择</text>
       </button>
       <view v-if="imageSize" class="image-info">
@@ -35,7 +40,12 @@
     <view class="consent-section card">
       <checkbox-group @change="updateConsent">
         <label class="consent-label">
-          <checkbox value="agree" :checked="hasConsent" color="#2e7d4f" class="consent-checkbox" />
+          <checkbox 
+            value="agree" 
+            :checked="hasConsent" 
+            color="#2e7d4f"
+            class="consent-checkbox"
+          />
           <text class="consent-text">我已阅读并同意《食物识别使用协议》</text>
         </label>
       </checkbox-group>
@@ -47,11 +57,11 @@
       <text class="tips-title">拍摄技巧</text>
       <view class="tips-list">
         <view class="tip-item">
-          <image class="tip-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
+          <image class="tip-icon" src="/static/icons/svg/check.svg" mode="aspectFit" />
           <text class="tip-text">光线充足，避免阴影</text>
         </view>
         <view class="tip-item">
-          <image class="tip-icon" src="/static/icons/camera.jpg" mode="aspectFit" />
+          <image class="tip-icon" src="/static/icons/svg/check.svg" mode="aspectFit" />
           <text class="tip-text">食物居中，距离适中</text>
         </view>
         <view class="tip-item">
@@ -63,15 +73,20 @@
 
     <!-- 错误提示 -->
     <view v-if="error" class="error-banner">
-      <view class="error-icon" />
+      <image class="error-icon" src="/static/icons/svg/close.svg" mode="aspectFit" />
       <text class="error-text">{{ error }}</text>
     </view>
 
+    <button v-if="error" class="manual-search" @tap="manualSearch">
+      <image src="/static/icons/svg/search.svg" mode="aspectFit" />
+      <text>改用食物库手动记录</text>
+    </button>
+
     <!-- 识别按钮 -->
-    <button
-      class="recognize-btn"
-      :class="{ disabled: !canRecognize || processing }"
-      :disabled="!canRecognize || processing"
+    <button 
+      class="recognize-btn" 
+      :class="{ 'disabled': !canRecognize || processing }"
+      :disabled="!canRecognize || processing" 
       @tap="recognize"
     >
       <text class="btn-text">{{ processing ? '正在识别…' : '开始识别' }}</text>
@@ -81,6 +96,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import {
   canStartRecognition,
@@ -90,14 +106,18 @@ import {
   grantFoodRecognitionConsent,
   imageContentType,
 } from '../../features/food/food-recognition.js';
+import type { MealType } from '../../features/food/food.types.js';
 
 const imagePath = ref('');
 const imageSize = ref(0);
 const processing = ref(false);
 const error = ref('');
 const hasConsent = ref(false);
+const mealType = ref<MealType>('lunch');
 
-const canRecognize = computed(() => canStartRecognition(imagePath.value, hasConsent.value));
+const canRecognize = computed(() => 
+  canStartRecognition(imagePath.value, hasConsent.value)
+);
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + 'B';
@@ -123,26 +143,30 @@ function updateConsent(event: { detail: { value: string[] } }) {
   hasConsent.value = event.detail.value.includes('agree');
 }
 
+function manualSearch() {
+  uni.navigateTo({ url: `/pages/food-search/FoodSearchPage?mealType=${mealType.value}` });
+}
+
 async function recognize() {
   if (!canRecognize.value) return;
-
+  
   processing.value = true;
   error.value = '';
-
+  
   try {
     await grantFoodRecognitionConsent();
-
+    
     const upload = await createRecognitionUpload({
       contentType: imageContentType(imagePath.value),
       sizeBytes: Math.max(1, imageSize.value),
     });
-
+    
     await completeRecognitionUpload(upload.id);
-
+    
     const job = await createRecognitionJob(upload.id);
-
+    
     uni.navigateTo({
-      url: `/pages/food-candidates/FoodCandidatesPage?jobId=${encodeURIComponent(job.id)}&imagePath=${encodeURIComponent(imagePath.value)}`,
+      url: `/pages/food-candidates/FoodCandidatesPage?jobId=${encodeURIComponent(job.id)}&imagePath=${encodeURIComponent(imagePath.value)}&mealType=${mealType.value}`,
     });
   } catch (err) {
     error.value = '暂时无法识别，请检查网络或稍后重试';
@@ -151,6 +175,12 @@ async function recognize() {
     processing.value = false;
   }
 }
+
+onLoad((options) => {
+  if (options?.mealType && ['breakfast', 'lunch', 'dinner', 'snack'].includes(options.mealType)) {
+    mealType.value = options.mealType as MealType;
+  }
+});
 </script>
 
 <style scoped>
@@ -180,34 +210,51 @@ async function recognize() {
   margin-bottom: 28rpx;
 }
 
-/* 序序气泡 */
-.xuxu-bubble {
-  display: flex;
-  align-items: flex-start;
-  gap: 24rpx;
+.camera-intro {
+  position: relative;
+  min-height: 236rpx;
   margin-bottom: 32rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(111, 146, 119, 0.18);
+  border-radius: 20rpx;
+  background: #f8f6ed;
   animation: fadeIn 0.4s ease 0.1s backwards;
 }
-
-.xuxu-avatar {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: 50%;
-  flex-shrink: 0;
+.camera-intro-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-
-.bubble-content {
-  flex: 1;
-  padding: 24rpx 28rpx;
-  background: #e8f2ea;
-  border-radius: 32rpx 32rpx 32rpx 8rpx;
+.camera-intro-copy {
+  position: relative;
+  z-index: 1;
+  width: 54%;
+  min-width: 250rpx;
+  padding: 34rpx 0 30rpx 28rpx;
 }
-
-.bubble-text {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #23382b;
-  line-height: 1.6;
+.camera-kicker,
+.camera-title,
+.camera-caption {
+  display: block;
+}
+.camera-kicker {
+  color: #66846f;
+  font-size: 19rpx;
+  font-weight: 700;
+}
+.camera-title {
+  margin-top: 8rpx;
+  color: #294a36;
+  font-size: 30rpx;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.camera-caption {
+  margin-top: 10rpx;
+  color: #748679;
+  font-size: 19rpx;
+  line-height: 1.5;
 }
 
 /* 图片选择器 */
@@ -238,8 +285,7 @@ async function recognize() {
 }
 
 @keyframes breathe {
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -250,10 +296,9 @@ async function recognize() {
 }
 
 .picker-icon {
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 50%;
-  mix-blend-mode: multiply;
+  width: 88rpx;
+  height: 88rpx;
+  opacity: 0.72;
 }
 
 .picker-title {
@@ -295,9 +340,7 @@ async function recognize() {
   transition: transform 0.12s ease;
 }
 
-.replace-btn::after {
-  border: none;
-}
+.replace-btn::after { border: none; }
 
 .replace-btn:active {
   transform: scale(0.97);
@@ -306,7 +349,6 @@ async function recognize() {
 .replace-icon {
   width: 28rpx;
   height: 28rpx;
-  transform: rotate(180deg);
 }
 
 .replace-text {
@@ -387,11 +429,10 @@ async function recognize() {
 }
 
 .tip-icon {
-  width: 34rpx;
-  height: 34rpx;
+  width: 26rpx;
+  height: 26rpx;
   flex-shrink: 0;
-  opacity: 0.7;
-  mix-blend-mode: multiply;
+  opacity: 0.62;
 }
 
 .tip-text {
@@ -414,11 +455,10 @@ async function recognize() {
 }
 
 .error-icon {
-  width: 18rpx;
-  height: 18rpx;
-  border-radius: 50%;
-  background: #d88778;
+  width: 28rpx;
+  height: 28rpx;
   flex-shrink: 0;
+  opacity: 0.65;
 }
 
 .error-text {
@@ -441,9 +481,7 @@ async function recognize() {
   animation: fadeIn 0.4s ease 0.5s backwards;
 }
 
-.recognize-btn::after {
-  border: none;
-}
+.recognize-btn::after { border: none; }
 
 .recognize-btn:active {
   transform: scale(0.97);
@@ -464,5 +502,27 @@ async function recognize() {
 
 .recognize-btn.disabled .btn-text {
   color: #9aaca0;
+}
+.manual-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  width: 100%;
+  margin: 0 0 20rpx;
+  padding: 20rpx;
+  border: 1rpx solid #cfded1;
+  border-radius: 16rpx;
+  background: #fff;
+  color: #3c6f50;
+  font-size: 24rpx;
+}
+.manual-search::after {
+  border: none;
+}
+.manual-search image {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.65;
 }
 </style>

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { calculateNutritionForGrams } from '@heban/domain';
 import { PrismaService } from '../../common/database/prisma.service.js';
 import type { CreateMealEntryDto } from './meal-entries.dto.js';
@@ -9,19 +9,46 @@ export class MealEntriesService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateMealEntryDto) {
-    const food = await this.prisma.foodItem.findFirst({
-      where: { id: dto.foodId, isActive: true },
-      include: { nutrition: true },
-    });
-    if (!food?.nutrition) throw new NotFoundException('椋熺墿涓嶅瓨鍦ㄦ垨鏆傛湭瀹屽杽');
-    const nutrition = calculateNutritionForGrams(food.nutrition, dto.grams);
+    if (Boolean(dto.foodId) === Boolean(dto.userFoodId)) {
+      throw new BadRequestException('公共食物和我的食物必须且只能选择一个');
+    }
+    const food = dto.foodId
+      ? await this.prisma.foodItem.findFirst({
+          where: { id: dto.foodId, isActive: true },
+          include: { nutrition: true },
+        })
+      : null;
+    const userFood = dto.userFoodId
+      ? await this.prisma.userFood.findFirst({ where: { id: dto.userFoodId, userId } })
+      : null;
+    if (dto.foodId && !food?.nutrition) throw new NotFoundException('食物不存在或暂未完善');
+    if (dto.userFoodId && !userFood) throw new NotFoundException('我的食物不存在或无权访问');
+    const source = food?.nutrition
+      ? { name: food.name, nutrition: food.nutrition }
+      : userFood
+        ? {
+            name: userFood.name,
+            nutrition: {
+              basisGrams: 100,
+              energyKcal: userFood.energyKcal,
+              proteinG: userFood.proteinG,
+              fatG: userFood.fatG,
+              carbohydrateG: userFood.carbohydrateG,
+              dietaryFiberG: null,
+              sodiumMg: null,
+            },
+          }
+        : null;
+    if (!source) throw new NotFoundException('食物不存在或暂未完善');
+    const nutrition = calculateNutritionForGrams(source.nutrition, dto.grams);
     await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
     return this.prisma.mealEntry.create({
       data: {
         userId,
         mealType: dto.mealType,
-        foodId: food.id,
-        foodNameSnapshot: food.name,
+        foodId: food?.id,
+        userFoodId: userFood?.id,
+        foodNameSnapshot: source.name,
         grams: dto.grams,
         ...nutrition,
         source: dto.source ?? 'manual',
@@ -51,15 +78,41 @@ export class MealEntriesService {
         where: { id: recordId, userId, isCurrent: true },
       });
       if (!old) throw new NotFoundException('未找到可修改的餐食记录');
-      const foodId = dto.foodId ?? old.foodId;
-      if (!foodId) throw new NotFoundException('原食品已不可用，请重新记录');
-      const food = await tx.foodItem.findFirst({
-        where: { id: foodId, isActive: true },
-        include: { nutrition: true },
-      });
-      if (!food?.nutrition) throw new NotFoundException('食品不存在或暂未完善');
+      if (dto.foodId && dto.userFoodId) {
+        throw new BadRequestException('公共食物和我的食物必须且只能选择一个');
+      }
+      const foodId = dto.foodId ?? (dto.userFoodId ? null : old.foodId);
+      const userFoodId = dto.userFoodId ?? (dto.foodId ? null : old.userFoodId);
+      const food = foodId
+        ? await tx.foodItem.findFirst({
+            where: { id: foodId, isActive: true },
+            include: { nutrition: true },
+          })
+        : null;
+      const userFood = userFoodId
+        ? await tx.userFood.findFirst({ where: { id: userFoodId, userId } })
+        : null;
+      if (foodId && !food?.nutrition) throw new NotFoundException('食品不存在或暂未完善');
+      if (userFoodId && !userFood) throw new NotFoundException('我的食物不存在或无权访问');
+      const source = food?.nutrition
+        ? { name: food.name, nutrition: food.nutrition }
+        : userFood
+          ? {
+              name: userFood.name,
+              nutrition: {
+                basisGrams: 100,
+                energyKcal: userFood.energyKcal,
+                proteinG: userFood.proteinG,
+                fatG: userFood.fatG,
+                carbohydrateG: userFood.carbohydrateG,
+                dietaryFiberG: null,
+                sodiumMg: null,
+              },
+            }
+          : null;
+      if (!source) throw new NotFoundException('原食品已不可用，请重新记录');
       const grams = dto.grams ?? old.grams;
-      const nutrition = calculateNutritionForGrams(food.nutrition, grams);
+      const nutrition = calculateNutritionForGrams(source.nutrition, grams);
       await tx.mealEntry.update({
         where: { id: old.id },
         data: { isCurrent: false, supersededAt: new Date() },
@@ -68,8 +121,9 @@ export class MealEntriesService {
         data: {
           userId,
           mealType: dto.mealType ?? old.mealType,
-          foodId: food.id,
-          foodNameSnapshot: food.name,
+          foodId: food?.id,
+          userFoodId: userFood?.id,
+          foodNameSnapshot: source.name,
           grams,
           ...nutrition,
           source: old.source,

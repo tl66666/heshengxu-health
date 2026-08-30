@@ -2,19 +2,27 @@
   <view class="page">
     <AppNavBar title="确认这份食物" route="/pages/food-confirm/FoodConfirmPage" />
 
-    <view v-if="!food && !error" class="state">正在准备食物信息...</view>
-    <view v-else-if="!food" class="state state--error">{{ error }}</view>
+    <view v-if="!food" class="state">正在准备食物信息...</view>
     <template v-else>
       <view class="food-hero">
-        <view class="food-mark">
-          <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
-        </view>
+        <image v-if="imagePath" class="food-photo" :src="imagePath" mode="aspectFill" />
+        <view v-else class="food-mark">{{ food.name.slice(0, 1) }}</view>
         <view class="food-copy">
           <text class="food-name">{{ food.name }}</text>
-          <text class="food-meta"
-            >{{ food.category?.name || '日常食物' }} · 营养值来自食物目录</text
-          >
+          <text class="food-meta">{{ sourceLabel }}</text>
         </view>
+      </view>
+
+      <view
+        v-if="canSaveToLibrary"
+        class="library-option"
+        data-testid="save-to-library"
+      >
+        <view class="library-copy">
+          <text class="library-title">保存到我的食物</text>
+          <text class="library-hint">下次搜索名称就能直接记录</text>
+        </view>
+        <switch v-model="saveToLibrary" color="#5c946f" />
       </view>
 
       <view class="section">
@@ -87,15 +95,18 @@ import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import {
   createMealEntry,
-  replaceMealEntry,
   getFoodById,
+  replaceMealEntry,
+  userFoodToSearchItem,
 } from '../../features/food/food.service.js';
+import { confirmRecognition } from '../../features/food/food-recognition.js';
+import { createUserFood, listUserFoods } from '../../features/food/user-foods.service.js';
+import type { UserFoodSource } from '../../features/food/user-foods.types.js';
 import {
   calculateFoodNutrition,
   type FoodItem,
   type MealType,
 } from '../../features/food/food.types.js';
-import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 import { foodConfirmMode } from '../../features/food/food-entry-form.js';
 
 const food = ref<FoodItem | null>(null);
@@ -106,7 +117,21 @@ const note = ref('');
 const saving = ref(false);
 const error = ref('');
 const entryId = ref('');
+const userFoodId = ref('');
+const candidateId = ref('');
+const source = ref<UserFoodSource>('catalog');
+const imagePath = ref('');
+const saveToLibrary = ref(true);
+const savedUserFoodId = ref('');
 const mode = computed(() => foodConfirmMode(entryId.value));
+const canSaveToLibrary = computed(
+  () => mode.value === 'create' && source.value === 'photo' && !userFoodId.value,
+);
+const sourceLabel = computed(() => {
+  if (userFoodId.value) return '我的食物 · 使用已保存的营养数据';
+  if (source.value === 'photo') return '序序相机识别 · 请确认份量';
+  return `${food.value?.category?.name || '日常食物'} · 营养值来自食物库`;
+});
 const meals: Array<{ value: MealType; label: string }> = [
   { value: 'breakfast', label: '早餐' },
   { value: 'lunch', label: '午餐' },
@@ -131,15 +156,23 @@ function chooseServing(value: number) {
 }
 async function load(options?: Record<string, string>) {
   entryId.value = options?.entryId || '';
+  userFoodId.value = options?.userFoodId || '';
+  candidateId.value = options?.candidateId || '';
+  source.value = (options?.source as UserFoodSource) || 'catalog';
+  imagePath.value = options?.imagePath ? decodeURIComponent(options.imagePath) : '';
   gramsText.value = options?.grams || '100';
   grams.value = Number(gramsText.value);
   mealType.value = (options?.mealType as MealType) || 'lunch';
   note.value = options?.note ? decodeURIComponent(options.note) : '';
   try {
-    food.value = options?.foodId ? await getFoodById(options.foodId) : null;
-    if (!food.value && options?.foodId) {
-      const pending = uni.getStorageSync('pendingFoodSelection') as FoodItem | undefined;
-      if (pending?.id === options.foodId) food.value = pending;
+    if (userFoodId.value) {
+      const personalFoods = await listUserFoods();
+      const personalFood = personalFoods.find((item) => item.id === userFoodId.value);
+      food.value = personalFood ? userFoodToSearchItem(personalFood) : null;
+    } else if (options?.foodId) {
+      food.value = await getFoodById(options.foodId);
+    } else {
+      food.value = null;
     }
     if (!food.value) error.value = '没有找到这份食物';
   } catch {
@@ -155,15 +188,39 @@ async function save() {
   saving.value = true;
   error.value = '';
   try {
-    const input = {
+    if (canSaveToLibrary.value && saveToLibrary.value && !savedUserFoodId.value) {
+      const saved = await createUserFood({
+        name: food.value.name,
+        imageUrl: null,
+        source: 'photo',
+        energyKcal: food.value.nutrition.energyKcal,
+        proteinG: food.value.nutrition.proteinG,
+        fatG: food.value.nutrition.fatG,
+        carbohydrateG: food.value.nutrition.carbohydrateG,
+        defaultServingLabel: '1 份',
+        defaultServingGrams: grams.value,
+      });
+      savedUserFoodId.value = saved.id;
+    }
+
+    const commonInput = {
       mealType: mealType.value,
-      foodId: food.value.id,
       grams: grams.value,
       recordedAt: new Date().toISOString(),
       note: note.value || undefined,
     };
-    if (mode.value === 'edit') await replaceMealEntry(entryId.value, input);
-    else await createMealEntry(input);
+    if (candidateId.value) {
+      await confirmRecognition({ candidateId: candidateId.value, ...commonInput });
+    } else {
+      const foodReference = userFoodId.value
+        ? { userFoodId: userFoodId.value }
+        : { foodId: food.value.id };
+      if (mode.value === 'edit') {
+        await replaceMealEntry(entryId.value, { ...commonInput, ...foodReference });
+      } else {
+        await createMealEntry({ ...commonInput, ...foodReference });
+      }
+    }
     uni.showToast({
       title: mode.value === 'edit' ? '记录已更新' : '已记录这份食物',
       icon: 'success',
@@ -204,14 +261,19 @@ onLoad((options) => load(options as Record<string, string>));
   height: 82rpx;
   flex: none;
   margin-right: 18rpx;
-  border: 1rpx solid #dce9e0;
   border-radius: 22rpx;
-  background: #f1f6f2;
+  color: #fff;
+  background: #7eae86;
+  font-size: 36rpx;
+  font-weight: 700;
 }
-
-.food-mark image {
-  width: 62rpx;
-  height: 62rpx;
+.food-photo {
+  width: 96rpx;
+  height: 96rpx;
+  flex: none;
+  margin-right: 18rpx;
+  border-radius: 14rpx;
+  background: #edf4ee;
 }
 .food-copy {
   min-width: 0;
@@ -308,6 +370,35 @@ onLoad((options) => load(options as Record<string, string>));
 .selected-label {
   color: #4f8a5f;
   font-size: 21rpx;
+}
+.library-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-top: 22rpx;
+  padding: 22rpx;
+  border: 1rpx solid #d9e8db;
+  border-radius: 14rpx;
+  background: #fff;
+}
+.library-copy {
+  min-width: 0;
+  flex: 1;
+}
+.library-title,
+.library-hint {
+  display: block;
+}
+.library-title {
+  color: #315b42;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.library-hint {
+  margin-top: 5rpx;
+  color: #839789;
+  font-size: 19rpx;
 }
 .nutrition {
   margin-top: 26rpx;

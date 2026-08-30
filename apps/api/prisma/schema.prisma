@@ -148,6 +148,7 @@ model MealEntry {
   userId                String
   mealType              MealType
   foodId                String?
+  userFoodId            String?
   foodNameSnapshot      String
   grams                 Float
   energyKcal            Float
@@ -165,6 +166,7 @@ model MealEntry {
   deletedAt             DateTime?
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   food                  FoodItem? @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  userFood              UserFood? @relation(fields: [userFoodId], references: [id], onDelete: SetNull)
   previousRecord        MealEntry? @relation("MealEntryVersions", fields: [previousRecordId], references: [id])
   replacements          MealEntry[] @relation("MealEntryVersions")
   createdAt             DateTime  @default(now())
@@ -172,6 +174,7 @@ model MealEntry {
 
   @@index([userId, isCurrent, recordedAt])
   @@index([userId, mealType, isCurrent, recordedAt])
+  @@index([userFoodId])
 }
 
 model UserFood {
@@ -189,6 +192,7 @@ model UserFood {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealEntries           MealEntry[]
 
   @@index([userId, name])
   @@index([userId, createdAt])

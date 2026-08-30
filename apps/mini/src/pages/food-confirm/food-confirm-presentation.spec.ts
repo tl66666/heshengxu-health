@@ -11,4 +11,15 @@ describe('food confirmation presentation', () => {
     expect(foodConfirmPageSource).toContain('getFoodCategoryIcon(food.category?.slug, food.name)');
     expect(foodConfirmPageSource).not.toMatch(/[🍚🥚🥦🍎🍽️]/u);
   });
+
+  it('supports meal context, personal foods, and saving photo results to the library', () => {
+    expect(foodConfirmPageSource).toContain('data-testid="save-to-library"');
+    expect(foodConfirmPageSource).toContain('v-model="saveToLibrary"');
+    expect(foodConfirmPageSource).toContain('options?.mealType');
+    expect(foodConfirmPageSource).toContain('options?.userFoodId');
+    expect(foodConfirmPageSource).toContain('options?.candidateId');
+    expect(foodConfirmPageSource).toContain('createUserFood');
+    expect(foodConfirmPageSource).toContain('confirmRecognition');
+    expect(foodConfirmPageSource).toContain('userFoodId:');
+  });
 });
