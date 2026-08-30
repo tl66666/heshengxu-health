@@ -152,7 +152,23 @@
             <text class="value-unit">公斤</text>
           </view>
           <view class="mini-chart">
-            <image class="chart-icon" src="/static/icons/svg/scale.svg" mode="aspectFit" />
+            <svg
+              v-if="miniWeightPoints.length"
+              class="mini-trend-svg"
+              viewBox="0 0 120 52"
+              preserveAspectRatio="none"
+            >
+              <path :d="miniWeightPath" class="mini-trend-line" />
+              <circle
+                v-for="point in miniWeightPoints"
+                :key="point.id"
+                :cx="point.x"
+                :cy="point.y"
+                r="2.6"
+                class="mini-trend-point"
+              />
+            </svg>
+            <image v-else class="chart-icon" src="/static/icons/svg/scale.svg" mode="aspectFit" />
           </view>
         </view>
       </view>
@@ -287,6 +303,7 @@ import { computed, onMounted, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { loadWeightHistory } from '../../features/health-loop/health-loop.service.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import {
   navigateTo,
@@ -340,6 +357,31 @@ const startWeight = computed(
 const currentWeight = computed(
   () => today.value?.todayRecords?.weight?.valueKg?.toFixed(1) || '--',
 );
+const weightHistory = ref<Array<{ id: string; valueKg: number; recordedAt: string }>>([]);
+const miniWeightData = computed(() =>
+  weightHistory.value
+    .slice()
+    .sort((a, b) => +new Date(a.recordedAt) - +new Date(b.recordedAt))
+    .slice(-7),
+);
+const miniWeightPoints = computed(() => {
+  const data = miniWeightData.value;
+  if (!data.length) return [];
+  const values = data.map((item) => item.valueKg);
+  const min = Math.min(...values) - 0.3;
+  const max = Math.max(...values) + 0.3;
+  const span = Math.max(0.1, max - min);
+  return data.map((item, index) => ({
+    id: item.id,
+    x: data.length === 1 ? 60 : (index / (data.length - 1)) * 120,
+    y: 48 - ((item.valueKg - min) / span) * 36,
+  }));
+});
+const miniWeightPath = computed(() =>
+  miniWeightPoints.value
+    .map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`)
+    .join(' '),
+);
 
 const targetWeight = computed(
   () => today.value?.activePlan?.healthTarget?.targetWeightKg?.toFixed(1) || '--',
@@ -369,9 +411,8 @@ const mealRecords = computed(() => today.value?.todayRecords?.meals || []);
 const mealCount = computed(() => mealRecords.value.length);
 const balancedMealCount = computed(
   () =>
-    mealRecords.value.filter(
-      (meal) => meal.hasStaple && meal.hasProtein && meal.hasVegetable,
-    ).length,
+    mealRecords.value.filter((meal) => meal.hasStaple && meal.hasProtein && meal.hasVegetable)
+      .length,
 );
 const mealSummaryText = computed(() =>
   mealCount.value === 0
@@ -479,6 +520,11 @@ const load = () => {
   healthLoopState.loadToday(today);
 };
 
+const loadWeightTrend = async () => {
+  const history = await loadWeightHistory().catch(() => null);
+  if (history) weightHistory.value = history;
+};
+
 const loadPersonalSignals = () => {
   try {
     const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
@@ -515,6 +561,7 @@ const loadPersonalSignals = () => {
 // 修复：首次进入立即加载
 onMounted(() => {
   load();
+  loadWeightTrend();
   loadPersonalSignals();
 });
 
@@ -523,6 +570,7 @@ onShow(() => {
   if (today.value) {
     load();
   }
+  loadWeightTrend();
   loadPersonalSignals();
 });
 </script>
@@ -871,14 +919,18 @@ onShow(() => {
   margin-top: 24rpx;
   background: linear-gradient(135deg, rgba(255, 248, 236, 0.96) 0%, rgba(238, 248, 246, 0.94) 100%);
   border: 1rpx solid rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12rpx 28rpx rgba(147, 126, 108, 0.1), inset 0 1rpx 0 rgba(255,255,255,0.95);
+  box-shadow:
+    0 12rpx 28rpx rgba(147, 126, 108, 0.1),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
   overflow: hidden;
   transition: all 0.2s ease;
 }
 
 .xuxu-camera-card:active {
   transform: scale(0.98);
-  box-shadow: 0 6rpx 14rpx rgba(147, 126, 108, 0.08), inset 0 1rpx 0 rgba(255,255,255,0.95);
+  box-shadow:
+    0 6rpx 14rpx rgba(147, 126, 108, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
 }
 
 .camera-copy {
@@ -974,6 +1026,23 @@ onShow(() => {
   width: 40rpx;
   height: 40rpx;
   opacity: 0.4;
+}
+.mini-trend-svg {
+  width: 132rpx;
+  height: 58rpx;
+  overflow: visible;
+}
+.mini-trend-line {
+  fill: none;
+  stroke: #74b58b;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mini-trend-point {
+  fill: #fffdfb;
+  stroke: #74b58b;
+  stroke-width: 2.2;
 }
 
 /* 4. 健康追踪网格 */

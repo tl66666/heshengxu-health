@@ -299,6 +299,10 @@
         <text class="dialog-hint">建议在起床后、早餐前记录，变化会更稳定</text>
         <view class="field-label">体重（kg）</view>
         <input v-model="inputWeight" class="weight-input" type="digit" placeholder="例如 65.5" />
+        <view class="field-label">记录日期</view>
+        <picker mode="date" :value="recordedDate" @change="recordedDate = $event.detail.value">
+          <view class="date-picker-value">{{ recordedDate || '选择日期' }}</view>
+        </picker>
         <view class="field-label">今天的心情（可选）</view>
         <input
           v-model="inputNote"
@@ -346,6 +350,7 @@ const showDialog = ref(false);
 const editingRecordId = ref<string | null>(null);
 const inputWeight = ref('');
 const inputNote = ref('');
+const recordedDate = ref('');
 const recordFilter = ref<'all' | '30' | '90'>('all');
 const recordFilters = [
   { label: '全部', value: 'all' as const },
@@ -595,17 +600,20 @@ function closeDialog() {
   editingRecordId.value = null;
   inputWeight.value = '';
   inputNote.value = '';
+  recordedDate.value = '';
 }
 function openNewRecord() {
   editingRecordId.value = null;
   inputWeight.value = '';
   inputNote.value = '';
+  recordedDate.value = localDate();
   showDialog.value = true;
 }
 function editRecord(record: WeightRecord) {
   editingRecordId.value = record.id;
   inputWeight.value = record.weight.toFixed(1);
   inputNote.value = record.note || '';
+  recordedDate.value = new Date(record.recordedAt).toISOString().slice(0, 10);
   showDialog.value = true;
 }
 function saveLocalWeight() {
@@ -618,7 +626,9 @@ function saveLocalWeight() {
     {
       id: `r-${Date.now()}`,
       weight: Number(value.toFixed(1)),
-      recordedAt: new Date().toISOString(),
+      recordedAt: recordedDate.value
+        ? new Date(`${recordedDate.value}T08:00:00`).toISOString()
+        : new Date().toISOString(),
       note: inputNote.value || '晨起空腹',
     },
     ...records.value,
@@ -632,11 +642,15 @@ async function saveWeight() {
     uni.showToast({ title: '请输入正确的体重', icon: 'none' });
     return;
   }
+  const previous = editingRecordId.value
+    ? records.value.find((record) => record.id === editingRecordId.value)
+    : undefined;
   const payload = {
     valueKg: Number(value.toFixed(1)),
-    recordedAt: editingRecordId.value
-      ? records.value.find((record) => record.id === editingRecordId.value)?.recordedAt ||
-        new Date().toISOString()
+    recordedAt: recordedDate.value
+      ? new Date(
+          `${recordedDate.value}T${previous ? new Date(previous.recordedAt).toTimeString().slice(0, 8) : '08:00:00'}`,
+        ).toISOString()
       : new Date().toISOString(),
     note: inputNote.value || undefined,
   };
@@ -1323,6 +1337,16 @@ onMounted(loadWeightData);
 }
 .weight-input,
 .note-input {
+  width: 100%;
+  padding: 22rpx;
+  border: 1rpx solid #efe3dc;
+  border-radius: 16rpx;
+  background: #fff9f5;
+  color: #51484b;
+  font-size: 26rpx;
+  box-sizing: border-box;
+}
+.date-picker-value {
   width: 100%;
   padding: 22rpx;
   border: 1rpx solid #efe3dc;
