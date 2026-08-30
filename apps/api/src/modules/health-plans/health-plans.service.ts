@@ -28,6 +28,13 @@ export class HealthPlansService {
           userId,
           kind: dto.kind,
           direction: dto.kind === 'weight' ? dto.direction : null,
+          startWeightKg:
+            dto.kind === 'weight'
+              ? ((await tx.healthProfile.findUnique({
+                  where: { userId },
+                  select: { weightKg: true },
+                }))?.weightKg ?? null)
+              : null,
           targetWeightKg: dto.kind === 'weight' ? dto.targetWeightKg : null,
           startDate,
         },
@@ -86,7 +93,7 @@ export class HealthPlansService {
       ...safePlan,
       healthTarget: {
         ...safePlan.healthTarget,
-        startWeightKg: user.healthProfile?.weightKg ?? null,
+        startWeightKg: safePlan.healthTarget.startWeightKg ?? user.healthProfile?.weightKg ?? null,
       },
     };
   }

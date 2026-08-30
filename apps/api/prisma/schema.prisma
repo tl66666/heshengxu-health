@@ -261,6 +261,7 @@ model HealthTarget {
   userId         String
   kind           PlanKind
   direction      WeightDirection?
+  startWeightKg  Float?
   targetWeightKg Float?
   startDate      DateTime         @db.Date
   status         PlanStatus       @default(active)

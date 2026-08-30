@@ -84,12 +84,12 @@
     <view v-if="activeView === 'progress'" class="trend-card card">
       <view class="trend-topline">
         <view>
-          <text class="trend-number">{{ trendChangeLabel }}</text>
+          <text class="trend-number">{{ hasTrendData ? trendChangeLabel : '--' }}</text>
           <text class="trend-caption">{{ trendCaption }}</text>
         </view>
         <view class="trend-legend"><view class="legend-dot" /> <text>体重</text></view>
       </view>
-      <view class="chart-shell">
+      <view v-if="hasTrendData" class="chart-shell">
         <svg class="trend-svg" viewBox="0 0 320 150" preserveAspectRatio="none">
           <line
             v-for="line in gridLines"
@@ -115,9 +115,14 @@
           <text v-for="point in chartLabels" :key="point.id">{{ point.label }}</text>
         </view>
       </view>
-      <view class="insight-strip">
+      <view v-if="hasTrendData" class="insight-strip">
         <image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <text>{{ insightText }}</text>
+      </view>
+      <view v-if="!hasTrendData" class="trend-empty">
+        <text class="trend-empty-title">还没有趋势数据</text>
+        <text class="trend-empty-copy">记录 2 次以上体重后，这里会显示你的变化曲线</text>
+        <button class="trend-empty-action" @tap="openNewRecord">记录第一次体重</button>
       </view>
     </view>
 
@@ -410,14 +415,20 @@ const trendRecords = computed(() => {
 const chartData = computed(() =>
   trendRecords.value.length ? trendRecords.value : records.value.slice(-2).reverse(),
 );
+const hasTrendData = computed(() => chartData.value.length > 0);
 const trendPoints = computed(() => {
   const data = chartData.value;
+  if (!data.length) return [];
+  if (data.length === 1) {
+    return [{ id: data[0].id, x: 160, y: 76 }];
+  }
   const min = Math.min(...data.map((item) => item.weight)) - 0.5;
   const max = Math.max(...data.map((item) => item.weight)) + 0.5;
+  const span = Math.max(0.1, max - min);
   return data.map((item, index) => ({
     id: item.id,
     x: data.length === 1 ? 160 : (index / (data.length - 1)) * 320,
-    y: 124 - ((item.weight - min) / (max - min)) * 96,
+    y: 124 - ((item.weight - min) / span) * 96,
   }));
 });
 const trendPath = computed(() =>
@@ -588,7 +599,9 @@ async function saveWeight() {
   }
   const payload = {
     valueKg: Number(value.toFixed(1)),
-    recordedAt: new Date().toISOString(),
+    recordedAt: editingRecordId.value
+      ? records.value.find((record) => record.id === editingRecordId.value)?.recordedAt || new Date().toISOString()
+      : new Date().toISOString(),
     note: inputNote.value || undefined,
   };
   try {
@@ -985,6 +998,33 @@ onMounted(loadWeightData);
   width: 48rpx;
   height: 48rpx;
   border-radius: 50%;
+}
+
+.trend-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  padding: 42rpx 24rpx 34rpx;
+  text-align: center;
+}
+.trend-empty-title {
+  color: #6e5c5d;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.trend-empty-copy {
+  color: #a28f8c;
+  font-size: 22rpx;
+}
+.trend-empty-action {
+  margin-top: 8rpx;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background: #e8f4e9;
+  color: #4f8b60;
+  font-size: 22rpx;
+  font-weight: 700;
 }
 .milestone-row {
   display: grid;
