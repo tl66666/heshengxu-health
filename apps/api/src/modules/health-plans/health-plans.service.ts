@@ -77,10 +77,18 @@ export class HealthPlansService {
       include: {
         healthTarget: true,
         tasks: { where: { scheduledFor }, orderBy: { actionType: 'asc' } },
+        user: { select: { healthProfile: { select: { weightKg: true } } } },
       },
     });
     if (!plan) throw new NotFoundException('未找到当前计划');
-    return plan;
+    const { user, ...safePlan } = plan;
+    return {
+      ...safePlan,
+      healthTarget: {
+        ...safePlan.healthTarget,
+        startWeightKg: user.healthProfile?.weightKg ?? null,
+      },
+    };
   }
 
   private async ensureTasksForDate(

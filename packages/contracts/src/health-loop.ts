@@ -62,6 +62,7 @@ export type HealthTargetDto = {
   id: string;
   kind: PlanKind;
   direction: WeightDirection | null;
+  startWeightKg?: number | null;
   targetWeightKg: number | null;
   startDate: string;
   status: PlanStatus;

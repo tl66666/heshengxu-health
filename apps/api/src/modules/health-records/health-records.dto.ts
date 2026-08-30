@@ -140,3 +140,13 @@ export class TodayRecordsQueryDto {
   @IsDateString()
   date!: string;
 }
+
+export class WeightHistoryQueryDto {
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @IsOptional()
+  @IsDateString()
+  to?: string;
+}

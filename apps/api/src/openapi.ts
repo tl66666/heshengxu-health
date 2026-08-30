@@ -31,6 +31,9 @@ const document = {
     '/health-records/weights': {
       post: protectedOperation('记录体重', '保存一条体重事实记录'),
     },
+    '/health-records/weights/history': {
+      get: protectedOperation('读取体重历史', '读取当前用户最近 120 条有效体重记录'),
+    },
     '/health-records/meal-structures': {
       post: protectedOperation('记录饮食结构', '保存一餐的主食、蛋白质和蔬菜结构'),
     },

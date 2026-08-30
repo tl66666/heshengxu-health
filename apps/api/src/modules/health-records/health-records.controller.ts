@@ -21,6 +21,7 @@ import {
   CreateWeightRecordDto,
   ReplaceHealthRecordDto,
   TodayRecordsQueryDto,
+  WeightHistoryQueryDto,
 } from './health-records.dto.js';
 import { HealthRecordsService, type HealthRecordType } from './health-records.service.js';
 
@@ -97,6 +98,20 @@ export class HealthRecordsController {
   ) {
     return response.send(
       envelope(await this.records.getTodayForUser(request.user.id, query.date), response),
+    );
+  }
+
+  @Get('weights/history')
+  async getWeightHistory(
+    @Req() request: AuthenticatedRequest,
+    @ValidatedQuery(WeightHistoryQueryDto) query: WeightHistoryQueryDto,
+    @Res() response: Response,
+  ) {
+    return response.send(
+      envelope(
+        await this.records.getWeightHistory(request.user.id, query.from, query.to),
+        response,
+      ),
     );
   }
 }

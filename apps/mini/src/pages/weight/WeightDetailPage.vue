@@ -7,7 +7,7 @@
       <view class="hero-copy">
         <text class="hero-kicker">慢慢变轻，也慢慢喜欢自己</text>
         <view class="hero-number-row">
-          <text class="hero-number">{{ currentWeight.toFixed(1) }}</text>
+          <text class="hero-number">{{ currentWeight ? currentWeight.toFixed(1) : '--' }}</text>
           <text class="hero-unit">kg</text>
         </view>
         <text class="hero-date">{{ latestRecordLabel }}</text>
@@ -29,7 +29,8 @@
         <view class="summary-item">
           <text class="summary-label">目标体重</text>
           <text class="summary-value"
-            >{{ targetWeight.toFixed(1) }}<text class="small-unit"> kg</text></text
+            >{{ targetWeight ? targetWeight.toFixed(1) : '--'
+            }}<text class="small-unit"> kg</text></text
           >
           <text class="summary-note">预计 {{ targetDate }}</text>
         </view>
@@ -39,9 +40,9 @@
         <view class="progress-marker" :style="{ left: `${progress}%` }" />
       </view>
       <view class="progress-meta">
-        <text>开始 {{ startWeight.toFixed(1) }} kg</text>
+        <text>开始 {{ startWeight ? startWeight.toFixed(1) : '--' }} kg</text>
         <text class="progress-message">已完成 {{ progress.toFixed(0) }}%</text>
-        <text>目标 {{ targetWeight.toFixed(1) }} kg</text>
+        <text>目标 {{ targetWeight ? targetWeight.toFixed(1) : '--' }} kg</text>
       </view>
     </view>
 
@@ -143,6 +144,11 @@
       <button class="text-button" @tap="showDialog = true">查看全部</button>
     </view>
     <view v-if="activeView === 'records'" class="history-card card">
+      <view v-if="loadingRecords" class="history-loading">正在同步真实记录…</view>
+      <view v-else-if="!visibleRecords.length" class="history-empty">
+        <text>还没有体重记录</text>
+        <text>记录第一次体重，开始看见自己的变化</text>
+      </view>
       <view v-for="(record, index) in visibleRecords" :key="record.id" class="history-item">
         <view class="history-date">
           <text class="history-day">{{ formatDay(record.recordedAt) }}</text>
@@ -269,19 +275,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import AppNavBar from '../../components/AppNavBar.vue';
+import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import {
+  createWeightRecord,
+  loadHealthProfile,
+  loadWeightHistory,
+} from '../../features/health-loop/health-loop.service.js';
 
 type WeightRecord = { id: string; weight: number; recordedAt: string; note?: string };
 const STORAGE_KEY = 'heban-weight-records';
-const seeded: WeightRecord[] = [
-  { id: 'r-1', weight: 68.0, recordedAt: '2026-08-17T08:10:00+08:00', note: '开始记录' },
-  { id: 'r-2', weight: 67.4, recordedAt: '2026-08-21T08:25:00+08:00', note: '散步后状态很好' },
-  { id: 'r-3', weight: 66.8, recordedAt: '2026-08-24T08:18:00+08:00', note: '昨晚睡得很香' },
-  { id: 'r-4', weight: 66.1, recordedAt: '2026-08-27T08:30:00+08:00', note: '轻盈的一天' },
-  { id: 'r-5', weight: 65.5, recordedAt: '2026-08-30T08:12:00+08:00', note: '晨起空腹' },
-];
-
 const readRecords = (): WeightRecord[] => {
   try {
     const value = uni.getStorageSync(STORAGE_KEY);
@@ -289,12 +293,14 @@ const readRecords = (): WeightRecord[] => {
   } catch {
     /* use seed data */
   }
-  return seeded;
+  return [];
 };
 
 const records = ref<WeightRecord[]>(
   readRecords().sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt)),
 );
+const profile = ref<{ heightCm: number | null; weightKg: number | null } | null>(null);
+const loadingRecords = ref(true);
 const selectedRange = ref<'7' | '30' | '90'>('30');
 const activeView = ref<'progress' | 'data' | 'records'>('progress');
 const showDialog = ref(false);
@@ -310,26 +316,58 @@ const viewTabs = [
   { label: '数据', caption: '身体指标', value: 'data' as const },
   { label: '记录', caption: '每一次变化', value: 'records' as const },
 ];
-const startWeight = 68;
-const targetWeight = 62;
-const heightCm = 170;
-
-const currentWeight = computed(() => records.value[0]?.weight || startWeight);
-const bmi = computed(() => (currentWeight.value / (heightCm / 100) ** 2).toFixed(1));
-const bmiStatus = computed(() => (Number(bmi.value) < 24 ? '健康范围' : '继续保持'));
-const progress = computed(() =>
-  Math.max(
+const startWeight = computed(
+  () =>
+    healthLoopState.today.value?.activePlan?.healthTarget?.startWeightKg ??
+    profile.value?.weightKg ??
+    records.value[records.value.length - 1]?.weight ??
     0,
-    Math.min(100, ((startWeight - currentWeight.value) / (startWeight - targetWeight)) * 100),
-  ),
 );
-const targetDate = computed(() => '10月24日');
-const remainingKg = computed(() => Math.max(0, currentWeight.value - targetWeight));
-const forecastDate = computed(() => (remainingKg.value <= 0 ? '已经到达目标' : '10月24日'));
-const latestRecordLabel = computed(
-  () => `${formatDate(records.value[0]?.recordedAt || new Date().toISOString())} 更新`,
+const targetWeight = computed(
+  () => healthLoopState.today.value?.activePlan?.healthTarget?.targetWeightKg ?? 0,
 );
-const weightDelta = computed(() => currentWeight.value - startWeight);
+const heightCm = computed(() => profile.value?.heightCm ?? 0);
+
+const currentWeight = computed(
+  () =>
+    records.value[0]?.weight ??
+    healthLoopState.today.value?.todayRecords.weight?.valueKg ??
+    profile.value?.weightKg ??
+    0,
+);
+const bmi = computed(() =>
+  currentWeight.value && heightCm.value
+    ? (currentWeight.value / (heightCm.value / 100) ** 2).toFixed(1)
+    : '--',
+);
+const bmiStatus = computed(() =>
+  bmi.value === '--' ? '待完善身高数据' : Number(bmi.value) < 24 ? '健康范围' : '请继续观察',
+);
+const progress = computed(() =>
+  startWeight.value > 0 && targetWeight.value > 0 && startWeight.value !== targetWeight.value
+    ? Math.max(
+        0,
+        Math.min(
+          100,
+          ((startWeight.value - currentWeight.value) / (startWeight.value - targetWeight.value)) *
+            100,
+        ),
+      )
+    : 0,
+);
+const targetDate = computed(() => (targetWeight.value ? '根据当前节奏估算' : '先设置目标体重'));
+const remainingKg = computed(() => Math.max(0, currentWeight.value - targetWeight.value));
+const forecastDate = computed(() =>
+  targetWeight.value && remainingKg.value <= 0
+    ? '已经到达目标'
+    : targetWeight.value
+      ? '根据记录动态估算'
+      : '等待目标体重',
+);
+const latestRecordLabel = computed(() =>
+  records.value[0] ? `${formatDate(records.value[0].recordedAt)} 更新` : '还没有记录',
+);
+const weightDelta = computed(() => currentWeight.value - startWeight.value);
 const weightDeltaLabel = computed(
   () => `${weightDelta.value > 0 ? '+' : ''}${weightDelta.value.toFixed(1)} kg`,
 );
@@ -389,12 +427,12 @@ const milestones = computed(() => [
   },
   {
     title: '轻盈 1kg',
-    note: startWeight - currentWeight.value >= 1 ? '已达成' : '还差 1kg',
-    achieved: startWeight - currentWeight.value >= 1,
+    note: startWeight.value - currentWeight.value >= 1 ? '已达成' : '还差 1kg',
+    achieved: startWeight.value - currentWeight.value >= 1,
   },
   {
     title: '靠近目标',
-    note: `${Math.max(0, targetWeight - currentWeight.value).toFixed(1)} kg`,
+    note: `${Math.max(0, targetWeight.value - currentWeight.value).toFixed(1)} kg`,
     achieved: progress.value >= 60,
   },
 ]);
@@ -421,29 +459,29 @@ const bodyMetrics = computed(() => [
   {
     title: '体脂率',
     unit: '%',
-    value: '24.8',
-    status: '标准',
-    tone: 'good',
-    percent: 58,
-    range: '参考范围 20% - 30%',
+    value: '--',
+    status: '待记录',
+    tone: 'soft',
+    percent: 0,
+    range: '记录体脂后显示趋势',
   },
   {
     title: '腰围',
     unit: 'cm',
-    value: '76.0',
-    status: '稳定',
+    value: '--',
+    status: '待记录',
     tone: 'soft',
-    percent: 46,
-    range: '最近一次记录 08/27',
+    percent: 0,
+    range: '记录腰围后显示趋势',
   },
   {
     title: '基础代谢',
     unit: 'kcal',
-    value: '1,342',
-    status: '估算',
+    value: '--',
+    status: '待完善资料',
     tone: 'warm',
-    percent: 64,
-    range: '根据身高、体重估算',
+    percent: 0,
+    range: '完善身高、年龄和性别后估算',
   },
 ]);
 
@@ -476,7 +514,7 @@ function closeDialog() {
   inputWeight.value = '';
   inputNote.value = '';
 }
-function saveWeight() {
+function saveLocalWeight() {
   const value = Number(inputWeight.value);
   if (!value || value < 20 || value > 300) {
     uni.showToast({ title: '请输入正确的体重', icon: 'none' });
@@ -495,6 +533,68 @@ function saveWeight() {
   uni.showToast({ title: '记录成功', icon: 'success' });
   closeDialog();
 }
+async function saveWeight() {
+  const value = Number(inputWeight.value);
+  if (!value || value < 20 || value > 300) {
+    uni.showToast({ title: '请输入正确的体重', icon: 'none' });
+    return;
+  }
+  const payload = {
+    valueKg: Number(value.toFixed(1)),
+    recordedAt: new Date().toISOString(),
+    note: inputNote.value || undefined,
+  };
+  try {
+    const saved = await createWeightRecord(payload);
+    records.value = [
+      {
+        id: saved.id,
+        weight: saved.valueKg,
+        recordedAt: saved.recordedAt,
+        note: saved.note || undefined,
+      },
+      ...records.value,
+    ];
+    uni.setStorageSync(STORAGE_KEY, records.value);
+    uni.showToast({ title: '记录成功', icon: 'success' });
+    closeDialog();
+  } catch {
+    saveLocalWeight();
+    uni.showToast({ title: '网络不可用，已保存到本地', icon: 'none' });
+  }
+}
+
+async function loadWeightData() {
+  const cached = readRecords();
+  if (cached.length)
+    records.value = cached.sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
+  try {
+    const [profileResult, historyResult] = await Promise.all([
+      loadHealthProfile().catch(() => null),
+      loadWeightHistory().catch(() => null),
+      healthLoopState.loadToday(localDate()),
+    ]);
+    if (profileResult) profile.value = profileResult;
+    if (historyResult) {
+      records.value = historyResult.map((item) => ({
+        id: item.id,
+        weight: item.valueKg,
+        recordedAt: item.recordedAt,
+        note: item.note || undefined,
+      }));
+      uni.setStorageSync(STORAGE_KEY, records.value);
+    }
+  } finally {
+    loadingRecords.value = false;
+  }
+}
+
+function localDate() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+onMounted(loadWeightData);
 </script>
 
 <style scoped>
@@ -856,6 +956,21 @@ function saveWeight() {
 }
 .history-card {
   padding: 6rpx 24rpx;
+}
+.history-loading,
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 44rpx 20rpx;
+  color: #8ea392;
+  font-size: 22rpx;
+  text-align: center;
+}
+.history-empty text:last-child {
+  color: #b5a39e;
+  font-size: 19rpx;
 }
 .history-item {
   display: flex;

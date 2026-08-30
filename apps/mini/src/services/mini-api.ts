@@ -37,17 +37,29 @@ function requestWithUni<T>({
   header: Record<string, string>;
 }): Promise<{ statusCode: number; data: ApiSuccess<T> | ApiFailure }> {
   return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      callback();
+    };
+    const timeoutId = setTimeout(() => {
+      finish(() => reject(new Error('NETWORK_TIMEOUT')));
+    }, 1600);
     uni.request({
       url,
       method: method as never,
       data: data as Record<string, unknown>,
       header,
       success: (response) =>
-        resolve({
-          statusCode: response.statusCode,
-          data: response.data as ApiSuccess<T> | ApiFailure,
-        }),
-      fail: reject,
+        finish(() =>
+          resolve({
+            statusCode: response.statusCode,
+            data: response.data as ApiSuccess<T> | ApiFailure,
+          }),
+        ),
+      fail: (reason) => finish(() => reject(reason)),
     });
   });
 }

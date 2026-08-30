@@ -190,6 +190,22 @@ export class HealthRecordsService {
     };
   }
 
+  async getWeightHistory(userId: string, from?: string, to?: string) {
+    await this.ensureUser(userId);
+    return this.prisma.weightRecord.findMany({
+      where: {
+        userId,
+        isCurrent: true,
+        recordedAt: {
+          gte: from ? new Date(from) : undefined,
+          lte: to ? new Date(to) : undefined,
+        },
+      },
+      orderBy: { recordedAt: 'desc' },
+      take: 120,
+    });
+  }
+
   private ensureUser(userId: string) {
     return this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
   }

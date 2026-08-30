@@ -20,6 +20,34 @@ export function loadToday(date: string) {
   return createMiniApiClient().get<DailyHomeDto>(`/daily-home/today?date=${date}`);
 }
 
+export function loadWeightHistory(from?: string, to?: string) {
+  const query = [
+    from ? `from=${encodeURIComponent(from)}` : '',
+    to ? `to=${encodeURIComponent(to)}` : '',
+  ]
+    .filter(Boolean)
+    .join('&');
+  return createMiniApiClient().get<
+    Array<{ id: string; valueKg: number; recordedAt: string; note: string | null }>
+  >(`/health-records/weights/history${query ? `?${query}` : ''}`);
+}
+
+export function loadHealthProfile() {
+  return createMiniApiClient().get<{
+    heightCm: number | null;
+    weightKg: number | null;
+  }>('/health-profiles/me');
+}
+
+export function createWeightRecord(data: { valueKg: number; recordedAt: string; note?: string }) {
+  return createMiniApiClient().post<{
+    id: string;
+    valueKg: number;
+    recordedAt: string;
+    note: string | null;
+  }>('/health-records/weights', data);
+}
+
 export function loadPlan(date: string) {
   return createMiniApiClient().get<PersonalPlanDto | null>(`/health-plans/current?date=${date}`);
 }

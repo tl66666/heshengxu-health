@@ -45,6 +45,7 @@ export function saveLocalPlan(request: SaveCurrentPlanRequest): PersonalPlanDto 
       id: 'local-target',
       kind: request.kind,
       direction: request.direction || null,
+      startWeightKg: request.kind === 'weight' ? (loadLocalProfile()?.weightKg ?? null) : null,
       targetWeightKg: request.targetWeightKg || null,
       startDate: request.startDate,
       status: 'active',
@@ -85,12 +86,21 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
   const profile = loadLocalProfile();
   if (!profile) return null;
   const activePlan = loadLocalPlan();
+  const weightRecords = readLocalWeightRecords();
+  const latestWeight = weightRecords.find((record) => record.recordedAt.slice(0, 10) === date);
   return {
     date,
     displayName: profile.displayName,
     activePlan,
     todayRecords: {
-      weight: null,
+      weight: latestWeight
+        ? {
+            id: latestWeight.id,
+            valueKg: latestWeight.weight,
+            recordedAt: latestWeight.recordedAt,
+            note: latestWeight.note || null,
+          }
+        : null,
       meals: [],
       activities: [],
       sleep: null,
@@ -106,12 +116,24 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
       route: activePlan ? '/pages/plan/PlanPage' : '/pages/plan-setup/PlanSetupPage',
     },
     recordingProgress: {
-      completed: 0,
+      completed: latestWeight ? 1 : 0,
       total: 4,
-      hasWeight: false,
+      hasWeight: Boolean(latestWeight),
       hasMeal: false,
       hasActivity: false,
       hasSleep: false,
     },
   };
+}
+
+type LocalWeightRecord = { id: string; weight: number; recordedAt: string; note?: string };
+
+function readLocalWeightRecords(): LocalWeightRecord[] {
+  try {
+    const value = uni.getStorageSync('heban-weight-records');
+    if (Array.isArray(value)) return value as LocalWeightRecord[];
+  } catch {
+    // Storage may be unavailable during the first render.
+  }
+  return [];
 }
