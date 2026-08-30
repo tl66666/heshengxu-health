@@ -335,32 +335,14 @@ async function load(page = 1) {
   }
 }
 
-async function loadPersonalFoods() {
-  loading.value = true;
-  error.value = false;
-  try {
-    personalFoods.value = await listUserFoods(query.value);
-    catalogFoods.value = [];
-  } catch (err) {
-    console.error('加载我的食物失败:', err);
-    error.value = true;
-  } finally {
-    loading.value = false;
-  }
-}
-
 // 搜索输入防抖
 function onSearchInput() {
   if (searchTimer) {
     clearTimeout(searchTimer);
   }
   searchTimer = setTimeout(() => {
-    if (query.value || selectedCategory.value) {
-      currentPage.value = 1;
-      load(1);
-    } else {
-      loadPersonalFoods();
-    }
+    currentPage.value = 1;
+    load(1);
   }, 500);
 }
 
@@ -377,7 +359,7 @@ function clearQuery() {
   query.value = '';
   selectedCategory.value = null;
   currentPage.value = 1;
-  loadPersonalFoods();
+  load(1);
 }
 
 // 通过关键词搜索
@@ -456,7 +438,7 @@ onLoad(async (options) => {
     mealType.value = routeMealType as MealType;
   }
   loadSearchHistory();
-  await Promise.all([loadCategories(), loadPersonalFoods()]);
+  await Promise.all([loadCategories(), load(1)]);
 });
 </script>
 

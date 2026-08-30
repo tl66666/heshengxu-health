@@ -1,7 +1,7 @@
 <template>
   <view class="page">
     <AppNavBar title="序序相机" route="/pages/food-recognition/FoodRecognitionPage" />
-    
+
     <view class="camera-intro">
       <image
         class="camera-intro-art"
@@ -40,12 +40,7 @@
     <view class="consent-section card">
       <checkbox-group @change="updateConsent">
         <label class="consent-label">
-          <checkbox 
-            value="agree" 
-            :checked="hasConsent" 
-            color="#2e7d4f"
-            class="consent-checkbox"
-          />
+          <checkbox value="agree" :checked="hasConsent" color="#2e7d4f" class="consent-checkbox" />
           <text class="consent-text">我已阅读并同意《食物识别使用协议》</text>
         </label>
       </checkbox-group>
@@ -83,10 +78,10 @@
     </button>
 
     <!-- 识别按钮 -->
-    <button 
-      class="recognize-btn" 
-      :class="{ 'disabled': !canRecognize || processing }"
-      :disabled="!canRecognize || processing" 
+    <button
+      class="recognize-btn"
+      :class="{ disabled: !canRecognize || processing }"
+      :disabled="!canRecognize || processing"
       @tap="recognize"
     >
       <text class="btn-text">{{ processing ? '正在识别…' : '开始识别' }}</text>
@@ -115,9 +110,7 @@ const error = ref('');
 const hasConsent = ref(false);
 const mealType = ref<MealType>('lunch');
 
-const canRecognize = computed(() => 
-  canStartRecognition(imagePath.value, hasConsent.value)
-);
+const canRecognize = computed(() => canStartRecognition(imagePath.value, hasConsent.value));
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + 'B';
@@ -149,22 +142,22 @@ function manualSearch() {
 
 async function recognize() {
   if (!canRecognize.value) return;
-  
+
   processing.value = true;
   error.value = '';
-  
+
   try {
     await grantFoodRecognitionConsent();
-    
+
     const upload = await createRecognitionUpload({
       contentType: imageContentType(imagePath.value),
       sizeBytes: Math.max(1, imageSize.value),
     });
-    
+
     await completeRecognitionUpload(upload.id);
-    
+
     const job = await createRecognitionJob(upload.id);
-    
+
     uni.navigateTo({
       url: `/pages/food-candidates/FoodCandidatesPage?jobId=${encodeURIComponent(job.id)}&imagePath=${encodeURIComponent(imagePath.value)}&mealType=${mealType.value}`,
     });
@@ -285,7 +278,8 @@ onLoad((options) => {
 }
 
 @keyframes breathe {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -340,7 +334,9 @@ onLoad((options) => {
   transition: transform 0.12s ease;
 }
 
-.replace-btn::after { border: none; }
+.replace-btn::after {
+  border: none;
+}
 
 .replace-btn:active {
   transform: scale(0.97);
@@ -481,7 +477,9 @@ onLoad((options) => {
   animation: fadeIn 0.4s ease 0.5s backwards;
 }
 
-.recognize-btn::after { border: none; }
+.recognize-btn::after {
+  border: none;
+}
 
 .recognize-btn:active {
   transform: scale(0.97);

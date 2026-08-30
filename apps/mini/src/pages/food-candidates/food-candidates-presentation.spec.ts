@@ -22,6 +22,8 @@ describe('food candidates presentation', () => {
   it('keeps retry and manual search fallbacks in failed or empty states', () => {
     expect(foodCandidatesPageSource).toContain('manualRecord');
     expect(foodCandidatesPageSource).toContain('/pages/food-search/FoodSearchPage?mealType=');
-    expect(foodCandidatesPageSource).toContain('/pages/food-recognition/FoodRecognitionPage?mealType=');
+    expect(foodCandidatesPageSource).toContain(
+      '/pages/food-recognition/FoodRecognitionPage?mealType=',
+    );
   });
 });

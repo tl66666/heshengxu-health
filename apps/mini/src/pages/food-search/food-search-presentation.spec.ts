@@ -18,4 +18,9 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('mealType');
     expect(foodSearchPageSource).toContain('&mealType=${mealType.value}');
   });
+
+  it('loads personal and catalog foods together on the default screen', () => {
+    expect(foodSearchPageSource).toContain('await Promise.all([loadCategories(), load(1)])');
+    expect(foodSearchPageSource).not.toContain('loadPersonalFoods');
+  });
 });

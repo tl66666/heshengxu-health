@@ -1,4 +1,13 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, Matches } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  Matches,
+} from 'class-validator';
 
 export enum UserFoodSource {
   catalog = 'catalog',

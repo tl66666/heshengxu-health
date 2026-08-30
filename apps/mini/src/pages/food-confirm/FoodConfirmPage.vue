@@ -13,11 +13,7 @@
         </view>
       </view>
 
-      <view
-        v-if="canSaveToLibrary"
-        class="library-option"
-        data-testid="save-to-library"
-      >
+      <view v-if="canSaveToLibrary" class="library-option" data-testid="save-to-library">
         <view class="library-copy">
           <text class="library-title">保存到我的食物</text>
           <text class="library-hint">下次搜索名称就能直接记录</text>

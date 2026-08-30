@@ -1,7 +1,7 @@
 <template>
   <view class="page">
     <AppNavBar title="识别结果" route="/pages/food-candidates/FoodCandidatesPage" />
-    
+
     <!-- 加载状态 -->
     <view v-if="loading" class="loading-state">
       <image class="loading-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
@@ -22,7 +22,9 @@
       <view v-if="job.status === 'failed'" class="failure-state card">
         <image class="state-art" src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
         <text class="failure-title">这次识别没有完成</text>
-        <text class="failure-desc">图片不会自动记入饮食记录，你可以重新拍摄，或改用食物目录手动记录。</text>
+        <text class="failure-desc"
+          >图片不会自动记入饮食记录，你可以重新拍摄，或改用食物目录手动记录。</text
+        >
         <view class="action-btns">
           <button class="retry-btn" @tap="retry">重新拍摄</button>
           <button class="manual-btn" @tap="manualRecord">手动记录</button>
@@ -51,7 +53,7 @@
           <button
             v-for="candidate in job.candidates"
             :key="candidate.id"
-            :class="['candidate-card', 'card', { 'selected': candidate.id === candidateId }]"
+            :class="['candidate-card', 'card', { selected: candidate.id === candidateId }]"
             @tap="select(candidate)"
           >
             <view class="candidate-icon">
@@ -85,9 +87,9 @@
         </view>
 
         <!-- 确认按钮 -->
-        <button 
-          class="confirm-btn" 
-          :class="{ 'disabled': !canContinue }"
+        <button
+          class="confirm-btn"
+          :class="{ disabled: !canContinue }"
           :disabled="!canContinue"
           @tap="continueToConfirm"
         >
@@ -222,8 +224,12 @@ onLoad((options) => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -334,8 +340,8 @@ onLoad((options) => {
 }
 
 .retry-btn::after,
-.manual-btn::after { 
-  border: none; 
+.manual-btn::after {
+  border: none;
 }
 
 .retry-btn:active,
@@ -382,11 +388,19 @@ onLoad((options) => {
   animation: fadeIn 0.4s ease backwards;
 }
 
-.candidate-card:nth-child(1) { animation-delay: 0.25s; }
-.candidate-card:nth-child(2) { animation-delay: 0.3s; }
-.candidate-card:nth-child(3) { animation-delay: 0.35s; }
+.candidate-card:nth-child(1) {
+  animation-delay: 0.25s;
+}
+.candidate-card:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.candidate-card:nth-child(3) {
+  animation-delay: 0.35s;
+}
 
-.candidate-card::after { border: none; }
+.candidate-card::after {
+  border: none;
+}
 
 .candidate-card:active {
   transform: scale(0.97);
@@ -515,7 +529,9 @@ onLoad((options) => {
   animation: fadeIn 0.4s ease 0.5s backwards;
 }
 
-.confirm-btn::after { border: none; }
+.confirm-btn::after {
+  border: none;
+}
 
 .confirm-btn:active {
   transform: scale(0.97);

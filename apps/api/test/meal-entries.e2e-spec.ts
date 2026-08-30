@@ -47,7 +47,7 @@ describe('meal entries', () => {
     await app.close();
   });
 
-  it('does not allow another user to record someone else\'s personal food', async () => {
+  it("does not allow another user to record someone else's personal food", async () => {
     const app = await createApp();
     await app.init();
     const client = request(app.getHttpServer());

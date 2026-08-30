@@ -1,8 +1,12 @@
 <template>
   <view class="page">
     <!-- 背景装饰 -->
-    <image class="bg-leaf" src="/static/illustrations/leaf-corner-decoration.png" mode="aspectFit" />
-    
+    <image
+      class="bg-leaf"
+      src="/static/illustrations/leaf-corner-decoration.png"
+      mode="aspectFit"
+    />
+
     <!-- 顶部 -->
     <view class="header">
       <view class="header-left">
@@ -16,7 +20,7 @@
     </view>
 
     <view v-if="loading" class="loading">正在整理今天的节律…</view>
-    
+
     <template v-else-if="today && experience">
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
       <view class="weight-card card">
@@ -24,12 +28,27 @@
           <text class="card-title">体重管理方案</text>
           <text class="week-badge">第 1/16 周</text>
         </view>
-        
+
         <view class="weight-visual">
           <svg class="semicircle-svg" viewBox="0 0 160 85" preserveAspectRatio="xMidYMid meet">
-            <path class="track" d="M 10,80 A 70,70 0 0,1 150,80" fill="none" stroke="#e8f7ed" stroke-width="8" stroke-linecap="round"/>
-            <path class="progress" d="M 10,80 A 70,70 0 0,1 150,80" fill="none" stroke="#7fcc8f" stroke-width="8" stroke-linecap="round" 
-                  :stroke-dasharray="`${Math.min(progress, 100) * 2.2} 220`" stroke-dashoffset="0"/>
+            <path
+              class="track"
+              d="M 10,80 A 70,70 0 0,1 150,80"
+              fill="none"
+              stroke="#e8f7ed"
+              stroke-width="8"
+              stroke-linecap="round"
+            />
+            <path
+              class="progress"
+              d="M 10,80 A 70,70 0 0,1 150,80"
+              fill="none"
+              stroke="#7fcc8f"
+              stroke-width="8"
+              stroke-linecap="round"
+              :stroke-dasharray="`${Math.min(progress, 100) * 2.2} 220`"
+              stroke-dashoffset="0"
+            />
           </svg>
           <view class="weight-row">
             <view class="weight-col">
@@ -58,15 +77,24 @@
         <view class="calorie-stats">
           <view class="stat stat--primary">
             <text class="stat-label">已摄入</text>
-            <view class="stat-value"><text>{{ intakeCalories }}</text><text>千卡</text></view>
+            <view class="stat-value"
+              ><text>{{ intakeCalories }}</text
+              ><text>千卡</text></view
+            >
           </view>
           <view class="stat">
             <text class="stat-label">还可吃</text>
-            <view class="stat-value"><text>{{ remainingCalories }}</text><text>千卡</text></view>
+            <view class="stat-value"
+              ><text>{{ remainingCalories }}</text
+              ><text>千卡</text></view
+            >
           </view>
           <view class="stat">
             <text class="stat-label">运动消耗</text>
-            <view class="stat-value"><text>{{ activityCalories }}</text><text>千卡</text></view>
+            <view class="stat-value"
+              ><text>{{ activityCalories }}</text
+              ><text>千卡</text></view
+            >
           </view>
         </view>
 
@@ -112,7 +140,9 @@
               {{ formatTime(today.todayRecords.weight.recordedAt) }} 更新
             </text>
           </view>
-          <button class="add-btn" hover-class="button-hover" @tap.stop="goToWeightDetail()">+</button>
+          <button class="add-btn" hover-class="button-hover" @tap.stop="goToWeightDetail()">
+            +
+          </button>
         </view>
         <view class="record-content">
           <view class="big-value">
@@ -138,21 +168,31 @@
           </view>
           <image class="grid-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         </button>
-        
-        <button class="grid-item card sleep-card" hover-class="button-hover" @tap="goToRecord('sleep')">
+
+        <button
+          class="grid-item card sleep-card"
+          hover-class="button-hover"
+          @tap="goToRecord('sleep')"
+        >
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
             <text class="grid-add">+</text>
           </view>
           <view class="grid-data">
-            <text v-if="today.todayRecords?.sleep" class="grid-num">{{ formatSleepHours(today.todayRecords.sleep) }}</text>
+            <text v-if="today.todayRecords?.sleep" class="grid-num">{{
+              formatSleepHours(today.todayRecords.sleep)
+            }}</text>
             <text v-if="today.todayRecords?.sleep" class="grid-unit">小时</text>
             <text v-else class="grid-hint">未记录</text>
           </view>
           <image class="grid-icon" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
         </button>
-        
-        <button class="grid-item card activity-card" hover-class="button-hover" @tap="goToRecord('activity')">
+
+        <button
+          class="grid-item card activity-card"
+          hover-class="button-hover"
+          @tap="goToRecord('activity')"
+        >
           <view class="grid-top">
             <text class="grid-title">活动</text>
             <text class="grid-add">+</text>
@@ -168,7 +208,7 @@
           </view>
           <image class="grid-icon" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
         </button>
-        
+
         <button class="grid-item card mood-card" hover-class="button-hover" @tap="toXuxu">
           <view class="grid-top">
             <text class="grid-title">心情</text>
@@ -190,7 +230,11 @@
           <text class="fasting-label">用餐时间剩余</text>
           <text class="fasting-time">01:04:08</text>
         </view>
-        <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.png" mode="aspectFit" />
+        <image
+          class="fasting-icon-img"
+          src="/static/icons/watercolor/fasting-clock.png"
+          mode="aspectFit"
+        />
       </view>
 
       <!-- 6. 经期记录卡片 -->
@@ -203,7 +247,11 @@
           <text class="period-hint">{{ periodStatusText }}</text>
           <text class="period-days">{{ periodDaysText }}</text>
         </view>
-        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.png" mode="aspectFit" />
+        <image
+          class="period-icon-img"
+          src="/static/icons/watercolor/menstruation.png"
+          mode="aspectFit"
+        />
       </view>
 
       <!-- 7. 用药打卡卡片 -->
@@ -218,15 +266,15 @@
             <text class="medication-item">{{ medicationPlanText }}</text>
           </view>
         </view>
-        <image class="medication-icon-img" src="/static/icons/watercolor/medication.png" mode="aspectFit" />
+        <image
+          class="medication-icon-img"
+          src="/static/icons/watercolor/medication.png"
+          mode="aspectFit"
+        />
       </view>
 
       <!-- 8. 编辑首页卡片 -->
-      <button 
-        class="edit-card" 
-        hover-class="button-hover"
-        @tap="go('/pages/home/edit-cards')"
-      >
+      <button class="edit-card" hover-class="button-hover" @tap="go('/pages/home/edit-cards')">
         <text class="edit-text">+ 编辑首页卡片</text>
       </button>
     </template>
@@ -236,7 +284,7 @@
       <text>检查服务连接后，再试一次就好</text>
       <button @tap="load">重新加载</button>
     </view>
-    
+
     <MiniTabBar active="home" />
   </view>
 </template>
@@ -247,15 +295,14 @@ import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
-import { estimateActivityCalories, getActivityById } from '../../features/activity/activity-catalog.js';
+import {
+  estimateActivityCalories,
+  getActivityById,
+} from '../../features/activity/activity-catalog.js';
 import { loadMealEntries } from '../../features/food/food.service.js';
 import { summarizeFoodEntries, type MealEntry } from '../../features/food/food.summary.js';
 import { foodRecordActions } from './home-actions.js';
-import { 
-  navigateTo,
-  navigateToWeightDetail,
-  navigateToXuxu,
-} from '../../utils/router.js';
+import { navigateTo, navigateToWeightDetail, navigateToXuxu } from '../../utils/router.js';
 
 const { today, loading, error } = healthLoopState;
 
@@ -304,10 +351,15 @@ const remainingCalories = computed(() =>
   Math.max(0, calorieTarget - intakeCalories.value + activityCalories.value),
 );
 const calorieProgress = computed(() =>
-  Math.min(100, Math.round((Math.max(0, intakeCalories.value - activityCalories.value) / calorieTarget) * 100)),
+  Math.min(
+    100,
+    Math.round((Math.max(0, intakeCalories.value - activityCalories.value) / calorieTarget) * 100),
+  ),
 );
 const periodStatusText = computed(() =>
-  menstruationCycle.value?.lastPeriodStart ? `上次经期 ${menstruationCycle.value.lastPeriodStart.slice(5).replace('-', '月')}日开始` : '还没有记录经期',
+  menstruationCycle.value?.lastPeriodStart
+    ? `上次经期 ${menstruationCycle.value.lastPeriodStart.slice(5).replace('-', '月')}日开始`
+    : '还没有记录经期',
 );
 const periodDaysText = computed(() => {
   const start = menstruationCycle.value?.lastPeriodStart;
@@ -316,23 +368,27 @@ const periodDaysText = computed(() => {
   next.setDate(next.getDate() + (menstruationCycle.value?.cycleLength || 28));
   return `距离下次预计 ${Math.max(0, Math.ceil((next.getTime() - Date.now()) / 86400000))} 天`;
 });
-const medicationStatusText = computed(() => medicationStats.value.total ? `今日已完成 ${medicationStats.value.done}/${medicationStats.value.total}` : '还没有用药提醒');
-const medicationPlanText = computed(() => medicationStats.value.total ? '按医嘱设置提醒时间' : '添加一条提醒，按时照顾自己');
-
-const experience = computed(() => 
-  today.value ? deriveDailyExperience(today.value) : null
+const medicationStatusText = computed(() =>
+  medicationStats.value.total
+    ? `今日已完成 ${medicationStats.value.done}/${medicationStats.value.total}`
+    : '还没有用药提醒',
+);
+const medicationPlanText = computed(() =>
+  medicationStats.value.total ? '按医嘱设置提醒时间' : '添加一条提醒，按时照顾自己',
 );
 
-const startWeight = computed(() => 
-  today.value?.activePlan?.healthTarget?.startWeightKg?.toFixed(1) || '--'
+const experience = computed(() => (today.value ? deriveDailyExperience(today.value) : null));
+
+const startWeight = computed(
+  () => today.value?.activePlan?.healthTarget?.startWeightKg?.toFixed(1) || '--',
 );
 
-const currentWeight = computed(() => 
-  today.value?.todayRecords?.weight?.valueKg?.toFixed(1) || '--'
+const currentWeight = computed(
+  () => today.value?.todayRecords?.weight?.valueKg?.toFixed(1) || '--',
 );
 
-const targetWeight = computed(() => 
-  today.value?.activePlan?.healthTarget?.targetWeightKg?.toFixed(1) || '--'
+const targetWeight = computed(
+  () => today.value?.activePlan?.healthTarget?.targetWeightKg?.toFixed(1) || '--',
 );
 
 const progress = computed(() => {
@@ -342,9 +398,9 @@ const progress = computed(() => {
   const start = today.value.activePlan.healthTarget.startWeightKg;
   const current = today.value.todayRecords.weight.valueKg;
   const target = today.value.activePlan.healthTarget.targetWeightKg;
-  
+
   if (start === target) return 0;
-  
+
   const prog = ((start - current) / (start - target)) * 100;
   return Math.max(0, Math.min(100, prog));
 });
@@ -352,7 +408,7 @@ const progress = computed(() => {
 const formatTime = (timestamp: string) => {
   return new Date(timestamp).toLocaleTimeString('zh-CN', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 };
 
@@ -382,7 +438,7 @@ const openMedication = () => {
 
 const showWaterDialog = () => {
   uni.navigateTo({
-    url: '/pages/water/WaterPage'
+    url: '/pages/water/WaterPage',
   });
 };
 
@@ -398,13 +454,13 @@ const openRecordAction = (route: string) => navigateTo(route);
 
 const goToMealAdd = () => {
   uni.navigateTo({
-    url: '/pages/meal-add/MealAddPage?mealType=lunch'
+    url: '/pages/meal-add/MealAddPage?mealType=lunch',
   });
 };
 
 const goToWater = () => {
   uni.navigateTo({
-    url: '/pages/water/WaterPage'
+    url: '/pages/water/WaterPage',
   });
 };
 
@@ -434,15 +490,29 @@ const loadFoodSummary = async () => {
 const loadPersonalSignals = () => {
   try {
     const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
-    menstruationCycle.value = cycleRaw ? (typeof cycleRaw === 'string' ? JSON.parse(cycleRaw) : cycleRaw) : null;
+    menstruationCycle.value = cycleRaw
+      ? typeof cycleRaw === 'string'
+        ? JSON.parse(cycleRaw)
+        : cycleRaw
+      : null;
     const remindersRaw = uni.getStorageSync('heban_medication_reminders');
     const checkinsRaw = uni.getStorageSync('heban_medication_checkins');
-    const medications = remindersRaw ? (typeof remindersRaw === 'string' ? JSON.parse(remindersRaw) : remindersRaw) : [];
-    const checkins = checkinsRaw ? (typeof checkinsRaw === 'string' ? JSON.parse(checkinsRaw) : checkinsRaw) : [];
+    const medications = remindersRaw
+      ? typeof remindersRaw === 'string'
+        ? JSON.parse(remindersRaw)
+        : remindersRaw
+      : [];
+    const checkins = checkinsRaw
+      ? typeof checkinsRaw === 'string'
+        ? JSON.parse(checkinsRaw)
+        : checkinsRaw
+      : [];
     const today = getTodayDate();
     medicationStats.value = {
       total: Array.isArray(medications) ? medications.length : 0,
-      done: Array.isArray(checkins) ? checkins.filter((item: { date?: string }) => item.date === today).length : 0,
+      done: Array.isArray(checkins)
+        ? checkins.filter((item: { date?: string }) => item.date === today).length
+        : 0,
     };
     const snapshots = uni.getStorageSync(`heban_activity_snapshots:${getTodayDate()}`);
     activitySnapshots.value = snapshots
@@ -570,7 +640,8 @@ onShow(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -1194,19 +1265,71 @@ onShow(() => {
 }
 </style>
 <style scoped>
-.page { background: #fff7f1; }
-.date-chip { border-radius: 12rpx; background: #fff0f3; color: #b66d80; }
-.greeting { color: #5a4c52; }
-.card { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(139, 102, 89, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
-.card-title, .grid-title { color: #66545a; }
-.weight-card, .calorie-card, .record-card, .fasting-card { background: #fffdfb; }
-.mode-tag { background: #fff0f3; color: #b66d80; }
-.mode-tag.blue { background: #f0effb; color: #7c76b2; }
-.period-card { border-color: #efcbd4; background: #fff0f3; }
-.period-hint, .medication-hint { color: #9f858b; }
-.period-days { color: #c26f84; }
-.medication-card { border-color: #d9e5ed; background: #f1f6fb; }
-.medication-item { color: #6a88a5; }
-.edit-card { border-color: #e9cfd1; }.edit-icon, .edit-text { color: #b66d80; }
-.error-state button { background: #fff0f3; color: #b66d80; }
+.page {
+  background: #fff7f1;
+}
+.date-chip {
+  border-radius: 12rpx;
+  background: #fff0f3;
+  color: #b66d80;
+}
+.greeting {
+  color: #5a4c52;
+}
+.card {
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
+  border-radius: 18rpx;
+  background: rgba(255, 253, 251, 0.82);
+  box-shadow:
+    0 12rpx 28rpx rgba(139, 102, 89, 0.07),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(18px);
+}
+.card-title,
+.grid-title {
+  color: #66545a;
+}
+.weight-card,
+.calorie-card,
+.record-card,
+.fasting-card {
+  background: #fffdfb;
+}
+.mode-tag {
+  background: #fff0f3;
+  color: #b66d80;
+}
+.mode-tag.blue {
+  background: #f0effb;
+  color: #7c76b2;
+}
+.period-card {
+  border-color: #efcbd4;
+  background: #fff0f3;
+}
+.period-hint,
+.medication-hint {
+  color: #9f858b;
+}
+.period-days {
+  color: #c26f84;
+}
+.medication-card {
+  border-color: #d9e5ed;
+  background: #f1f6fb;
+}
+.medication-item {
+  color: #6a88a5;
+}
+.edit-card {
+  border-color: #e9cfd1;
+}
+.edit-icon,
+.edit-text {
+  color: #b66d80;
+}
+.error-state button {
+  background: #fff0f3;
+  color: #b66d80;
+}
 </style>

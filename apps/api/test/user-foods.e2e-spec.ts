@@ -59,25 +59,16 @@ describe('user foods', () => {
       newest.body.data.id,
     ]);
 
-    const listed = await client
-      .get('/api/v1/user-foods?q=鸡胸')
-      .set(owner)
-      .expect(200);
+    const listed = await client.get('/api/v1/user-foods?q=鸡胸').set(owner).expect(200);
     expect(listed.body.data).toHaveLength(1);
     expect(listed.body.data[0].id).toBe(created.body.data.id);
 
     const hidden = await client.get('/api/v1/user-foods').set(other).expect(200);
     expect(hidden.body.data).toEqual([]);
 
-    await client
-      .delete(`/api/v1/user-foods/${created.body.data.id}`)
-      .set(other)
-      .expect(404);
+    await client.delete(`/api/v1/user-foods/${created.body.data.id}`).set(other).expect(404);
 
-    await client
-      .delete(`/api/v1/user-foods/${created.body.data.id}`)
-      .set(owner)
-      .expect(204);
+    await client.delete(`/api/v1/user-foods/${created.body.data.id}`).set(owner).expect(204);
     await client.delete(`/api/v1/user-foods/${newest.body.data.id}`).set(owner).expect(204);
     const afterDelete = await client.get('/api/v1/user-foods').set(owner).expect(200);
     expect(afterDelete.body.data).toEqual([]);

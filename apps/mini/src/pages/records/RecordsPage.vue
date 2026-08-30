@@ -322,12 +322,16 @@ const filteredActivities = computed(() =>
 const selectedActivity = computed(() => getActivityById(activityId.value));
 const estimatedActivityCalories = computed(() => {
   const durationMinutes = Number(activityMinutes.value);
-  if (!selectedActivity.value || !Number.isFinite(durationMinutes) || durationMinutes <= 0) return 0;
-  const multiplier = activityIntensity.value === 'high' ? 1.2 : activityIntensity.value === 'low' ? 0.8 : 1;
+  if (!selectedActivity.value || !Number.isFinite(durationMinutes) || durationMinutes <= 0)
+    return 0;
+  const multiplier =
+    activityIntensity.value === 'high' ? 1.2 : activityIntensity.value === 'low' ? 0.8 : 1;
   return estimateActivityCalories({
     met: selectedActivity.value.met * multiplier,
     weightKg:
-      healthLoopState.today.value?.todayRecords?.weight?.valueKg || profileWeightKg.value || undefined,
+      healthLoopState.today.value?.todayRecords?.weight?.valueKg ||
+      profileWeightKg.value ||
+      undefined,
     durationMinutes,
   });
 });
@@ -542,10 +546,7 @@ function persistActivitySnapshot(
     ),
     next,
   ];
-  uni.setStorageSync(
-    `heban_activity_snapshots:${date}`,
-    JSON.stringify(activitySnapshots.value),
-  );
+  uni.setStorageSync(`heban_activity_snapshots:${date}`, JSON.stringify(activitySnapshots.value));
 }
 function localDate() {
   const n = new Date();
