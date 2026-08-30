@@ -21,11 +21,14 @@ const props = defineProps<{ visible: boolean; plans: HabitPlan[]; planId?: strin
 const emit = defineEmits<{ close: []; save: [planId: string, patch: { title: string; subtitle: string }]; addTask: [planId: string, title: string]; archive: [planId: string] }>();
 const activeId = ref(''); const title = ref(''); const subtitle = ref(''); const taskTitle = ref('');
 const activePlan = computed(() => props.plans.find((plan) => plan.id === activeId.value));
-watch(() => [props.visible, props.planId, props.plans], () => { if (!props.visible) return; activeId.value = props.planId || props.plans[0]?.id || ''; title.value = activePlan.value?.title || ''; subtitle.value = activePlan.value?.subtitle || ''; taskTitle.value = ''; }, { deep: true });
+watch(() => [props.visible, props.planId], () => { if (!props.visible) return; activeId.value = props.planId || props.plans[0]?.id || ''; title.value = activePlan.value?.title || ''; subtitle.value = activePlan.value?.subtitle || ''; taskTitle.value = ''; });
 watch(activePlan, (plan) => { title.value = plan?.title || ''; subtitle.value = plan?.subtitle || ''; });
 function save() { if (!activePlan.value || !title.value.trim()) return; emit('save', activePlan.value.id, { title: title.value.trim(), subtitle: subtitle.value.trim() }); }
 function addTask() { if (!activePlan.value || !taskTitle.value.trim()) return; emit('addTask', activePlan.value.id, taskTitle.value.trim()); taskTitle.value = ''; }
-function archive() { if (activePlan.value) emit('archive', activePlan.value.id); }
+function archive() {
+  if (!activePlan.value) return;
+  uni.showModal({ title: '归档这份计划？', content: '历史打卡会保留，但它不会再出现在进行中。', confirmText: '归档', success: (result) => { if (result.confirm) emit('archive', activePlan.value!.id); } });
+}
 </script>
 <style scoped>
 .scrim { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end; background:rgba(73,55,58,.28); }
