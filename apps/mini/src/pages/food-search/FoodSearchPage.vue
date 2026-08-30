@@ -26,7 +26,6 @@
     <!-- 热门搜索 - 仅在未搜索时显示 -->
     <view v-if="!query && !selectedCategory" class="hot-searches">
       <view class="section-header">
-        <text class="section-icon">🔥</text>
         <text class="section-title">热门搜索</text>
       </view>
       <view class="tag-list">
@@ -45,7 +44,6 @@
     <view v-if="!query && !selectedCategory && searchHistory.length > 0" class="search-history">
       <view class="section-header">
         <view class="section-left">
-          <text class="section-icon">📚</text>
           <text class="section-title">搜索历史</text>
         </view>
         <button class="clear-history" @tap="clearHistory">清空</button>
@@ -65,21 +63,25 @@
     <!-- 快捷筛选 -->
     <view v-if="!query && !selectedCategory" class="quick-filters">
       <button class="filter-btn green" @tap="filterByHealthLight(1)">
-        <text class="filter-icon">🟢</text>
+        <image class="filter-icon" src="/static/icons/svg/meal.svg" mode="aspectFit" />
         <text class="filter-text">绿灯食物</text>
       </button>
       <button class="filter-btn" @tap="selectCategory(null)">
-        <text class="filter-icon">🍽️</text>
+        <image class="filter-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
         <text class="filter-text">浏览全部</text>
       </button>
     </view>
 
     <!-- 分类筛选 -->
-    <scroll-view v-if="categories.length > 0 && (query || selectedCategory)" class="category-tabs" scroll-x>
+    <scroll-view
+      v-if="categories.length > 0 && (query || selectedCategory)"
+      class="category-tabs"
+      scroll-x
+    >
       <view class="category-list">
-        <view 
-          v-for="cat in allCategories" 
-          :key="cat.id || 'all'" 
+        <view
+          v-for="cat in allCategories"
+          :key="cat.id || 'all'"
           :class="['category-tab', { active: selectedCategory === cat.id }]"
           @tap="selectCategory(cat.id)"
         >
@@ -109,35 +111,63 @@
 
     <!-- 空状态 -->
     <view v-else-if="(query || selectedCategory) && foods.length === 0" class="state">
-      <text>🔍</text>
+      <text>暂无结果</text>
       <text class="state-copy">没有找到相关食物</text>
       <text class="state-copy">试试换个关键词</text>
     </view>
 
     <!-- 食物列表 -->
     <view v-else-if="foods.length > 0" class="food-list">
+      <view v-if="personalResults.length" class="food-group">
+        <text class="group-heading personal-food-heading">我的食物</text>
+        <button
+          v-for="food in personalResults"
+          :key="food.id"
+          class="food-card"
+          hover-class="food-card-active"
+          @tap="choose(food)"
+        >
+          <view class="food-main">
+            <image
+              class="food-icon-image"
+              :src="food.imageUrl || '/static/icons/svg/meal.svg'"
+              mode="aspectFill"
+            />
+            <view class="food-info">
+              <text class="food-name">{{ food.name }}</text>
+              <text class="food-source">我的食物 · {{ food.servings[0]?.label || '100g' }}</text>
+              <text class="food-calories">{{ food.nutrition.energyKcal }} 千卡 / 100g</text>
+            </view>
+          </view>
+          <image class="forward-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        </button>
+      </view>
+
+      <text v-if="catalogResults.length" class="group-heading catalog-food-heading">食物库</text>
       <button
-        v-for="food in foods"
+        v-for="food in catalogResults"
         :key="food.id"
         class="food-card"
         hover-class="food-card-active"
         @tap="choose(food)"
       >
         <view class="food-main">
-          <view class="food-icon">{{ getFoodEmoji(food.name, food.category?.slug) }}</view>
+          <image class="food-icon-image" src="/static/icons/svg/meal.svg" mode="aspectFit" />
           <view class="food-info">
             <text class="food-name">{{ food.name }}</text>
             <view v-if="getHighlights(food).length > 0" class="food-tags">
               <text v-for="tag in getHighlights(food)" :key="tag" class="tag">{{ tag }}</text>
             </view>
-            <text class="food-calories">
-              {{ food.nutrition?.energyKcal || 0 }} 千卡 / 100g
-            </text>
+            <text class="food-calories"> {{ food.nutrition?.energyKcal || 0 }} 千卡 / 100g </text>
           </view>
         </view>
-        <view :class="['food-badge', 'badge-' + food.healthLight]">
-          {{ getHealthLabel(food.healthLight) }}
+        <view v-if="getHealthLight(food) !== undefined" class="food-card-meta">
+          <view :class="['food-badge', 'badge-' + getHealthLight(food)]">
+            {{ getHealthLabel(getHealthLight(food)) }}
+          </view>
+          <image class="forward-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </view>
+        <image v-else class="forward-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
       </button>
     </view>
 
@@ -156,26 +186,25 @@
 
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import AppNavBar from '../../components/AppNavBar.vue';
-import { 
-  searchFoods, 
+import {
   getCategoryStats,
-  type FoodCategory 
+  mergeFoodResults,
+  searchFoods,
+  type FoodCategory,
+  type FoodSearchItem,
 } from '../../features/food/food.service.js';
-import type { FoodItem } from '../../features/food/food.types.js';
-import { 
-  getFoodEmoji, 
-  generateNutritionHighlights, 
-  getHealthLightLabel 
-} from '../../utils/nutrition.js';
-import { 
-  navigateToFoodConfirm,
-  navigateToFoodRecognition 
-} from '../../utils/router.js';
+import type { FoodItem, MealType } from '../../features/food/food.types.js';
+import { listUserFoods } from '../../features/food/user-foods.service.js';
+import type { UserFood } from '../../features/food/user-foods.types.js';
+import { generateNutritionHighlights, getHealthLightLabel } from '../../utils/nutrition.js';
+import { navigateTo } from '../../utils/router.js';
 
 const query = ref('');
-const foods = ref<FoodItem[]>([]);
+const mealType = ref<MealType>('lunch');
+const personalFoods = ref<UserFood[]>([]);
+const catalogFoods = ref<FoodItem[]>([]);
 const loading = ref(false);
 const error = ref(false);
 const categories = ref<FoodCategory[]>([]);
@@ -185,14 +214,26 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = 20;
 
+const foods = computed(() => mergeFoodResults(personalFoods.value, catalogFoods.value));
+const personalResults = computed(() => foods.value.filter((food) => Boolean(food.userId)));
+const catalogResults = computed(() => foods.value.filter((food) => !food.userId));
+
 // 搜索历史（localStorage）
 const searchHistory = ref<string[]>([]);
 const MAX_HISTORY = 10;
 
 // 热门搜索关键词
 const hotKeywords = [
-  '鸡胸肉', '鸡蛋', '燕麦', '西兰花', '苹果',
-  '牛奶', '香蕉', '番茄', '豆腐', '牛肉'
+  '鸡胸肉',
+  '鸡蛋',
+  '燕麦',
+  '西兰花',
+  '苹果',
+  '牛奶',
+  '香蕉',
+  '番茄',
+  '豆腐',
+  '牛肉',
 ];
 
 let searchTimer: number | null = null;
@@ -218,14 +259,14 @@ function loadSearchHistory() {
 // 保存搜索历史
 function saveSearchHistory(keyword: string) {
   if (!keyword || keyword.trim() === '') return;
-  
+
   const trimmed = keyword.trim();
-  const history = searchHistory.value.filter(item => item !== trimmed);
+  const history = searchHistory.value.filter((item) => item !== trimmed);
   history.unshift(trimmed);
-  
+
   // 限制数量
   searchHistory.value = history.slice(0, MAX_HISTORY);
-  
+
   try {
     uni.setStorageSync('searchHistory', JSON.stringify(searchHistory.value));
   } catch (e) {
@@ -247,7 +288,7 @@ function clearHistory() {
           console.error('清空搜索历史失败:', e);
         }
       }
-    }
+    },
   });
 }
 
@@ -266,24 +307,42 @@ async function load(page = 1) {
   loading.value = true;
   error.value = false;
   try {
-    const result = await searchFoods({
-      query: query.value || undefined,
-      categoryId: selectedCategory.value || undefined,
-      page,
-      pageSize,
-    });
-    
-    foods.value = result.items;
+    const [result, mine] = await Promise.all([
+      searchFoods({
+        query: query.value || undefined,
+        categoryId: selectedCategory.value || undefined,
+        page,
+        pageSize,
+      }),
+      selectedCategory.value ? Promise.resolve([]) : listUserFoods(query.value),
+    ]);
+
+    catalogFoods.value = result.items;
+    personalFoods.value = mine;
     totalCount.value = result.total;
     currentPage.value = result.page;
     totalPages.value = result.totalPages;
-    
+
     // 保存搜索历史
     if (query.value && query.value.trim()) {
       saveSearchHistory(query.value.trim());
     }
   } catch (err) {
     console.error('搜索失败:', err);
+    error.value = true;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function loadPersonalFoods() {
+  loading.value = true;
+  error.value = false;
+  try {
+    personalFoods.value = await listUserFoods(query.value);
+    catalogFoods.value = [];
+  } catch (err) {
+    console.error('加载我的食物失败:', err);
     error.value = true;
   } finally {
     loading.value = false;
@@ -299,6 +358,8 @@ function onSearchInput() {
     if (query.value || selectedCategory.value) {
       currentPage.value = 1;
       load(1);
+    } else {
+      loadPersonalFoods();
     }
   }, 500);
 }
@@ -315,8 +376,8 @@ function handleSearch() {
 function clearQuery() {
   query.value = '';
   selectedCategory.value = null;
-  foods.value = [];
   currentPage.value = 1;
+  loadPersonalFoods();
 }
 
 // 通过关键词搜索
@@ -344,14 +405,19 @@ function filterByHealthLight(level: number) {
 }
 
 // 选择食物
-function choose(food: FoodItem) {
-  navigateToFoodConfirm(food.id);
+function choose(food: FoodSearchItem) {
+  const personalContext = food.userId
+    ? `&userFoodId=${encodeURIComponent(food.id)}&source=${food.source}`
+    : '';
+  navigateTo(
+    `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(food.id)}&mealType=${mealType.value}${personalContext}`,
+  );
   uni.$emit('food-selected', food);
 }
 
 // 打开拍照识别
 function openRecognition() {
-  navigateToFoodRecognition();
+  navigateTo(`/pages/food-recognition/FoodRecognitionPage?mealType=${mealType.value}`);
 }
 
 // 获取营养亮点
@@ -361,8 +427,12 @@ function getHighlights(food: FoodItem): string[] {
 }
 
 // 获取健康标签
-function getHealthLabel(level: number): string {
-  return getHealthLightLabel(level);
+function getHealthLabel(level: number | undefined): string {
+  return level === undefined ? '' : getHealthLightLabel(level);
+}
+
+function getHealthLight(food: FoodSearchItem) {
+  return (food as FoodSearchItem & { healthLight?: number }).healthLight;
 }
 
 // 获取结果文本
@@ -373,16 +443,20 @@ function getResultText() {
     return `找到 ${totalCount.value} 种相关食物`;
   }
   if (selectedCategory.value) {
-    const cat = categories.value.find(c => c.id === selectedCategory.value);
+    const cat = categories.value.find((c) => c.id === selectedCategory.value);
     return cat ? `${cat.name} - ${totalCount.value} 种食物` : `${totalCount.value} 种食物`;
   }
   return `共 ${totalCount.value} 种食物`;
 }
 
 // 页面加载
-onLoad(async () => {
+onLoad(async (options) => {
+  const routeMealType = options?.mealType;
+  if (routeMealType && ['breakfast', 'lunch', 'dinner', 'snack'].includes(routeMealType)) {
+    mealType.value = routeMealType as MealType;
+  }
   loadSearchHistory();
-  await loadCategories();
+  await Promise.all([loadCategories(), loadPersonalFoods()]);
 });
 </script>
 
@@ -488,11 +562,6 @@ onLoad(async () => {
 .section-left {
   display: flex;
   align-items: center;
-}
-
-.section-icon {
-  font-size: 28rpx;
-  margin-right: 8rpx;
 }
 
 .section-title {
@@ -607,7 +676,9 @@ onLoad(async () => {
 }
 
 .filter-icon {
-  font-size: 32rpx;
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.72;
 }
 
 .filter-text {
@@ -681,6 +752,18 @@ onLoad(async () => {
   margin-bottom: 100rpx;
 }
 
+.food-group {
+  margin-bottom: 28rpx;
+}
+
+.group-heading {
+  display: block;
+  margin: 0 4rpx 14rpx;
+  color: #315b42;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
 .food-card {
   display: flex;
   align-items: center;
@@ -710,13 +793,12 @@ onLoad(async () => {
   flex: 1;
 }
 
-.food-icon {
-  width: 48rpx;
-  height: 48rpx;
-  margin-right: 16rpx;
-  font-size: 32rpx;
-  line-height: 48rpx;
-  text-align: center;
+.food-icon-image {
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 18rpx;
+  border-radius: 12rpx;
+  background: #f0f6f0;
 }
 
 .food-info {
@@ -750,6 +832,26 @@ onLoad(async () => {
   display: block;
   color: #76907d;
   font-size: 22rpx;
+}
+
+.food-source {
+  display: block;
+  margin-bottom: 4rpx;
+  color: #8a9d90;
+  font-size: 20rpx;
+}
+
+.food-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.forward-icon {
+  flex: 0 0 auto;
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.38;
 }
 
 .food-badge {

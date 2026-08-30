@@ -1,6 +1,13 @@
 import { createMiniApiClient } from '../../services/mini-api.js';
 import type { FoodItem, MealType } from './food.types.js';
 import type { MealEntry } from './food.summary.js';
+import type { UserFood, UserFoodSource } from './user-foods.types.js';
+
+export type FoodSearchItem = FoodItem & {
+  source: UserFoodSource;
+  imageUrl?: string | null;
+  userId?: string;
+};
 
 export interface SearchFoodsOptions {
   query?: string;
@@ -32,16 +39,16 @@ export interface FoodCategory {
  */
 export function searchFoods(options: SearchFoodsOptions = {}) {
   const params = new URLSearchParams();
-  
+
   if (options.query) params.append('q', options.query);
   if (options.categoryId) params.append('categoryId', options.categoryId);
   if (options.healthLight !== undefined) params.append('healthLight', String(options.healthLight));
   if (options.page) params.append('page', String(options.page));
   if (options.pageSize) params.append('pageSize', String(options.pageSize));
-  
+
   const queryString = params.toString();
   return createMiniApiClient().get<SearchFoodsResult>(
-    `/foods/search${queryString ? '?' + queryString : ''}`
+    `/foods/search${queryString ? '?' + queryString : ''}`,
   );
 }
 
@@ -49,7 +56,7 @@ export function searchFoods(options: SearchFoodsOptions = {}) {
  * 简单搜索（向后兼容）
  */
 export function searchFoodsSimple(query = '') {
-  return searchFoods({ query, pageSize: 30 }).then(result => result.items);
+  return searchFoods({ query, pageSize: 30 }).then((result) => result.items);
 }
 
 /**
@@ -85,6 +92,47 @@ export function getPopularFoods(limit = 10) {
  */
 export function getRecommendedFoods(limit = 10) {
   return createMiniApiClient().get<FoodItem[]>(`/foods/recommended/list?limit=${limit}`);
+}
+
+export function mergeFoodResults(
+  personalFoods: UserFood[],
+  catalogFoods: FoodItem[],
+): FoodSearchItem[] {
+  const personalResults = personalFoods.map(userFoodToSearchItem);
+  const seenIds = new Set(personalResults.map((food) => food.id));
+  const publicResults = catalogFoods
+    .filter((food) => !seenIds.has(food.id))
+    .map((food) => ({ ...food, source: 'catalog' as const }));
+
+  return [...personalResults, ...publicResults];
+}
+
+function userFoodToSearchItem(food: UserFood): FoodSearchItem {
+  return {
+    id: food.id,
+    userId: food.userId,
+    name: food.name,
+    imageUrl: food.imageUrl,
+    source: food.source,
+    brand: null,
+    category: null,
+    nutrition: {
+      basisGrams: 100,
+      energyKcal: food.energyKcal,
+      proteinG: food.proteinG,
+      fatG: food.fatG,
+      carbohydrateG: food.carbohydrateG,
+      dietaryFiberG: null,
+      sodiumMg: null,
+    },
+    servings: [
+      {
+        id: `${food.id}:default`,
+        label: food.defaultServingLabel,
+        grams: food.defaultServingGrams,
+      },
+    ],
+  };
 }
 
 export function createMealEntry(input: {
