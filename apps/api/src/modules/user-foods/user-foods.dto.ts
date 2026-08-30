@@ -25,19 +25,19 @@ export class CreateUserFoodDto {
   source!: UserFoodSource;
 
   @IsNumber()
-  @Min(0.0001)
+  @Min(0)
   energyKcal!: number;
 
   @IsNumber()
-  @Min(0.0001)
+  @Min(0)
   proteinG!: number;
 
   @IsNumber()
-  @Min(0.0001)
+  @Min(0)
   fatG!: number;
 
   @IsNumber()
-  @Min(0.0001)
+  @Min(0)
   carbohydrateG!: number;
 
   @IsString()

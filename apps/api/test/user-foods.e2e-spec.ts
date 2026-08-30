@@ -71,6 +71,11 @@ describe('user foods', () => {
 
     await client
       .delete(`/api/v1/user-foods/${created.body.data.id}`)
+      .set(other)
+      .expect(404);
+
+    await client
+      .delete(`/api/v1/user-foods/${created.body.data.id}`)
       .set(owner)
       .expect(204);
     await client.delete(`/api/v1/user-foods/${newest.body.data.id}`).set(owner).expect(204);
@@ -79,16 +84,30 @@ describe('user foods', () => {
     await app.close();
   });
 
-  it('rejects non-positive nutrition and serving values', async () => {
+  it('accepts zero nutrition values but rejects negative nutrition and serving values', async () => {
     const app = await createApp();
     await app.init();
+    await request(app.getHttpServer())
+      .post('/api/v1/user-foods')
+      .set({ Authorization: `Bearer dev-user-food-zero-${Date.now()}` })
+      .send({
+        name: '矿泉水',
+        source: 'manual',
+        energyKcal: 0,
+        proteinG: 0,
+        fatG: 0,
+        carbohydrateG: 0,
+        defaultServingLabel: '1瓶',
+        defaultServingGrams: 500,
+      })
+      .expect(201);
     await request(app.getHttpServer())
       .post('/api/v1/user-foods')
       .set({ Authorization: `Bearer dev-user-food-invalid-${Date.now()}` })
       .send({
         name: '无效食物',
         source: 'manual',
-        energyKcal: 0,
+        energyKcal: -1,
         proteinG: 1,
         fatG: 1,
         carbohydrateG: 1,
