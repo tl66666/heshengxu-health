@@ -1,6 +1,7 @@
 <template>
   <view class="section">
     <view class="section-head"><view><text class="section-title">正在进行</text><text class="section-note">今天完成一点点即可</text></view><text class="count">{{ completedTotal }}/{{ totalTasks }}</text></view>
+    <view class="filters"><button v-for="item in filters" :key="item.value" :class="{ active: filter === item.value }" @tap="filter = item.value">{{ item.label }}</button></view>
     <view v-if="!plans.length" class="empty-inline"><text>还没有计划，去下面挑一个吧</text></view>
     <view v-for="plan in plans" :key="plan.id" class="plan-card" :style="{ '--tint': plan.tint }">
       <view class="plan-head">
@@ -9,7 +10,7 @@
         <view class="plan-head-actions"><text class="plan-frequency">{{ plan.frequency }}</text><button class="manage" aria-label="管理计划" @tap="$emit('manage', plan.id)">···</button></view>
       </view>
       <view class="task-list">
-        <view v-for="task in plan.tasks" :key="task.id" class="task-row" :class="{ done: done(task) }">
+        <view v-for="task in visibleTasks(plan)" :key="task.id" class="task-row" :class="{ done: done(task) }">
           <button class="check" :class="{ checked: done(task) }" :aria-label="done(task) ? '取消打卡' : '完成打卡'" @tap="$emit('toggle', plan.id, task.id)"><text v-if="done(task)">✓</text></button>
           <view class="task-copy"><text class="task-title">{{ task.title }}</text><text class="task-note">{{ done(task) ? '今天已经完成，做得很好' : task.note }}</text></view>
         </view>
@@ -24,14 +25,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { HabitPlan, HabitTask } from '../../features/plans/plan-types.js';
 import { isTaskDone, planStats } from '../../features/plans/plan-store.js';
 const props = defineProps<{ plans: HabitPlan[] }>();
 defineEmits<{ toggle: [planId: string, taskId: string]; manage: [planId: string] }>();
 const completedTotal = computed(() => props.plans.reduce((sum, plan) => sum + planStats(plan).completed, 0));
 const totalTasks = computed(() => props.plans.reduce((sum, plan) => sum + plan.tasks.length, 0));
+const filter = ref<'all' | 'pending' | 'done'>('all');
+const filters = [{ value: 'all', label: '全部' }, { value: 'pending', label: '待完成' }, { value: 'done', label: '已完成' }] as const;
 const done = (task: HabitTask) => isTaskDone(task);
+const visibleTasks = (plan: HabitPlan) => plan.tasks.filter((task) => filter.value === 'all' || (filter.value === 'done' ? done(task) : !done(task)));
 const weekDays = computed(() => {
   const labels = ['日', '一', '二', '三', '四', '五', '六'];
   const list = [];
@@ -50,6 +54,7 @@ const weekDays = computed(() => {
 .section-title { display:block; color:#5d4f53; font-size:30rpx; font-weight:700; }
 .section-note { display:block; margin-top:5rpx; color:#9b888d; font-size:20rpx; }
 .count { color:#b66d80; font-size:22rpx; }
+.filters { display:flex; gap:8rpx; margin-bottom:12rpx; }.filters button { padding:8rpx 15rpx; border:1rpx solid #eadbd5; border-radius:999rpx; color:#9b878c; font-size:19rpx; background:#fffdfb; }.filters button.active { border-color:#cf9aa0; color:#ad6675; background:#fff0f1; }
 .empty-inline { padding:30rpx; border:1rpx dashed #ead8d2; border-radius:18rpx; color:#9d8c90; text-align:center; font-size:22rpx; background:#fffdf8; }
 .plan-card { margin-bottom:18rpx; padding:20rpx; border:1rpx solid #efe2dc; border-radius:20rpx; background:linear-gradient(135deg,var(--tint),#fffdfb 72%); box-shadow:0 8rpx 24rpx rgba(139,102,89,.05); }
 .plan-head { display:flex; align-items:center; gap:14rpx; }

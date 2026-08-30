@@ -8,6 +8,7 @@
     <view v-if="apiPlan" class="api-plan"><view><text class="api-title">健康计划</text><text class="api-note">{{ apiPlan.kind === 'sleep' ? '睡眠与精力' : '体重管理' }} · 来自健康档案</text></view><button @tap="openSetup">调整</button></view>
 
     <PlanTaskList :plans="plans" @toggle="toggleTask" @manage="openManage" />
+    <PlanWeekReview :plans="plans" />
     <PlanTemplateGrid @select="addTemplate" @custom="sheetVisible = true" />
 
     <PlanCreateSheet :visible="sheetVisible" @close="sheetVisible = false" @create="createCustom" />
@@ -25,6 +26,7 @@ import PlanTaskList from '../../components/plans/PlanTaskList.vue';
 import PlanTemplateGrid from '../../components/plans/PlanTemplateGrid.vue';
 import PlanCreateSheet from '../../components/plans/PlanCreateSheet.vue';
 import PlanManageSheet from '../../components/plans/PlanManageSheet.vue';
+import PlanWeekReview from '../../components/plans/PlanWeekReview.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { addCustomPlan, addHabitTask, addTemplatePlan, loadHabitPlans, planStats, removeHabitPlan, streakFor, toggleHabitTask, updateHabitPlan, weekCheckins } from '../../features/plans/plan-store.js';
 import type { HabitPlan, PlanTemplate } from '../../features/plans/plan-types.js';

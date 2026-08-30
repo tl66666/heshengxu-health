@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PLAN_TEMPLATES, addCustomPlan, addHabitTask, addTemplatePlan, loadHabitPlans, removeHabitPlan, toggleHabitTask, updateHabitPlan } from './plan-store.js';
+import { PLAN_TEMPLATES, addCustomPlan, addHabitTask, addTemplatePlan, loadHabitPlans, removeHabitPlan, toggleHabitTask, updateHabitPlan, weekSummary } from './plan-store.js';
 
 const storage = new Map<string, unknown>();
 vi.stubGlobal('uni', {
@@ -35,5 +35,10 @@ describe('habit plan store', () => {
     expect(loadHabitPlans()[0].title).toBe('晨间散步 20 分钟');
     removeHabitPlan(plan.id);
     expect(loadHabitPlans()).toEqual([]);
+  });
+
+  it('returns a seven-day summary for the review chart', () => {
+    addCustomPlan({ title: '喝水', subtitle: '', category: 'custom', frequency: '每天' });
+    expect(weekSummary(loadHabitPlans())).toHaveLength(7);
   });
 });
