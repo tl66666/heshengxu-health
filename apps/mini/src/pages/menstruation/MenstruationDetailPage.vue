@@ -190,7 +190,7 @@ function formatDate(date: Date) {
   return `${y}-${m}-${d}`;
 }
 function parseDate(value: string) {
-  const [y, m, d] = value.split('-').map(Number);
+  const [y = 1970, m = 1, d = 1] = value.split('-').map(Number);
   return new Date(y, m - 1, d);
 }
 function changeMonth(delta: number) {
@@ -244,9 +244,9 @@ function editCycleSettings() {
     content: `${cycle.cycleLength},${cycle.periodLength}`,
     success: ({ confirm, content }) => {
       if (!confirm) return;
-      const [cycleValue, periodValue] = content.split(',').map(Number);
-      if (cycleValue >= 20 && cycleValue <= 45) cycle.cycleLength = cycleValue;
-      if (periodValue >= 2 && periodValue <= 10) cycle.periodLength = periodValue;
+      const [cycleValue = cycle.cycleLength, periodValue = cycle.periodLength] = (content || '').split(',').map(Number);
+      if (Number.isFinite(cycleValue) && cycleValue >= 20 && cycleValue <= 45) cycle.cycleLength = cycleValue;
+      if (Number.isFinite(periodValue) && periodValue >= 2 && periodValue <= 10) cycle.periodLength = periodValue;
       saveCycle();
     },
   });

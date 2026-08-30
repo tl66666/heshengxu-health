@@ -8,7 +8,7 @@
         <text class="hero-title">今日用药 {{ completedCount }}/{{ medications.length }}</text>
         <text class="hero-note">按医嘱记录提醒，不替代医生建议</text>
       </view>
-      <view class="progress-ring"><text>{{ progress }}%</text></view>
+      <view class="progress-ring" :style="{ background: `conic-gradient(#79acd2 0 ${progress}%, #e4edf5 ${progress}% 100%)` }"><text>{{ progress }}%</text></view>
     </view>
 
     <view class="progress-track"><view class="progress-fill" :style="{ width: `${progress}%` }" /></view>
