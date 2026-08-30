@@ -2,18 +2,17 @@
   <view class="page">
     <AppNavBar title="生理期记录" route="/pages/menstruation/MenstruationDetailPage" />
 
+    <scroll-view class="date-strip" scroll-x show-scrollbar="false">
+      <view v-for="item in dateStrip" :key="item.key" class="date-pill" :class="{ active: item.key === selectedDate, period: isPeriodDay(item.key) }" @tap="selectDate(item.key)">
+        <text>{{ item.week }}</text><text>{{ item.day }}</text>
+      </view>
+    </scroll-view>
     <view class="hero-card hz-rise">
-      <view class="hero-copy">
-        <text class="eyebrow">温柔了解自己的节律</text>
-        <text class="hero-title">下次经期还有 {{ daysUntilNext }} 天</text>
-        <text class="hero-note">预计 {{ nextPeriodLabel }} 开始 · 仅供生活记录参考</text>
-      </view>
+      <view class="hero-caption">{{ cycle.start ? '当前周期' : '还没有周期记录' }}</view>
       <view class="cycle-ring" aria-label="周期进度">
-        <view class="ring-inner">
-          <text class="ring-number">{{ cycleDay }}</text>
-          <text class="ring-label">周期日</text>
-        </view>
+        <view class="ring-inner"><text class="ring-overline">距离经期还有</text><text class="ring-number">{{ daysUntilNext }}</text><text class="ring-label">天</text><text class="ring-date">{{ nextPeriodDate ? `预计${nextPeriodLabel}开始` : '完成设置后生成预测' }}</text></view>
       </view>
+      <view class="cycle-meta"><text>{{ cycleDay === '--' ? '设置周期后开始追踪' : `周期第 ${cycleDay} 天` }}</text><text>{{ cycle.start ? `经期 ${cycle.periodLength} 天 · 周期 ${cycle.cycleLength} 天` : '' }}</text></view>
     </view>
 
     <view class="section-heading">
@@ -111,7 +110,7 @@
       <view class="cycle-hint"><text>当前按 {{ cycleLength }} 天周期、{{ periodLength }} 天经期估算</text><button @tap="editCycleSettings">调整</button></view>
     </view>
 
-    <button class="primary-button" @tap="saveAll">保存今天的记录</button>
+    <button class="primary-button sticky-action" @tap="saveAll">{{ isPeriodDay(selectedDate) ? '保存今天的记录' : '记录今天的经期' }}</button>
     <text class="disclaimer">生理期预测会受压力、睡眠和身体状态影响，如有持续不适请咨询专业医生。</text>
   </view>
 </template>
@@ -133,6 +132,14 @@ const visibleMonth = ref(new Date(new Date().getFullYear(), new Date().getMonth(
 const cycle = reactive<Cycle>({ start: '', end: '', cycleLength: 28, periodLength: 5 });
 const daily = reactive<DailyRecord>({ pain: '', symptoms: [], note: '' });
 const weekLabels = ['日', '一', '二', '三', '四', '五', '六'];
+const dateStrip = computed(() => {
+  const base = parseDate(todayKey);
+  return Array.from({ length: 9 }, (_, index) => {
+    const date = new Date(base);
+    date.setDate(base.getDate() + index - 4);
+    return { key: formatDate(date), day: date.getDate(), week: index === 4 ? '今' : weekLabels[date.getDay()] };
+  });
+});
 const painOptions = [
   { value: 'none', label: '不痛', emoji: '☁️' },
   { value: 'mild', label: '轻微痛', emoji: '🌸' },
