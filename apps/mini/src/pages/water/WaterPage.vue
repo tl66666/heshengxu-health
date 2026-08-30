@@ -60,6 +60,7 @@
         
         <!-- 水位 -->
         <view class="water-wrapper" :style="{ height: waterHeight + '%' }">
+          <view class="water-surface"><view class="surface-glint" /></view>
           <image 
             class="water-texture" 
             src="/static/illustrations/water-ripple-texture.png" 
@@ -83,7 +84,8 @@
           <text class="header-text">快捷记录</text>
         </view>
         <button class="quick-drink-picker" @tap="selectQuickDrink">
-          <text class="quick-drink-emoji">{{ quickDrink.icon }}</text>
+          <image v-if="quickDrink.id === 'water'" class="quick-drink-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <text v-else class="quick-drink-emoji">{{ quickDrink.icon }}</text>
           <text>{{ quickDrink.name }}</text>
           <text class="quick-drink-chevron">⌄</text>
         </button>
@@ -96,7 +98,8 @@
           class="quick-btn"
           @tap="quickAdd(amt)"
         >
-          <text class="btn-drink-icon">{{ quickDrink.icon }}</text>
+          <image v-if="quickDrink.id === 'water'" class="btn-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <text v-else class="btn-drink-icon">{{ quickDrink.icon }}</text>
           <text class="btn-text">{{ amt }}ml</text>
         </button>
       </view>
@@ -105,7 +108,10 @@
     <!-- 记录喝水按钮 -->
     <view class="action-section">
       <button class="record-btn" @tap="openDialog">
-        <text class="record-btn-emoji">{{ quickDrink.icon }}</text>
+        <view class="record-icon-wrap">
+          <image v-if="quickDrink.id === 'water'" class="record-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <text v-else class="record-btn-emoji">{{ quickDrink.icon }}</text>
+        </view>
         <text class="record-text">记录{{ quickDrink.name }}</text>
       </button>
     </view>
@@ -132,7 +138,10 @@
           :key="record.id"
           class="record-item card"
         >
-          <text class="record-drink-icon">{{ getDrinkIcon(record.drinkType) }}</text>
+          <view class="record-drink-icon">
+            <image v-if="record.drinkType === 'water'" class="record-water-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+            <text v-else>{{ getDrinkIcon(record.drinkType) }}</text>
+          </view>
           <view class="record-info">
             <text class="record-name">{{ getDrinkName(record.drinkType) }}</text>
             <text class="record-time">{{ formatTime(record.timestamp) }}</text>
@@ -168,7 +177,8 @@
               :class="['drink-option', selectedDrink === drink.id ? 'active' : '']"
               @tap="selectedDrink = drink.id"
             >
-              <text class="drink-emoji">{{ drink.icon }}</text>
+              <image v-if="drink.id === 'water'" class="drink-image" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+              <text v-else class="drink-emoji">{{ drink.icon }}</text>
               <text class="drink-name">{{ drink.name }}</text>
             </button>
           </view>
@@ -720,7 +730,7 @@ onShow(() => {
   color: #2d6943;
 }
 
-.quick-drink-picker { display: inline-flex; align-items: center; gap: 6rpx; min-height: 44rpx; padding: 6rpx 12rpx; border: 1rpx solid #dce9e5; border-radius: 999rpx; color: #5c8177; background: rgba(255, 253, 251, .84); font-size: 19rpx; }
+.quick-drink-picker { display: inline-flex; align-items: center; gap: 6rpx; min-height: 44rpx; padding: 6rpx 12rpx; border: 1rpx solid #dce9e5; border-radius: 999rpx; color: #71818a; background: rgba(255, 253, 251, .84); font-size: 19rpx; }
 .quick-drink-emoji { font-size: 22rpx; }.quick-drink-chevron { margin-left: 3rpx; color: #a8b9b2; font-size: 18rpx; }
 
 .quick-buttons {
@@ -1073,28 +1083,40 @@ onShow(() => {
 .page { background: #fff8f2; }
 .card { border: 1rpx solid rgba(255, 255, 255, .9); background: rgba(255, 253, 251, .78); box-shadow: 0 14rpx 34rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255, 255, 255, .9); backdrop-filter: blur(18px); }
 .date-section { margin: 0 24rpx; border-radius: 0 0 22rpx 22rpx; background: rgba(255, 253, 251, .72); }
-.date-btn { color: #7397a5; background: #edf5f5; }.date-text { color: #557a70; }
-.goal-card { margin-top: 18rpx; padding: 24rpx; border-radius: 22rpx; }.stat-label { color: #9d908f; }.stat-value { color: #6b9c8a; }.stat-value.primary { color: #4e7e73; }.stat-divider { background: #e6eeea; }
-.personalized-info { background: #eef6f2; }.info-badge { background: #dcefe4; }.badge-icon, .badge-text { color: #5d937c; }.info-desc { color: #8ba299; }.reset-btn { color: #668d7b; background: #fffdfb; }
+.date-btn { color: #7898a5; background: #edf5f5; }.date-text { color: #766b73; }
+.goal-card { margin-top: 18rpx; padding: 24rpx; border-radius: 22rpx; }.stat-label { color: #9d908f; }.stat-value { color: #789aa4; }.stat-value.primary { color: #5d8796; }.stat-divider { background: #e6eeea; }
+.personalized-info { background: #eef6f2; }.info-badge { background: #dcefe4; }.badge-icon, .badge-text { color: #75878d; }.info-desc { color: #969093; }.reset-btn { color: #7d878c; background: #fffdfb; }
 .setup-btn { border-color: #dfc8bd; color: #aa7772; background: #fff4ed; }
 .cup-display { padding: 12rpx 0 30rpx; }
-.progress-badge { top: 32rpx; right: 42rpx; color: #658d82; background: #e7f3ee; }
+.progress-badge { top: 32rpx; right: 42rpx; color: #748e98; background: #e7f3ee; }
 .cup-container { width: 600rpx; height: 680rpx; overflow: hidden; }
 .cup-empty { top: -50%; left: -50%; width: 200%; height: 200%; z-index: 2; }
 .water-wrapper { width: 56%; max-height: 72%; bottom: 9%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(4% 0, 96% 0, 100% 91%, 92% 100%, 8% 100%, 0 91%); background: rgba(157, 206, 226, .42); z-index: 1; }
-.water-wrapper::before { content: ''; position: absolute; top: 0; right: 5%; left: 5%; height: 12rpx; border-radius: 50%; background: rgba(231, 247, 250, .72); z-index: 2; }
-.water-wrapper::after { content: ''; position: absolute; top: 6rpx; right: -8%; left: -8%; height: 16rpx; border: 2rpx solid rgba(213, 240, 244, .62); border-radius: 50%; opacity: .7; z-index: 2; animation: water-ripple 4.6s ease-in-out infinite; }
+.water-wrapper::before { content: ''; position: absolute; top: -4rpx; right: -8%; left: -8%; height: 34rpx; background: rgba(226, 246, 249, .7); clip-path: polygon(0 42%, 8% 23%, 16% 39%, 25% 9%, 34% 34%, 44% 15%, 53% 38%, 63% 8%, 73% 31%, 83% 13%, 92% 36%, 100% 19%, 100% 100%, 0 100%); z-index: 2; }
+.water-wrapper::after { content: ''; position: absolute; top: 7rpx; right: -10%; left: -10%; height: 18rpx; border: 2rpx solid rgba(204, 235, 241, .7); border-radius: 50%; opacity: .7; z-index: 2; animation: water-ripple 4.6s ease-in-out infinite; }
 .water-texture { top: -52%; bottom: auto; width: 100%; height: 150%; opacity: .9; }
 .water-texture { animation: water-drift 7s ease-in-out infinite alternate; transform-origin: center bottom; }
 .water-wrapper::before { animation: water-breathe 3.8s ease-in-out infinite; }
+.water-surface { position: absolute; top: -8rpx; left: -8%; z-index: 4; width: 116%; height: 34rpx; border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; background: rgba(225, 247, 250, .84); box-shadow: 0 2rpx 8rpx rgba(100, 170, 190, .13); animation: surface-swell 3.2s ease-in-out infinite; }
+.surface-glint { position: absolute; top: 8rpx; right: 14%; left: 14%; height: 5rpx; border-radius: 50%; background: rgba(255, 255, 255, .72); animation: surface-glint 2.7s ease-in-out infinite alternate; }
 @keyframes water-drift { from { transform: translateX(-3%) scaleX(1.03); } to { transform: translateX(3%) scaleX(1.08); } }
-@keyframes water-breathe { 0%, 100% { transform: scaleX(.94); opacity: .56; } 50% { transform: scaleX(1.02); opacity: .82; } }
+@keyframes water-breathe { 0%, 100% { transform: translateX(-2%) scaleX(.96) skewX(-1deg); opacity: .56; } 50% { transform: translateX(2%) scaleX(1.04) skewX(1deg); opacity: .84; } }
 @keyframes water-ripple { 0%, 100% { transform: translateX(-4%) scaleX(.92); opacity: .38; } 50% { transform: translateX(5%) scaleX(1.04); opacity: .78; } }
-.amount-display { top: 52%; }.amount-num { color: #3e7468; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #6b9c8a; }
-.quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #5a7f73; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #73978b; }
-.record-btn { padding: 26rpx; border-radius: 48rpx; background: #76b7c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .22); }.record-text { letter-spacing: 0; }
-.record-item { border-radius: 16rpx; }.record-name { color: #5f7b73; }.record-time, .history-count { color: #a39391; }.record-amount { color: #6c9b8c; }
+@keyframes surface-swell { 0%, 100% { transform: translateX(-2%) rotate(-1deg) scaleX(.96); border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; } 50% { transform: translateX(3%) rotate(1deg) scaleX(1.04); border-radius: 55% 45% 52% 48% / 52% 68% 32% 48%; } }
+@keyframes surface-glint { from { transform: translateX(-10%); opacity: .38; } to { transform: translateX(12%); opacity: .82; } }
+.amount-display { top: 52%; }.amount-num { color: #477b8d; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #789daa; }
+.quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #6c626a; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #7d8e96; }
+.quick-drink-picker { padding: 5rpx 12rpx 5rpx 8rpx; color: #71818a; }
+.quick-drink-icon { width: 28rpx; height: 28rpx; }
+.record-btn { position: relative; padding: 22rpx 28rpx; border: 1rpx solid rgba(255,255,255,.66); border-radius: 24rpx; background: linear-gradient(135deg, #83c5d2 0%, #69adbe 100%); box-shadow: 0 14rpx 28rpx rgba(94,157,176,.2), inset 0 2rpx 0 rgba(255,255,255,.42); overflow: hidden; }
+.record-btn::before { content: ''; position: absolute; top: 2rpx; right: 10%; left: 10%; height: 18rpx; border-radius: 50%; background: rgba(255,255,255,.18); }
+.record-btn:active { transform: translateY(2rpx) scale(.985); box-shadow: 0 8rpx 16rpx rgba(94,157,176,.18), inset 0 2rpx 0 rgba(255,255,255,.34); }
+.record-text { position: relative; z-index: 1; letter-spacing: 0; color: #fffdfb; }
+.record-icon-wrap { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; width: 42rpx; height: 42rpx; border-radius: 50%; background: rgba(255,255,255,.24); }
+.record-item { border-radius: 16rpx; }.record-name { color: #675d67; }.record-time, .history-count { color: #a39391; }.record-amount { color: #6d9aaa; }
 .record-drink-icon { display: flex; align-items: center; justify-content: center; width: 56rpx; height: 56rpx; margin-right: 14rpx; border-radius: 16rpx; background: #edf7f4; font-size: 29rpx; line-height: 1; }
-.dialog-mask { background: rgba(75, 56, 61, .26); }.dialog-content { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 28rpx 28rpx 0 0; background: rgba(255, 253, 251, .96); box-shadow: 0 -14rpx 36rpx rgba(100, 76, 75, .16); backdrop-filter: blur(20px); }.dialog-title { color: #5b4f54; }.close-btn { color: #9b8589; background: #f8efec; }.input-num { color: #5c8e82; }.input-unit { color: #a39391; }.drink-option { border-color: #efe1da; background: #fffaf7; }.drink-option.active { border-color: #b8d8d5; background: #edf7f4; }.drink-name { color: #9b8889; }.drink-option.active .drink-name { color: #5c8e82; }.key-btn { color: #5d8278; background: #f7f2ee; }.confirm-btn { background: #76b7c7; box-shadow: 0 10rpx 22rpx rgba(94, 157, 176, .2); }
+.record-water-icon { width: 36rpx; height: 36rpx; }
+.drink-image { width: 42rpx; height: 42rpx; }
+.dialog-mask { background: rgba(75, 56, 61, .26); }.dialog-content { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 28rpx 28rpx 0 0; background: rgba(255, 253, 251, .96); box-shadow: 0 -14rpx 36rpx rgba(100, 76, 75, .16); backdrop-filter: blur(20px); }.dialog-title { color: #5b4f54; }.close-btn { color: #9b8589; background: #f8efec; }.input-num { color: #5c8ca0; }.input-unit { color: #a39391; }.drink-option { border-color: #efe1da; background: #fffaf7; }.drink-option.active { border-color: #b8d8d5; background: #edf7f4; }.drink-name { color: #9b8889; }.drink-option.active .drink-name { color: #5f8997; }.key-btn { color: #667d87; background: #f7f2ee; }.confirm-btn { background: #76b7c7; box-shadow: 0 10rpx 22rpx rgba(94, 157, 176, .2); }
 @media (min-width: 700px) { .page { max-width: 760px; margin: 0 auto; } }
 </style>
