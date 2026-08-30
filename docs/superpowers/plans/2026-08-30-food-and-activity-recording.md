@@ -50,7 +50,7 @@ describe('activity catalog', () => {
   });
 
   it('uses a conservative default weight when no profile weight is available', () => {
-    expect(estimateActivityCalories({ met: 3.5, durationMinutes: 30 })).toBe(128);
+    expect(estimateActivityCalories({ met: 3.5, durationMinutes: 30 })).toBe(129);
   });
 
   it('returns undefined for an unknown id', () => {
