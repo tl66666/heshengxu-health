@@ -464,7 +464,7 @@ onLoad(async (options) => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 0 32rpx 140rpx;
+  padding: 0 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 180rpx);
   background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
 }
 
@@ -915,7 +915,7 @@ onLoad(async (options) => {
 .photo-entry {
   position: fixed;
   right: 32rpx;
-  bottom: 120rpx;
+  bottom: calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 20rpx);
   display: flex;
   align-items: center;
   gap: 12rpx;

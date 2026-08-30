@@ -6,7 +6,7 @@
       <image
         class="camera-intro-art"
         src="/static/illustrations/home-companion-banner.png"
-        mode="aspectFill"
+        mode="aspectFit"
       />
       <view class="camera-intro-copy">
         <text class="camera-kicker">序序相机</text>
@@ -205,7 +205,7 @@ onLoad((options) => {
 /* 通用卡片 */
 .card {
   background: #ffffff;
-  border-radius: 36rpx;
+  border-radius: 16rpx;
   box-shadow: 0 12rpx 40rpx rgba(46, 125, 79, 0.08);
   margin-bottom: 28rpx;
 }
@@ -216,7 +216,7 @@ onLoad((options) => {
   margin-bottom: 32rpx;
   overflow: hidden;
   border: 1rpx solid rgba(111, 146, 119, 0.18);
-  border-radius: 20rpx;
+  border-radius: 16rpx;
   background: #f8f6ed;
   animation: fadeIn 0.4s ease 0.1s backwards;
 }
@@ -336,7 +336,7 @@ onLoad((options) => {
   margin-top: 24rpx;
   border: none;
   background: #f2f7f1;
-  border-radius: 28rpx;
+  border-radius: 12rpx;
   transition: transform 0.12s ease;
 }
 
@@ -449,7 +449,7 @@ onLoad((options) => {
   gap: 16rpx;
   padding: 24rpx 28rpx;
   background: rgba(224, 169, 62, 0.12);
-  border-radius: 24rpx;
+  border-radius: 12rpx;
   margin-bottom: 28rpx;
   animation: fadeIn 0.3s ease;
 }
@@ -475,7 +475,7 @@ onLoad((options) => {
   padding: 28rpx;
   border: none;
   background: #2e7d4f;
-  border-radius: 28rpx;
+  border-radius: 14rpx;
   box-shadow: 0 16rpx 40rpx rgba(46, 125, 79, 0.35);
   transition: all 0.12s ease;
   animation: fadeIn 0.4s ease 0.5s backwards;

@@ -120,7 +120,7 @@
 
         <template v-else-if="activeType === 'activity'">
           <view class="activity-banner">
-            <image src="/static/illustrations/record-desk-banner.png" mode="aspectFill" />
+            <image src="/static/illustrations/record-desk-banner.png" mode="aspectFit" />
             <view class="activity-banner-copy">
               <text>今天动了什么？</text>
               <text>选项目和时长，消耗仅作参考</text>

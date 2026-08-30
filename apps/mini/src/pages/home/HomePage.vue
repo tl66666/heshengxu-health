@@ -93,7 +93,7 @@
           <image
             class="camera-banner-art"
             src="/static/illustrations/home-companion-banner.png"
-            mode="aspectFill"
+            mode="aspectFit"
           />
           <view class="camera-banner-copy">
             <text class="camera-title">序序相机</text>
