@@ -516,7 +516,7 @@ onMounted(() => {
 
 /* 水杯区域 */
 .cup-section {
-  padding: 40rpx 32rpx 60rpx;
+  padding: 20rpx 0 40rpx;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -524,8 +524,8 @@ onMounted(() => {
 
 .cup-wrapper {
   position: relative;
-  width: 520rpx;
-  height: 680rpx;
+  width: 600rpx;
+  height: 780rpx;
 }
 
 .cup-image {
@@ -553,7 +553,7 @@ onMounted(() => {
 
 .water-image {
   width: 100%;
-  height: 680rpx;
+  height: 780rpx;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -599,6 +599,8 @@ onMounted(() => {
   width: 36rpx;
   height: 36rpx;
   border-radius: 8rpx;
+  background: transparent;
+  mix-blend-mode: multiply;
 }
 
 .title-text {
@@ -631,6 +633,7 @@ onMounted(() => {
   width: 36rpx;
   height: 36rpx;
   border-radius: 6rpx;
+  mix-blend-mode: multiply;
 }
 
 .item-text {
@@ -664,6 +667,7 @@ onMounted(() => {
   height: 48rpx;
   border-radius: 8rpx;
   filter: brightness(1.2);
+  mix-blend-mode: multiply;
 }
 
 .btn-label {
@@ -689,6 +693,7 @@ onMounted(() => {
   width: 32rpx;
   height: 32rpx;
   border-radius: 6rpx;
+  mix-blend-mode: multiply;
 }
 
 .header-title {
@@ -754,6 +759,7 @@ onMounted(() => {
   height: 48rpx;
   border-radius: 8rpx;
   flex-shrink: 0;
+  mix-blend-mode: multiply;
 }
 
 .item-content {
