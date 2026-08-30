@@ -124,8 +124,12 @@
 
         <!-- 序序相机 -->
         <button class="xuxu-camera-card card" hover-class="button-hover" @tap="goToXuxuCamera">
+          <view class="camera-copy">
+            <text class="camera-title">序序相机</text>
+            <text class="camera-subtitle">拍照识别 · 轻松记录</text>
+          </view>
           <image class="camera-decoration" src="/static/icons/camera.jpg" mode="aspectFit" />
-          <text class="camera-title">序序相机</text>
+          <text class="camera-arrow">›</text>
         </button>
       </view>
 
@@ -828,34 +832,66 @@ onShow(() => {
 
 /* 序序相机卡片 */
 .xuxu-camera-card {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 28rpx 32rpx;
+  justify-content: space-between;
+  min-height: 148rpx;
+  gap: 16rpx;
+  padding: 24rpx 24rpx 24rpx 28rpx;
   margin-top: 24rpx;
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.08) 0%, rgba(232, 247, 237, 0.6) 100%);
-  border: 2rpx solid rgba(127, 204, 143, 0.15);
+  background: linear-gradient(135deg, rgba(255, 248, 236, 0.96) 0%, rgba(238, 248, 246, 0.94) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12rpx 28rpx rgba(147, 126, 108, 0.1), inset 0 1rpx 0 rgba(255,255,255,0.95);
+  overflow: hidden;
   transition: all 0.2s ease;
 }
 
 .xuxu-camera-card:active {
   transform: scale(0.98);
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.7) 100%);
+  box-shadow: 0 6rpx 14rpx rgba(147, 126, 108, 0.08), inset 0 1rpx 0 rgba(255,255,255,0.95);
+}
+
+.camera-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10rpx;
 }
 
 .camera-decoration {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
+  width: 188rpx;
+  height: 122rpx;
+  margin-right: -10rpx;
   mix-blend-mode: multiply;
   flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .camera-title {
-  font-size: 28rpx;
+  color: #526d68;
+  font-size: 30rpx;
   font-weight: 700;
-  color: #2d6943;
-  letter-spacing: 1rpx;
+  letter-spacing: 0;
+}
+
+.camera-subtitle {
+  color: #9a8b84;
+  font-size: 21rpx;
+  line-height: 1.3;
+}
+
+.camera-arrow {
+  position: relative;
+  z-index: 2;
+  margin-left: -8rpx;
+  color: #9ab4ae;
+  font-size: 42rpx;
+  font-weight: 300;
+  line-height: 1;
 }
 
 /* 3. 体重记录卡片 */

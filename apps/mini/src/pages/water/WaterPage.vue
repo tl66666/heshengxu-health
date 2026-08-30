@@ -60,7 +60,11 @@
         
         <!-- 水位 -->
         <view class="water-wrapper" :style="{ height: waterHeight + '%' }">
-          <view class="water-surface"><view class="surface-glint" /></view>
+          <view class="water-surface">
+            <view class="surface-wave wave-one" />
+            <view class="surface-wave wave-two" />
+            <view class="surface-glint" />
+          </view>
           <image 
             class="water-texture" 
             src="/static/illustrations/water-ripple-texture.png" 
@@ -207,7 +211,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
-import { navigateBack } from '../../utils/router.js';
+import { navigateBack, navigateTo } from '../../utils/router.js';
 
 interface WaterRecord {
   id: string;
@@ -330,8 +334,10 @@ function nextDay() {
 }
 
 function goToSetup() {
-  uni.navigateTo({
-    url: '/pages/water-goal/WaterGoalPage'
+  navigateTo('/pages/water-goal/WaterGoalPage', {
+    fail: () => {
+      uni.redirectTo({ url: '/pages/water-goal/WaterGoalPage' });
+    },
   });
 }
 
@@ -1097,13 +1103,18 @@ onShow(() => {
 .water-texture { top: -52%; bottom: auto; width: 100%; height: 150%; opacity: .9; }
 .water-texture { animation: water-drift 7s ease-in-out infinite alternate; transform-origin: center bottom; }
 .water-wrapper::before { animation: water-breathe 3.8s ease-in-out infinite; }
-.water-surface { position: absolute; top: -8rpx; left: -8%; z-index: 4; width: 116%; height: 34rpx; border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; background: rgba(225, 247, 250, .84); box-shadow: 0 2rpx 8rpx rgba(100, 170, 190, .13); animation: surface-swell 3.2s ease-in-out infinite; }
-.surface-glint { position: absolute; top: 8rpx; right: 14%; left: 14%; height: 5rpx; border-radius: 50%; background: rgba(255, 255, 255, .72); animation: surface-glint 2.7s ease-in-out infinite alternate; }
+.water-surface { position: absolute; top: -8rpx; left: -10%; z-index: 4; width: 120%; height: 42rpx; border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; background: rgba(225, 247, 250, .62); box-shadow: 0 3rpx 10rpx rgba(100, 170, 190, .16); animation: surface-swell 3.2s ease-in-out infinite; }
+.surface-wave { position: absolute; left: -8%; width: 116%; height: 18rpx; border-top: 3rpx solid rgba(194, 231, 239, .8); border-radius: 50%; pointer-events: none; }
+.wave-one { top: 7rpx; animation: wave-one 2.35s ease-in-out infinite; }
+.wave-two { top: 18rpx; border-top-color: rgba(255, 255, 255, .62); animation: wave-two 3.6s ease-in-out infinite reverse; }
+.surface-glint { position: absolute; top: 9rpx; right: 14%; left: 14%; height: 5rpx; border-radius: 50%; background: rgba(255, 255, 255, .78); animation: surface-glint 2.7s ease-in-out infinite alternate; }
 @keyframes water-drift { from { transform: translateX(-3%) scaleX(1.03); } to { transform: translateX(3%) scaleX(1.08); } }
 @keyframes water-breathe { 0%, 100% { transform: translateX(-2%) scaleX(.96) skewX(-1deg); opacity: .56; } 50% { transform: translateX(2%) scaleX(1.04) skewX(1deg); opacity: .84; } }
 @keyframes water-ripple { 0%, 100% { transform: translateX(-4%) scaleX(.92); opacity: .38; } 50% { transform: translateX(5%) scaleX(1.04); opacity: .78; } }
 @keyframes surface-swell { 0%, 100% { transform: translateX(-2%) rotate(-1deg) scaleX(.96); border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; } 50% { transform: translateX(3%) rotate(1deg) scaleX(1.04); border-radius: 55% 45% 52% 48% / 52% 68% 32% 48%; } }
 @keyframes surface-glint { from { transform: translateX(-10%); opacity: .38; } to { transform: translateX(12%); opacity: .82; } }
+@keyframes wave-one { 0%, 100% { transform: translateX(-7%) scaleX(.9) rotate(-1deg); opacity: .46; } 50% { transform: translateX(8%) scaleX(1.08) rotate(1deg); opacity: .96; } }
+@keyframes wave-two { 0%, 100% { transform: translateX(8%) scaleX(1.08) rotate(1deg); opacity: .3; } 50% { transform: translateX(-8%) scaleX(.88) rotate(-1deg); opacity: .78; } }
 .amount-display { top: 52%; }.amount-num { color: #477b8d; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #789daa; }
 .quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #6c626a; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #7d8e96; }
 .quick-drink-picker { padding: 5rpx 12rpx 5rpx 8rpx; color: #71818a; }
