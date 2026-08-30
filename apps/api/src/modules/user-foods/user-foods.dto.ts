@@ -18,22 +18,23 @@ export class CreateUserFoodDto {
   source!: string;
 
   @IsNumber()
-  @Min(0)
+  @Min(0.0001)
   energyKcal!: number;
 
   @IsNumber()
-  @Min(0)
+  @Min(0.0001)
   proteinG!: number;
 
   @IsNumber()
-  @Min(0)
+  @Min(0.0001)
   fatG!: number;
 
   @IsNumber()
-  @Min(0)
+  @Min(0.0001)
   carbohydrateG!: number;
 
   @IsString()
+  @IsNotEmpty()
   @MaxLength(60)
   defaultServingLabel!: string;
 
