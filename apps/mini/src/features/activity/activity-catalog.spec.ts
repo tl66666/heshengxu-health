@@ -33,6 +33,24 @@ describe('activity catalog', () => {
     );
   });
 
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    'rejects invalid MET values (%s)',
+    (met) => {
+      expect(() => estimateActivityCalories({ met, durationMinutes: 30 })).toThrow(
+        '运动 MET 需要大于 0',
+      );
+    },
+  );
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    'rejects invalid body weights (%s)',
+    (weightKg) => {
+      expect(() => estimateActivityCalories({ met: 3.5, weightKg, durationMinutes: 30 })).toThrow(
+        '体重需要大于 0 千克',
+      );
+    },
+  );
+
   it('finds an activity by id and returns undefined for unknown ids', () => {
     expect(getActivityById('run')?.id).toBe('run');
     expect(getActivityById('unknown')).toBeUndefined();

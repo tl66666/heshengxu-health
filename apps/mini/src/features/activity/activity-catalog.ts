@@ -13,7 +13,7 @@ export type ActivityCatalogItem = {
  * A small, curated set for the quick-record flow. MET values are representative
  * estimates; the UI should label calculated calories as estimates.
  */
-export const activityCatalog: ActivityCatalogItem[] = [
+export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'walk',
     name: '步行',
@@ -83,10 +83,18 @@ export function estimateActivityCalories(input: {
   weightKg?: number;
   durationMinutes: number;
 }): number {
+  if (!Number.isFinite(input.met) || input.met <= 0) {
+    throw new Error('运动 MET 需要大于 0');
+  }
+
   if (!Number.isFinite(input.durationMinutes) || input.durationMinutes <= 0) {
     throw new Error('运动时长需要大于 0 分钟');
   }
 
-  const weightKg = input.weightKg ?? DEFAULT_WEIGHT_KG;
+  const weightKg = input.weightKg === undefined ? DEFAULT_WEIGHT_KG : input.weightKg;
+  if (!Number.isFinite(weightKg) || weightKg <= 0) {
+    throw new Error('体重需要大于 0 千克');
+  }
+
   return Math.round((input.met * 3.5 * weightKg * input.durationMinutes) / 200);
 }
