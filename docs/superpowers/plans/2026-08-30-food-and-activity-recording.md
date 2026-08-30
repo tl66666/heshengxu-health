@@ -327,6 +327,8 @@ Assert that food recognition references an existing sequence illustration and re
 
 Use `home-companion-banner.png` only in the camera-related entry/empty state and `record-desk-banner.png` only as the activity page banner. Keep text in a separate flex column with a minimum width; set images to `mode="aspectFit"` and hide overflow so they cannot cover controls.
 
+Image quality gate: do not use emoji, system emoji, generic flat stickers, or placeholder SVGs for the camera/运动 primary visuals. Any new GPT Image 2 asset must have watercolor paper texture, physically coherent volume, soft contact shadows, clean subject edges, and a quiet area for copy; reject it if it reads as a flat AI sticker at 1x mobile size.
+
 - [ ] **Step 3: Run formatting and page tests**
 
 Run: `pnpm format:write` then `pnpm --filter @heban/mini exec vitest run src/pages/food-search/food-search-presentation.spec.ts`.
