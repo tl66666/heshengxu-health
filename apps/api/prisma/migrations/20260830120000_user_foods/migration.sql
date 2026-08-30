@@ -1,9 +1,11 @@
+CREATE TYPE "public"."UserFoodSource" AS ENUM ('catalog', 'photo', 'manual');
+
 CREATE TABLE "public"."UserFood" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "imageUrl" TEXT,
-    "source" TEXT NOT NULL,
+    "source" "public"."UserFoodSource" NOT NULL,
     "energyKcal" DOUBLE PRECISION NOT NULL,
     "proteinG" DOUBLE PRECISION NOT NULL,
     "fatG" DOUBLE PRECISION NOT NULL,

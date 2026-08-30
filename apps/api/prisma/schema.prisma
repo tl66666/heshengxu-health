@@ -161,7 +161,7 @@ model UserFood {
   userId                String
   name                  String
   imageUrl              String?
-  source                String
+  source                UserFoodSource
   energyKcal            Float
   proteinG              Float
   fatG                  Float
@@ -468,6 +468,12 @@ enum MealType {
 enum MealEntrySource {
   manual
   photo_confirmed
+}
+
+enum UserFoodSource {
+  catalog
+  photo
+  manual
 }
 
 enum FoodRecognitionJobStatus {
