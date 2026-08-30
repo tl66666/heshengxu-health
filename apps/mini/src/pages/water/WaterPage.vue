@@ -80,7 +80,7 @@
           class="quick-btn"
           @tap="quickAdd(item)"
         >
-          <text class="quick-icon">💧</text>
+          <image class="quick-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
           <text class="quick-amount">{{ item }}ml</text>
         </button>
       </view>
@@ -97,7 +97,8 @@
     <!-- 今日记录 -->
     <view class="records-section">
       <view class="section-header">
-        <text class="section-title">💧 今日记录</text>
+        <image class="section-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
+        <text class="section-title">今日记录</text>
         <text class="record-count">({{ records.length }}次)</text>
         <button v-if="records.length > 0" class="edit-toggle" @tap="toggleEdit">
           {{ editMode ? '完成' : '编辑' }}
@@ -116,7 +117,7 @@
           class="record-item"
         >
           <view class="record-left">
-            <text class="record-emoji">{{ getDrinkIcon(record.drinkType) }}</text>
+            <image class="record-icon" src="/static/icons/watercolor/water-drop.jpg" mode="aspectFit" />
             <view class="record-detail">
               <text class="record-name">{{ getDrinkName(record.drinkType) }}</text>
               <text class="record-time">{{ formatTime(record.timestamp) }}</text>
@@ -544,9 +545,11 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
+  max-height: 100%;
   overflow: hidden;
   transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
+  border-radius: 0 0 20rpx 20rpx;
 }
 
 .water-texture {
@@ -555,6 +558,7 @@ onMounted(() => {
   position: absolute;
   bottom: 0;
   left: 0;
+  object-fit: cover;
 }
 
 .amount-text {
@@ -638,7 +642,9 @@ onMounted(() => {
 .quick-btn::after { border: none; }
 
 .quick-icon {
-  font-size: 32rpx;
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 6rpx;
 }
 
 .quick-amount {
@@ -691,8 +697,13 @@ onMounted(() => {
   margin-bottom: 20rpx;
 }
 
+.section-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 6rpx;
+}
+
 .section-title {
-  flex: 1;
   font-size: 30rpx;
   font-weight: 700;
   color: #2d6943;
@@ -758,6 +769,12 @@ onMounted(() => {
 
 .record-emoji {
   font-size: 40rpx;
+}
+
+.record-icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 8rpx;
 }
 
 .record-detail {
