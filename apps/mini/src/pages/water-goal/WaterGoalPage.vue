@@ -38,7 +38,6 @@
     <view class="result-card card">
       <view class="result-header">
         <image class="result-icon-image" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
-        <text class="result-icon">💧</text>
         <text class="result-title">推荐饮水量</text>
       </view>
       <text class="result-value">{{ selectedDailyGoal }}</text>
