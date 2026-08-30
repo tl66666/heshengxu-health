@@ -1,50 +1,23 @@
 <template>
   <view class="page">
-    <AppNavBar title="用药管理" route="/pages/medication/MedicationManagePage" />
+    <AppNavBar title="用药记录" route="/pages/medication/MedicationManagePage" />
+    <view class="page-head"><view><text class="kicker">今天 · {{ todayLabel }}</text><text class="title">按医嘱，慢慢来</text></view><button class="head-add" aria-label="添加用药" @tap="openForm">＋</button></view>
+    <view class="summary-line"><view><text class="summary-number">{{ completedCount }}<text class="summary-total"> / {{ medications.length }}</text></text><text class="summary-label">今日已完成</text></view><view class="summary-copy">{{ medications.length ? (completedCount === medications.length ? '今天的提醒都完成了' : '还有提醒，按自己的节奏来') : '添加一条提醒，今天会更安心' }}</view></view>
+    <view v-if="medications.length" class="progress-track"><view class="progress-fill" :style="{ width: `${progress}%` }" /></view>
 
-    <view class="hero-card hz-rise">
-      <view>
-        <text class="eyebrow">今天也按自己的节奏来</text>
-        <text class="hero-title">今日用药 {{ completedCount }}/{{ medications.length }}</text>
-        <text class="hero-note">按医嘱记录提醒，不替代医生建议</text>
-      </view>
-      <view class="progress-ring" :style="{ background: `conic-gradient(#79acd2 0 ${progress}%, #e4edf5 ${progress}% 100%)` }"><text>{{ progress }}%</text></view>
-    </view>
-
-    <view class="progress-track"><view class="progress-fill" :style="{ width: `${progress}%` }" /></view>
-
-    <view class="section-heading">
-      <view><text class="section-title">今天的提醒</text><text class="section-caption">完成后轻轻点一下即可打卡</text></view>
-      <button class="add-button" @tap="showForm = !showForm">＋ 添加</button>
-    </view>
-
-    <view v-if="medications.length" class="med-list hz-rise hz-rise-1">
+    <view class="section-head"><view><text class="section-title">今日提醒</text><text class="section-caption">按时间排序，完成后轻轻点一下</text></view><button class="text-action" @tap="openForm">添加提醒</button></view>
+    <view v-if="medications.length" class="timeline">
       <view v-for="item in medications" :key="item.id" class="med-row" :class="{ done: item.checked }">
-        <button class="check-button" :class="{ checked: item.checked }" :aria-label="item.checked ? '取消打卡' : '完成打卡'" @tap="toggleChecked(item)">
-          <image v-if="item.checked" src="/static/icons/svg/check.svg" mode="aspectFit" />
-        </button>
-        <view class="med-icon"><image src="/static/icons/watercolor/medication.jpg" mode="aspectFit" /></view>
-        <view class="med-copy"><text class="med-name">{{ item.name }}</text><text class="med-meta">{{ item.doseNote }} · {{ frequencyLabel(item.frequency) }} · {{ item.reminderTime || '未设置时间' }}</text></view>
-        <button class="more-button" aria-label="删除用药" @tap="removeMedication(item.id)">⋯</button>
+        <view class="time-rail"><text>{{ item.reminderTime || '--:--' }}</text><view class="rail-dot" :class="{ checked: item.checked }" /></view>
+        <button class="check-button" :class="{ checked: item.checked }" :aria-label="item.checked ? '取消打卡' : '完成打卡'" @tap="toggleChecked(item)"><image v-if="item.checked" src="/static/icons/svg/check.svg" mode="aspectFit" /></button>
+        <view class="med-copy"><text class="med-name">{{ item.name }}</text><text class="med-meta">{{ item.doseNote }} · {{ frequencyLabel(item.frequency) }}</text><text v-if="item.note" class="med-note">{{ item.note }}</text></view>
+        <button class="more-button" aria-label="管理提醒" @tap="manageMedication(item)">···</button>
       </view>
     </view>
+    <view v-else class="empty-state"><image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFit" /><text class="empty-title">还没有用药提醒</text><text class="empty-copy">把医生交代的时间记下来，和生序只帮你整理，不替你做用药决定。</text><button class="empty-action" @tap="openForm">添加第一条提醒</button></view>
 
-    <view v-else class="empty-state hz-rise hz-rise-1">
-      <image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFit" />
-      <text class="empty-title">还没有用药提醒</text>
-      <text class="empty-copy">把医生交代的用药时间记下来，今天会更安心。</text>
-      <button class="soft-button" @tap="showForm = true">添加第一条提醒</button>
-    </view>
-
-    <view v-if="showForm" class="form-card hz-rise hz-rise-2">
-      <view class="form-head"><text class="section-title">添加用药提醒</text><button class="close-button" @tap="showForm = false">×</button></view>
-      <input v-model="draft.name" class="field" maxlength="24" placeholder="药品或提醒名称" />
-      <view class="field-row"><input v-model="draft.dose" class="field" maxlength="16" placeholder="剂量（如：按医嘱）" /><input v-model="draft.time" class="field time-field" type="time" /></view>
-      <view class="option-row"><button v-for="frequency in frequencies" :key="frequency.value" class="option-chip" :class="{ active: draft.frequency === frequency.label }" @tap="draft.frequency = frequency.label">{{ frequency.label }}</button></view>
-      <button class="primary-button" @tap="addMedication">保存提醒</button>
-    </view>
-
-    <view class="safety-note"><text class="safety-title">小提示</text><text>请以处方、药品说明书和医生指导为准；漏服、重复服用或不适时，及时联系专业人员。</text></view>
+    <view v-if="showForm" class="form-panel"><view class="form-head"><view><text class="section-title">{{ editingId ? '修改提醒' : '添加提醒' }}</text><text class="section-caption">信息由你或医生确认后填写</text></view><button class="close-button" aria-label="关闭" @tap="closeForm">×</button></view><input v-model="draft.name" class="field" maxlength="24" placeholder="药物或提醒名称" /><view class="field-grid"><input v-model="draft.doseNote" class="field" maxlength="20" placeholder="剂量说明，如：按医嘱" /><input v-model="draft.reminderTime" class="field" type="time" /></view><view class="frequency-row"><button v-for="item in frequencies" :key="item.value" class="frequency" :class="{ active: draft.frequency === item.value }" @tap="draft.frequency = item.value">{{ item.label }}</button></view><input v-model="draft.note" class="field" maxlength="50" placeholder="备注（选填）" /><button class="primary-button" @tap="saveMedication">保存提醒</button></view>
+    <view class="safety-note"><text>用药提示</text><text>请以处方、药品说明书和医生指导为准。这里不推荐药物、剂量或停药。</text></view>
   </view>
 </template>
 
@@ -54,59 +27,21 @@ import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { deleteMedicationReminder, loadCheckinsForDate, loadMedicationReminders, saveMedicationReminder, setMedicationCheckin } from '../../features/medication/medication.service.js';
 import type { MedicationFrequency, MedicationReminder } from '../../features/medication/medication.types.js';
-
 type MedicationView = MedicationReminder & { checked: boolean };
-const medications = ref<MedicationView[]>([]);
-const showForm = ref(false);
+const medications = ref<MedicationView[]>([]); const showForm = ref(false); const editingId = ref<string | null>(null);
 const frequencies: Array<{ value: MedicationFrequency; label: string }> = [{ value: 'daily', label: '每日' }, { value: 'weekly', label: '每周' }, { value: 'as_needed', label: '按需' }];
-const draft = reactive({ name: '', dose: '按医嘱', frequency: '每日', time: '08:00' });
-const completedCount = computed(() => medications.value.filter(item => item.checked).length);
-const progress = computed(() => medications.value.length ? Math.round((completedCount.value / medications.value.length) * 100) : 0);
-function frequencyLabel(value: MedicationFrequency) {
-  return frequencies.find(item => item.value === value)?.label || '每日';
-}
-
-function load() {
-  const today = new Date().toISOString().slice(0, 10);
-  const checked = new Set(loadCheckinsForDate(today).map(item => item.reminderId));
-  medications.value = loadMedicationReminders().sort((a, b) => (a.reminderTime || '').localeCompare(b.reminderTime || '')).map(item => ({ ...item, checked: checked.has(item.id) }));
-}
-function toggleChecked(item: MedicationView) {
-  item.checked = !item.checked;
-  setMedicationCheckin(item.id, new Date().toISOString().slice(0, 10), item.checked);
-  uni.showToast({ title: item.checked ? '已完成今天的提醒' : '已取消打卡', icon: 'none' });
-}
-function addMedication() {
-  if (!draft.name.trim()) {
-    uni.showToast({ title: '先写一个提醒名称', icon: 'none' });
-    return;
-  }
-  const frequency = frequencies.find(item => item.label === draft.frequency)?.value || 'daily';
-  const reminder: MedicationReminder = { id: `${Date.now()}`, name: draft.name.trim(), doseNote: draft.dose.trim() || '按医嘱', frequency, reminderTime: draft.time || '08:00', active: true, createdAt: new Date().toISOString() };
-  saveMedicationReminder(reminder);
-  medications.value.push({ ...reminder, checked: false });
-  draft.name = '';
-  draft.dose = '按医嘱';
-  draft.frequency = '每日';
-  draft.time = '08:00';
-  showForm.value = false;
-  uni.showToast({ title: '提醒已添加', icon: 'success' });
-}
-function removeMedication(id: string) {
-  uni.showModal({ title: '删除这条提醒？', content: '只会删除本地记录，不影响实际用药。', confirmColor: '#c76b8d', success: ({ confirm }) => { if (!confirm) return; deleteMedicationReminder(id); medications.value = medications.value.filter(item => item.id !== id); } });
-}
+const draft = reactive<{ name: string; doseNote: string; frequency: MedicationFrequency; reminderTime: string; note: string }>({ name: '', doseNote: '', frequency: 'daily', reminderTime: '', note: '' });
+const completedCount = computed(() => medications.value.filter(item => item.checked).length); const progress = computed(() => medications.value.length ? Math.round(completedCount.value / medications.value.length * 100) : 0); const todayLabel = computed(() => `${new Date().getMonth() + 1}月${new Date().getDate()}日`);
+function frequencyLabel(value: MedicationFrequency) { return frequencies.find(item => item.value === value)?.label || '每日'; }
+function load() { const date = new Date().toISOString().slice(0, 10); const checked = new Set(loadCheckinsForDate(date).map(item => item.reminderId)); medications.value = loadMedicationReminders().sort((a, b) => (a.reminderTime || '99:99').localeCompare(b.reminderTime || '99:99')).map(item => ({ ...item, checked: checked.has(item.id) })); }
+function toggleChecked(item: MedicationView) { item.checked = !item.checked; setMedicationCheckin(item.id, new Date().toISOString().slice(0, 10), item.checked); uni.showToast({ title: item.checked ? '已完成' : '已取消', icon: 'none' }); }
+function openForm() { editingId.value = null; Object.assign(draft, { name: '', doseNote: '', frequency: 'daily', reminderTime: '', note: '' }); showForm.value = true; }
+function closeForm() { showForm.value = false; editingId.value = null; }
+function saveMedication() { if (!draft.name.trim()) { uni.showToast({ title: '请填写提醒名称', icon: 'none' }); return; } const reminder: MedicationReminder = { id: editingId.value || `${Date.now()}`, name: draft.name.trim(), doseNote: draft.doseNote.trim() || '按医嘱', frequency: draft.frequency, reminderTime: draft.reminderTime || undefined, note: draft.note.trim() || undefined, active: true, createdAt: new Date().toISOString() }; saveMedicationReminder(reminder); closeForm(); load(); uni.showToast({ title: '已保存', icon: 'success' }); }
+function manageMedication(item: MedicationView) { uni.showActionSheet({ itemList: ['修改提醒', '删除提醒'], success: ({ tapIndex }) => { if (tapIndex === 0) { editingId.value = item.id; Object.assign(draft, { name: item.name, doseNote: item.doseNote, frequency: item.frequency, reminderTime: item.reminderTime || '', note: item.note || '' }); showForm.value = true; } else { uni.showModal({ title: '删除这条提醒？', content: '只删除记录，不影响实际用药。', success: ({ confirm }) => { if (confirm) { deleteMedicationReminder(item.id); load(); } } }); } } }); }
 onShow(load);
 </script>
 
 <style scoped>
-.page { min-height: 100vh; padding: 0 32rpx 64rpx; background: linear-gradient(180deg, #f4f8ff 0%, #f7fbf8 62%, #f5f9f6 100%); color: #263b35; }
-.hero-card { display: flex; align-items: center; justify-content: space-between; margin-top: 24rpx; padding: 30rpx 26rpx; border: 2rpx solid #dce8f4; border-radius: 24rpx; background: rgba(255,255,255,.9); box-shadow: 0 10rpx 24rpx rgba(111, 151, 193, .1); }
-.eyebrow { display: block; color: #6e98bd; font-size: 21rpx; }.hero-title { display: block; margin-top: 10rpx; color: #30475b; font-size: 34rpx; font-weight: 700; }.hero-note { display: block; margin-top: 10rpx; color: #82919f; font-size: 21rpx; }
-.progress-ring { display: flex; align-items: center; justify-content: center; width: 132rpx; height: 132rpx; flex: none; border-radius: 50%; background: conic-gradient(#79acd2 0 0%, #e4edf5 0 100%); position: relative; }.progress-ring::before { content: ''; position: absolute; inset: 12rpx; border-radius: 50%; background: #f8fbfe; }.progress-ring text { position: relative; color: #4b759b; font-size: 28rpx; font-weight: 700; }
-.progress-track { height: 12rpx; margin-top: 18rpx; overflow: hidden; border-radius: 12rpx; background: #e2edf5; }.progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #98c7e4, #78a9d0); transition: width .25s ease; }
-.section-heading { display: flex; align-items: flex-end; justify-content: space-between; margin: 34rpx 2rpx 14rpx; }.section-title { display: block; color: #2e4940; font-size: 29rpx; font-weight: 700; }.section-caption { display: block; margin-top: 6rpx; color: #87988f; font-size: 20rpx; }.add-button { padding: 10rpx 14rpx; border-radius: 12rpx; color: #4b82a8; background: #eaf3fb; font-size: 21rpx; }
-.med-list { border-top: 1rpx solid #e3ecef; }.med-row { display: flex; align-items: center; gap: 14rpx; min-height: 112rpx; border-bottom: 1rpx solid #e3ecef; }.med-row.done { opacity: .62; }.check-button { display: flex; align-items: center; justify-content: center; width: 44rpx; height: 44rpx; flex: none; border: 2rpx solid #9abdd7; border-radius: 50%; background: #fff; }.check-button.checked { border-color: #78a9d0; background: #78a9d0; }.check-button image { width: 28rpx; height: 28rpx; filter: brightness(0) invert(1); }.med-icon { width: 64rpx; height: 64rpx; flex: none; overflow: hidden; border-radius: 18rpx; background: #edf5fb; }.med-icon image { width: 100%; height: 100%; }.med-copy { min-width: 0; flex: 1; }.med-name, .med-meta { display: block; }.med-name { color: #34536b; font-size: 26rpx; font-weight: 700; }.med-meta { margin-top: 6rpx; color: #8295a3; font-size: 20rpx; }.more-button { width: 46rpx; height: 46rpx; color: #8ca0ad; font-size: 30rpx; }
-.empty-state { display: flex; align-items: center; flex-direction: column; padding: 62rpx 24rpx; text-align: center; }.empty-state image { width: 190rpx; height: 150rpx; }.empty-title { margin-top: 12rpx; color: #38536a; font-size: 27rpx; font-weight: 700; }.empty-copy { margin-top: 8rpx; color: #8a9aa5; font-size: 21rpx; line-height: 1.5; }.soft-button { margin-top: 20rpx; padding: 14rpx 22rpx; border-radius: 14rpx; color: #4b82a8; background: #eaf3fb; font-size: 22rpx; }
-.form-card { margin-top: 22rpx; padding: 22rpx; border: 1rpx solid #dce8f2; border-radius: 20rpx; background: #fff; }.form-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16rpx; }.close-button { width: 48rpx; height: 48rpx; border-radius: 50%; color: #7d94a3; background: #f2f7fa; font-size: 32rpx; line-height: 44rpx; }.field { width: 100%; height: 74rpx; margin-bottom: 12rpx; padding: 0 16rpx; border: 1rpx solid #dfe9ef; border-radius: 13rpx; color: #375269; background: #fbfdfe; font-size: 22rpx; }.field-row { display: flex; gap: 12rpx; }.field-row .field:first-child { flex: 1; }.time-field { width: 190rpx; }.option-row { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 4rpx; }.option-chip { padding: 10rpx 15rpx; border: 1rpx solid #dce8ef; border-radius: 999rpx; color: #7c91a0; background: #fbfdff; font-size: 20rpx; }.option-chip.active { border-color: #8bb7d8; color: #477ca4; background: #eaf3fb; }.primary-button { width: 100%; height: 82rpx; margin-top: 20rpx; border-radius: 17rpx; color: #fff; background: linear-gradient(135deg, #91c1e2, #6f9fc8); box-shadow: 0 10rpx 20rpx rgba(102, 150, 192, .2); font-size: 27rpx; line-height: 82rpx; }
-.safety-note { margin-top: 28rpx; padding: 18rpx 20rpx; border-left: 5rpx solid #9ac3df; border-radius: 0 14rpx 14rpx 0; background: #eef6fb; }.safety-title { display: block; margin-bottom: 5rpx; color: #4c789d; font-size: 21rpx; font-weight: 700; }.safety-note text:last-child { color: #8095a3; font-size: 19rpx; line-height: 1.5; }
+.page{min-height:100vh;padding:0 32rpx 56rpx;background:#f7fbf8;color:#29453a}.page-head{display:flex;align-items:flex-start;justify-content:space-between;padding:30rpx 2rpx 24rpx}.kicker{display:block;color:#789284;font-size:20rpx}.title{display:block;margin-top:8rpx;color:#29483a;font-size:35rpx;font-weight:700}.head-add{width:58rpx;height:58rpx;border:1rpx solid #cfe1d4;border-radius:50%;color:#4e8a61;background:#fff;font-size:32rpx;line-height:54rpx}.summary-line{display:flex;align-items:flex-end;justify-content:space-between;padding:22rpx 24rpx;border:1rpx solid #dce9df;border-radius:16rpx;background:#fff}.summary-number{color:#315d43;font-size:44rpx;font-weight:700;line-height:1}.summary-total{color:#9aaba0;font-size:24rpx;font-weight:400}.summary-label{display:block;margin-top:8rpx;color:#819289;font-size:19rpx}.summary-copy{max-width:220rpx;color:#71857a;font-size:20rpx;line-height:1.5;text-align:right}.progress-track{height:8rpx;margin-top:12rpx;border-radius:8rpx;background:#e4efe6;overflow:hidden}.progress-fill{height:100%;border-radius:inherit;background:#7fb98b;transition:width .25s ease}.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-top:34rpx;margin-bottom:12rpx}.section-title{display:block;color:#315341;font-size:28rpx;font-weight:700}.section-caption{display:block;margin-top:5rpx;color:#8a9b91;font-size:19rpx}.text-action{padding:7rpx 0;color:#4f8a60;font-size:21rpx}.timeline{border-top:1rpx solid #dfeae1}.med-row{display:flex;align-items:center;min-height:116rpx;border-bottom:1rpx solid #e3ece4}.med-row.done{opacity:.6}.time-rail{display:flex;align-items:center;flex-direction:column;width:70rpx;flex:none;padding-right:12rpx;color:#8a9a90;font-size:18rpx}.rail-dot{width:12rpx;height:12rpx;margin-top:8rpx;border:2rpx solid #9bc1a3;border-radius:50%;background:#f7fbf8}.rail-dot.checked{border-color:#7fb98b;background:#7fb98b}.check-button{display:flex;align-items:center;justify-content:center;width:42rpx;height:42rpx;flex:none;margin-right:14rpx;border:2rpx solid #a4c5ab;border-radius:50%;background:#fff}.check-button.checked{border-color:#7fb98b;background:#7fb98b}.check-button image{width:25rpx;height:25rpx;filter:brightness(0) invert(1)}.med-copy{min-width:0;flex:1}.med-name,.med-meta,.med-note{display:block}.med-name{color:#365a43;font-size:25rpx;font-weight:700}.med-meta{margin-top:5rpx;color:#809188;font-size:19rpx}.med-note{margin-top:4rpx;color:#9aa9a1;font-size:18rpx}.more-button{width:54rpx;height:54rpx;color:#8b9d91;font-size:23rpx}.empty-state{display:flex;align-items:center;flex-direction:column;padding:68rpx 24rpx 48rpx;text-align:center}.empty-state image{width:176rpx;height:138rpx;opacity:.85}.empty-title{margin-top:12rpx;color:#365944;font-size:27rpx;font-weight:700}.empty-copy{max-width:540rpx;margin-top:8rpx;color:#899990;font-size:20rpx;line-height:1.5}.empty-action{margin-top:20rpx;padding:13rpx 20rpx;border-radius:12rpx;color:#4f8a60;background:#eaf4ec;font-size:21rpx}.form-panel{margin-top:22rpx;padding:22rpx;border:1rpx solid #dce9df;border-radius:16rpx;background:#fff}.form-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16rpx}.close-button{width:46rpx;height:46rpx;border-radius:50%;color:#7c9083;background:#f1f6f2;font-size:28rpx;line-height:42rpx}.field{width:100%;height:70rpx;margin-bottom:12rpx;padding:0 14rpx;border:1rpx solid #e0ebe2;border-radius:11rpx;color:#345440;background:#fbfdfb;font-size:21rpx}.field-grid{display:grid;grid-template-columns:1fr 180rpx;gap:12rpx}.frequency-row{display:flex;gap:9rpx;margin:2rpx 0 12rpx}.frequency{flex:1;padding:10rpx 0;border:1rpx solid #deebe0;border-radius:10rpx;color:#809188;background:#fbfdfb;font-size:19rpx}.frequency.active{border-color:#9bc9a5;color:#39744c;background:#edf7ef}.primary-button{width:100%;height:78rpx;border-radius:13rpx;color:#fff;background:#6fa77b;font-size:25rpx;line-height:78rpx}.safety-note{display:flex;gap:10rpx;margin-top:28rpx;padding:14rpx 16rpx;border-left:4rpx solid #a9c8af;background:#eff6f0;color:#84958a;font-size:18rpx;line-height:1.5}.safety-note text:first-child{flex:none;color:#527b5c;font-weight:700}
 </style>

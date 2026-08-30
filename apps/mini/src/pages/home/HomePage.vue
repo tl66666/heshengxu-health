@@ -1033,3 +1033,7 @@ onShow(() => {
   font-weight: 700;
 }
 </style>
+<style scoped>
+.period-card,.medication-card{border:1rpx solid #dfeae1;box-shadow:0 4rpx 12rpx rgba(47,91,57,.05)}
+.period-card{background:#fff8fb}.medication-card{background:#f6fbff}.period-days{font-size:24rpx}.medication-item{font-size:22rpx}.period-icon-img,.medication-icon-img{width:72rpx;height:72rpx;opacity:.5}
+</style>
