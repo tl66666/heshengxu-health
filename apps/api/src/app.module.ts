@@ -9,6 +9,7 @@ import { MealEntriesModule } from './modules/meal-entries/meal-entries.module.js
 import { FoodRecognitionModule } from './modules/food-recognition/food-recognition.module.js';
 import { HealthInsightsModule } from './modules/health-insights/health-insights.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { UserFoodsModule } from './modules/user-foods/user-foods.module.js';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
     MealEntriesModule,
     FoodRecognitionModule,
     HealthInsightsModule,
+    UserFoodsModule,
   ],
   controllers: [SystemController],
 })
