@@ -7,10 +7,11 @@
 
     <view v-if="apiPlan" class="api-plan"><view><text class="api-title">健康计划</text><text class="api-note">{{ apiPlan.kind === 'sleep' ? '睡眠与精力' : '体重管理' }} · 来自健康档案</text></view><button @tap="openSetup">调整</button></view>
 
-    <PlanTaskList :plans="plans" @toggle="toggleTask" />
+    <PlanTaskList :plans="plans" @toggle="toggleTask" @manage="openManage" />
     <PlanTemplateGrid @select="addTemplate" @custom="sheetVisible = true" />
 
     <PlanCreateSheet :visible="sheetVisible" @close="sheetVisible = false" @create="createCustom" />
+    <PlanManageSheet :visible="manageVisible" :plans="plans" :plan-id="managePlanId" @close="manageVisible = false" @save="savePlan" @add-task="addTask" @archive="archivePlan" />
     <MiniTabBar active="plan" />
   </view>
 </template>
@@ -23,8 +24,9 @@ import PlanHero from '../../components/plans/PlanHero.vue';
 import PlanTaskList from '../../components/plans/PlanTaskList.vue';
 import PlanTemplateGrid from '../../components/plans/PlanTemplateGrid.vue';
 import PlanCreateSheet from '../../components/plans/PlanCreateSheet.vue';
+import PlanManageSheet from '../../components/plans/PlanManageSheet.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
-import { addCustomPlan, addTemplatePlan, loadHabitPlans, planStats, streakFor, toggleHabitTask, weekCheckins } from '../../features/plans/plan-store.js';
+import { addCustomPlan, addHabitTask, addTemplatePlan, loadHabitPlans, planStats, removeHabitPlan, streakFor, toggleHabitTask, updateHabitPlan, weekCheckins } from '../../features/plans/plan-store.js';
 import type { HabitPlan, PlanTemplate } from '../../features/plans/plan-types.js';
 
 const plans = ref<HabitPlan[]>([]);
@@ -33,9 +35,15 @@ const apiPlan = computed(() => healthLoopState.today.value?.activePlan || health
 const habitCompleted = computed(() => plans.value.reduce((sum, plan) => sum + planStats(plan).completed, 0));
 const habitStreak = computed(() => plans.value.length ? Math.max(...plans.value.map(streakFor)) : 0);
 const habitWeekCheckins = computed(() => weekCheckins(plans.value));
+const manageVisible = ref(false);
+const managePlanId = ref('');
 
 function refresh() { plans.value = loadHabitPlans(); healthLoopState.loadToday(localDate()); }
 function toggleTask(planId: string, taskId: string) { toggleHabitTask(planId, taskId); plans.value = loadHabitPlans(); }
+function openManage(planId: string) { managePlanId.value = planId; manageVisible.value = true; }
+function savePlan(planId: string, patch: { title: string; subtitle: string }) { updateHabitPlan(planId, patch); plans.value = loadHabitPlans(); uni.showToast({ title: '计划已更新', icon: 'none' }); }
+function addTask(planId: string, title: string) { addHabitTask(planId, title); plans.value = loadHabitPlans(); uni.showToast({ title: '小行动已添加', icon: 'none' }); }
+function archivePlan(planId: string) { removeHabitPlan(planId); plans.value = loadHabitPlans(); manageVisible.value = false; uni.showToast({ title: '计划已归档', icon: 'none' }); }
 function addTemplate(template: PlanTemplate) {
   const result = addTemplatePlan(template); plans.value = result.plans;
   uni.showToast({ title: result.added ? '已加入你的计划' : '这个计划已经在进行中', icon: 'none' });

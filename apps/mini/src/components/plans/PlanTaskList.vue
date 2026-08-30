@@ -6,7 +6,7 @@
       <view class="plan-head">
         <image :src="plan.icon" mode="aspectFit" />
         <view class="plan-head-copy"><text class="plan-title">{{ plan.title }}</text><text class="plan-subtitle">{{ plan.subtitle }}</text></view>
-        <text class="plan-frequency">{{ plan.frequency }}</text>
+        <view class="plan-head-actions"><text class="plan-frequency">{{ plan.frequency }}</text><button class="manage" aria-label="管理计划" @tap="$emit('manage', plan.id)">···</button></view>
       </view>
       <view class="task-list">
         <view v-for="task in plan.tasks" :key="task.id" class="task-row" :class="{ done: done(task) }">
@@ -28,7 +28,7 @@ import { computed } from 'vue';
 import type { HabitPlan, HabitTask } from '../../features/plans/plan-types.js';
 import { isTaskDone, planStats } from '../../features/plans/plan-store.js';
 const props = defineProps<{ plans: HabitPlan[] }>();
-defineEmits<{ toggle: [planId: string, taskId: string] }>();
+defineEmits<{ toggle: [planId: string, taskId: string]; manage: [planId: string] }>();
 const completedTotal = computed(() => props.plans.reduce((sum, plan) => sum + planStats(plan).completed, 0));
 const totalTasks = computed(() => props.plans.reduce((sum, plan) => sum + plan.tasks.length, 0));
 const done = (task: HabitTask) => isTaskDone(task);
@@ -58,6 +58,7 @@ const weekDays = computed(() => {
 .plan-title { display:block; color:#5b4d52; font-size:27rpx; font-weight:700; }
 .plan-subtitle { display:block; margin-top:5rpx; overflow:hidden; color:#927f84; font-size:20rpx; text-overflow:ellipsis; white-space:nowrap; }
 .plan-frequency { flex:none; color:#b07d72; font-size:18rpx; }
+.plan-head-actions { display:flex; align-items:center; gap:8rpx; flex:none; }.manage { width:44rpx; height:44rpx; color:#a88180; font-size:26rpx; line-height:38rpx; }
 .task-list { margin-top:14rpx; border-top:1rpx solid rgba(214,188,181,.35); }
 .task-row { display:flex; align-items:center; gap:14rpx; min-height:80rpx; border-bottom:1rpx solid rgba(214,188,181,.3); }
 .task-row:last-child { border-bottom:0; }

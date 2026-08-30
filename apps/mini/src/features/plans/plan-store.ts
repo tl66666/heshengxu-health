@@ -150,6 +150,22 @@ export function removeHabitPlan(planId: string) {
   return write(read().filter((plan) => plan.id !== planId));
 }
 
+export function updateHabitPlan(planId: string, patch: Partial<Pick<HabitPlan, 'title' | 'subtitle' | 'frequency'>>) {
+  const plans = read();
+  const plan = plans.find((item) => item.id === planId);
+  if (!plan) return plans;
+  Object.assign(plan, patch);
+  return write(plans);
+}
+
+export function addHabitTask(planId: string, title: string, note = '完成后给自己一个小小的肯定') {
+  const plans = read();
+  const plan = plans.find((item) => item.id === planId);
+  if (!plan || !title.trim()) return plans;
+  plan.tasks.push({ id: `${plan.id}-task-${Date.now()}`, title: title.trim(), note, doneDates: [] });
+  return write(plans);
+}
+
 export function isTaskDone(task: { doneDates: string[] }, date = today()) {
   return task.doneDates.includes(date);
 }
