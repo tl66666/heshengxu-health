@@ -255,7 +255,7 @@
 
       <!-- 8. 编辑首页卡片 -->
       <button class="edit-card" hover-class="button-hover" @tap="go('/pages/home/edit-cards')">
-        <text class="edit-text">+ 编辑首页卡片</text>
+        <text class="edit-text">编辑首页卡片</text>
       </button>
     </template>
 
@@ -853,21 +853,6 @@ onShow(() => {
   font-size: 18rpx;
 }
 
-.add-btn {
-  width: 44rpx;
-  height: 44rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(232, 247, 237, 0.6);
-  color: #7fcc8f;
-  font-size: 28rpx;
-  font-weight: 300;
-  padding: 0;
-  border: 0;
-}
-
 .record-content {
   display: flex;
   align-items: center;
@@ -934,7 +919,7 @@ onShow(() => {
 .grid-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 16rpx;
 }
 
@@ -942,19 +927,6 @@ onShow(() => {
   color: #2d6943;
   font-size: 26rpx;
   font-weight: 700;
-}
-
-.grid-add {
-  width: 40rpx;
-  height: 40rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(127, 204, 143, 0.12);
-  color: #5a9572;
-  font-size: 28rpx;
-  font-weight: 300;
 }
 
 .grid-data {
