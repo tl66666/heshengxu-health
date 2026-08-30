@@ -170,3 +170,13 @@ export function streakFor(plan: HabitPlan) {
   }
   return streak;
 }
+
+export function weekCheckins(plans: HabitPlan[]) {
+  const dates = new Set<string>();
+  for (let offset = 0; offset < 7; offset += 1) {
+    const date = new Date();
+    date.setDate(date.getDate() - offset);
+    dates.add(new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10));
+  }
+  return plans.reduce((sum, plan) => sum + plan.tasks.reduce((taskSum, task) => taskSum + task.doneDates.filter((date) => dates.has(date)).length, 0), 0);
+}

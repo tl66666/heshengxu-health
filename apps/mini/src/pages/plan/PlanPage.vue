@@ -3,7 +3,7 @@
     <image class="leaf" src="/static/illustrations/leaf-corner-decoration.png" mode="aspectFit" />
     <view class="topbar"><view><text class="top-eyebrow">HEBAN · 我的计划</text><text class="top-title">计划</text></view><button class="history" @tap="showToast('历史记录会在这里慢慢长出来')">历史</button></view>
 
-    <PlanHero :completed="habitCompleted" :streak="habitStreak" />
+    <PlanHero :completed="habitCompleted" :streak="habitStreak" :week-checkins="habitWeekCheckins" />
 
     <view v-if="apiPlan" class="api-plan"><view><text class="api-title">健康计划</text><text class="api-note">{{ apiPlan.kind === 'sleep' ? '睡眠与精力' : '体重管理' }} · 来自健康档案</text></view><button @tap="openSetup">调整</button></view>
 
@@ -24,7 +24,7 @@ import PlanTaskList from '../../components/plans/PlanTaskList.vue';
 import PlanTemplateGrid from '../../components/plans/PlanTemplateGrid.vue';
 import PlanCreateSheet from '../../components/plans/PlanCreateSheet.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
-import { addCustomPlan, addTemplatePlan, loadHabitPlans, planStats, streakFor, toggleHabitTask } from '../../features/plans/plan-store.js';
+import { addCustomPlan, addTemplatePlan, loadHabitPlans, planStats, streakFor, toggleHabitTask, weekCheckins } from '../../features/plans/plan-store.js';
 import type { HabitPlan, PlanTemplate } from '../../features/plans/plan-types.js';
 
 const plans = ref<HabitPlan[]>([]);
@@ -32,6 +32,7 @@ const sheetVisible = ref(false);
 const apiPlan = computed(() => healthLoopState.today.value?.activePlan || healthLoopState.plan.value);
 const habitCompleted = computed(() => plans.value.reduce((sum, plan) => sum + planStats(plan).completed, 0));
 const habitStreak = computed(() => plans.value.length ? Math.max(...plans.value.map(streakFor)) : 0);
+const habitWeekCheckins = computed(() => weekCheckins(plans.value));
 
 function refresh() { plans.value = loadHabitPlans(); healthLoopState.loadToday(localDate()); }
 function toggleTask(planId: string, taskId: string) { toggleHabitTask(planId, taskId); plans.value = loadHabitPlans(); }

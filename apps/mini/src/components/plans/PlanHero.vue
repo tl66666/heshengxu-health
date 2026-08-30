@@ -7,6 +7,7 @@
       <view class="hero-metrics">
         <view><text class="metric-value">{{ completed }}</text><text class="metric-label">今日完成</text></view>
         <view><text class="metric-value">{{ streak }}</text><text class="metric-label">连续天数</text></view>
+        <view><text class="metric-value">{{ weekCheckins }}</text><text class="metric-label">本周完成</text></view>
       </view>
     </view>
     <image class="hero-art" src="/static/illustrations/xuxu-avatar.png" mode="aspectFit" />
@@ -14,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ completed: number; streak: number }>();
+defineProps<{ completed: number; streak: number; weekCheckins: number }>();
 const now = new Date();
 const dateLabel = `${now.getMonth() + 1} 月 ${now.getDate()} 日`;
 </script>
@@ -25,7 +26,7 @@ const dateLabel = `${now.getMonth() + 1} 月 ${now.getDate()} 日`;
 .eyebrow { display:block; color:#b27a70; font-size:21rpx; }
 .title { display:block; max-width:440rpx; margin-top:14rpx; color:#5d4f53; font-size:36rpx; font-weight:700; line-height:1.25; }
 .subtitle { display:block; margin-top:10rpx; color:#97858a; font-size:22rpx; }
-.hero-metrics { display:flex; gap:38rpx; margin-top:24rpx; }
+.hero-metrics { display:flex; gap:24rpx; margin-top:24rpx; }
 .hero-metrics view { display:flex; align-items:baseline; gap:8rpx; }
 .metric-value { color:#b66d80; font-size:33rpx; font-weight:700; }
 .metric-label { color:#9b888d; font-size:20rpx; }
