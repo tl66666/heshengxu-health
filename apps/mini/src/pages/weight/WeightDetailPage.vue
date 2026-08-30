@@ -115,11 +115,38 @@
             :cx="point.x"
             :cy="point.y"
             r="4"
-            class="trend-point"
+            :class="['trend-point', { selected: selectedTrendRecord?.id === point.id }]"
+            @tap="selectTrendPoint(point.id)"
           />
         </svg>
         <view class="chart-labels">
           <text v-for="point in chartLabels" :key="point.id">{{ point.label }}</text>
+        </view>
+      </view>
+      <view v-if="hasTrendData" class="trend-summary">
+        <view class="trend-summary-item">
+          <text class="trend-summary-label">区间平均</text>
+          <text class="trend-summary-value">{{ averageWeight.toFixed(1) }} kg</text>
+        </view>
+        <view class="trend-summary-item">
+          <text class="trend-summary-label">最低记录</text>
+          <text class="trend-summary-value">{{ lowestWeight.toFixed(1) }} kg</text>
+        </view>
+        <view class="trend-summary-item">
+          <text class="trend-summary-label">最高记录</text>
+          <text class="trend-summary-value">{{ highestWeight.toFixed(1) }} kg</text>
+        </view>
+      </view>
+      <view v-if="selectedTrendRecord" class="selected-record">
+        <view>
+          <text class="selected-record-label">选中记录</text>
+          <text class="selected-record-date">{{
+            formatDateTime(selectedTrendRecord.recordedAt)
+          }}</text>
+        </view>
+        <view class="selected-record-value">
+          <text>{{ selectedTrendRecord.weight.toFixed(1) }}</text>
+          <text class="small-unit"> kg</text>
         </view>
       </view>
       <view v-if="hasTrendComparison" class="insight-strip">
@@ -217,9 +244,7 @@
         <view class="forecast-copy">
           <text class="forecast-label">预计到达目标</text>
           <text class="forecast-date">{{ forecastDate }}</text>
-          <text class="forecast-note"
-            >还需要 {{ remainingKg.toFixed(1) }} kg，保持每周 0.4 kg 的舒适节奏</text
-          >
+          <text class="forecast-note">{{ forecastNote }}</text>
         </view>
         <view class="forecast-ring"
           ><text>{{ progress.toFixed(0) }}<text class="ring-unit">%</text></text
@@ -377,6 +402,9 @@ const startWeight = computed(
 const targetWeight = computed(
   () => healthLoopState.today.value?.activePlan?.healthTarget?.targetWeightKg ?? 0,
 );
+const targetDirection = computed(
+  () => healthLoopState.today.value?.activePlan?.healthTarget?.direction ?? 'lose',
+);
 const heightCm = computed(() => profile.value?.heightCm ?? 0);
 
 const currentWeight = computed(
@@ -396,7 +424,12 @@ const progress = computed(() =>
         0,
         Math.min(
           100,
-          ((startWeight.value - currentWeight.value) / (startWeight.value - targetWeight.value)) *
+          ((targetDirection.value === 'gain'
+            ? currentWeight.value - startWeight.value
+            : startWeight.value - currentWeight.value) /
+            (targetDirection.value === 'gain'
+              ? targetWeight.value - startWeight.value
+              : startWeight.value - targetWeight.value)) *
             100,
         ),
       )
@@ -405,7 +438,12 @@ const progress = computed(() =>
 const targetDate = computed(() => (targetWeight.value ? '根据当前节奏估算' : '先设置目标体重'));
 const remainingKg = computed(() =>
   currentWeight.value && targetWeight.value
-    ? Math.max(0, currentWeight.value - targetWeight.value)
+    ? Math.max(
+        0,
+        targetDirection.value === 'gain'
+          ? targetWeight.value - currentWeight.value
+          : currentWeight.value - targetWeight.value,
+      )
     : 0,
 );
 const forecastDate = computed(() =>
@@ -417,6 +455,12 @@ const forecastDate = computed(() =>
         ? '根据记录动态估算'
         : '等待目标体重',
 );
+const forecastNote = computed(() => {
+  if (!currentWeight.value) return '记录 3 次以上后，预测会更准确';
+  if (!targetWeight.value) return '设置目标体重后，这里会显示预计进度';
+  if (remainingKg.value <= 0) return '已达到目标，保持现在的节奏就很好';
+  return `还需要 ${remainingKg.value.toFixed(1)} kg，保持每周 0.4 kg 的舒适节奏`;
+});
 const latestRecordLabel = computed(() =>
   records.value[0] ? `${formatDate(records.value[0].recordedAt)} 更新` : '还没有记录',
 );
@@ -435,6 +479,24 @@ const trendRecords = computed(() => {
 const chartData = computed(() => trendRecords.value);
 const hasTrendData = computed(() => chartData.value.length > 0);
 const hasTrendComparison = computed(() => chartData.value.length > 1);
+const selectedTrendId = ref<string | null>(null);
+const selectedTrendRecord = computed(
+  () =>
+    chartData.value.find((record) => record.id === selectedTrendId.value) ||
+    chartData.value[chartData.value.length - 1] ||
+    null,
+);
+const averageWeight = computed(() =>
+  chartData.value.length
+    ? chartData.value.reduce((total, record) => total + record.weight, 0) / chartData.value.length
+    : 0,
+);
+const lowestWeight = computed(() =>
+  chartData.value.length ? Math.min(...chartData.value.map((record) => record.weight)) : 0,
+);
+const highestWeight = computed(() =>
+  chartData.value.length ? Math.max(...chartData.value.map((record) => record.weight)) : 0,
+);
 const chartBounds = computed(() => {
   const data = chartData.value;
   if (!data.length) return { min: 0, max: 1 };
@@ -456,7 +518,8 @@ const trendPoints = computed(() => {
   const data = chartData.value;
   if (!data.length) return [];
   if (data.length === 1) {
-    return [{ id: data[0].id, x: 160, y: 76 }];
+    const first = data[0];
+    return first ? [{ id: first.id, x: 160, y: 76 }] : [];
   }
   const min = Math.min(...data.map((item) => item.weight)) - 0.5;
   const max = Math.max(...data.map((item) => item.weight)) + 0.5;
@@ -512,13 +575,21 @@ const milestones = computed(() => [
     achieved: records.value.length >= 5,
   },
   {
-    title: '轻盈 1kg',
-    note: startWeight.value - currentWeight.value >= 1 ? '已达成' : '还差 1kg',
-    achieved: startWeight.value - currentWeight.value >= 1,
+    title: targetDirection.value === 'gain' ? '稳步增加 1kg' : '轻盈 1kg',
+    note:
+      (targetDirection.value === 'gain'
+        ? currentWeight.value - startWeight.value
+        : startWeight.value - currentWeight.value) >= 1
+        ? '已达成'
+        : '还差 1kg',
+    achieved:
+      (targetDirection.value === 'gain'
+        ? currentWeight.value - startWeight.value
+        : startWeight.value - currentWeight.value) >= 1,
   },
   {
     title: '靠近目标',
-    note: `${Math.max(0, targetWeight.value - currentWeight.value).toFixed(1)} kg`,
+    note: `${remainingKg.value.toFixed(1)} kg`,
     achieved: progress.value >= 60,
   },
 ]);
@@ -586,6 +657,12 @@ function formatDay(value: string) {
 function formatTime(value: string) {
   return new Date(value).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 }
+function formatDateTime(value: string) {
+  return `${formatDate(value)} ${formatTime(value)}`;
+}
+function selectTrendPoint(id: string) {
+  selectedTrendId.value = id;
+}
 function changeLabel(record: WeightRecord, index: number) {
   const next = records.value[index + 1];
   if (!next) return '';
@@ -623,6 +700,7 @@ function saveLocalWeight() {
     return;
   }
   records.value = [
+    ...records.value,
     {
       id: `r-${Date.now()}`,
       weight: Number(value.toFixed(1)),
@@ -631,8 +709,7 @@ function saveLocalWeight() {
         : new Date().toISOString(),
       note: inputNote.value || '晨起空腹',
     },
-    ...records.value,
-  ];
+  ].sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
   uni.setStorageSync(STORAGE_KEY, records.value);
   closeDialog();
 }
@@ -662,16 +739,18 @@ async function saveWeight() {
         recordedAt: string;
         note: string | null;
       };
-      records.value = records.value.map((record) =>
-        record.id === editingRecordId.value
-          ? {
-              id: replaced.id,
-              weight: replaced.valueKg,
-              recordedAt: replaced.recordedAt,
-              note: replaced.note || undefined,
-            }
-          : record,
-      );
+      records.value = records.value
+        .map((record) =>
+          record.id === editingRecordId.value
+            ? {
+                id: replaced.id,
+                weight: replaced.valueKg,
+                recordedAt: replaced.recordedAt,
+                note: replaced.note || undefined,
+              }
+            : record,
+        )
+        .sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
       uni.setStorageSync(STORAGE_KEY, records.value);
       uni.showToast({ title: '已更新记录', icon: 'success' });
       closeDialog();
@@ -679,29 +758,31 @@ async function saveWeight() {
     }
     const saved = await createWeightRecord(payload);
     records.value = [
+      ...records.value,
       {
         id: saved.id,
         weight: saved.valueKg,
         recordedAt: saved.recordedAt,
         note: saved.note || undefined,
       },
-      ...records.value,
-    ];
+    ].sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
     uni.setStorageSync(STORAGE_KEY, records.value);
     uni.showToast({ title: '记录成功', icon: 'success' });
     closeDialog();
   } catch {
     if (editingRecordId.value) {
-      records.value = records.value.map((record) =>
-        record.id === editingRecordId.value
-          ? {
-              ...record,
-              weight: payload.valueKg,
-              recordedAt: payload.recordedAt,
-              note: payload.note,
-            }
-          : record,
-      );
+      records.value = records.value
+        .map((record) =>
+          record.id === editingRecordId.value
+            ? {
+                ...record,
+                weight: payload.valueKg,
+                recordedAt: payload.recordedAt,
+                note: payload.note,
+              }
+            : record,
+        )
+        .sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
       uni.setStorageSync(STORAGE_KEY, records.value);
       uni.showToast({ title: '网络不可用，已更新本地记录', icon: 'none' });
       closeDialog();
@@ -1037,6 +1118,56 @@ onMounted(loadWeightData);
   stroke-width: 1.5;
   stroke-dasharray: 5 5;
 }
+.trend-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8rpx;
+  margin-top: 22rpx;
+  padding: 16rpx 12rpx;
+  border-radius: 16rpx;
+  background: #f8f4ef;
+}
+.trend-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rpx;
+}
+.trend-summary-label {
+  color: #ad9b94;
+  font-size: 18rpx;
+}
+.trend-summary-value {
+  color: #6b5d5d;
+  font-size: 21rpx;
+  font-weight: 700;
+}
+.selected-record {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  padding: 16rpx 18rpx;
+  border: 1rpx solid #eee2da;
+  border-radius: 16rpx;
+  background: #fffdfb;
+}
+.selected-record-label,
+.selected-record-date {
+  display: block;
+  color: #a28f88;
+  font-size: 18rpx;
+}
+.selected-record-date {
+  margin-top: 4rpx;
+  color: #756567;
+  font-size: 20rpx;
+}
+.selected-record-value {
+  color: #5d8f6d;
+  font-size: 32rpx;
+  font-weight: 800;
+}
 .trend-area {
   fill: url(#trend-fill);
   fill: rgba(169, 218, 190, 0.2);
@@ -1052,6 +1183,11 @@ onMounted(loadWeightData);
   fill: #fffdfb;
   stroke: #72b48d;
   stroke-width: 3;
+}
+.trend-point.selected {
+  fill: #72b48d;
+  stroke: #fffdfb;
+  stroke-width: 4;
 }
 .chart-labels {
   display: flex;

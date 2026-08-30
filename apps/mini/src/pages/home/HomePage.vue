@@ -354,10 +354,13 @@ const startWeight = computed(
   () => today.value?.activePlan?.healthTarget?.startWeightKg?.toFixed(1) || '--',
 );
 
-const currentWeight = computed(
-  () => today.value?.todayRecords?.weight?.valueKg?.toFixed(1) || '--',
-);
 const weightHistory = ref<Array<{ id: string; valueKg: number; recordedAt: string }>>([]);
+const currentWeight = computed(
+  () =>
+    today.value?.todayRecords?.weight?.valueKg?.toFixed(1) ||
+    weightHistory.value[0]?.valueKg.toFixed(1) ||
+    '--',
+);
 const miniWeightData = computed(() =>
   weightHistory.value
     .slice()
