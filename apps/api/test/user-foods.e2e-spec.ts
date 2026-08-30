@@ -20,7 +20,7 @@ describe('user foods', () => {
         energyKcal: 165,
         proteinG: 31,
         fatG: 3.6,
-        carbohydrateG: 0,
+        carbohydrateG: 1.2,
         defaultServingLabel: '一块',
         defaultServingGrams: 150,
       })
