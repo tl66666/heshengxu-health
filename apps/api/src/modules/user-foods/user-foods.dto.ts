@@ -1,4 +1,10 @@
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, Matches } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, Matches } from 'class-validator';
+
+export enum UserFoodSource {
+  catalog = 'catalog',
+  photo = 'photo',
+  manual = 'manual',
+}
 
 export class CreateUserFoodDto {
   @IsString()
@@ -13,10 +19,10 @@ export class CreateUserFoodDto {
   imageUrl?: string;
 
   @IsString()
-  @IsIn(['catalog', 'photo', 'manual'])
+  @IsEnum(UserFoodSource)
   @IsNotEmpty()
   @MaxLength(40)
-  source!: string;
+  source!: UserFoodSource;
 
   @IsNumber()
   @Min(0.0001)

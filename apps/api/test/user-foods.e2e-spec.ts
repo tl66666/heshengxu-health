@@ -118,4 +118,24 @@ describe('user foods', () => {
       .expect(400);
     await app.close();
   });
+
+  it('rejects unknown personal food sources', async () => {
+    const app = await createApp();
+    await app.init();
+    await request(app.getHttpServer())
+      .post('/api/v1/user-foods')
+      .set({ Authorization: `Bearer dev-user-food-source-${Date.now()}` })
+      .send({
+        name: '自定义食物',
+        source: 'imported',
+        energyKcal: 100,
+        proteinG: 1,
+        fatG: 1,
+        carbohydrateG: 1,
+        defaultServingLabel: '1份',
+        defaultServingGrams: 100,
+      })
+      .expect(400);
+    await app.close();
+  });
 });
