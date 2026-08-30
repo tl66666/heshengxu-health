@@ -78,8 +78,15 @@
     <!-- 快捷记录 -->
     <view class="quick-section">
       <view class="section-header">
-        <image class="header-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
-        <text class="header-text">快速记录</text>
+        <view class="section-heading-copy">
+          <image class="header-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <text class="header-text">快捷记录</text>
+        </view>
+        <button class="quick-drink-picker" @tap="selectQuickDrink">
+          <text class="quick-drink-emoji">{{ quickDrink.icon }}</text>
+          <text>{{ quickDrink.name }}</text>
+          <text class="quick-drink-chevron">⌄</text>
+        </button>
       </view>
       
       <view class="quick-buttons">
@@ -89,7 +96,7 @@
           class="quick-btn"
           @tap="quickAdd(amt)"
         >
-          <image class="btn-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <text class="btn-drink-icon">{{ quickDrink.icon }}</text>
           <text class="btn-text">{{ amt }}ml</text>
         </button>
       </view>
@@ -98,8 +105,8 @@
     <!-- 记录喝水按钮 -->
     <view class="action-section">
       <button class="record-btn" @tap="openDialog">
-        <image class="record-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
-        <text class="record-text">记录喝水</text>
+        <text class="record-btn-emoji">{{ quickDrink.icon }}</text>
+        <text class="record-text">记录{{ quickDrink.name }}</text>
       </button>
     </view>
 
@@ -125,7 +132,7 @@
           :key="record.id"
           class="record-item card"
         >
-          <image class="record-img" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <text class="record-drink-icon">{{ getDrinkIcon(record.drinkType) }}</text>
           <view class="record-info">
             <text class="record-name">{{ getDrinkName(record.drinkType) }}</text>
             <text class="record-time">{{ formatTime(record.timestamp) }}</text>
@@ -142,7 +149,7 @@
     <view v-if="dialogVisible" class="dialog-mask" @tap="closeDialog">
       <view class="dialog-content" @tap.stop>
         <view class="dialog-header">
-          <text class="dialog-title">添加饮水记录</text>
+          <text class="dialog-title">添加{{ getDrinkName(selectedDrink) }}记录</text>
           <button class="close-btn" @tap="closeDialog">✕</button>
         </view>
 
@@ -212,6 +219,7 @@ const editMode = ref(false);
 const dialogVisible = ref(false);
 const inputAmount = ref('200');
 const selectedDrink = ref('water');
+const quickDrinkId = ref('water');
 const isPersonalized = ref(false);
 
 const quickAmounts = [100, 200, 250, 300, 500];
@@ -226,6 +234,8 @@ const drinkOptions = [
 ];
 
 const numberKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '00', '⌫'];
+const defaultDrink = { id: 'water', name: '水', icon: '💧' };
+const quickDrink = computed(() => drinkOptions.find((drink) => drink.id === quickDrinkId.value) || defaultDrink);
 
 const dateLabel = computed(() => {
   const d = currentDate.value;
@@ -291,6 +301,10 @@ function getDrinkName(type: string): string {
   return drink?.name || '水';
 }
 
+function getDrinkIcon(type: string): string {
+  return drinkOptions.find((drink) => drink.id === type)?.icon || '💧';
+}
+
 function prevDay() {
   const d = new Date(currentDate.value);
   d.setDate(d.getDate() - 1);
@@ -312,12 +326,22 @@ function goToSetup() {
 }
 
 function quickAdd(amount: number) {
-  addRecord(amount, 'water');
+  addRecord(amount, quickDrink.value.id);
+}
+
+function selectQuickDrink() {
+  uni.showActionSheet({
+    itemList: drinkOptions.map((drink) => `${drink.icon} ${drink.name}`),
+    success: ({ tapIndex }) => {
+      const drink = drinkOptions[tapIndex];
+      if (drink) quickDrinkId.value = drink.id;
+    },
+  });
 }
 
 function openDialog() {
   inputAmount.value = '200';
-  selectedDrink.value = 'water';
+  selectedDrink.value = quickDrinkId.value;
   dialogVisible.value = true;
 }
 
@@ -677,9 +701,11 @@ onShow(() => {
 .section-header {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  justify-content: space-between;
   margin-bottom: 12rpx;
 }
+
+.section-heading-copy { display: flex; align-items: center; gap: 8rpx; }
 
 .header-icon {
   width: 28rpx;
@@ -693,6 +719,9 @@ onShow(() => {
   font-weight: 800;
   color: #2d6943;
 }
+
+.quick-drink-picker { display: inline-flex; align-items: center; gap: 6rpx; min-height: 44rpx; padding: 6rpx 12rpx; border: 1rpx solid #dce9e5; border-radius: 999rpx; color: #5c8177; background: rgba(255, 253, 251, .84); font-size: 19rpx; }
+.quick-drink-emoji { font-size: 22rpx; }.quick-drink-chevron { margin-left: 3rpx; color: #a8b9b2; font-size: 18rpx; }
 
 .quick-buttons {
   display: grid;
@@ -720,6 +749,8 @@ onShow(() => {
   border-radius: 6rpx;
   mix-blend-mode: multiply;
 }
+
+.btn-drink-icon { display: flex; align-items: center; justify-content: center; width: 34rpx; height: 34rpx; font-size: 27rpx; line-height: 1; }
 
 .btn-text {
   font-size: 20rpx;
@@ -754,6 +785,8 @@ onShow(() => {
   mix-blend-mode: multiply;
   filter: brightness(1.2);
 }
+
+.record-btn-emoji { font-size: 28rpx; line-height: 1; }
 
 .record-text {
   font-size: 32rpx;
@@ -1050,15 +1083,18 @@ onShow(() => {
 .cup-empty { top: -50%; left: -50%; width: 200%; height: 200%; z-index: 2; }
 .water-wrapper { width: 56%; max-height: 72%; bottom: 9%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(4% 0, 96% 0, 100% 91%, 92% 100%, 8% 100%, 0 91%); background: rgba(157, 206, 226, .42); z-index: 1; }
 .water-wrapper::before { content: ''; position: absolute; top: 0; right: 5%; left: 5%; height: 12rpx; border-radius: 50%; background: rgba(231, 247, 250, .72); z-index: 2; }
+.water-wrapper::after { content: ''; position: absolute; top: 6rpx; right: -8%; left: -8%; height: 16rpx; border: 2rpx solid rgba(213, 240, 244, .62); border-radius: 50%; opacity: .7; z-index: 2; animation: water-ripple 4.6s ease-in-out infinite; }
 .water-texture { top: -52%; bottom: auto; width: 100%; height: 150%; opacity: .9; }
 .water-texture { animation: water-drift 7s ease-in-out infinite alternate; transform-origin: center bottom; }
 .water-wrapper::before { animation: water-breathe 3.8s ease-in-out infinite; }
 @keyframes water-drift { from { transform: translateX(-3%) scaleX(1.03); } to { transform: translateX(3%) scaleX(1.08); } }
 @keyframes water-breathe { 0%, 100% { transform: scaleX(.94); opacity: .56; } 50% { transform: scaleX(1.02); opacity: .82; } }
+@keyframes water-ripple { 0%, 100% { transform: translateX(-4%) scaleX(.92); opacity: .38; } 50% { transform: translateX(5%) scaleX(1.04); opacity: .78; } }
 .amount-display { top: 52%; }.amount-num { color: #3e7468; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #6b9c8a; }
 .quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #5a7f73; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #73978b; }
 .record-btn { padding: 26rpx; border-radius: 48rpx; background: #76b7c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .22); }.record-text { letter-spacing: 0; }
 .record-item { border-radius: 16rpx; }.record-name { color: #5f7b73; }.record-time, .history-count { color: #a39391; }.record-amount { color: #6c9b8c; }
+.record-drink-icon { display: flex; align-items: center; justify-content: center; width: 56rpx; height: 56rpx; margin-right: 14rpx; border-radius: 16rpx; background: #edf7f4; font-size: 29rpx; line-height: 1; }
 .dialog-mask { background: rgba(75, 56, 61, .26); }.dialog-content { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 28rpx 28rpx 0 0; background: rgba(255, 253, 251, .96); box-shadow: 0 -14rpx 36rpx rgba(100, 76, 75, .16); backdrop-filter: blur(20px); }.dialog-title { color: #5b4f54; }.close-btn { color: #9b8589; background: #f8efec; }.input-num { color: #5c8e82; }.input-unit { color: #a39391; }.drink-option { border-color: #efe1da; background: #fffaf7; }.drink-option.active { border-color: #b8d8d5; background: #edf7f4; }.drink-name { color: #9b8889; }.drink-option.active .drink-name { color: #5c8e82; }.key-btn { color: #5d8278; background: #f7f2ee; }.confirm-btn { background: #76b7c7; box-shadow: 0 10rpx 22rpx rgba(94, 157, 176, .2); }
 @media (min-width: 700px) { .page { max-width: 760px; margin: 0 auto; } }
 </style>

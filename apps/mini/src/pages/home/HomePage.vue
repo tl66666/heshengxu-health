@@ -1,5 +1,8 @@
 <template>
   <view class="page">
+    <!-- 背景装饰 -->
+    <image class="bg-leaf" src="/static/illustrations/leaf-corner-decoration.png" mode="aspectFit" />
+    
     <!-- 顶部 -->
     <view class="header">
       <view class="header-left">
@@ -135,7 +138,7 @@
             <text class="grid-num">{{ today.todayRecords?.water?.totalMilliliters || 0 }}</text>
             <text class="grid-unit">ml</text>
           </view>
-          <image class="grid-art" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/water-drop.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card sleep-card" hover-class="button-hover" @tap="goToRecord('sleep')">
@@ -148,7 +151,7 @@
             <text v-if="today.todayRecords?.sleep" class="grid-unit">小时</text>
             <text v-else class="grid-hint">未记录</text>
           </view>
-          <image class="grid-art" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/sleep.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card activity-card" hover-class="button-hover" @tap="goToRecord('activity')">
@@ -160,7 +163,7 @@
             <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
             <text class="grid-unit">分钟</text>
           </view>
-          <image class="grid-art" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/activity.jpg" mode="aspectFit" />
         </button>
         
         <button class="grid-item card mood-card" hover-class="button-hover" @tap="toXuxu">
@@ -170,7 +173,7 @@
           <view class="grid-data">
             <text class="grid-hint">记录今天</text>
           </view>
-          <image class="grid-art" src="/static/icons/watercolor/mood-smile.png" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/mood-smile.jpg" mode="aspectFit" />
         </button>
       </view>
 
@@ -184,7 +187,7 @@
           <text class="fasting-label">用餐时间剩余</text>
           <text class="fasting-time">01:04:08</text>
         </view>
-        <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.png" mode="aspectFit" />
+        <image class="fasting-icon-img" src="/static/icons/fasting-clock.jpg" mode="aspectFit" />
       </view>
 
       <!-- 6. 经期记录卡片 -->
@@ -197,7 +200,7 @@
           <text class="period-hint">{{ periodStatusText }}</text>
           <text class="period-days">{{ periodDaysText }}</text>
         </view>
-        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.png" mode="aspectFit" />
+        <image class="period-icon-img" src="/static/icons/menstruation.jpg" mode="aspectFit" />
       </view>
 
       <!-- 7. 用药打卡卡片 -->
@@ -212,7 +215,7 @@
             <text class="medication-item">{{ medicationPlanText }}</text>
           </view>
         </view>
-        <image class="medication-icon-img" src="/static/icons/watercolor/medication.png" mode="aspectFit" />
+        <image class="medication-icon-img" src="/static/icons/medication.jpg" mode="aspectFit" />
       </view>
 
       <!-- 8. 编辑首页卡片 -->
@@ -421,13 +424,29 @@ onShow(() => {
 <style scoped>
 /* 页面 - 治愈系背景 */
 .page {
+  position: relative;
   min-height: 100vh;
   padding: 28rpx 24rpx 160rpx;
   background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
+  overflow: hidden;
+}
+
+/* 背景装饰 */
+.bg-leaf {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360rpx;
+  height: 360rpx;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* 顶部 */
 .header {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -897,10 +916,23 @@ onShow(() => {
   right: -8rpx;
   width: 120rpx;
   height: 120rpx;
-  opacity: 0.35;
+  opacity: 0.7;
   pointer-events: none;
   z-index: 1;
   mix-blend-mode: multiply;
+}
+
+.grid-icon {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  border-radius: 50%;
 }
 
 .grid-icon-img {
@@ -950,10 +982,11 @@ onShow(() => {
   position: absolute;
   bottom: 8rpx;
   right: 8rpx;
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.6;
-  border-radius: 12rpx;
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.75;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
 }
 
 /* 6. 经期记录卡片 */
@@ -984,10 +1017,11 @@ onShow(() => {
   position: absolute;
   bottom: 8rpx;
   right: 8rpx;
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.6;
-  border-radius: 12rpx;
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.75;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
 }
 
 /* 7. 用药打卡卡片 */
@@ -1024,10 +1058,11 @@ onShow(() => {
   position: absolute;
   bottom: 8rpx;
   right: 8rpx;
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.6;
-  border-radius: 12rpx;
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.75;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
 }
 
 /* 8. 编辑卡片 */
@@ -1099,7 +1134,6 @@ onShow(() => {
 .period-days { color: #c26f84; }
 .medication-card { border-color: #d9e5ed; background: #f1f6fb; }
 .medication-item { color: #6a88a5; }
-.period-icon-img, .medication-icon-img { width: 96rpx; height: 96rpx; opacity: .9; border-radius: 0; mix-blend-mode: normal; }
 .edit-card { border-color: #e9cfd1; }.edit-icon, .edit-text { color: #b66d80; }
 .error-state button { background: #fff0f3; color: #b66d80; }
 </style>
