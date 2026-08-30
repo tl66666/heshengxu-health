@@ -11,6 +11,7 @@ This note records the persistence rules for the weight-management module so othe
 - Weight history is loaded from `GET /api/v1/health-records/weights/history`; local storage is only a network-failure fallback.
 - New records use `POST /api/v1/health-records/weights`. Edits use versioned `PATCH /api/v1/health-records/weight/:recordId` and preserve the original `recordedAt` unless explicitly changed by a future editor.
 - Empty history renders an explicit empty state. No seeded or fake weight values are allowed.
+- Trend charts are scoped to the selected 7/30/90-day window. A single record is shown as a point with a prompt to record again; change labels and insights only appear once two records can be compared.
 
 ## Migration
 

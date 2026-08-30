@@ -84,12 +84,18 @@
     <view v-if="activeView === 'progress'" class="trend-card card">
       <view class="trend-topline">
         <view>
-          <text class="trend-number">{{ hasTrendData ? trendChangeLabel : '--' }}</text>
+          <text class="trend-number">{{ hasTrendComparison ? trendChangeLabel : '--' }}</text>
           <text class="trend-caption">{{ trendCaption }}</text>
         </view>
-        <view class="trend-legend"><view class="legend-dot" /> <text>体重</text></view>
+        <view class="trend-meta">
+          <view class="trend-legend"><view class="legend-dot" /> <text>体重</text></view>
+          <text v-if="hasTrendData" class="trend-count">{{ chartData.length }} 次记录</text>
+        </view>
       </view>
       <view v-if="hasTrendData" class="chart-shell">
+        <view class="chart-scale">
+          <text v-for="label in chartScaleLabels" :key="label">{{ label }}</text>
+        </view>
         <svg class="trend-svg" viewBox="0 0 320 150" preserveAspectRatio="none">
           <line
             v-for="line in gridLines"
@@ -100,6 +106,7 @@
             :y2="line"
             class="grid-line"
           />
+          <line v-if="goalY !== null" x1="0" :y1="goalY" x2="320" :y2="goalY" class="goal-line" />
           <path :d="trendAreaPath" class="trend-area" />
           <path :d="trendPath" class="trend-line" />
           <circle
@@ -115,9 +122,13 @@
           <text v-for="point in chartLabels" :key="point.id">{{ point.label }}</text>
         </view>
       </view>
-      <view v-if="hasTrendData" class="insight-strip">
+      <view v-if="hasTrendComparison" class="insight-strip">
         <image src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <text>{{ insightText }}</text>
+      </view>
+      <view v-if="hasTrendData && !hasTrendComparison" class="trend-single">
+        <text>已记录 1 次</text>
+        <text>再记录一次，就能看到体重变化趋势</text>
       </view>
       <view v-if="!hasTrendData" class="trend-empty">
         <text class="trend-empty-title">还没有趋势数据</text>
@@ -364,11 +375,7 @@ const targetWeight = computed(
 const heightCm = computed(() => profile.value?.heightCm ?? 0);
 
 const currentWeight = computed(
-  () =>
-    records.value[0]?.weight ??
-    healthLoopState.today.value?.todayRecords.weight?.valueKg ??
-    profile.value?.weightKg ??
-    0,
+  () => records.value[0]?.weight ?? healthLoopState.today.value?.todayRecords.weight?.valueKg ?? 0,
 );
 const bmi = computed(() =>
   currentWeight.value && heightCm.value
@@ -391,20 +398,28 @@ const progress = computed(() =>
     : 0,
 );
 const targetDate = computed(() => (targetWeight.value ? '根据当前节奏估算' : '先设置目标体重'));
-const remainingKg = computed(() => Math.max(0, currentWeight.value - targetWeight.value));
+const remainingKg = computed(() =>
+  currentWeight.value && targetWeight.value
+    ? Math.max(0, currentWeight.value - targetWeight.value)
+    : 0,
+);
 const forecastDate = computed(() =>
-  targetWeight.value && remainingKg.value <= 0
-    ? '已经到达目标'
-    : targetWeight.value
-      ? '根据记录动态估算'
-      : '等待目标体重',
+  !currentWeight.value
+    ? '记录体重后开始预测'
+    : targetWeight.value && remainingKg.value <= 0
+      ? '已经到达目标'
+      : targetWeight.value
+        ? '根据记录动态估算'
+        : '等待目标体重',
 );
 const latestRecordLabel = computed(() =>
   records.value[0] ? `${formatDate(records.value[0].recordedAt)} 更新` : '还没有记录',
 );
 const weightDelta = computed(() => currentWeight.value - startWeight.value);
-const weightDeltaLabel = computed(
-  () => `${weightDelta.value > 0 ? '+' : ''}${weightDelta.value.toFixed(1)} kg`,
+const weightDeltaLabel = computed(() =>
+  currentWeight.value
+    ? `${weightDelta.value > 0 ? '+' : ''}${weightDelta.value.toFixed(1)} kg`
+    : '--',
 );
 const trendRecords = computed(() => {
   const cutoff = Date.now() - Number(selectedRange.value) * 86400000;
@@ -412,10 +427,26 @@ const trendRecords = computed(() => {
     .filter((item) => +new Date(item.recordedAt) >= cutoff)
     .sort((a, b) => +new Date(a.recordedAt) - +new Date(b.recordedAt));
 });
-const chartData = computed(() =>
-  trendRecords.value.length ? trendRecords.value : records.value.slice(-2).reverse(),
-);
+const chartData = computed(() => trendRecords.value);
 const hasTrendData = computed(() => chartData.value.length > 0);
+const hasTrendComparison = computed(() => chartData.value.length > 1);
+const chartBounds = computed(() => {
+  const data = chartData.value;
+  if (!data.length) return { min: 0, max: 1 };
+  const min = Math.min(...data.map((item) => item.weight)) - 0.5;
+  const max = Math.max(...data.map((item) => item.weight)) + 0.5;
+  return { min, max: Math.max(min + 0.1, max) };
+});
+const chartScaleLabels = computed(() => {
+  const { min, max } = chartBounds.value;
+  return [max, (min + max) / 2, min].map((value) => value.toFixed(1));
+});
+const goalY = computed(() => {
+  if (!targetWeight.value || !hasTrendData.value) return null;
+  const { min, max } = chartBounds.value;
+  if (targetWeight.value < min || targetWeight.value > max) return null;
+  return 124 - ((targetWeight.value - min) / (max - min)) * 96;
+});
 const trendPoints = computed(() => {
   const data = chartData.value;
   if (!data.length) return [];
@@ -451,7 +482,11 @@ const trendChangeLabel = computed(
   () => `${trendChange.value > 0 ? '+' : ''}${trendChange.value.toFixed(1)} kg`,
 );
 const trendCaption = computed(() =>
-  trendChange.value <= 0 ? '比周期开始轻了一点' : '这段时间有些波动',
+  !hasTrendComparison.value
+    ? '再记录一次，就能看到变化'
+    : trendChange.value <= 0
+      ? '比周期开始轻了一点'
+      : '这段时间有些波动',
 );
 const insightText = computed(() =>
   trendChange.value <= 0
@@ -600,7 +635,8 @@ async function saveWeight() {
   const payload = {
     valueKg: Number(value.toFixed(1)),
     recordedAt: editingRecordId.value
-      ? records.value.find((record) => record.id === editingRecordId.value)?.recordedAt || new Date().toISOString()
+      ? records.value.find((record) => record.id === editingRecordId.value)?.recordedAt ||
+        new Date().toISOString()
       : new Date().toISOString(),
     note: inputNote.value || undefined,
   };
@@ -939,6 +975,16 @@ onMounted(loadWeightData);
   color: #a79791;
   font-size: 19rpx;
 }
+.trend-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+.trend-count {
+  color: #b5a49e;
+  font-size: 18rpx;
+}
 .legend-dot {
   width: 14rpx;
   height: 14rpx;
@@ -946,7 +992,20 @@ onMounted(loadWeightData);
   background: #77b48f;
 }
 .chart-shell {
+  position: relative;
   margin-top: 24rpx;
+  padding-left: 48rpx;
+}
+.chart-scale {
+  position: absolute;
+  top: 2rpx;
+  bottom: 34rpx;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #b5a49e;
+  font-size: 17rpx;
 }
 .trend-svg {
   display: block;
@@ -958,6 +1017,11 @@ onMounted(loadWeightData);
   stroke: #f0e9e1;
   stroke-width: 1;
   stroke-dasharray: 3 5;
+}
+.goal-line {
+  stroke: #d7b86f;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
 }
 .trend-area {
   fill: url(#trend-fill);
@@ -1025,6 +1089,16 @@ onMounted(loadWeightData);
   color: #4f8b60;
   font-size: 22rpx;
   font-weight: 700;
+}
+.trend-single {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  background: #f7f3ec;
+  color: #9c8c84;
+  font-size: 20rpx;
 }
 .milestone-row {
   display: grid;
