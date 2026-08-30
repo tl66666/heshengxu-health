@@ -138,7 +138,7 @@
             <text class="grid-num">{{ today.todayRecords?.water?.totalMilliliters || 0 }}</text>
             <text class="grid-unit">ml</text>
           </view>
-          <image class="grid-icon" src="/static/icons/water-drop.jpg" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card sleep-card" hover-class="button-hover" @tap="goToRecord('sleep')">
@@ -151,7 +151,7 @@
             <text v-if="today.todayRecords?.sleep" class="grid-unit">小时</text>
             <text v-else class="grid-hint">未记录</text>
           </view>
-          <image class="grid-icon" src="/static/icons/sleep.jpg" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card activity-card" hover-class="button-hover" @tap="goToRecord('activity')">
@@ -163,7 +163,7 @@
             <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
             <text class="grid-unit">分钟</text>
           </view>
-          <image class="grid-icon" src="/static/icons/activity.jpg" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
         </button>
         
         <button class="grid-item card mood-card" hover-class="button-hover" @tap="toXuxu">
@@ -173,7 +173,7 @@
           <view class="grid-data">
             <text class="grid-hint">记录今天</text>
           </view>
-          <image class="grid-icon" src="/static/icons/mood-smile.jpg" mode="aspectFit" />
+          <image class="grid-icon" src="/static/icons/watercolor/mood-smile.png" mode="aspectFit" />
         </button>
       </view>
 
@@ -187,7 +187,7 @@
           <text class="fasting-label">用餐时间剩余</text>
           <text class="fasting-time">01:04:08</text>
         </view>
-        <image class="fasting-icon-img" src="/static/icons/fasting-clock.jpg" mode="aspectFit" />
+        <image class="fasting-icon-img" src="/static/icons/watercolor/fasting-clock.png" mode="aspectFit" />
       </view>
 
       <!-- 6. 经期记录卡片 -->
@@ -200,7 +200,7 @@
           <text class="period-hint">{{ periodStatusText }}</text>
           <text class="period-days">{{ periodDaysText }}</text>
         </view>
-        <image class="period-icon-img" src="/static/icons/menstruation.jpg" mode="aspectFit" />
+        <image class="period-icon-img" src="/static/icons/watercolor/menstruation.png" mode="aspectFit" />
       </view>
 
       <!-- 7. 用药打卡卡片 -->
@@ -215,7 +215,7 @@
             <text class="medication-item">{{ medicationPlanText }}</text>
           </view>
         </view>
-        <image class="medication-icon-img" src="/static/icons/medication.jpg" mode="aspectFit" />
+        <image class="medication-icon-img" src="/static/icons/watercolor/medication.png" mode="aspectFit" />
       </view>
 
       <!-- 8. 编辑首页卡片 -->
