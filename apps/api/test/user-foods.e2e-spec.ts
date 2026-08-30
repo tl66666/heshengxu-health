@@ -33,6 +33,32 @@ describe('user foods', () => {
       defaultServingGrams: 150,
     });
 
+    const newest = await client
+      .post('/api/v1/user-foods')
+      .set(owner)
+      .send({
+        name: 'Oat Bowl',
+        source: 'manual',
+        energyKcal: 240,
+        proteinG: 8,
+        fatG: 6,
+        carbohydrateG: 38,
+        defaultServingLabel: '1 bowl',
+        defaultServingGrams: 220,
+      })
+      .expect(201);
+
+    const newestFirst = await client.get('/api/v1/user-foods').set(owner).expect(200);
+    expect(newestFirst.body.data.map((food: { id: string }) => food.id)).toEqual([
+      newest.body.data.id,
+      created.body.data.id,
+    ]);
+
+    const caseInsensitive = await client.get('/api/v1/user-foods?q=oAt').set(owner).expect(200);
+    expect(caseInsensitive.body.data.map((food: { id: string }) => food.id)).toEqual([
+      newest.body.data.id,
+    ]);
+
     const listed = await client
       .get('/api/v1/user-foods?q=鸡胸')
       .set(owner)
@@ -47,6 +73,7 @@ describe('user foods', () => {
       .delete(`/api/v1/user-foods/${created.body.data.id}`)
       .set(owner)
       .expect(204);
+    await client.delete(`/api/v1/user-foods/${newest.body.data.id}`).set(owner).expect(204);
     const afterDelete = await client.get('/api/v1/user-foods').set(owner).expect(200);
     expect(afterDelete.body.data).toEqual([]);
     await app.close();
