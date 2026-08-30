@@ -3,130 +3,158 @@
     <AppNavBar title="喝水记录" route="/pages/water/WaterPage" />
 
     <!-- 日期切换 -->
-    <view class="date-bar">
-      <button class="date-btn" @tap="prevDay">
-        <text>←</text>
+    <view class="date-nav">
+      <button class="nav-arrow" @tap="prevDay">
+        <text>‹</text>
       </button>
-      <text class="date-text">{{ dateLabel }}</text>
-      <button class="date-btn" @tap="nextDay">
-        <text>→</text>
+      <text class="date-label">{{ dateLabel }}</text>
+      <button class="nav-arrow" @tap="nextDay">
+        <text>›</text>
       </button>
     </view>
 
-    <!-- 喝水统计卡片 -->
-    <view class="stat-card">
-      <view class="stat-main">
-        <image class="water-icon" src="/static/icons/svg/water.svg" mode="aspectFit" />
-        <view class="stat-info">
-          <text class="stat-current">{{ totalAmount }}</text>
-          <text class="stat-unit">ml</text>
-          <text class="stat-target">/ {{ dailyGoal }}ml</text>
+    <!-- 目标和进度 -->
+    <view class="goal-bar">
+      <view class="goal-item">
+        <text class="goal-name">每日目标</text>
+        <text class="goal-val">{{ dailyGoal }}ml</text>
+      </view>
+      <view class="goal-item">
+        <text class="goal-name">剩余</text>
+        <text class="goal-val">{{ remainingAmount }}ml</text>
+      </view>
+      <button class="goal-edit" @tap="editGoal">
+        <text>调整</text>
+      </button>
+    </view>
+
+    <!-- 水杯容器 -->
+    <view class="cup-container">
+      <!-- 水杯外框 -->
+      <view class="water-cup">
+        <!-- 水位 -->
+        <view class="water-fill" :style="{ height: waterHeight + '%' }">
+          <view class="water-wave"></view>
+        </view>
+        
+        <!-- 显示数字 -->
+        <view class="water-amount-display">
+          <text class="amount-num">{{ totalAmount }}</text>
+          <text class="amount-unit">ml</text>
+          <text class="amount-percent">({{ progressPercent }}%)</text>
         </view>
       </view>
-      
-      <view class="stat-progress">
-        <view class="progress-bar">
-          <view class="progress-fill" :style="{ width: progressPercent + '%' }" />
+    </view>
+
+    <!-- 快捷记录 -->
+    <view class="quick-add">
+      <view class="quick-drink">
+        <text class="drink-icon">💧</text>
+        <view class="drink-info">
+          <text class="drink-name">水</text>
+          <text class="drink-amount">200ml</text>
         </view>
-        <text class="progress-text">{{ progressPercent }}%</text>
       </view>
-      
-      <button class="stat-edit" @tap="editGoal">
-        <text>调整目标</text>
+    </view>
+
+    <!-- 添加记录弹窗触发 -->
+    <view class="add-section">
+      <button class="add-quick-btn" @tap="quickAdd(200)">
+        <text class="add-icon">+</text>
+        <text class="add-text">快速记录</text>
       </button>
     </view>
 
-    <!-- 快捷添加 -->
-    <view class="quick-section">
-      <view class="quick-title">
-        <text>快速记录</text>
-      </view>
-      <view class="quick-btns">
-        <button 
-          v-for="item in quickItems" 
-          :key="item.amount"
-          class="quick-item"
-          @tap="addWater(item.amount, 'water')"
-        >
-          <text class="quick-icon">💧</text>
-          <text class="quick-label">{{ item.amount }}ml</text>
-        </button>
-        <button class="quick-item custom" @tap="showCustomInput">
-          <text class="quick-icon">✏️</text>
-          <text class="quick-label">自定义</text>
-        </button>
-      </view>
+    <!-- 记录喝水按钮 -->
+    <view class="bottom-actions">
+      <button class="record-btn" @tap="showAddDialog">
+        <text class="record-icon">💧</text>
+        <text class="record-text">记录喝水</text>
+      </button>
+      <button class="stat-btn" @tap="showStats">
+        <text>统计</text>
+      </button>
     </view>
 
-    <!-- 今日记录列表 -->
-    <view class="records-section">
-      <view class="records-header">
-        <text class="records-title">今日记录</text>
-        <text class="records-count">({{ records.length }}次)</text>
+    <!-- 今日记录 -->
+    <view class="records-area">
+      <view class="records-head">
+        <text class="records-title">💧 今日喝水 ({{ records.length }}次)</text>
+        <button v-if="records.length > 0" class="records-edit" @tap="editMode = !editMode">
+          <text>{{ editMode ? '完成' : '编辑' }}</text>
+        </button>
       </view>
 
-      <view v-if="records.length === 0" class="empty">
-        <text class="empty-icon">🥤</text>
-        <text class="empty-text">还没有记录，点击上方快速添加吧</text>
+      <view v-if="records.length === 0" class="records-empty">
+        <text class="empty-tip">还没有喝水吗？来一杯吧～</text>
       </view>
 
       <view v-else class="records-list">
         <view 
           v-for="record in records" 
           :key="record.id"
-          class="record-row"
+          class="record-item"
         >
-          <view class="record-left">
-            <text class="record-icon">💧</text>
-            <view class="record-info">
-              <text class="record-name">水</text>
-              <text class="record-time">{{ formatTime(record.timestamp) }}</text>
-            </view>
+          <text class="record-icon">💧</text>
+          <view class="record-detail">
+            <text class="record-type">水</text>
+            <text class="record-time">{{ formatTime(record.timestamp) }}</text>
           </view>
-          <view class="record-right">
-            <text class="record-amount">{{ record.amount }}ml</text>
-            <button class="record-del" @tap="deleteRecord(record.id)">
-              <text>×</text>
-            </button>
-          </view>
+          <text class="record-amt">{{ record.amount }}ml</text>
+          <button v-if="editMode" class="record-del" @tap="deleteRecord(record.id)">
+            <text>删除</text>
+          </button>
         </view>
       </view>
     </view>
 
-    <!-- 自定义输入弹窗 -->
-    <view v-if="showInput" class="modal" @tap="hideCustomInput">
-      <view class="modal-content" @tap.stop>
-        <view class="modal-header">
-          <text class="modal-title">添加喝水记录</text>
-          <button class="modal-close" @tap="hideCustomInput">
-            <text>×</text>
-          </button>
-        </view>
-        
-        <view class="input-section">
-          <input 
-            class="amount-input" 
-            type="number" 
-            v-model="customAmount" 
-            placeholder="请输入毫升数"
-          />
-          <text class="input-unit">ml</text>
-        </view>
-
-        <view class="preset-amounts">
-          <button 
-            v-for="amt in [100, 200, 250, 300, 500]" 
-            :key="amt"
-            class="preset-btn"
-            @tap="customAmount = amt"
-          >
-            {{ amt }}
+    <!-- 添加喝水弹窗 -->
+    <view v-if="showDialog" class="dialog-mask" @tap="hideDialog">
+      <view class="dialog-box" @tap.stop>
+        <view class="dialog-head">
+          <text class="dialog-title">设置快捷记录</text>
+          <button class="dialog-close" @tap="hideDialog">
+            <text>✕</text>
           </button>
         </view>
 
-        <button class="modal-confirm" @tap="confirmCustom">
-          <text>确定</text>
-        </button>
+        <view class="dialog-body">
+          <!-- 数量输入 -->
+          <view class="amount-display">
+            <text class="amount-big">{{ inputAmount }}</text>
+            <text class="amount-unit-big">ml</text>
+          </view>
+
+          <!-- 饮品选择 -->
+          <view class="drink-types">
+            <button 
+              v-for="drink in drinkTypes" 
+              :key="drink.id"
+              :class="['drink-type', selectedDrink === drink.id ? 'active' : '']"
+              @tap="selectedDrink = drink.id"
+            >
+              <text class="drink-emoji">{{ drink.icon }}</text>
+              <text class="drink-label">{{ drink.name }}</text>
+            </button>
+          </view>
+
+          <!-- 数字键盘 -->
+          <view class="num-pad">
+            <button 
+              v-for="num in [1,2,3,4,5,6,7,8,9,0,'00','⌫']" 
+              :key="num"
+              class="num-btn"
+              @tap="handleNum(num)"
+            >
+              <text>{{ num }}</text>
+            </button>
+          </view>
+
+          <!-- 确定按钮 -->
+          <button class="dialog-confirm" @tap="confirmAdd">
+            <text>完成</text>
+          </button>
+        </view>
       </view>
     </view>
   </view>
@@ -139,22 +167,24 @@ import AppNavBar from '../../components/AppNavBar.vue';
 interface WaterRecord {
   id: string;
   amount: number;
-  type: string;
   timestamp: number;
 }
 
 const currentDate = ref(new Date());
 const dailyGoal = ref(2000);
 const records = ref<WaterRecord[]>([]);
-const showInput = ref(false);
-const customAmount = ref<number | string>('');
+const editMode = ref(false);
+const showDialog = ref(false);
+const inputAmount = ref('200');
+const selectedDrink = ref('water');
 
-const quickItems = [
-  { amount: 100 },
-  { amount: 200 },
-  { amount: 250 },
-  { amount: 300 },
-  { amount: 500 },
+const drinkTypes = [
+  { id: 'water', name: '水', icon: '💧' },
+  { id: 'tea', name: '茶水', icon: '🍵' },
+  { id: 'milk', name: '牛奶', icon: '🥛' },
+  { id: 'coffee', name: '咖啡', icon: '☕' },
+  { id: 'juice', name: '果汁', icon: '🧃' },
+  { id: 'soda', name: '苏打水', icon: '🥤' },
 ];
 
 const dateLabel = computed(() => {
@@ -170,9 +200,18 @@ const totalAmount = computed(() => {
   return records.value.reduce((sum, r) => sum + r.amount, 0);
 });
 
+const remainingAmount = computed(() => {
+  const remain = dailyGoal.value - totalAmount.value;
+  return Math.max(remain, 0);
+});
+
 const progressPercent = computed(() => {
   const percent = Math.round((totalAmount.value / dailyGoal.value) * 100);
   return Math.min(percent, 100);
+});
+
+const waterHeight = computed(() => {
+  return Math.min((totalAmount.value / dailyGoal.value) * 100, 100);
 });
 
 function prevDay() {
@@ -199,18 +238,51 @@ function editGoal() {
         const val = parseInt(res.content);
         if (val > 0) {
           dailyGoal.value = val;
-          saveGoal();
+          uni.setStorageSync('water_daily_goal', val);
         }
       }
     },
   });
 }
 
-function addWater(amount: number, type: string) {
+function quickAdd(amount: number) {
+  addRecord(amount);
+}
+
+function showAddDialog() {
+  inputAmount.value = '200';
+  selectedDrink.value = 'water';
+  showDialog.value = true;
+}
+
+function hideDialog() {
+  showDialog.value = false;
+}
+
+function handleNum(val: number | string) {
+  if (val === '⌫') {
+    inputAmount.value = inputAmount.value.slice(0, -1) || '0';
+  } else {
+    if (inputAmount.value === '0') {
+      inputAmount.value = String(val);
+    } else {
+      inputAmount.value += String(val);
+    }
+  }
+}
+
+function confirmAdd() {
+  const amt = parseInt(inputAmount.value);
+  if (amt > 0) {
+    addRecord(amt);
+    hideDialog();
+  }
+}
+
+function addRecord(amount: number) {
   const record: WaterRecord = {
     id: Date.now().toString(),
     amount,
-    type,
     timestamp: Date.now(),
   };
   
@@ -224,43 +296,19 @@ function addWater(amount: number, type: string) {
   });
 }
 
-function showCustomInput() {
-  customAmount.value = '';
-  showInput.value = true;
-}
-
-function hideCustomInput() {
-  showInput.value = false;
-}
-
-function confirmCustom() {
-  const amt = parseInt(String(customAmount.value));
-  if (!amt || amt <= 0) {
-    uni.showToast({
-      title: '请输入有效数字',
-      icon: 'none',
-    });
-    return;
-  }
-  
-  addWater(amt, 'water');
-  hideCustomInput();
-}
-
 function deleteRecord(id: string) {
-  uni.showModal({
-    title: '删除记录',
-    content: '确定要删除这条记录吗？',
-    success: (res) => {
-      if (res.confirm) {
-        records.value = records.value.filter(r => r.id !== id);
-        saveRecords();
-        uni.showToast({
-          title: '已删除',
-          icon: 'success',
-        });
-      }
-    },
+  records.value = records.value.filter(r => r.id !== id);
+  saveRecords();
+  uni.showToast({
+    title: '已删除',
+    icon: 'success',
+  });
+}
+
+function showStats() {
+  uni.showToast({
+    title: '统计功能开发中',
+    icon: 'none',
   });
 }
 
@@ -273,7 +321,7 @@ function formatTime(timestamp: number): string {
 
 function getStorageKey(): string {
   const d = currentDate.value;
-  return `water_${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  return `water_${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`;
 }
 
 function saveRecords() {
@@ -289,21 +337,12 @@ function loadRecords() {
   }
 }
 
-function saveGoal() {
-  uni.setStorageSync('water_daily_goal', dailyGoal.value);
-}
-
-function loadGoal() {
+onMounted(() => {
   try {
     const goal = uni.getStorageSync('water_daily_goal');
     if (goal) dailyGoal.value = goal;
-  } catch (e) {
-    // ignore
-  }
-}
-
-onMounted(() => {
-  loadGoal();
+  } catch (e) {}
+  
   loadRecords();
 });
 </script>
@@ -311,182 +350,272 @@ onMounted(() => {
 <style scoped>
 .page {
   min-height: 100vh;
-  background: #f5f8f6;
-  padding-bottom: 40rpx;
+  background: #f7f8fa;
+  padding-bottom: 120rpx;
 }
 
-/* 日期栏 */
-.date-bar {
+/* 日期导航 */
+.date-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40rpx;
+  gap: 32rpx;
   padding: 24rpx;
   background: #fff;
 }
 
-.date-btn {
-  width: 60rpx;
-  height: 60rpx;
+.nav-arrow {
+  width: 56rpx;
+  height: 56rpx;
   border: none;
-  background: #f5f5f5;
-  border-radius: 50%;
-  font-size: 28rpx;
+  background: transparent;
+  font-size: 40rpx;
   color: #666;
   padding: 0;
   line-height: 1;
 }
 
-.date-btn::after { border: none; }
+.nav-arrow::after { border: none; }
 
-.date-text {
-  font-size: 32rpx;
+.date-label {
+  font-size: 30rpx;
   font-weight: 600;
   color: #333;
-  min-width: 160rpx;
+  min-width: 140rpx;
   text-align: center;
 }
 
-/* 统计卡片 */
-.stat-card {
-  margin: 24rpx 32rpx;
-  padding: 32rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
-}
-
-.stat-main {
+/* 目标栏 */
+.goal-bar {
   display: flex;
   align-items: center;
-  gap: 24rpx;
-  margin-bottom: 24rpx;
+  padding: 24rpx 32rpx;
+  background: #fff;
+  border-top: 1rpx solid #f0f0f0;
 }
 
-.water-icon {
-  width: 80rpx;
-  height: 80rpx;
-}
-
-.stat-info {
+.goal-item {
+  flex: 1;
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
   gap: 8rpx;
 }
 
-.stat-current {
-  font-size: 56rpx;
-  font-weight: 700;
-  color: #4a90e2;
-}
-
-.stat-unit {
+.goal-name {
   font-size: 24rpx;
   color: #999;
 }
 
-.stat-target {
+.goal-val {
   font-size: 28rpx;
-  color: #666;
-}
-
-.stat-progress {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  margin-bottom: 24rpx;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 16rpx;
-  background: #e8f4fd;
-  border-radius: 8rpx;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4a90e2 0%, #5fb7ff 100%);
-  border-radius: 8rpx;
-  transition: width 0.3s;
-}
-
-.progress-text {
-  font-size: 24rpx;
-  color: #4a90e2;
   font-weight: 600;
-  min-width: 80rpx;
-  text-align: right;
+  color: #333;
 }
 
-.stat-edit {
-  width: 100%;
-  padding: 20rpx;
+.goal-edit {
+  padding: 12rpx 28rpx;
   border: none;
-  background: #f5f8fa;
-  border-radius: 16rpx;
-  color: #666;
-  font-size: 28rpx;
-}
-
-.stat-edit::after { border: none; }
-
-/* 快捷记录 */
-.quick-section {
-  margin: 0 32rpx 24rpx;
-}
-
-.quick-title {
-  padding: 24rpx 0 16rpx;
-  font-size: 28rpx;
+  background: #f5f5f5;
+  border-radius: 40rpx;
+  font-size: 24rpx;
   color: #666;
 }
 
-.quick-btns {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
-}
+.goal-edit::after { border: none; }
 
-.quick-item {
+/* 水杯容器 */
+.cup-container {
+  padding: 60rpx 32rpx;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12rpx;
-  padding: 28rpx;
+  justify-content: center;
   background: #fff;
-  border-radius: 20rpx;
-  border: none;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 
-.quick-item::after { border: none; }
-
-.quick-item.custom {
-  background: #f5f8fa;
+.water-cup {
+  position: relative;
+  width: 460rpx;
+  height: 680rpx;
+  background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 100%);
+  border-radius: 32rpx;
+  overflow: hidden;
+  box-shadow: 
+    inset 0 4rpx 12rpx rgba(0,0,0,0.06),
+    0 8rpx 24rpx rgba(0,0,0,0.08);
 }
 
-.quick-icon {
-  font-size: 40rpx;
+.water-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #a8d8ff 0%, #4a90e2 100%);
+  transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 0 32rpx 32rpx;
 }
 
-.quick-label {
-  font-size: 26rpx;
-  color: #666;
-  font-weight: 500;
+.water-wave {
+  position: absolute;
+  top: -20rpx;
+  left: -100%;
+  width: 200%;
+  height: 40rpx;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(255,255,255,0.3) 50%,
+    transparent
+  );
+  animation: wave 3s linear infinite;
 }
 
-/* 记录列表 */
-.records-section {
-  margin: 0 32rpx;
+@keyframes wave {
+  to {
+    transform: translateX(50%);
+  }
 }
 
-.records-header {
+.water-amount-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: baseline;
   gap: 8rpx;
-  padding: 24rpx 0 16rpx;
+  z-index: 10;
+}
+
+.amount-num {
+  font-size: 100rpx;
+  font-weight: 800;
+  color: #2d7ab8;
+  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.amount-unit {
+  font-size: 32rpx;
+  color: #5a9fd8;
+}
+
+.amount-percent {
+  font-size: 28rpx;
+  color: #7eb4dd;
+}
+
+/* 快捷记录 */
+.quick-add {
+  padding: 32rpx;
+  background: #fff;
+}
+
+.quick-drink {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 20rpx;
+}
+
+.drink-icon {
+  font-size: 48rpx;
+}
+
+.drink-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.drink-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.drink-amount {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 快速添加 */
+.add-section {
+  padding: 0 32rpx 32rpx;
+  background: #fff;
+}
+
+.add-quick-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 24rpx;
+  border: none;
+  background: #f0f8ff;
+  border-radius: 20rpx;
+  color: #4a90e2;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.add-quick-btn::after { border: none; }
+
+.add-icon {
+  font-size: 32rpx;
+}
+
+/* 底部按钮 */
+.bottom-actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 32rpx;
+  background: #fff;
+}
+
+.record-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 28rpx;
+  border: none;
+  background: linear-gradient(135deg, #4a90e2 0%, #5fb7ff 100%);
+  border-radius: 50rpx;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 6rpx 20rpx rgba(74,144,226,0.3);
+}
+
+.record-btn::after { border: none; }
+
+.record-icon {
+  font-size: 36rpx;
+}
+
+.stat-btn {
+  padding: 28rpx 48rpx;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50rpx;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.stat-btn::after { border: none; }
+
+/* 记录列表 */
+.records-area {
+  padding: 32rpx;
+}
+
+.records-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
 }
 
 .records-title {
@@ -495,28 +624,22 @@ onMounted(() => {
   color: #333;
 }
 
-.records-count {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 80rpx 20rpx;
-  background: #fff;
+.records-edit {
+  padding: 8rpx 24rpx;
+  border: none;
+  background: #f5f5f5;
   border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666;
 }
 
-.empty-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
-}
+.records-edit::after { border: none; }
 
-.empty-text {
-  font-size: 26rpx;
+.records-empty {
+  text-align: center;
+  padding: 80rpx 20rpx;
   color: #999;
+  font-size: 26rpx;
 }
 
 .records-list {
@@ -525,32 +648,28 @@ onMounted(() => {
   gap: 16rpx;
 }
 
-.record-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24rpx;
-  background: #fff;
-  border-radius: 20rpx;
-}
-
-.record-left {
+.record-item {
   display: flex;
   align-items: center;
   gap: 20rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 
 .record-icon {
-  font-size: 40rpx;
+  font-size: 36rpx;
 }
 
-.record-info {
+.record-detail {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6rpx;
 }
 
-.record-name {
+.record-type {
   font-size: 28rpx;
   color: #333;
   font-weight: 500;
@@ -561,129 +680,163 @@ onMounted(() => {
   color: #999;
 }
 
-.record-right {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.record-amount {
+.record-amt {
   font-size: 32rpx;
   font-weight: 600;
   color: #4a90e2;
 }
 
 .record-del {
-  width: 48rpx;
-  height: 48rpx;
+  padding: 8rpx 20rpx;
   border: none;
-  background: #f5f5f5;
-  border-radius: 50%;
-  font-size: 32rpx;
-  color: #999;
-  padding: 0;
-  line-height: 1;
+  background: #ffe5e5;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #ff4d4f;
 }
 
 .record-del::after { border: none; }
 
 /* 弹窗 */
-.modal {
+.dialog-mask {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
   z-index: 1000;
 }
 
-.modal-content {
-  width: 600rpx;
+.dialog-box {
+  width: 100%;
   background: #fff;
-  border-radius: 24rpx;
-  padding: 40rpx;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx 32rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
 }
 
-.modal-header {
+.dialog-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 32rpx;
 }
 
-.modal-title {
+.dialog-title {
   font-size: 32rpx;
   font-weight: 600;
   color: #333;
 }
 
-.modal-close {
+.dialog-close {
   width: 48rpx;
   height: 48rpx;
   border: none;
   background: #f5f5f5;
   border-radius: 50%;
-  font-size: 32rpx;
+  font-size: 28rpx;
   color: #999;
   padding: 0;
   line-height: 1;
 }
 
-.modal-close::after { border: none; }
+.dialog-close::after { border: none; }
 
-.input-section {
+.dialog-body {
   display: flex;
-  align-items: center;
-  gap: 16rpx;
-  margin-bottom: 24rpx;
+  flex-direction: column;
+  gap: 32rpx;
 }
 
-.amount-input {
-  flex: 1;
-  padding: 20rpx 24rpx;
-  background: #f5f8fa;
-  border-radius: 16rpx;
-  font-size: 32rpx;
-  text-align: center;
+.amount-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 32rpx;
 }
 
-.input-unit {
-  font-size: 28rpx;
+.amount-big {
+  font-size: 120rpx;
+  font-weight: 800;
+  color: #333;
+}
+
+.amount-unit-big {
+  font-size: 40rpx;
   color: #999;
 }
 
-.preset-amounts {
-  display: flex;
-  gap: 12rpx;
-  margin-bottom: 32rpx;
+.drink-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
 }
 
-.preset-btn {
-  flex: 1;
-  padding: 16rpx;
-  border: none;
-  background: #f5f8fa;
-  border-radius: 12rpx;
-  font-size: 26rpx;
+.drink-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 24rpx;
+  border: 2rpx solid #e8e8e8;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.drink-type::after { border: none; }
+
+.drink-type.active {
+  border-color: #4a90e2;
+  background: #f0f8ff;
+}
+
+.drink-emoji {
+  font-size: 48rpx;
+}
+
+.drink-label {
+  font-size: 24rpx;
   color: #666;
 }
 
-.preset-btn::after { border: none; }
-
-.modal-confirm {
-  width: 100%;
-  padding: 24rpx;
-  border: none;
-  background: linear-gradient(135deg, #4a90e2 0%, #5fb7ff 100%);
-  border-radius: 16rpx;
-  color: #fff;
-  font-size: 32rpx;
+.drink-type.active .drink-label {
+  color: #4a90e2;
   font-weight: 600;
 }
 
-.modal-confirm::after { border: none; }
+.num-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.num-btn {
+  height: 100rpx;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 20rpx;
+  font-size: 40rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.num-btn::after { border: none; }
+
+.dialog-confirm {
+  width: 100%;
+  padding: 32rpx;
+  border: none;
+  background: linear-gradient(135deg, #4a90e2 0%, #5fb7ff 100%);
+  border-radius: 50rpx;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 700;
+  box-shadow: 0 8rpx 24rpx rgba(74,144,226,0.3);
+}
+
+.dialog-confirm::after { border: none; }
 </style>
