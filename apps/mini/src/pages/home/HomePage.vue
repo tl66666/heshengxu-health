@@ -231,15 +231,15 @@
       </view>
 
       <!-- 5. 轻断食卡片 -->
-      <view class="fasting-card card" @tap="go('/pages/plan/PlanPage')">
+      <view class="fasting-card card" @tap="go('/pages/fasting/FastingDetailPage')">
         <view class="card-top">
-          <text class="card-title">今日节律</text>
-          <view class="mode-tag blue">陪伴进度</view>
+          <text class="card-title">轻断食</text>
+          <view class="mode-tag blue">16:8 模式</view>
         </view>
         <view class="fasting-content">
-          <text class="fasting-label">今日记录进度</text>
-          <text class="fasting-time">{{ recordingCompleted }}/{{ recordingTotal }}</text>
-          <text class="fasting-summary">{{ recordingMessage }}</text>
+          <text class="fasting-label">用餐时间</text>
+          <text class="fasting-time">09:00 - 17:00</text>
+          <text class="fasting-summary">点击进入轻断食计时与用餐打卡</text>
         </view>
         <image
           class="fasting-icon-img"

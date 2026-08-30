@@ -35,6 +35,10 @@
       "style": { "navigationBarTitleText": "我的计划" }
     },
     {
+      "path": "pages/fasting/FastingDetailPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "轻断食" }
+    },
+    {
       "path": "pages/weekly-review/WeeklyReviewPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "本周回顾" }
     },

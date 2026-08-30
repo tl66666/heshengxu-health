@@ -58,7 +58,7 @@ const weekDays = computed(() => {
 .empty-inline { padding:30rpx; border:1rpx dashed #ead8d2; border-radius:18rpx; color:#9d8c90; text-align:center; font-size:22rpx; background:#fffdf8; }
 .plan-card { margin-bottom:18rpx; padding:20rpx; border:1rpx solid #efe2dc; border-radius:20rpx; background:linear-gradient(135deg,var(--tint),#fffdfb 72%); box-shadow:0 8rpx 24rpx rgba(139,102,89,.05); }
 .plan-head { display:flex; align-items:center; gap:14rpx; }
-.plan-head image { width:76rpx; height:76rpx; flex:none; border-radius:16rpx; }
+.plan-head image { width:148rpx; height:148rpx; flex:none; border-radius:20rpx; background:rgba(255,255,255,.5); }
 .plan-head-copy { min-width:0; flex:1; }
 .plan-title { display:block; color:#5b4d52; font-size:27rpx; font-weight:700; }
 .plan-subtitle { display:block; margin-top:5rpx; overflow:hidden; color:#927f84; font-size:20rpx; text-overflow:ellipsis; white-space:nowrap; }
