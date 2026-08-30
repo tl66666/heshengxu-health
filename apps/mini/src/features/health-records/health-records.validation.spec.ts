@@ -25,8 +25,41 @@ describe('validateRecordForm', () => {
 
   it('validates activity and sleep ranges', () => {
     expect(
-      validateRecordForm({ type: 'activity', activityType: '', durationMinutes: '', note: '' }),
-    ).toEqual({ activityType: '请填写活动类型', durationMinutes: '请填写活动时长' });
+      validateRecordForm({
+        type: 'activity',
+        activityId: '',
+        activityType: '',
+        intensity: 'medium',
+        durationMinutes: '',
+        estimatedCalories: 0,
+        source: 'directory',
+        note: '',
+      }),
+    ).toEqual({ activityType: '请选择运动项目', durationMinutes: '请填写运动时长' });
+    expect(
+      validateRecordForm({
+        type: 'activity',
+        activityId: 'walk',
+        activityType: '步行',
+        intensity: 'medium',
+        durationMinutes: '0',
+        estimatedCalories: 0,
+        source: 'directory',
+        note: '',
+      }),
+    ).toEqual({ durationMinutes: '运动时长需要大于 0 分钟' });
+    expect(
+      validateRecordForm({
+        type: 'activity',
+        activityId: 'walk',
+        activityType: '步行',
+        intensity: 'medium',
+        durationMinutes: '1441',
+        estimatedCalories: 6000,
+        source: 'directory',
+        note: '',
+      }),
+    ).toEqual({ durationMinutes: '运动时长不能超过 24 小时' });
     expect(
       validateRecordForm({ type: 'sleep', durationMinutes: '20', quality: 'good', note: '' }),
     ).toEqual({ durationMinutes: '睡眠时长应在 30 到 1440 分钟之间' });
@@ -41,6 +74,18 @@ describe('validateRecordForm', () => {
         hasStaple: false,
         hasProtein: true,
         hasVegetable: true,
+        note: '',
+      }),
+    ).toEqual({});
+    expect(
+      validateRecordForm({
+        type: 'activity',
+        activityId: 'walk',
+        activityType: '步行',
+        intensity: 'medium',
+        durationMinutes: '30',
+        estimatedCalories: 129,
+        source: 'directory',
         note: '',
       }),
     ).toEqual({});

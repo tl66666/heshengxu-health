@@ -16,10 +16,11 @@ export function validateRecordForm(form: RecordForm): RecordFormErrors {
   if (form.type === 'activity') {
     const errors: RecordFormErrors = {};
     const duration = Number(form.durationMinutes);
-    if (!form.activityType.trim()) errors.activityType = '请填写活动类型';
-    if (!form.durationMinutes.trim()) errors.durationMinutes = '请填写活动时长';
-    else if (!Number.isFinite(duration) || duration < 1 || duration > 1440)
-      errors.durationMinutes = '活动时长应在 1 到 1440 分钟之间';
+    if (!form.activityId.trim()) errors.activityType = '请选择运动项目';
+    if (!form.durationMinutes.trim()) errors.durationMinutes = '请填写运动时长';
+    else if (!Number.isFinite(duration) || duration <= 0)
+      errors.durationMinutes = '运动时长需要大于 0 分钟';
+    else if (duration > 1440) errors.durationMinutes = '运动时长不能超过 24 小时';
     return errors;
   }
   const duration = Number(form.durationMinutes);

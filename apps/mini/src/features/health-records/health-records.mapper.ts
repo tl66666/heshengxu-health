@@ -10,6 +10,7 @@ import type {
   WeightRecordDto,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import type { RecordForm, RecordTimelineItem } from './health-records.types.js';
+import { getActivityById } from '../activity/activity-catalog.js';
 
 export type HealthRecordRequest =
   | { type: 'weight'; data: CreateWeightRecordRequest }
@@ -39,8 +40,9 @@ export function formToRequest(form: RecordForm, recordedAt: string): HealthRecor
     return {
       type: form.type,
       data: {
-        activityType: form.activityType.trim(),
+        activityType: form.activityId,
         durationMinutes: Number(form.durationMinutes),
+        intensity: form.intensity,
         recordedAt,
         note: form.note || undefined,
       },
@@ -89,8 +91,13 @@ export function formFromTimeline(
     if (record)
       return {
         type,
-        activityType: record.activityType,
+        activityId: record.activityType,
+        activityType: getActivityById(record.activityType)?.name || record.activityType,
+        intensity:
+          record.intensity === 'low' || record.intensity === 'high' ? record.intensity : 'medium',
         durationMinutes: String(record.durationMinutes),
+        estimatedCalories: 0,
+        source: 'directory',
         note: record.note || '',
       };
   }
@@ -128,10 +135,11 @@ function mealTimeline(record: MealStructureRecordDto): RecordTimelineItem {
   };
 }
 function activityTimeline(record: ActivityRecordDto): RecordTimelineItem {
+  const activity = getActivityById(record.activityType);
   return {
     id: record.id,
     type: 'activity',
-    title: record.activityType,
+    title: activity?.name || record.activityType,
     description: `${record.durationMinutes} 分钟`,
     recordedAt: record.recordedAt,
   };

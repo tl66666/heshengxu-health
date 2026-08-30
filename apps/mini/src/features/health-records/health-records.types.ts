@@ -1,4 +1,5 @@
 import type { MealType, SleepQuality } from '../../../../../packages/contracts/src/health-loop.js';
+import type { ActivityIntensity } from '../activity/activity-catalog.js';
 
 export type RecordForm =
   | { type: 'weight'; valueKg: string; note: string }
@@ -10,7 +11,16 @@ export type RecordForm =
       hasVegetable: boolean;
       note: string;
     }
-  | { type: 'activity'; activityType: string; durationMinutes: string; note: string }
+  | {
+      type: 'activity';
+      activityId: string;
+      activityType: string;
+      intensity: ActivityIntensity;
+      durationMinutes: string;
+      estimatedCalories: number;
+      source: 'directory';
+      note: string;
+    }
   | { type: 'sleep'; durationMinutes: string; quality: SleepQuality; note: string };
 
 export type RecordFormErrors = Partial<

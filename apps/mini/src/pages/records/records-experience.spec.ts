@@ -29,7 +29,22 @@ describe('supporting screen contracts', () => {
   });
 
   it('uses the shared forward icon for the food entry affordance', () => {
-    expect(recordsPageSource).toContain('class="food-entry-arrow" src="/static/icons/forward.svg"');
+    expect(recordsPageSource).toContain(
+      'class="food-entry-arrow" src="/static/icons/svg/forward.svg"',
+    );
     expect(recordsPageSource).not.toContain('<text class="food-entry-arrow">›</text>');
+  });
+
+  it('uses the activity directory, segmented intensity, duration, and calorie estimate', () => {
+    expect(recordsPageSource).toContain('v-for="activity in filteredActivities"');
+    expect(recordsPageSource).toContain('class="intensity-control"');
+    expect(recordsPageSource).toContain('activityMinutes');
+    expect(recordsPageSource).toContain('estimatedActivityCalories');
+    expect(recordsPageSource).toContain('估算消耗');
+  });
+
+  it('uses the existing activity illustration as a semantic banner', () => {
+    expect(recordsPageSource).toContain('/static/illustrations/record-desk-banner.png');
+    expect(recordsPageSource).toContain('class="activity-banner"');
   });
 });

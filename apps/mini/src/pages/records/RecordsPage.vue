@@ -15,7 +15,7 @@
 
     <template v-else>
       <view v-if="!timeline.length" class="welcome-strip">
-        <image src="/static/illustrations/record-desk-banner.png" mode="aspectFit" />
+        <image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFit" />
         <view>
           <text>从一件小事开始</text>
           <text>记录不需要完美，真实就已经足够。</text>
@@ -119,12 +119,62 @@
         </template>
 
         <template v-else-if="activeType === 'activity'">
-          <text class="field-label">活动类型</text>
-          <input v-model="activityType" class="text-input" placeholder="例如 步行、拉伸、瑜伽" />
+          <view class="activity-banner">
+            <image src="/static/illustrations/record-desk-banner.png" mode="aspectFill" />
+            <view class="activity-banner-copy">
+              <text>今天动了什么？</text>
+              <text>选项目和时长，消耗仅作参考</text>
+            </view>
+          </view>
+
+          <scroll-view class="activity-categories" scroll-x>
+            <view class="activity-category-row">
+              <button
+                v-for="category in activityCategories"
+                :key="category"
+                :class="['activity-category', { selected: activityCategory === category }]"
+                @tap="activityCategory = category"
+              >
+                {{ category }}
+              </button>
+            </view>
+          </scroll-view>
+
+          <view class="activity-list">
+            <button
+              v-for="activity in filteredActivities"
+              :key="activity.id"
+              :class="['activity-item', { selected: activityId === activity.id }]"
+              @tap="selectActivity(activity)"
+            >
+              <view class="activity-item-copy">
+                <text>{{ activity.name }}</text>
+                <text>{{ activity.category }} · {{ intensityLabel(activity.intensity) }}</text>
+              </view>
+              <image
+                v-if="activityId === activity.id"
+                src="/static/icons/svg/check.svg"
+                mode="aspectFit"
+              />
+            </button>
+          </view>
           <text v-if="fieldError('activityType')" class="field-error">{{
             fieldError('activityType')
           }}</text>
-          <text class="field-label field-label-spaced">活动时长</text>
+
+          <text class="field-label field-label-spaced">强度</text>
+          <view class="intensity-control">
+            <button
+              v-for="item in intensityOptions"
+              :key="item.value"
+              :class="{ selected: activityIntensity === item.value }"
+              @tap="activityIntensity = item.value"
+            >
+              {{ item.label }}
+            </button>
+          </view>
+
+          <text class="field-label field-label-spaced">运动时长</text>
           <view class="input-wrap" :class="{ invalid: fieldError('durationMinutes') }">
             <input v-model="activityMinutes" type="number" placeholder="例如 30" />
             <text>分钟</text>
@@ -132,6 +182,17 @@
           <text v-if="fieldError('durationMinutes')" class="field-error">{{
             fieldError('durationMinutes')
           }}</text>
+
+          <view class="activity-estimate">
+            <view>
+              <text>估算消耗</text>
+              <text>按项目、强度、时长和当前体重计算</text>
+            </view>
+            <view class="activity-estimate-value">
+              <text>{{ estimatedActivityCalories }}</text>
+              <text>千卡</text>
+            </view>
+          </view>
         </template>
 
         <template v-else>
@@ -177,9 +238,7 @@
           <view class="timeline-marker" />
           <view class="timeline-copy">
             <text class="timeline-title">{{ item.title }}</text>
-            <text class="timeline-desc"
-              >{{ item.description }} · {{ timeLabel(item.recordedAt) }}</text
-            >
+            <text class="timeline-desc">{{ timelineDescription(item) }}</text>
           </view>
           <button class="edit-action" @tap="startEdit(item)">修改</button>
         </view>
@@ -200,7 +259,17 @@ import type {
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import MiniTabBar from '../../components/MiniTabBar.vue';
+import {
+  activityCatalog,
+  estimateActivityCalories,
+  getActivityById,
+  type ActivityCatalogItem,
+  type ActivityIntensity,
+} from '../../features/activity/activity-catalog.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
+import { loadHealthProfile } from '../../features/health-profile/health-profile.service.js';
+import { loadProfileForDisplay } from '../../features/health-profile/profile-loader.js';
 import { createHealthRecordsStore } from '../../features/health-records/health-records.store.js';
 import { consumeRecordTypeFocus } from '../../features/health-records/records-focus.js';
 import { deleteMealEntry, loadMealEntries } from '../../features/food/food.service.js';
@@ -222,13 +291,46 @@ const errors = ref<RecordFormErrors>({});
 const weight = ref('');
 const mealType = ref<MealType>('lunch');
 const meal = ref({ hasStaple: false, hasProtein: false, hasVegetable: false });
+const activityId = ref('walk');
 const activityType = ref('步行');
+const activityIntensity = ref<ActivityIntensity>('low');
+const activityCategory = ref('全部');
 const activityMinutes = ref('');
 const sleepMinutes = ref('');
 const sleepQuality = ref<SleepQuality>('good');
 const note = ref('');
 const foodEntries = ref<MealEntry[]>([]);
+type ActivitySnapshot = {
+  recordId: string;
+  activityId: string;
+  activityType: string;
+  intensity: ActivityIntensity;
+  durationMinutes: number;
+  estimatedCalories: number;
+  source: 'directory';
+  recordedAt: string;
+};
+const activitySnapshots = ref<ActivitySnapshot[]>([]);
+const profileWeightKg = ref<number | undefined>();
 const foodSummary = computed(() => summarizeFoodEntries(foodEntries.value));
+const activityCategories = ['全部', ...new Set(activityCatalog.map((item) => item.category))];
+const filteredActivities = computed(() =>
+  activityCategory.value === '全部'
+    ? activityCatalog
+    : activityCatalog.filter((item) => item.category === activityCategory.value),
+);
+const selectedActivity = computed(() => getActivityById(activityId.value));
+const estimatedActivityCalories = computed(() => {
+  const durationMinutes = Number(activityMinutes.value);
+  if (!selectedActivity.value || !Number.isFinite(durationMinutes) || durationMinutes <= 0) return 0;
+  const multiplier = activityIntensity.value === 'high' ? 1.2 : activityIntensity.value === 'low' ? 0.8 : 1;
+  return estimateActivityCalories({
+    met: selectedActivity.value.met * multiplier,
+    weightKg:
+      healthLoopState.today.value?.todayRecords?.weight?.valueKg || profileWeightKg.value || undefined,
+    durationMinutes,
+  });
+});
 
 const types: Array<{ type: HealthRecordType; label: string }> = [
   { type: 'weight', label: '体重' },
@@ -251,6 +353,11 @@ const qualities: Array<{ value: SleepQuality; label: string }> = [
   { value: 'poor', label: '不太好' },
   { value: 'fair', label: '一般' },
   { value: 'good', label: '挺好' },
+];
+const intensityOptions: Array<{ value: ActivityIntensity; label: string }> = [
+  { value: 'low', label: '轻松' },
+  { value: 'medium', label: '适中' },
+  { value: 'high', label: '较强' },
 ];
 const formTitle = computed(
   () =>
@@ -283,8 +390,12 @@ function currentForm() {
   if (activeType.value === 'activity')
     return {
       type: 'activity' as const,
+      activityId: activityId.value,
       activityType: activityType.value,
+      intensity: activityIntensity.value,
       durationMinutes: activityMinutes.value,
+      estimatedCalories: estimatedActivityCalories.value,
+      source: 'directory' as const,
       note: note.value,
     };
   return {
@@ -306,10 +417,32 @@ function selectType(type: HealthRecordType) {
     errors.value = {};
   }
 }
+function selectActivity(activity: ActivityCatalogItem) {
+  activityId.value = activity.id;
+  activityType.value = activity.name;
+  activityIntensity.value = activity.intensity;
+  clearErrors();
+}
+function intensityLabel(value: ActivityIntensity) {
+  return intensityOptions.find((item) => item.value === value)?.label || '适中';
+}
 async function submit() {
+  const activitySnapshot =
+    activeType.value === 'activity'
+      ? {
+          activityId: activityId.value,
+          activityType: activityType.value,
+          intensity: activityIntensity.value,
+          durationMinutes: Number(activityMinutes.value),
+          estimatedCalories: estimatedActivityCalories.value,
+          source: 'directory' as const,
+        }
+      : null;
+  const previousEditingId = editingId.value;
   const result = await store.save(currentForm(), date, editingId.value);
   errors.value = result.fieldErrors;
   if (!result.persisted) return;
+  if (activitySnapshot) persistActivitySnapshot(activitySnapshot, previousEditingId);
   resetForm();
   await healthLoopState.loadToday(date);
   uni.showToast({ title: '已保存', icon: 'success' });
@@ -334,7 +467,9 @@ function startEdit(item: RecordTimelineItem) {
     note.value = form.note;
   }
   if (form.type === 'activity') {
+    activityId.value = form.activityId;
     activityType.value = form.activityType;
+    activityIntensity.value = form.intensity;
     activityMinutes.value = form.durationMinutes;
     note.value = form.note;
   }
@@ -362,6 +497,56 @@ function load() {
 function timeLabel(value: string) {
   return new Date(value).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 }
+function activitySnapshotCalories(recordId: string) {
+  return activitySnapshots.value.find((item) => item.recordId === recordId)?.estimatedCalories || 0;
+}
+function timelineDescription(item: RecordTimelineItem) {
+  const calories = activitySnapshotCalories(item.id);
+  return `${item.description} · ${timeLabel(item.recordedAt)}${calories ? ` · 估算 ${calories} 千卡` : ''}`;
+}
+function loadActivitySnapshots() {
+  try {
+    const raw = uni.getStorageSync(`heban_activity_snapshots:${date}`);
+    activitySnapshots.value = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : [];
+  } catch {
+    activitySnapshots.value = [];
+  }
+}
+async function loadProfileWeight() {
+  const result = await loadProfileForDisplay(loadHealthProfile, loadLocalProfile);
+  profileWeightKg.value = result.profile?.weightKg || undefined;
+}
+function persistActivitySnapshot(
+  snapshot: Omit<ActivitySnapshot, 'recordId' | 'recordedAt'>,
+  previousRecordId: string | null,
+) {
+  const records = store.records.value?.activities || [];
+  const matchingRecord = [...records]
+    .reverse()
+    .find(
+      (item) =>
+        item.activityType === snapshot.activityId &&
+        item.durationMinutes === snapshot.durationMinutes &&
+        item.intensity === snapshot.intensity,
+    );
+  const recordId = matchingRecord?.id || previousRecordId;
+  if (!recordId) return;
+  const next: ActivitySnapshot = {
+    ...snapshot,
+    recordId,
+    recordedAt: matchingRecord?.recordedAt || new Date().toISOString(),
+  };
+  activitySnapshots.value = [
+    ...activitySnapshots.value.filter(
+      (item) => item.recordId !== recordId && item.recordId !== previousRecordId,
+    ),
+    next,
+  ];
+  uni.setStorageSync(
+    `heban_activity_snapshots:${date}`,
+    JSON.stringify(activitySnapshots.value),
+  );
+}
 function localDate() {
   const n = new Date();
   return new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -384,12 +569,15 @@ function manageFood(entry: MealEntry) {
     itemList: ['编辑这份记录', '删除这份记录'],
     success: ({ tapIndex }) => {
       if (tapIndex === 0) {
-        if (!entry.foodId) {
+        if (!entry.foodId && !entry.userFoodId) {
           uni.showToast({ title: '原食品不可用，请重新记录', icon: 'none' });
           return;
         }
+        const foodReference = entry.userFoodId
+          ? `userFoodId=${encodeURIComponent(entry.userFoodId)}`
+          : `foodId=${encodeURIComponent(entry.foodId || '')}`;
         uni.navigateTo({
-          url: `/pages/food-confirm/FoodConfirmPage?entryId=${encodeURIComponent(entry.id)}&foodId=${encodeURIComponent(entry.foodId)}&grams=${entry.grams}&mealType=${entry.mealType}&note=${encodeURIComponent(entry.note || '')}`,
+          url: `/pages/food-confirm/FoodConfirmPage?entryId=${encodeURIComponent(entry.id)}&${foodReference}&grams=${entry.grams}&mealType=${entry.mealType}&note=${encodeURIComponent(entry.note || '')}`,
         });
         return;
       }
@@ -419,6 +607,8 @@ onShow(() => {
   const requested = consumeRecordTypeFocus();
   if (requested) activeType.value = requested;
   load();
+  loadActivitySnapshots();
+  loadProfileWeight();
   loadFoods();
   healthLoopState.loadToday(date);
 });
@@ -739,6 +929,176 @@ onShow(() => {
 .text-input {
   display: block;
   padding: 0 18rpx;
+}
+.activity-banner {
+  position: relative;
+  min-height: 190rpx;
+  overflow: hidden;
+  margin: 0 0 20rpx;
+  border: 1rpx solid #d8e5da;
+  border-radius: 16rpx;
+  background: #f8f7ef;
+}
+.activity-banner > image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.activity-banner-copy {
+  position: relative;
+  z-index: 1;
+  width: 48%;
+  min-width: 240rpx;
+  padding: 32rpx 0 28rpx 26rpx;
+}
+.activity-banner-copy text {
+  display: block;
+}
+.activity-banner-copy text:first-child {
+  color: #31543e;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.activity-banner-copy text:last-child {
+  margin-top: 8rpx;
+  color: #75897b;
+  font-size: 19rpx;
+  line-height: 1.5;
+}
+.activity-categories {
+  width: 100%;
+  margin-bottom: 14rpx;
+  white-space: nowrap;
+}
+.activity-category-row {
+  display: inline-flex;
+  gap: 8rpx;
+  padding-bottom: 4rpx;
+}
+.activity-category {
+  height: 54rpx;
+  padding: 0 20rpx;
+  border: 1rpx solid #dce7de;
+  border-radius: 10rpx;
+  background: #fff;
+  color: #637d6b;
+  font-size: 21rpx;
+  line-height: 54rpx;
+}
+.activity-category.selected {
+  border-color: #77a884;
+  background: #eaf4eb;
+  color: #286b47;
+  font-weight: 700;
+}
+.activity-list {
+  border-top: 1rpx solid #e2ebe3;
+}
+.activity-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 76rpx;
+  padding: 12rpx 8rpx;
+  border: 0;
+  border-bottom: 1rpx solid #e7eee8;
+  background: transparent;
+  text-align: left;
+}
+.activity-item.selected {
+  background: #f0f7f1;
+}
+.activity-item-copy {
+  min-width: 0;
+  flex: 1;
+}
+.activity-item-copy text {
+  display: block;
+}
+.activity-item-copy text:first-child {
+  color: #345b41;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.activity-item-copy text:last-child {
+  margin-top: 4rpx;
+  color: #829589;
+  font-size: 18rpx;
+}
+.activity-item > image {
+  width: 28rpx;
+  height: 28rpx;
+  flex: none;
+  margin-left: 12rpx;
+  opacity: 0.7;
+}
+.intensity-control {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rpx;
+  padding: 5rpx;
+  border-radius: 12rpx;
+  background: #eaf2eb;
+}
+.intensity-control button {
+  height: 58rpx;
+  border: 0;
+  border-radius: 9rpx;
+  background: transparent;
+  color: #657d6c;
+  font-size: 22rpx;
+  line-height: 58rpx;
+}
+.intensity-control button.selected {
+  background: #fff;
+  color: #286b47;
+  box-shadow: 0 3rpx 9rpx rgba(54, 103, 68, 0.08);
+  font-weight: 700;
+}
+.activity-estimate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: 18rpx;
+  padding: 18rpx 20rpx;
+  border: 1rpx solid #d7e5d9;
+  border-radius: 12rpx;
+  background: #f8fbf8;
+}
+.activity-estimate > view:first-child {
+  min-width: 0;
+  flex: 1;
+}
+.activity-estimate text {
+  display: block;
+}
+.activity-estimate > view:first-child text:first-child {
+  color: #44684f;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+.activity-estimate > view:first-child text:last-child {
+  margin-top: 5rpx;
+  color: #83968a;
+  font-size: 18rpx;
+  line-height: 1.4;
+}
+.activity-estimate-value {
+  display: flex;
+  align-items: baseline;
+  gap: 5rpx;
+  flex: none;
+}
+.activity-estimate-value text:first-child {
+  color: #2c744a;
+  font-size: 35rpx;
+  font-weight: 800;
+}
+.activity-estimate-value text:last-child {
+  color: #71877a;
+  font-size: 18rpx;
 }
 .note-input {
   margin-top: 20rpx;

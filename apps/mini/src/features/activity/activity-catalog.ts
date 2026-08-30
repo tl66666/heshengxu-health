@@ -17,7 +17,7 @@ export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'walk',
     name: '步行',
-    category: '步行',
+    category: '有氧',
     intensity: 'low',
     met: 3.5,
     icon: 'activity-walk',
@@ -25,7 +25,7 @@ export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'run',
     name: '跑步',
-    category: '跑步',
+    category: '有氧',
     intensity: 'high',
     met: 8.3,
     icon: 'activity-run',
@@ -33,7 +33,7 @@ export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'cycle',
     name: '骑行',
-    category: '骑行',
+    category: '有氧',
     intensity: 'medium',
     met: 7.5,
     icon: 'activity-cycle',
@@ -41,7 +41,7 @@ export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'rope',
     name: '跳绳',
-    category: '跳绳',
+    category: '有氧',
     intensity: 'high',
     met: 10,
     icon: 'activity-rope',
@@ -49,7 +49,7 @@ export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'strength',
     name: '力量训练',
-    category: '力量训练',
+    category: '力量',
     intensity: 'medium',
     met: 5,
     icon: 'activity-strength',
@@ -57,7 +57,7 @@ export const activityCatalog: readonly ActivityCatalogItem[] = [
   {
     id: 'yoga',
     name: '瑜伽',
-    category: '瑜伽',
+    category: '身心',
     intensity: 'low',
     met: 2.5,
     icon: 'activity-yoga',

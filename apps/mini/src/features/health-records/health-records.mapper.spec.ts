@@ -29,6 +29,33 @@ describe('health records mapper', () => {
     });
   });
 
+  it('sends only API-supported activity fields while retaining a rich local form', () => {
+    expect(
+      formToRequest(
+        {
+          type: 'activity',
+          activityId: 'walk',
+          activityType: '步行',
+          intensity: 'medium',
+          durationMinutes: '30',
+          estimatedCalories: 129,
+          source: 'directory',
+          note: '',
+        },
+        '2026-08-26T08:00:00.000Z',
+      ),
+    ).toEqual({
+      type: 'activity',
+      data: {
+        activityType: 'walk',
+        durationMinutes: 30,
+        intensity: 'medium',
+        recordedAt: '2026-08-26T08:00:00.000Z',
+        note: undefined,
+      },
+    });
+  });
+
   it('creates a sorted timeline and supports edit rehydration', () => {
     expect(timelineFromToday(records).map((item) => item.id)).toEqual(['m1', 'w1']);
     expect(formFromTimeline('meal-structure', records, 'm1')).toMatchObject({
