@@ -136,32 +136,34 @@
         </view>
       </view>
 
-      <!-- 4. 2x2功能卡片 -->
+      <!-- 4. 健康追踪网格 -->
       <view class="grid-cards">
-        <button class="grid-item card" hover-class="button-hover" @tap="showWaterDialog()">
+        <button class="grid-item card water-card" hover-class="button-hover" @tap="goToWater">
           <view class="grid-top">
             <text class="grid-title">喝水</text>
             <text class="grid-add">+</text>
           </view>
           <view class="grid-data">
-            <text class="grid-num">0</text>
-            <text class="grid-unit">毫升</text>
+            <text class="grid-num">{{ today.todayRecords?.water?.totalMilliliters || 0 }}</text>
+            <text class="grid-unit">ml</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
+          <image class="grid-art" src="/static/illustrations/water-cup-watercolor.png" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('sleep')">
+        <button class="grid-item card sleep-card" hover-class="button-hover" @tap="goToRecord('sleep')">
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
             <text class="grid-add">+</text>
           </view>
           <view class="grid-data">
-            <text class="grid-hint">没有记录</text>
+            <text v-if="today.todayRecords?.sleep" class="grid-num">{{ formatSleepHours(today.todayRecords.sleep) }}</text>
+            <text v-if="today.todayRecords?.sleep" class="grid-unit">小时</text>
+            <text v-else class="grid-hint">未记录</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
+          <image class="grid-art" src="/static/illustrations/xuxu-sleep-reminder.png" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="goToRecord('activity')">
+        <button class="grid-item card activity-card" hover-class="button-hover" @tap="goToRecord('activity')">
           <view class="grid-top">
             <text class="grid-title">活动</text>
             <text class="grid-add">+</text>
@@ -170,17 +172,17 @@
             <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
             <text class="grid-unit">分钟</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
+          <image class="grid-art" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
         </button>
         
-        <button class="grid-item card" hover-class="button-hover" @tap="toXuxu">
+        <button class="grid-item card mood-card" hover-class="button-hover" @tap="toXuxu">
           <view class="grid-top">
             <text class="grid-title">心情</text>
           </view>
           <view class="grid-data">
             <text class="grid-hint">记录今天</text>
           </view>
-          <image class="grid-icon-img" src="/static/icons/watercolor/mood-smile.png" mode="aspectFit" />
+          <image class="grid-art" src="/static/icons/watercolor/mood-smile.png" mode="aspectFit" />
         </button>
       </view>
 
@@ -371,6 +373,18 @@ const goToMealAdd = () => {
   uni.navigateTo({
     url: '/pages/meal-add/MealAddPage?mealType=lunch'
   });
+};
+
+const goToWater = () => {
+  uni.navigateTo({
+    url: '/pages/water/WaterPage'
+  });
+};
+
+const formatSleepHours = (sleep: any) => {
+  if (!sleep?.durationMinutes) return '0';
+  const hours = (sleep.durationMinutes / 60).toFixed(1);
+  return hours;
 };
 
 const getTodayDate = () => {
@@ -824,79 +838,91 @@ onShow(() => {
   opacity: 0.4;
 }
 
-/* 4. 2x2网格卡片 */
+/* 4. 健康追踪网格 */
 .grid-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12rpx;
-  margin-bottom: 16rpx;
+  gap: 16rpx;
+  margin-bottom: 32rpx;
 }
 
 .grid-item {
   position: relative;
-  padding: 18rpx 20rpx;
-  min-height: 130rpx;
+  padding: 24rpx;
+  min-height: 150rpx;
   text-align: left;
   border: 0;
   overflow: hidden;
+  transition: transform 0.12s ease;
+}
+
+.grid-item:active {
+  transform: scale(0.97);
 }
 
 .grid-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12rpx;
+  margin-bottom: 16rpx;
 }
 
 .grid-title {
   color: #2d6943;
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: 700;
 }
 
 .grid-add {
-  width: 34rpx;
-  height: 34rpx;
+  width: 40rpx;
+  height: 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(232, 247, 237, 0.6);
-  color: #7fcc8f;
-  font-size: 24rpx;
+  background: rgba(127, 204, 143, 0.12);
+  color: #5a9572;
+  font-size: 28rpx;
   font-weight: 300;
 }
 
 .grid-data {
   display: flex;
   align-items: baseline;
-  gap: 4rpx;
-  margin-bottom: 8rpx;
+  gap: 6rpx;
+  margin-bottom: 12rpx;
+  position: relative;
+  z-index: 2;
 }
 
 .grid-num {
   color: #2d6943;
-  font-size: 40rpx;
+  font-size: 48rpx;
   font-weight: 900;
   line-height: 1;
 }
 
 .grid-unit {
   color: #76907d;
-  font-size: 18rpx;
+  font-size: 22rpx;
+  font-weight: 600;
 }
 
 .grid-hint {
-  color: #9ba8a0;
-  font-size: 18rpx;
+  color: #9aaca0;
+  font-size: 22rpx;
+  font-weight: 600;
 }
 
-.grid-icon {
+.grid-art {
   position: absolute;
-  bottom: 12rpx;
-  right: 12rpx;
-  font-size: 44rpx;
-  opacity: 0.2;
+  bottom: -8rpx;
+  right: -8rpx;
+  width: 120rpx;
+  height: 120rpx;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .grid-icon-img {

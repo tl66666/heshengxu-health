@@ -27,6 +27,11 @@
         <text class="form-value">{{ activityLabel }}</text>
         <image class="form-arrow" src="/static/icons/svg/back.svg" mode="aspectFit" />
       </view>
+      <view class="form-item custom-goal-item" @tap="selectCustomGoal">
+        <view class="custom-goal-copy"><text class="form-label">每日目标</text><text class="form-hint">可按自己的节奏微调</text></view>
+        <text class="form-value">{{ customGoal ? `${customGoal}ml` : '使用推荐值' }}</text>
+        <image class="form-arrow" src="/static/icons/svg/back.svg" mode="aspectFit" />
+      </view>
     </view>
 
     <!-- 推荐结果 -->
@@ -35,7 +40,7 @@
         <text class="result-icon">💧</text>
         <text class="result-title">推荐饮水量</text>
       </view>
-      <text class="result-value">{{ recommendedAmount }}</text>
+      <text class="result-value">{{ selectedDailyGoal }}</text>
       <text class="result-unit">ml/天</text>
       <text class="result-hint">约 {{ cupsCount }} 杯水（每杯200ml）</text>
     </view>
@@ -84,6 +89,7 @@ import { navigateBack } from '../../utils/router.js';
 const gender = ref<'male' | 'female'>('male');
 const weight = ref(75);
 const activity = ref<'none' | 'light' | 'moderate' | 'heavy'>('none');
+const customGoal = ref<number | null>(null);
 
 const genderOptions = [
   { value: 'male', label: '男' },
@@ -122,9 +128,8 @@ const recommendedAmount = computed(() => {
   return Math.round(total / 100) * 100;
 });
 
-const cupsCount = computed(() => {
-  return Math.ceil(recommendedAmount.value / 200);
-});
+const selectedDailyGoal = computed(() => customGoal.value || recommendedAmount.value);
+const cupsCount = computed(() => Math.ceil(selectedDailyGoal.value / 200));
 
 function selectGender() {
   uni.showActionSheet({
@@ -160,6 +165,21 @@ function selectActivity() {
   });
 }
 
+function selectCustomGoal() {
+  uni.showModal({
+    title: '调整每日目标',
+    editable: true,
+    content: String(customGoal.value || recommendedAmount.value),
+    placeholderText: '输入 500-6000ml',
+    success: (res) => {
+      if (!res.confirm || !res.content) return;
+      const amount = Math.round(Number(res.content) / 50) * 50;
+      if (Number.isFinite(amount) && amount >= 500 && amount <= 6000) customGoal.value = amount;
+      else uni.showToast({ title: '请输入 500-6000ml', icon: 'none' });
+    },
+  });
+}
+
 function onGenderChange(e: any) {
   gender.value = genderOptions[e.detail.value].value as 'male' | 'female';
 }
@@ -167,7 +187,9 @@ function onGenderChange(e: any) {
 function saveGoal() {
   try {
     // 保存目标
-    uni.setStorageSync('water_daily_goal', recommendedAmount.value.toString());
+    uni.setStorageSync('water_daily_goal', selectedDailyGoal.value.toString());
+    if (customGoal.value) uni.setStorageSync('water_daily_goal_custom', String(customGoal.value));
+    else uni.removeStorageSync('water_daily_goal_custom');
     
     // 保存用户信息
     uni.setStorageSync('water_user_info', JSON.stringify({
@@ -203,6 +225,8 @@ onLoad(() => {
       weight.value = data.weight || 75;
       activity.value = data.activity || 'none';
     }
+    const savedCustomGoal = Number(uni.getStorageSync('water_daily_goal_custom'));
+    customGoal.value = Number.isFinite(savedCustomGoal) && savedCustomGoal > 0 ? savedCustomGoal : null;
   } catch (e) {
     console.error('加载用户信息失败:', e);
   }

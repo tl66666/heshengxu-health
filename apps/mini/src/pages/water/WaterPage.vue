@@ -188,6 +188,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack } from '../../utils/router.js';
 
@@ -271,7 +272,8 @@ function loadUserInfo() {
     const userInfo = uni.getStorageSync('water_user_info') as UserInfo | null;
     if (userInfo && userInfo.weight) {
       const recommended = calculateRecommendedWater(userInfo);
-      dailyGoal.value = recommended;
+      const customGoal = Number(uni.getStorageSync('water_daily_goal_custom'));
+      dailyGoal.value = Number.isFinite(customGoal) && customGoal > 0 ? customGoal : recommended;
       isPersonalized.value = true;
     } else {
       const savedGoal = uni.getStorageSync('water_daily_goal');
@@ -400,6 +402,11 @@ function loadRecords() {
 }
 
 onMounted(() => {
+  loadUserInfo();
+  loadRecords();
+});
+
+onShow(() => {
   loadUserInfo();
   loadRecords();
 });
