@@ -75,33 +75,36 @@
       <!-- 2. 饮食热量卡片 - 真正紧凑 -->
       <view class="calorie-card card" @tap="goToFoodDetail">
         <view class="card-top">
-          <text class="card-title">饮食热量</text>
-          <view class="mode-tag">16:8饮食</view>
+          <text class="card-title">饮食记录</text>
+          <view class="mode-tag">今日概览</view>
         </view>
 
         <view class="calorie-main">
-          <text class="hint-text">还可吃</text>
+          <text class="hint-text">今日已记录</text>
           <view class="big-number">
-            <text class="number">1500</text>
-            <text class="unit">千卡</text>
+            <text class="number">{{ mealCount }}</text>
+            <text class="unit">餐</text>
           </view>
+          <text class="meal-summary">{{ mealSummaryText }}</text>
         </view>
 
         <view class="calorie-stats">
           <view class="stat">
-            <text class="stat-num">0</text>
-            <text class="stat-label">饮食</text>
+            <text class="stat-num">{{ balancedMealCount }}</text>
+            <text class="stat-label">结构完整</text>
           </view>
           <view class="stat">
-            <text class="stat-num">0</text>
-            <text class="stat-label">运动×0.9</text>
+            <text class="stat-num">{{ mealCount - balancedMealCount }}</text>
+            <text class="stat-label">待补充</text>
           </view>
         </view>
 
-        <view class="dots">
-          <view class="dot active"></view>
-          <view class="dot"></view>
-          <view class="dot"></view>
+        <view class="meal-progress" aria-label="今日饮食记录进度">
+          <view
+            v-for="slot in 3"
+            :key="slot"
+            :class="['meal-progress-segment', slot <= mealCount ? 'filled' : '']"
+          />
         </view>
 
         <view class="meals">
@@ -212,14 +215,15 @@
       </view>
 
       <!-- 5. 轻断食卡片 -->
-      <view class="fasting-card card">
+      <view class="fasting-card card" @tap="go('/pages/plan/PlanPage')">
         <view class="card-top">
-          <text class="card-title">轻断食</text>
-          <view class="mode-tag blue">16:8模式</view>
+          <text class="card-title">今日节律</text>
+          <view class="mode-tag blue">陪伴进度</view>
         </view>
         <view class="fasting-content">
-          <text class="fasting-label">用餐时间剩余</text>
-          <text class="fasting-time">01:04:08</text>
+          <text class="fasting-label">今日记录进度</text>
+          <text class="fasting-time">{{ recordingCompleted }}/{{ recordingTotal }}</text>
+          <text class="fasting-summary">{{ recordingMessage }}</text>
         </view>
         <image
           class="fasting-icon-img"
@@ -359,6 +363,25 @@ const todayActivityMinutes = computed(
   () =>
     today.value?.todayRecords.activities.reduce((total, item) => total + item.durationMinutes, 0) ||
     0,
+);
+
+const mealRecords = computed(() => today.value?.todayRecords?.meals || []);
+const mealCount = computed(() => mealRecords.value.length);
+const balancedMealCount = computed(
+  () =>
+    mealRecords.value.filter(
+      (meal) => meal.hasStaple && meal.hasProtein && meal.hasVegetable,
+    ).length,
+);
+const mealSummaryText = computed(() =>
+  mealCount.value === 0
+    ? '还没有记录，先记下今天的一餐'
+    : `${balancedMealCount.value}/${mealCount.value} 餐结构完整`,
+);
+const recordingCompleted = computed(() => today.value?.recordingProgress.completed || 0);
+const recordingTotal = computed(() => today.value?.recordingProgress.total || 0);
+const recordingMessage = computed(
+  () => experience.value?.recording.message || '完成一件小事，就已经是在照顾自己',
 );
 
 const progress = computed(() => {
@@ -750,6 +773,12 @@ onShow(() => {
   margin-bottom: 6rpx;
 }
 
+.meal-summary {
+  margin-top: 10rpx;
+  color: #9a8b84;
+  font-size: 20rpx;
+}
+
 .calorie-stats {
   display: flex;
   justify-content: center;
@@ -778,23 +807,23 @@ onShow(() => {
   font-size: 18rpx;
 }
 
-.dots {
+.meal-progress {
   display: flex;
   justify-content: center;
-  gap: 8rpx;
-  margin: 14rpx 0;
+  gap: 10rpx;
+  margin: 14rpx 18rpx 8rpx;
 }
 
-.dot {
-  width: 10rpx;
-  height: 10rpx;
-  border-radius: 50%;
-  background: #d4e8db;
+.meal-progress-segment {
+  flex: 1;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #e8eee8;
+  transition: background 0.2s ease;
 }
 
-.dot.active {
-  background: #7fcc8f;
-  width: 14rpx;
+.meal-progress-segment.filled {
+  background: linear-gradient(90deg, #9ccfb0, #78b9a7);
 }
 
 .meals {
@@ -1066,8 +1095,14 @@ onShow(() => {
   color: #2d6943;
   font-size: 44rpx;
   font-weight: 900;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 2rpx;
+  line-height: 1;
+}
+
+.fasting-summary {
+  max-width: 70%;
+  color: #84978b;
+  font-size: 21rpx;
+  line-height: 1.45;
 }
 
 .fasting-icon {

@@ -50,6 +50,13 @@ describe('health records', () => {
       activities: [{ activityType: 'walk' }],
       sleep: { durationMinutes: 430, quality: 'good' },
     });
+    const history = await client
+      .get('/api/v1/health-records/weights/history?from=2026-08-01T00:00:00.000Z')
+      .set(authorization)
+      .expect(200);
+    expect(history.body.data).toEqual([
+      expect.objectContaining({ valueKg: 61.8, isCurrent: true }),
+    ]);
     await app.close();
   });
 

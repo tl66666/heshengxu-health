@@ -12,4 +12,11 @@ describe('home card presentation contracts', () => {
     expect(homePageSource).toContain("navigateTo('/pages/water/WaterPage')");
     expect(homePageSource).not.toContain("const goToWater = () => {\n  uni.navigateTo({");
   });
+
+  it('does not render invented calorie or fasting values', () => {
+    expect(homePageSource).not.toContain('<text class="number">1500</text>');
+    expect(homePageSource).not.toContain('<text class="fasting-time">01:04:08</text>');
+    expect(homePageSource).toContain('{{ mealCount }}');
+    expect(homePageSource).toContain('{{ recordingCompleted }}/{{ recordingTotal }}');
+  });
 });

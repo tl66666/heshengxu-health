@@ -145,15 +145,31 @@
         <text class="section-title">最近记录</text>
         <text class="section-subtitle">每一次记录，都是在照顾自己</text>
       </view>
-      <button class="text-button" @tap="showDialog = true">查看全部</button>
+      <button class="text-button" @tap="activeView = 'records'">查看全部</button>
     </view>
     <view v-if="activeView === 'records'" class="history-card card">
+      <view class="record-filters">
+        <button
+          v-for="filter in recordFilters"
+          :key="filter.value"
+          class="record-filter"
+          :class="{ active: recordFilter === filter.value }"
+          @tap="recordFilter = filter.value"
+        >
+          {{ filter.label }}
+        </button>
+      </view>
       <view v-if="loadingRecords" class="history-loading">正在同步真实记录…</view>
-      <view v-else-if="!visibleRecords.length" class="history-empty">
+      <view v-else-if="!recordList.length" class="history-empty">
         <text>还没有体重记录</text>
         <text>记录第一次体重，开始看见自己的变化</text>
       </view>
-      <view v-for="(record, index) in visibleRecords" :key="record.id" class="history-item">
+      <view
+        v-for="(record, index) in recordList"
+        :key="record.id"
+        class="history-item"
+        @tap="editRecord(record)"
+      >
         <view class="history-date">
           <text class="history-day">{{ formatDay(record.recordedAt) }}</text>
           <text class="history-time">{{ formatTime(record.recordedAt) }}</text>
@@ -166,7 +182,7 @@
           ><text class="small-unit"> kg</text></view
         >
         <text
-          v-if="index < visibleRecords.length - 1"
+          v-if="index < recordList.length - 1"
           class="history-change"
           :class="changeClass(record, index)"
           >{{ changeLabel(record, index) }}</text
@@ -252,14 +268,16 @@
     </view>
 
     <view class="bottom-space" />
-    <button class="record-button" hover-class="record-button-hover" @tap="showDialog = true">
+    <button class="record-button" hover-class="record-button-hover" @tap="openNewRecord">
       <text class="plus">+</text><text>记录今天体重</text>
     </button>
 
     <view v-if="showDialog" class="dialog-mask" @tap="closeDialog">
       <view class="dialog" @tap.stop>
         <view class="dialog-head"
-          ><text class="dialog-title">记录今天的体重</text
+          ><text class="dialog-title">{{
+            editingRecordId ? '编辑体重记录' : '记录今天的体重'
+          }}</text
           ><button class="dialog-close" @tap="closeDialog">×</button></view
         >
         <text class="dialog-hint">建议在起床后、早餐前记录，变化会更稳定</text>
@@ -286,6 +304,7 @@ import {
   createWeightRecord,
   loadHealthProfile,
   loadWeightHistory,
+  replaceRecord as replaceWeightRecord,
 } from '../../features/health-loop/health-loop.service.js';
 
 type WeightRecord = { id: string; weight: number; recordedAt: string; note?: string };
@@ -308,8 +327,15 @@ const loadingRecords = ref(true);
 const selectedRange = ref<'7' | '30' | '90'>('30');
 const activeView = ref<'progress' | 'data' | 'records'>('progress');
 const showDialog = ref(false);
+const editingRecordId = ref<string | null>(null);
 const inputWeight = ref('');
 const inputNote = ref('');
+const recordFilter = ref<'all' | '30' | '90'>('all');
+const recordFilters = [
+  { label: '全部', value: 'all' as const },
+  { label: '近 30 天', value: '30' as const },
+  { label: '近 90 天', value: '90' as const },
+];
 const rangeTabs = [
   { label: '7天', value: '7' as const },
   { label: '30天', value: '30' as const },
@@ -323,8 +349,8 @@ const viewTabs = [
 const startWeight = computed(
   () =>
     healthLoopState.today.value?.activePlan?.healthTarget?.startWeightKg ??
-    profile.value?.weightKg ??
     records.value[records.value.length - 1]?.weight ??
+    profile.value?.weightKg ??
     0,
 );
 const targetWeight = computed(
@@ -422,6 +448,11 @@ const insightText = computed(() =>
     : '小絮说：体重有波动很正常，先照顾好今天的自己。',
 );
 const visibleRecords = computed(() => records.value.slice(0, 4));
+const recordList = computed(() => {
+  if (recordFilter.value === 'all') return records.value;
+  const cutoff = Date.now() - Number(recordFilter.value) * 86400000;
+  return records.value.filter((record) => +new Date(record.recordedAt) >= cutoff);
+});
 const gridLines = [28, 60, 92, 124];
 const milestones = computed(() => [
   {
@@ -515,8 +546,21 @@ function changeClass(record: WeightRecord, index: number) {
 }
 function closeDialog() {
   showDialog.value = false;
+  editingRecordId.value = null;
   inputWeight.value = '';
   inputNote.value = '';
+}
+function openNewRecord() {
+  editingRecordId.value = null;
+  inputWeight.value = '';
+  inputNote.value = '';
+  showDialog.value = true;
+}
+function editRecord(record: WeightRecord) {
+  editingRecordId.value = record.id;
+  inputWeight.value = record.weight.toFixed(1);
+  inputNote.value = record.note || '';
+  showDialog.value = true;
 }
 function saveLocalWeight() {
   const value = Number(inputWeight.value);
@@ -548,6 +592,28 @@ async function saveWeight() {
     note: inputNote.value || undefined,
   };
   try {
+    if (editingRecordId.value) {
+      const replaced = (await replaceWeightRecord('weight', editingRecordId.value, payload)) as {
+        id: string;
+        valueKg: number;
+        recordedAt: string;
+        note: string | null;
+      };
+      records.value = records.value.map((record) =>
+        record.id === editingRecordId.value
+          ? {
+              id: replaced.id,
+              weight: replaced.valueKg,
+              recordedAt: replaced.recordedAt,
+              note: replaced.note || undefined,
+            }
+          : record,
+      );
+      uni.setStorageSync(STORAGE_KEY, records.value);
+      uni.showToast({ title: '已更新记录', icon: 'success' });
+      closeDialog();
+      return;
+    }
     const saved = await createWeightRecord(payload);
     records.value = [
       {
@@ -562,6 +628,22 @@ async function saveWeight() {
     uni.showToast({ title: '记录成功', icon: 'success' });
     closeDialog();
   } catch {
+    if (editingRecordId.value) {
+      records.value = records.value.map((record) =>
+        record.id === editingRecordId.value
+          ? {
+              ...record,
+              weight: payload.valueKg,
+              recordedAt: payload.recordedAt,
+              note: payload.note,
+            }
+          : record,
+      );
+      uni.setStorageSync(STORAGE_KEY, records.value);
+      uni.showToast({ title: '网络不可用，已更新本地记录', icon: 'none' });
+      closeDialog();
+      return;
+    }
     saveLocalWeight();
     uni.showToast({ title: '网络不可用，已保存到本地', icon: 'none' });
   }
@@ -960,6 +1042,27 @@ onMounted(loadWeightData);
 .history-card {
   padding: 6rpx 24rpx;
 }
+.record-filters {
+  display: flex;
+  gap: 10rpx;
+  padding: 14rpx 0 8rpx;
+}
+.record-filter {
+  padding: 10rpx 16rpx;
+  border-radius: 999rpx;
+  background: #f7f0eb;
+  color: #a28f88;
+  font-size: 19rpx;
+  line-height: 1;
+}
+.record-filter::after {
+  border: 0;
+}
+.record-filter.active {
+  background: #e8f4eb;
+  color: #6f9f7d;
+  font-weight: 700;
+}
 .history-loading,
 .history-empty {
   display: flex;
@@ -980,6 +1083,9 @@ onMounted(loadWeightData);
   align-items: center;
   min-height: 100rpx;
   border-bottom: 1rpx solid #f2e9e4;
+}
+.history-item:active {
+  background: #fff8f3;
 }
 .history-item:last-child {
   border-bottom: 0;
