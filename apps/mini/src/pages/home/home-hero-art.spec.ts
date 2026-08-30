@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { homeHeroArtPool, pickHomeHeroArt } from './home-hero-art.js';
+import homePageSource from './HomePage.vue?raw';
 
 describe('home hero daily art rotation', () => {
   it('contains only complete-display artworks with their own copy side', () => {
@@ -32,5 +33,18 @@ describe('home hero daily art rotation', () => {
       seen.add(pickHomeHeroArt(day).image);
     }
     expect([...seen].sort()).toEqual(homeHeroArtPool.map((item) => item.image).sort());
+  });
+
+  it('uses the companion artwork for the camera banner without the old generated camera icon', () => {
+    expect(homePageSource).toContain('/static/illustrations/home-companion-banner.png');
+    expect(homePageSource).toContain('class="camera-banner"');
+    expect(homePageSource).not.toContain('/static/icons/camera.jpg');
+  });
+
+  it('shows live intake, remaining, activity burn, and a stable progress track', () => {
+    expect(homePageSource).toContain('intakeCalories');
+    expect(homePageSource).toContain('remainingCalories');
+    expect(homePageSource).toContain('activityCalories');
+    expect(homePageSource).toContain('class="calorie-progress-track"');
   });
 });

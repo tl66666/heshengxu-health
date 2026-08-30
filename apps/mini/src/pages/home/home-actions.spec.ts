@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { homeQuickActions } from './home-actions.js';
+import { foodRecordActions, homeQuickActions } from './home-actions.js';
 
 describe('home quick actions', () => {
   it('keeps food recording first and adds weight review shortcuts with distinct icons', () => {
@@ -36,5 +36,15 @@ describe('home quick actions', () => {
   it('uses each existing icon only once so tiles stay scannable', () => {
     const icons = homeQuickActions.map((item) => item.icon);
     expect(new Set(icons).size).toBe(icons.length);
+  });
+
+  it('keeps four meal entries and one activity entry with explicit meal context', () => {
+    expect(foodRecordActions).toEqual([
+      { label: '早餐', route: '/pages/food-search/FoodSearchPage?mealType=breakfast' },
+      { label: '午餐', route: '/pages/food-search/FoodSearchPage?mealType=lunch' },
+      { label: '晚餐', route: '/pages/food-search/FoodSearchPage?mealType=dinner' },
+      { label: '加餐', route: '/pages/food-search/FoodSearchPage?mealType=snack' },
+      { label: '运动', route: '/pages/records/RecordsPage?type=activity' },
+    ]);
   });
 });

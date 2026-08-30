@@ -28,3 +28,11 @@ export const homeQuickActions = [
     tone: 'blush',
   },
 ] as const;
+
+export const foodRecordActions = [
+  { label: '早餐', route: '/pages/food-search/FoodSearchPage?mealType=breakfast' },
+  { label: '午餐', route: '/pages/food-search/FoodSearchPage?mealType=lunch' },
+  { label: '晚餐', route: '/pages/food-search/FoodSearchPage?mealType=dinner' },
+  { label: '加餐', route: '/pages/food-search/FoodSearchPage?mealType=snack' },
+  { label: '运动', route: '/pages/records/RecordsPage?type=activity' },
+] as const;

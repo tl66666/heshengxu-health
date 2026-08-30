@@ -48,60 +48,58 @@
         </view>
       </view>
 
-      <!-- 2. 饮食热量卡片 - 真正紧凑 -->
-      <view class="calorie-card card" @tap="goToFoodDetail">
+      <!-- 2. 饮食与运动摘要 -->
+      <view class="calorie-card card">
         <view class="card-top">
           <text class="card-title">饮食热量</text>
-          <view class="mode-tag">16:8饮食</view>
+          <button class="summary-link" @tap="goToFoodDetail">查看明细</button>
         </view>
-        
-        <view class="calorie-main">
-          <text class="hint-text">还可吃</text>
-          <view class="big-number">
-            <text class="number">1500</text>
-            <text class="unit">千卡</text>
-          </view>
-        </view>
-        
+
         <view class="calorie-stats">
-          <view class="stat">
-            <text class="stat-num">0</text>
-            <text class="stat-label">饮食</text>
+          <view class="stat stat--primary">
+            <text class="stat-label">已摄入</text>
+            <view class="stat-value"><text>{{ intakeCalories }}</text><text>千卡</text></view>
           </view>
           <view class="stat">
-            <text class="stat-num">0</text>
-            <text class="stat-label">运动×0.9</text>
+            <text class="stat-label">还可吃</text>
+            <view class="stat-value"><text>{{ remainingCalories }}</text><text>千卡</text></view>
+          </view>
+          <view class="stat">
+            <text class="stat-label">运动消耗</text>
+            <view class="stat-value"><text>{{ activityCalories }}</text><text>千卡</text></view>
           </view>
         </view>
-        
-        <view class="dots">
-          <view class="dot active"></view>
-          <view class="dot"></view>
-          <view class="dot"></view>
+
+        <view class="calorie-progress">
+          <view class="calorie-progress-track">
+            <view class="calorie-progress-fill" :style="{ width: `${calorieProgress}%` }" />
+          </view>
+          <text>参考目标 {{ calorieTarget }} 千卡</text>
         </view>
-        
+
         <view class="meals">
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">早餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">午餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">晚餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">加餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('activity')">
-            <text class="meal-name">运动</text>
+          <button
+            v-for="action in foodRecordActions"
+            :key="action.label"
+            class="meal-item"
+            hover-class="button-hover"
+            @tap="openRecordAction(action.route)"
+          >
+            <text class="meal-name">{{ action.label }}</text>
           </button>
         </view>
-        
-        <!-- 序序相机 -->
-        <button class="xuxu-camera-card card" hover-class="button-hover" @tap="goToXuxuCamera">
-          <image class="camera-decoration" src="/static/icons/camera.jpg" mode="aspectFit" />
-          <text class="camera-title">序序相机</text>
+
+        <button class="camera-banner" hover-class="button-hover" @tap="goToXuxuCamera">
+          <image
+            class="camera-banner-art"
+            src="/static/illustrations/home-companion-banner.png"
+            mode="aspectFill"
+          />
+          <view class="camera-banner-copy">
+            <text class="camera-title">序序相机</text>
+            <text class="camera-caption">拍下食物，先看热量再决定是否记录</text>
+          </view>
+          <image class="camera-arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
       </view>
 
@@ -160,7 +158,12 @@
             <text class="grid-add">+</text>
           </view>
           <view class="grid-data">
-            <text class="grid-num">{{ today.todayRecords?.activity?.durationMin || 0 }}</text>
+            <text class="grid-num">{{
+              today.todayRecords?.activities?.reduce(
+                (total, activity) => total + activity.durationMinutes,
+                0,
+              ) || 0
+            }}</text>
             <text class="grid-unit">分钟</text>
           </view>
           <image class="grid-icon" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
@@ -244,9 +247,12 @@ import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
+import { estimateActivityCalories, getActivityById } from '../../features/activity/activity-catalog.js';
+import { loadMealEntries } from '../../features/food/food.service.js';
+import { summarizeFoodEntries, type MealEntry } from '../../features/food/food.summary.js';
+import { foodRecordActions } from './home-actions.js';
 import { 
   navigateTo,
-  navigateToFoodRecognition,
   navigateToWeightDetail,
   navigateToXuxu,
 } from '../../utils/router.js';
@@ -266,6 +272,40 @@ const dateLabel = computed(() => {
 const displayName = computed(() => today.value?.displayName || '朋友');
 const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
+const mealEntries = ref<MealEntry[]>([]);
+const activitySnapshots = ref<Array<{ estimatedCalories?: number }>>([]);
+const calorieTarget = 1500;
+const foodSummary = computed(() => summarizeFoodEntries(mealEntries.value));
+const intakeCalories = computed(() => Math.round(foodSummary.value.energyKcal));
+const activityCalories = computed(() => {
+  const storedTotal = activitySnapshots.value.reduce(
+    (sum, item) => sum + Math.max(0, Number(item.estimatedCalories) || 0),
+    0,
+  );
+  if (storedTotal > 0) return Math.round(storedTotal);
+  const weightKg = today.value?.todayRecords?.weight?.valueKg || 70;
+  return Math.round(
+    (today.value?.todayRecords?.activities || []).reduce((sum, record) => {
+      const activity = getActivityById(record.activityType);
+      if (!activity) return sum;
+      const multiplier = record.intensity === 'high' ? 1.2 : record.intensity === 'low' ? 0.8 : 1;
+      return (
+        sum +
+        estimateActivityCalories({
+          met: activity.met * multiplier,
+          weightKg,
+          durationMinutes: record.durationMinutes,
+        })
+      );
+    }, 0),
+  );
+});
+const remainingCalories = computed(() =>
+  Math.max(0, calorieTarget - intakeCalories.value + activityCalories.value),
+);
+const calorieProgress = computed(() =>
+  Math.min(100, Math.round((Math.max(0, intakeCalories.value - activityCalories.value) / calorieTarget) * 100)),
+);
 const periodStatusText = computed(() =>
   menstruationCycle.value?.lastPeriodStart ? `上次经期 ${menstruationCycle.value.lastPeriodStart.slice(5).replace('-', '月')}日开始` : '还没有记录经期',
 );
@@ -328,10 +368,6 @@ const goToFoodDetail = () => {
   navigateTo('/pages/food/FoodDetailPage');
 };
 
-const goToFoodRecognition = () => {
-  navigateToFoodRecognition();
-};
-
 const goToRecord = (type: string) => {
   navigateTo(`/pages/records/RecordsPage?type=${type}`);
 };
@@ -355,10 +391,10 @@ const toXuxu = () => {
 };
 
 const goToXuxuCamera = () => {
-  uni.navigateTo({
-    url: '/pages/food-recognition/FoodRecognitionPage'
-  });
+  navigateTo('/pages/food-recognition/FoodRecognitionPage');
 };
+
+const openRecordAction = (route: string) => navigateTo(route);
 
 const goToMealAdd = () => {
   uni.navigateTo({
@@ -387,6 +423,14 @@ const load = () => {
   healthLoopState.loadToday(today);
 };
 
+const loadFoodSummary = async () => {
+  try {
+    mealEntries.value = await loadMealEntries(getTodayDate());
+  } catch {
+    mealEntries.value = [];
+  }
+};
+
 const loadPersonalSignals = () => {
   try {
     const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
@@ -400,15 +444,23 @@ const loadPersonalSignals = () => {
       total: Array.isArray(medications) ? medications.length : 0,
       done: Array.isArray(checkins) ? checkins.filter((item: { date?: string }) => item.date === today).length : 0,
     };
+    const snapshots = uni.getStorageSync(`heban_activity_snapshots:${getTodayDate()}`);
+    activitySnapshots.value = snapshots
+      ? typeof snapshots === 'string'
+        ? JSON.parse(snapshots)
+        : snapshots
+      : [];
   } catch {
     menstruationCycle.value = null;
     medicationStats.value = { total: 0, done: 0 };
+    activitySnapshots.value = [];
   }
 };
 
 // 修复：首次进入立即加载
 onMounted(() => {
   load();
+  loadFoodSummary();
   loadPersonalSignals();
 });
 
@@ -417,6 +469,7 @@ onShow(() => {
   if (today.value) {
     load();
   }
+  loadFoodSummary();
   loadPersonalSignals();
 });
 </script>
@@ -620,91 +673,83 @@ onShow(() => {
   color: #5a8fd6;
 }
 
-.calorie-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16rpx 0;
-}
-
-.hint-text {
-  color: #76907d;
-  font-size: 20rpx;
-  margin-bottom: 8rpx;
-}
-
-.big-number {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
-}
-
-.big-number .number {
-  color: #2d6943;
-  font-size: 64rpx;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.big-number .unit {
-  color: #5a9572;
-  font-size: 24rpx;
-  font-weight: 700;
-  margin-bottom: 6rpx;
-}
-
 .calorie-stats {
-  display: flex;
-  justify-content: center;
-  gap: 24rpx;
-  padding: 14rpx 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8rpx;
+  padding: 8rpx 0 16rpx;
 }
 
 .stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 12rpx;
-  background: rgba(232, 247, 237, 0.4);
+  min-width: 0;
+  padding: 12rpx 10rpx;
+  border-left: 1rpx solid #e3ece4;
 }
-
-.stat-num {
-  color: #2d6943;
-  font-size: 28rpx;
-  font-weight: 900;
+.stat:first-child {
+  border-left: 0;
 }
-
 .stat-label {
-  color: #9ba8a0;
+  display: block;
+  color: #819287;
   font-size: 18rpx;
 }
-
-.dots {
+.stat-value {
   display: flex;
-  justify-content: center;
-  gap: 8rpx;
-  margin: 14rpx 0;
+  align-items: baseline;
+  gap: 4rpx;
+  margin-top: 7rpx;
 }
-
-.dot {
-  width: 10rpx;
+.stat-value text:first-child {
+  overflow: hidden;
+  color: #365d43;
+  font-size: 28rpx;
+  font-weight: 800;
+  text-overflow: ellipsis;
+}
+.stat--primary .stat-value text:first-child {
+  color: #257248;
+}
+.stat-value text:last-child {
+  color: #84968a;
+  font-size: 16rpx;
+}
+.summary-link {
+  padding: 6rpx 2rpx;
+  border: 0;
+  background: transparent;
+  color: #64846e;
+  font-size: 19rpx;
+}
+.summary-link::after {
+  border: 0;
+}
+.calorie-progress {
+  margin-bottom: 14rpx;
+}
+.calorie-progress-track {
+  width: 100%;
   height: 10rpx;
-  border-radius: 50%;
-  background: #d4e8db;
+  overflow: hidden;
+  border-radius: 5rpx;
+  background: #e6eee7;
 }
-
-.dot.active {
-  background: #7fcc8f;
-  width: 14rpx;
+.calorie-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #69a978;
+  transition: width 0.25s ease;
+}
+.calorie-progress > text {
+  display: block;
+  margin-top: 7rpx;
+  color: #8b9a90;
+  font-size: 17rpx;
 }
 
 .meals {
   display: flex;
-  justify-content: space-around;
-  padding: 14rpx 0;
+  gap: 8rpx;
+  padding: 12rpx 0 16rpx;
 }
 
 .meal-item {
@@ -712,9 +757,14 @@ onShow(() => {
   flex-direction: column;
   align-items: center;
   gap: 8rpx;
-  padding: 0;
-  background: transparent;
-  border: 0;
+  min-width: 0;
+  height: 58rpx;
+  flex: 1;
+  padding: 0 4rpx;
+  border: 1rpx solid #dce8de;
+  border-radius: 10rpx;
+  background: #fbfdfb;
+  justify-content: center;
 }
 
 .meal-icon {
@@ -734,36 +784,59 @@ onShow(() => {
   font-weight: 600;
 }
 
-/* 序序相机卡片 */
-.xuxu-camera-card {
+/* 序序相机横幅 */
+.camera-banner {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 28rpx 32rpx;
-  margin-top: 24rpx;
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.08) 0%, rgba(232, 247, 237, 0.6) 100%);
-  border: 2rpx solid rgba(127, 204, 143, 0.15);
+  width: 100%;
+  min-height: 154rpx;
+  overflow: hidden;
+  padding: 22rpx 26rpx;
+  border: 1rpx solid #d8e5da;
+  border-radius: 16rpx;
+  background: #f9f7ef;
+  text-align: left;
   transition: all 0.2s ease;
 }
-
-.xuxu-camera-card:active {
+.camera-banner::after {
+  border: 0;
+}
+.camera-banner:active {
   transform: scale(0.98);
-  background: linear-gradient(135deg, rgba(127, 204, 143, 0.12) 0%, rgba(232, 247, 237, 0.7) 100%);
 }
-
-.camera-decoration {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
-  mix-blend-mode: multiply;
-  flex-shrink: 0;
+.camera-banner-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-
+.camera-banner-copy {
+  position: relative;
+  z-index: 1;
+  width: 54%;
+  min-width: 230rpx;
+}
 .camera-title {
+  display: block;
   font-size: 28rpx;
   font-weight: 700;
   color: #2d6943;
-  letter-spacing: 1rpx;
+}
+.camera-caption {
+  display: block;
+  margin-top: 7rpx;
+  color: #728579;
+  font-size: 18rpx;
+  line-height: 1.45;
+}
+.camera-arrow {
+  position: absolute;
+  right: 18rpx;
+  z-index: 2;
+  width: 26rpx;
+  height: 26rpx;
+  opacity: 0.45;
 }
 
 /* 3. 体重记录卡片 */
