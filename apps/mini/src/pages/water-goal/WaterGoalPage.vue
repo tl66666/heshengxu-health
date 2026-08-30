@@ -37,6 +37,7 @@
     <!-- 推荐结果 -->
     <view class="result-card card">
       <view class="result-header">
+        <image class="result-icon-image" src="/static/icons/watercolor/water-drop.png" mode="aspectFit" />
         <text class="result-icon">💧</text>
         <text class="result-title">推荐饮水量</text>
       </view>
@@ -63,6 +64,7 @@
     <!-- 底部按钮 -->
     <view class="bottom-actions">
       <button class="action-btn" @tap="saveGoal">
+        <text class="action-label">保存并应用目标</text>
         <text>获取推荐喝水量</text>
       </button>
     </view>
@@ -208,7 +210,7 @@ function saveGoal() {
     
     setTimeout(() => {
       navigateBack();
-    }, 1500);
+    }, 650);
   } catch (e) {
     console.error('保存失败:', e);
     uni.showToast({
@@ -223,7 +225,7 @@ onLoad(() => {
   try {
     const userInfo = uni.getStorageSync('water_user_info');
     if (userInfo) {
-      const data = JSON.parse(userInfo);
+      const data = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
       gender.value = data.gender || 'male';
       weight.value = data.weight || 75;
       activity.value = data.activity || 'none';
@@ -427,10 +429,50 @@ onLoad(() => {
 }
 </style>
 <style scoped>
+.page {
+  background:
+    radial-gradient(circle at 84% 16%, rgba(226, 241, 235, .72), transparent 34%),
+    linear-gradient(180deg, #fffaf6 0%, #f6f5f2 100%);
+  color: #5e565b;
+}
+.intro { padding: 24rpx 30rpx 28rpx; }
+.eyebrow { color: #8aa59b; letter-spacing: 1rpx; }
+.title { color: #5a5259; font-size: 38rpx; letter-spacing: 0; }
+.subtitle { color: #a19796; }
+.form-section, .result-card, .tips-card { border: 1rpx solid rgba(255, 255, 255, .92); background: rgba(255, 253, 251, .78); box-shadow: 0 16rpx 34rpx rgba(128, 108, 99, .09), inset 0 1rpx 0 rgba(255,255,255,.96); backdrop-filter: blur(20rpx); }
+.form-section { margin-bottom: 22rpx; }
+.form-item { min-height: 92rpx; padding: 22rpx 24rpx; border-color: rgba(237, 225, 218, .9); }
+.form-label { color: #686168; font-size: 25rpx; }
+.form-value { color: #718992; font-size: 25rpx; }
+.form-hint { color: #aba0a0; }
+.form-arrow { opacity: .38; }
+.result-card { position: relative; min-height: 286rpx; padding: 38rpx 26rpx 32rpx; background: linear-gradient(145deg, rgba(241, 249, 247, .95), rgba(255, 244, 236, .96)); overflow: hidden; }
+.result-card::after { content: ''; position: absolute; right: -58rpx; bottom: -78rpx; width: 220rpx; height: 220rpx; border: 1rpx solid rgba(119, 174, 181, .18); border-radius: 50%; box-shadow: 0 0 0 18rpx rgba(119,174,181,.06), 0 0 0 36rpx rgba(119,174,181,.035); pointer-events: none; }
+.result-header { position: relative; z-index: 1; gap: 10rpx; margin-bottom: 20rpx; }
+.result-icon { display: none; }
+.result-icon-image { width: 42rpx; height: 42rpx; mix-blend-mode: multiply; }
+.result-title, .tips-title { color: #625a61; }
+.result-value { position: relative; z-index: 1; color: #5f8793; font-size: 92rpx; letter-spacing: 0; text-shadow: 0 4rpx 16rpx rgba(95,135,147,.12); }
+.result-unit, .result-hint, .tip-item { color: #9e9291; }
+.tips-card { padding: 28rpx 26rpx; }
+.tips-header { margin-bottom: 18rpx; }
+.tips-icon { opacity: .62; }
+.bottom-actions { padding: 14rpx 28rpx; padding-bottom: calc(14rpx + env(safe-area-inset-bottom)); background: rgba(255,253,251,.9); border-top: 1rpx solid rgba(235,221,214,.8); box-shadow: 0 -8rpx 22rpx rgba(126,104,94,.06); }
+.action-btn { min-height: 88rpx; border-radius: 24rpx; background: linear-gradient(135deg, #79b8c7 0%, #609eaf 100%); box-shadow: 0 14rpx 28rpx rgba(94,157,176,.22), inset 0 2rpx 0 rgba(255,255,255,.38); color: #fffdfb; font-size: 30rpx; letter-spacing: 0; }
+.action-btn > text:not(.action-label) { display: none; }
+</style>
+<style scoped>
 .page { background: #fff8f2; color: #554b4f; }
 .intro { padding: 26rpx 30rpx 30rpx; }.eyebrow { color: #789c8d; }.title { color: #564d51; }.subtitle { color: #9b8e8d; }
 .form-section, .result-card, .tips-card { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(126, 104, 94, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
 .form-item { border-color: #f1e5df; }.form-label { color: #65595d; }.form-value { color: #9b8e8d; }.custom-goal-copy { display: flex; flex: 1; flex-direction: column; gap: 5rpx; }.form-hint { color: #b1a3a1; font-size: 18rpx; }
 .result-title, .tips-title { color: #62575b; }.result-value { color: #649889; }.result-unit, .result-hint, .tip-item { color: #9d8f8e; }
 .action-btn { border-radius: 42rpx; background: #78b8c7; box-shadow: 0 12rpx 26rpx rgba(94, 157, 176, .2); }
+</style>
+<style scoped>
+.page { background: radial-gradient(circle at 84% 16%, rgba(226, 241, 235, .72), transparent 34%), linear-gradient(180deg, #fffaf6 0%, #f6f5f2 100%); color: #5e565b; }
+.intro { padding: 24rpx 30rpx 28rpx; }.eyebrow { color: #8aa59b; letter-spacing: 1rpx; }.title { color: #5a5259; font-size: 38rpx; letter-spacing: 0; }.subtitle { color: #a19796; }
+.form-section, .result-card, .tips-card { border: 1rpx solid rgba(255, 255, 255, .92); background: rgba(255, 253, 251, .78); box-shadow: 0 16rpx 34rpx rgba(128, 108, 99, .09), inset 0 1rpx 0 rgba(255,255,255,.96); backdrop-filter: blur(20rpx); }.form-section { margin-bottom: 22rpx; }.form-item { min-height: 92rpx; padding: 22rpx 24rpx; border-color: rgba(237, 225, 218, .9); transition: background .18s ease, transform .18s ease; }.form-item:active { background: rgba(239, 247, 246, .72); transform: scale(.995); }.form-label { color: #686168; font-size: 25rpx; }.form-value { color: #718992; font-size: 25rpx; }.form-hint { color: #aba0a0; }.form-arrow { opacity: .38; }
+.result-card { position: relative; min-height: 286rpx; padding: 38rpx 26rpx 32rpx; background: linear-gradient(145deg, rgba(241, 249, 247, .95), rgba(255, 244, 236, .96)); overflow: hidden; }.result-card::after { content: ''; position: absolute; right: -58rpx; bottom: -78rpx; width: 220rpx; height: 220rpx; border: 1rpx solid rgba(119, 174, 181, .18); border-radius: 50%; box-shadow: 0 0 0 18rpx rgba(119,174,181,.06), 0 0 0 36rpx rgba(119,174,181,.035); pointer-events: none; }.result-header { position: relative; z-index: 1; gap: 10rpx; margin-bottom: 20rpx; }.result-icon { display: none; }.result-icon-image { width: 42rpx; height: 42rpx; mix-blend-mode: multiply; }.result-title, .tips-title { color: #625a61; }.result-value { position: relative; z-index: 1; color: #5f8793; font-size: 92rpx; letter-spacing: 0; text-shadow: 0 4rpx 16rpx rgba(95,135,147,.12); }.result-unit, .result-hint, .tip-item { color: #9e9291; }
+.tips-card { padding: 28rpx 26rpx; }.tips-header { margin-bottom: 18rpx; }.tips-icon { opacity: .62; }.bottom-actions { padding: 14rpx 28rpx; padding-bottom: calc(14rpx + env(safe-area-inset-bottom)); background: rgba(255,253,251,.9); border-top: 1rpx solid rgba(235,221,214,.8); box-shadow: 0 -8rpx 22rpx rgba(126,104,94,.06); }.action-btn { min-height: 88rpx; border-radius: 24rpx; background: linear-gradient(135deg, #79b8c7 0%, #609eaf 100%); box-shadow: 0 14rpx 28rpx rgba(94,157,176,.22), inset 0 2rpx 0 rgba(255,255,255,.38); color: #fffdfb; font-size: 30rpx; letter-spacing: 0; }.action-btn > text:not(.action-label) { display: none; }
 </style>

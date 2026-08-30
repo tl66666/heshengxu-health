@@ -293,7 +293,8 @@ function calculateRecommendedWater(userInfo: UserInfo): number {
 
 function loadUserInfo() {
   try {
-    const userInfo = uni.getStorageSync('water_user_info') as UserInfo | null;
+    const rawUserInfo = uni.getStorageSync('water_user_info') as UserInfo | string | null;
+    const userInfo = typeof rawUserInfo === 'string' ? (JSON.parse(rawUserInfo) as UserInfo) : rawUserInfo;
     if (userInfo && userInfo.weight) {
       const recommended = calculateRecommendedWater(userInfo);
       const customGoal = Number(uni.getStorageSync('water_daily_goal_custom'));
