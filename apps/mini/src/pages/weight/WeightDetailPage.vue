@@ -3,7 +3,11 @@
     <AppNavBar title="我的体重" route="weight" />
 
     <view class="hero-wrap">
-      <image class="hero-art" src="/static/illustrations/program-weight.png" mode="aspectFit" />
+      <image
+        class="hero-art"
+        src="/static/illustrations/weight-weighing-scene.png"
+        mode="aspectFit"
+      />
       <view class="hero-copy">
         <text class="hero-kicker">慢慢变轻，也慢慢喜欢自己</text>
         <view class="hero-number-row">
@@ -530,7 +534,6 @@ function saveLocalWeight() {
     ...records.value,
   ];
   uni.setStorageSync(STORAGE_KEY, records.value);
-  uni.showToast({ title: '记录成功', icon: 'success' });
   closeDialog();
 }
 async function saveWeight() {
@@ -623,11 +626,11 @@ onMounted(loadWeightData);
 }
 .hero-art {
   position: absolute;
-  right: 18rpx;
-  bottom: 4rpx;
-  width: 250rpx;
-  height: 250rpx;
-  opacity: 0.88;
+  right: -32rpx;
+  bottom: -26rpx;
+  width: 360rpx;
+  height: 360rpx;
+  opacity: 0.96;
   mix-blend-mode: multiply;
 }
 .hero-copy,
@@ -1363,9 +1366,10 @@ onMounted(loadWeightData);
     font-size: 76rpx;
   }
   .hero-art {
-    right: -18rpx;
-    width: 220rpx;
-    height: 220rpx;
+    right: -72rpx;
+    bottom: -18rpx;
+    width: 320rpx;
+    height: 320rpx;
   }
   .hero-bubble {
     right: 24rpx;

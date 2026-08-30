@@ -66,6 +66,7 @@ type WeightRecord = {
 
 - 沿用奶油底色、低饱和水彩绿、樱粉和麦芽黄。
 - 主视觉优先复用 `program-weight.png`、`xuxu-avatar.png`、`xuxu-safe-support.png`。
+- 新增 `weight-weighing-scene.png`：沿用现有女主与序序形象的称重场景，左侧留白供文字叠放，适合体重页首屏。
 - 不使用通用 emoji 作为装饰图标，不新增孤立的扁平 AI 图标。
 - 女主与序序的形象必须保持一致；新增图片需要先锁定现有形象再生成。
 - 图片必须使用稳定尺寸和独立层级，不能遮挡数据、按钮或底部操作区。
@@ -82,4 +83,4 @@ type WeightRecord = {
 1. 生产环境必须配置 `VITE_MINI_API_BASE_URL`，不要依赖 localhost 默认地址。
 2. 接入真实体脂率、腰围和基础代谢接口后，替换数据视图里的“待记录”状态。
 3. 用户设置新计划时，后端应记录当时的起始体重快照，避免后续档案变更影响历史计划展示。
-4. 图片生成需要本机设置 `OPENAI_API_KEY`；当前环境未检测到该变量，因此本次继续复用了现有高质感水彩资产，没有用低质占位图替代。
+4. 新增图片通过 `shengtu-skill` 的 GPT Image 2 网关生成，已同步到 `apps/mini/src/static/illustrations`；生成时锁定现有女主与序序形象，避免角色漂移。

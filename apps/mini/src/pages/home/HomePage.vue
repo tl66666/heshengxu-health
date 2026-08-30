@@ -24,6 +24,11 @@
     <template v-else-if="today && experience">
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
       <view class="weight-card card">
+        <image
+          class="weight-scene-thumb"
+          src="/static/illustrations/weight-weighing-scene.png"
+          mode="aspectFill"
+        />
         <view class="card-top">
           <text class="card-title">体重管理方案</text>
           <text class="week-badge">第 1/16 周</text>
@@ -626,7 +631,19 @@ onShow(() => {
 
 /* 1. 体重卡片 */
 .weight-card {
+  position: relative;
+  overflow: hidden;
   padding: 20rpx 24rpx 16rpx;
+}
+.weight-scene-thumb {
+  position: absolute;
+  top: -12rpx;
+  right: -20rpx;
+  width: 210rpx;
+  height: 210rpx;
+  opacity: 0.16;
+  pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
 .week-badge {
