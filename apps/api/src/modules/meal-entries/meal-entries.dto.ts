@@ -17,8 +17,13 @@ export class CreateMealEntryDto {
   @IsEnum(['breakfast', 'lunch', 'dinner', 'snack'])
   mealType!: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
+  @IsOptional()
   @IsString()
-  foodId!: string;
+  foodId?: string;
+
+  @IsOptional()
+  @IsString()
+  userFoodId?: string;
 
   @IsNumber()
   @Min(1)
@@ -45,6 +50,10 @@ export class ReplaceMealEntryDto {
   @IsOptional()
   @IsString()
   foodId?: string;
+
+  @IsOptional()
+  @IsString()
+  userFoodId?: string;
 
   @IsOptional()
   @IsNumber()

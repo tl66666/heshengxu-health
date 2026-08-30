@@ -4,6 +4,7 @@ export type MealEntry = {
   id: string;
   mealType: MealType;
   foodId: string | null;
+  userFoodId?: string | null;
   foodNameSnapshot: string;
   grams: number;
   energyKcal: number;

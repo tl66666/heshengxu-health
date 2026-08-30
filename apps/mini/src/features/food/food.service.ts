@@ -107,7 +107,7 @@ export function mergeFoodResults(
   return [...personalResults, ...publicResults];
 }
 
-function userFoodToSearchItem(food: UserFood): FoodSearchItem {
+export function userFoodToSearchItem(food: UserFood): FoodSearchItem {
   return {
     id: food.id,
     userId: food.userId,
@@ -137,7 +137,8 @@ function userFoodToSearchItem(food: UserFood): FoodSearchItem {
 
 export function createMealEntry(input: {
   mealType: MealType;
-  foodId: string;
+  foodId?: string;
+  userFoodId?: string;
   grams: number;
   recordedAt: string;
   note?: string;
@@ -154,6 +155,7 @@ export function replaceMealEntry(
   input: {
     mealType?: MealType;
     foodId?: string;
+    userFoodId?: string;
     grams?: number;
     recordedAt?: string;
     note?: string;

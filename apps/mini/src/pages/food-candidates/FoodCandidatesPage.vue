@@ -4,7 +4,7 @@
     
     <!-- 加载状态 -->
     <view v-if="loading" class="loading-state">
-      <view class="loading-icon">🔍</view>
+      <image class="loading-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
       <text class="loading-text">正在整理候选食物…</text>
     </view>
 
@@ -13,14 +13,14 @@
       <view v-if="imagePath" class="image-preview card">
         <image class="preview-img" :src="imagePath" mode="aspectFill" />
         <view class="success-badge">
-          <text class="badge-icon">✓</text>
+          <image class="badge-icon" src="/static/icons/svg/check.svg" mode="aspectFit" />
           <text class="badge-text">识别成功</text>
         </view>
       </view>
 
       <!-- 失败状态 -->
       <view v-if="job.status === 'failed'" class="failure-state card">
-        <text class="failure-icon">😕</text>
+        <image class="state-art" src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
         <text class="failure-title">这次识别没有完成</text>
         <text class="failure-desc">图片不会自动记入饮食记录，你可以重新拍摄，或改用食物目录手动记录。</text>
         <view class="action-btns">
@@ -31,7 +31,7 @@
 
       <!-- 无结果状态 -->
       <view v-else-if="!job.candidates.length" class="empty-state card">
-        <text class="empty-icon">🤔</text>
+        <image class="state-art" src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
         <text class="empty-title">还没有找到可确认的食物</text>
         <text class="empty-desc">试试换一张更清晰的照片</text>
         <view class="action-btns">
@@ -57,7 +57,7 @@
             <view class="candidate-icon">
               <text class="icon-text">{{ candidate.name.slice(0, 1) }}</text>
             </view>
-            <view class="candidate-content">
+            <view class="candidate-copy">
               <text class="candidate-name">{{ candidate.name }}</text>
               <view class="candidate-meta">
                 <view class="confidence-badge">
@@ -67,62 +67,38 @@
               </view>
             </view>
             <view v-if="candidate.id === candidateId" class="check-icon">
-              <text>✓</text>
+              <image src="/static/icons/svg/check.svg" mode="aspectFit" />
             </view>
           </button>
         </view>
 
-        <!-- 输入面板 -->
-        <view class="input-panel card">
-          <view class="input-section">
-            <text class="input-label">实际吃了多少？</text>
-            <view class="gram-input">
-              <input 
-                v-model="grams" 
-                type="digit" 
-                placeholder="输入克数"
-                class="gram-field"
-              />
-              <text class="gram-unit">克</text>
-            </view>
-          </view>
-
-          <view class="meal-section">
-            <text class="input-label">这是什么时候吃的？</text>
-            <view class="meal-options">
-              <button
-                v-for="item in meals"
-                :key="item.value"
-                :class="['meal-option', { 'selected': mealType === item.value }]"
-                @tap="mealType = item.value"
-              >
-                {{ item.label }}
-              </button>
-            </view>
-          </view>
+        <view class="selection-note">
+          <text v-if="!candidateId">请选择最接近照片的食物，再继续确认份量</text>
+          <text v-else-if="!selectedCandidate?.foodId">这个候选还没有营养数据，请改用手动搜索</text>
+          <text v-else>下一步可调整份量和餐次，不会自动写入记录</text>
         </view>
 
         <!-- 错误提示 -->
         <view v-if="error" class="error-banner">
-          <text class="error-icon">⚠️</text>
+          <image class="error-icon" src="/static/icons/svg/close.svg" mode="aspectFit" />
           <text class="error-text">{{ error }}</text>
         </view>
 
         <!-- 确认按钮 -->
         <button 
           class="confirm-btn" 
-          :class="{ 'disabled': saving || !candidateId }"
-          :disabled="saving || !candidateId" 
-          @tap="confirm"
+          :class="{ 'disabled': !canContinue }"
+          :disabled="!canContinue"
+          @tap="continueToConfirm"
         >
-          <text class="btn-text">{{ saving ? '保存中…' : '确认并保存' }}</text>
+          <text class="btn-text">继续确认</text>
         </button>
       </template>
     </template>
 
     <!-- 加载失败 -->
     <view v-else class="error-state card">
-      <text class="error-icon">⚠️</text>
+      <image class="state-art" src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
       <text class="error-title">识别结果加载失败</text>
       <button class="retry-btn" @tap="back">返回重试</button>
     </view>
@@ -130,12 +106,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import {
-  confirmRecognition,
-  defaultRecognitionCandidateId,
   loadRecognitionJob,
   type RecognitionCandidate,
   type RecognitionJob,
@@ -146,30 +120,23 @@ const loading = ref(true);
 const job = ref<RecognitionJob | null>(null);
 const imagePath = ref('');
 const candidateId = ref('');
-const grams = ref('');
 const mealType = ref<MealType>('lunch');
-const saving = ref(false);
 const error = ref('');
-
-const meals: Array<{ value: MealType; label: string }> = [
-  { value: 'breakfast', label: '早餐' },
-  { value: 'lunch', label: '午餐' },
-  { value: 'dinner', label: '晚餐' },
-  { value: 'snack', label: '加餐' },
-];
+const selectedCandidate = computed(() =>
+  job.value?.candidates.find((candidate) => candidate.id === candidateId.value),
+);
+const canContinue = computed(() => Boolean(selectedCandidate.value?.foodId));
 
 function select(candidate: RecognitionCandidate) {
   candidateId.value = candidate.id;
-  grams.value = String(candidate.estimatedGrams);
+  error.value = '';
 }
 
 async function load(jobId: string) {
   loading.value = true;
   try {
     job.value = await loadRecognitionJob(jobId);
-    candidateId.value = defaultRecognitionCandidateId(job.value.candidates);
-    const first = job.value.candidates.find((item) => item.id === candidateId.value);
-    grams.value = String(first?.estimatedGrams || '');
+    candidateId.value = '';
   } catch {
     job.value = null;
   } finally {
@@ -177,30 +144,15 @@ async function load(jobId: string) {
   }
 }
 
-async function confirm() {
-  if (!candidateId.value || Number(grams.value) <= 0) {
-    error.value = '请输入大于 0 克的份量';
+function continueToConfirm() {
+  const candidate = selectedCandidate.value;
+  if (!candidate?.foodId) {
+    error.value = '请选择有营养数据的候选食物';
     return;
   }
-  
-  saving.value = true;
-  error.value = '';
-  
-  try {
-    await confirmRecognition({
-      candidateId: candidateId.value,
-      mealType: mealType.value,
-      grams: Number(grams.value),
-      recordedAt: new Date().toISOString(),
-    });
-    
-    uni.showToast({ title: '已记录这份食物', icon: 'success' });
-    setTimeout(() => uni.navigateBack({ delta: 2 }), 450);
-  } catch {
-    error.value = '保存失败，请检查网络连接';
-  } finally {
-    saving.value = false;
-  }
+  uni.navigateTo({
+    url: `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(candidate.foodId)}&candidateId=${encodeURIComponent(candidate.id)}&source=photo&grams=${candidate.estimatedGrams}&mealType=${mealType.value}&imagePath=${encodeURIComponent(imagePath.value)}`,
+  });
 }
 
 function back() {
@@ -208,14 +160,19 @@ function back() {
 }
 
 function retry() {
-  uni.redirectTo({ url: '/pages/food-recognition/FoodRecognitionPage' });
+  uni.redirectTo({
+    url: `/pages/food-recognition/FoodRecognitionPage?mealType=${mealType.value}`,
+  });
 }
 
 function manualRecord() {
-  uni.redirectTo({ url: '/pages/food-search/FoodSearchPage' });
+  uni.redirectTo({ url: `/pages/food-search/FoodSearchPage?mealType=${mealType.value}` });
 }
 
 onLoad((options) => {
+  if (options?.mealType && ['breakfast', 'lunch', 'dinner', 'snack'].includes(options.mealType)) {
+    mealType.value = options.mealType as MealType;
+  }
   imagePath.value = options?.imagePath ? decodeURIComponent(options.imagePath) : '';
   const jobId = options?.jobId ? decodeURIComponent(options.jobId) : '';
   if (jobId) load(jobId);
@@ -258,7 +215,8 @@ onLoad((options) => {
 }
 
 .loading-icon {
-  font-size: 96rpx;
+  width: 72rpx;
+  height: 72rpx;
   margin-bottom: 32rpx;
   animation: spin 2s linear infinite;
 }
@@ -302,8 +260,9 @@ onLoad((options) => {
 }
 
 .badge-icon {
-  font-size: 24rpx;
-  color: #ffffff;
+  width: 24rpx;
+  height: 24rpx;
+  filter: brightness(0) invert(1);
 }
 
 .badge-text {
@@ -323,10 +282,9 @@ onLoad((options) => {
   text-align: center;
 }
 
-.failure-icon,
-.empty-icon,
-.error-icon {
-  font-size: 96rpx;
+.state-art {
+  width: 180rpx;
+  height: 150rpx;
   margin-bottom: 24rpx;
 }
 
@@ -460,7 +418,8 @@ onLoad((options) => {
   color: #2e7d4f;
 }
 
-.candidate-content {
+.candidate-copy {
+  min-width: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -505,79 +464,19 @@ onLoad((options) => {
   justify-content: center;
   background: #2e7d4f;
   border-radius: 50%;
-  font-size: 28rpx;
-  color: #ffffff;
   flex-shrink: 0;
 }
-
-/* 输入面板 */
-.input-panel {
-  padding: 32rpx 28rpx;
-  animation: fadeIn 0.4s ease 0.4s backwards;
+.check-icon image {
+  width: 24rpx;
+  height: 24rpx;
+  filter: brightness(0) invert(1);
 }
 
-.input-section,
-.meal-section {
-  margin-bottom: 32rpx;
-}
-
-.meal-section {
-  margin-bottom: 0;
-}
-
-.input-label {
-  display: block;
-  font-size: 26rpx;
-  font-weight: 800;
-  color: #23382b;
-  margin-bottom: 16rpx;
-}
-
-.gram-input {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 20rpx 24rpx;
-  background: #f2f7f1;
-  border-radius: 28rpx;
-}
-
-.gram-field {
-  flex: 1;
-  font-size: 32rpx;
-  font-weight: 800;
-  color: #23382b;
-}
-
-.gram-unit {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #68796d;
-}
-
-.meal-options {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12rpx;
-}
-
-.meal-option {
-  padding: 20rpx 8rpx;
-  border: 3rpx solid #f2f7f1;
-  background: #ffffff;
-  border-radius: 28rpx;
-  font-size: 24rpx;
-  font-weight: 800;
-  color: #68796d;
-  transition: all 0.12s ease;
-}
-
-.meal-option::after { border: none; }
-
-.meal-option.selected {
-  border-color: #2e7d4f;
-  background: #e8f2ea;
-  color: #2e7d4f;
+.selection-note {
+  margin: 8rpx 0 24rpx;
+  color: #718579;
+  font-size: 22rpx;
+  line-height: 1.55;
 }
 
 /* 错误提示 */
@@ -596,6 +495,12 @@ onLoad((options) => {
   font-size: 24rpx;
   font-weight: 600;
   color: #c08826;
+}
+.error-icon {
+  width: 28rpx;
+  height: 28rpx;
+  flex: none;
+  opacity: 0.65;
 }
 
 /* 确认按钮 */
