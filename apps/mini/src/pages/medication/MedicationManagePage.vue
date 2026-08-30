@@ -53,7 +53,7 @@ import { computed, reactive, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 
-type Medication = { id: string; name: string; dose: string; frequency: string; time: string; checked: boolean; date: string };
+type Medication = { id: string; name: string; dose: string; frequency: string; time: string; checked: boolean; date: string; checkedDate?: string };
 const STORAGE_KEY = 'heban_medications';
 const medications = ref<Medication[]>([]);
 const showForm = ref(false);
@@ -65,13 +65,15 @@ const progress = computed(() => medications.value.length ? Math.round((completed
 function load() {
   const raw = uni.getStorageSync(STORAGE_KEY) as Medication[] | string | null;
   const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-  medications.value = Array.isArray(data) ? data : [];
+  const today = new Date().toISOString().slice(0, 10);
+  medications.value = Array.isArray(data) ? data.map(item => ({ ...item, checked: item.checkedDate === today })) : [];
 }
 function persist() {
   uni.setStorageSync(STORAGE_KEY, JSON.stringify(medications.value));
 }
 function toggleChecked(item: Medication) {
   item.checked = !item.checked;
+  item.checkedDate = item.checked ? new Date().toISOString().slice(0, 10) : undefined;
   persist();
   uni.showToast({ title: item.checked ? '已完成今天的提醒' : '已取消打卡', icon: 'none' });
 }

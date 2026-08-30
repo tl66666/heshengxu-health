@@ -1,110 +1,124 @@
 <template>
   <view class="page">
-    <AppNavBar :title="mealTitle" route="/pages/meal-add/MealAddPage" />
+    <!-- 顶部导航 -->
+    <view class="navbar">
+      <button class="nav-back" @tap="goBack">
+        <text class="icon-back">←</text>
+      </button>
+      <view class="nav-title-wrap">
+        <text class="nav-title">{{ mealTitle }}</text>
+        <button class="nav-date" @tap="selectDate">
+          <text class="icon-date">▼</text>
+        </button>
+      </view>
+      <view class="nav-placeholder"></view>
+    </view>
 
     <!-- 搜索框 -->
-    <view class="search-section">
+    <view class="search-wrap">
       <view class="search-box" @tap="goToSearch">
-        <image class="search-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
-        <text class="search-text">请输入食物名称</text>
+        <text class="search-icon">🔍</text>
+        <text class="search-placeholder">请输入食物名称</text>
       </view>
     </view>
 
-    <!-- 快捷操作 -->
-    <view class="quick-section">
-      <button class="quick-item" @tap="copyRecord">
-        <view class="quick-icon">📋</view>
-        <text class="quick-label">复制记录</text>
-      </button>
-      <button class="quick-item" @tap="quickAdd">
-        <view class="quick-icon">⚡</view>
-        <text class="quick-label">快速记录</text>
-      </button>
-      <button class="quick-item" @tap="scanBarcode">
-        <view class="quick-icon">📱</view>
-        <text class="quick-label">扫条形码</text>
-      </button>
+    <!-- 快捷按钮 -->
+    <view class="quick-btns">
+      <view class="quick-btn" @tap="copyRecord">
+        <text class="quick-icon">📋</text>
+        <text class="quick-text">复制记录</text>
+      </view>
+      <view class="quick-btn" @tap="quickAdd">
+        <text class="quick-icon">⚡</text>
+        <text class="quick-text">快速记录</text>
+      </view>
+      <view class="quick-btn" @tap="scanCode">
+        <text class="quick-icon">📷</text>
+        <text class="quick-text">扫条形码</text>
+      </view>
     </view>
 
-    <!-- 分类标签 -->
-    <scroll-view class="category-scroll" scroll-x>
-      <view class="category-list">
-        <view 
-          v-for="cat in categories" 
-          :key="cat.id"
-          :class="['category-item', { active: selectedCategory === cat.id }]"
-          @tap="selectCategory(cat.id)"
-        >
-          {{ cat.name }}
+    <!-- 分类 -->
+    <view class="categories">
+      <scroll-view class="category-scroll" scroll-x show-scrollbar="{{false}}">
+        <view class="category-list">
+          <text 
+            v-for="cat in categories" 
+            :key="cat.id"
+            :class="['category-tag', currentCategory === cat.id ? 'active' : '']"
+            @tap="switchCategory(cat.id)"
+          >
+            {{ cat.name }}
+          </text>
         </view>
-      </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
 
-    <!-- 常见食物标题 -->
-    <view class="section-title">
-      <text class="title-text">常见食物</text>
+    <!-- 标题 -->
+    <view class="section-header">
+      <text class="section-title">常见食物</text>
     </view>
 
     <!-- 食物列表 -->
-    <view class="food-section">
-      <view v-if="loading" class="loading-state">
+    <view class="food-list">
+      <view v-if="loading" class="list-loading">
         <text>加载中...</text>
       </view>
-
-      <view v-else-if="foodList.length === 0" class="empty-state">
-        <text class="empty-icon">🍽️</text>
-        <text class="empty-text">暂无食物数据</text>
+      
+      <view v-else-if="!foods || foods.length === 0" class="list-empty">
+        <text class="empty-text">暂无食物</text>
       </view>
-
-      <view v-else class="food-list">
+      
+      <view v-else class="food-items">
         <view 
-          v-for="food in foodList" 
+          v-for="food in foods" 
           :key="food.id"
-          class="food-card"
+          class="food-item"
         >
-          <!-- 食物图片 -->
-          <image 
-            v-if="food.thumbImageUrl" 
-            :src="food.thumbImageUrl" 
-            class="food-img"
-            mode="aspectFill"
-          />
-          <view v-else class="food-img-placeholder">
-            <text class="placeholder-emoji">{{ getFoodEmoji(food.name) }}</text>
+          <!-- 左侧图片 -->
+          <view class="food-pic">
+            <image 
+              v-if="food.imageUrl" 
+              :src="food.imageUrl" 
+              class="food-img" 
+              mode="aspectFill"
+            />
+            <text v-else class="food-emoji">{{ getEmoji(food.name) }}</text>
           </view>
 
-          <!-- 食物信息 -->
-          <view class="food-content">
+          <!-- 中间信息 -->
+          <view class="food-info">
             <text class="food-name">{{ food.name }}</text>
-            <view class="food-meta">
-              <text class="food-cal">{{ Math.round(food.calories || 0) }}</text>
-              <text class="food-unit">千卡</text>
-              <text class="food-serving">/{{ food.servingSize || '100克' }}</text>
+            <view class="food-stats">
+              <text class="food-cal">{{ food.calories || 0 }}</text>
+              <text class="food-unit">千卡/</text>
+              <text class="food-serving">{{ food.serving }}</text>
             </view>
           </view>
 
-          <!-- 添加按钮 -->
-          <button 
-            :class="['add-btn', { selected: isSelected(food.id) }]"
-            @tap="toggleFood(food)"
-          >
-            <text v-if="isSelected(food.id)" class="btn-text">✓</text>
-            <text v-else class="btn-text">+</text>
-          </button>
+          <!-- 右侧按钮 -->
+          <view class="food-action">
+            <button 
+              :class="['add-btn', isAdded(food.id) ? 'added' : '']"
+              @tap="toggleFood(food)"
+            >
+              <text class="add-icon">{{ isAdded(food.id) ? '✓' : '+' }}</text>
+            </button>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 已选食物悬浮栏 -->
-    <view v-if="selectedFoods.length > 0" class="float-bar">
-      <view class="bar-left">
-        <image class="bar-icon" src="/static/icons/svg/restaurant.svg" mode="aspectFit" />
-        <text class="bar-meal">{{ mealTypeLabel }}</text>
-        <button class="bar-toggle" @tap="toggleMealType">
+    <!-- 底部栏 -->
+    <view v-if="selectedFoods.length > 0" class="bottom-bar">
+      <view class="bar-meal">
+        <image class="meal-icon" src="/static/icons/svg/restaurant.svg" mode="aspectFit" />
+        <text class="meal-name">{{ mealLabel }}</text>
+        <button class="meal-arrow" @tap="changeMeal">
           <text>▼</text>
         </button>
       </view>
-      <button class="bar-confirm" @tap="confirmAdd">
+      <button class="bar-done" @tap="done">
         <text>完成</text>
       </button>
     </view>
@@ -117,79 +131,84 @@ import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack } from '../../utils/router.js';
 
-interface FoodItem {
+interface Food {
   id: string;
   name: string;
-  calories?: number;
-  servingSize?: string;
-  thumbImageUrl?: string;
-  protein?: number;
-  fat?: number;
-  carbs?: number;
+  calories: number;
+  serving: string;
+  imageUrl?: string;
 }
 
 const mealType = ref<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
-const selectedCategory = ref('common');
+const currentCategory = ref('common');
 const loading = ref(false);
-const foodList = ref<FoodItem[]>([]);
-const selectedFoods = ref<FoodItem[]>([]);
+const foods = ref<Food[]>([]);
+const selectedFoods = ref<Food[]>([]);
 
 const categories = [
   { id: 'common', name: '常见' },
   { id: 'custom', name: '自定义' },
-  { id: 'purchased', name: '已购' },
+  { id: 'bought', name: '已购' },
   { id: 'recipe', name: '食谱' },
-  { id: 'favorite', name: '收藏' },
-  { id: 'meal', name: '套餐' },
+  { id: 'fav', name: '收藏' },
+  { id: 'package', name: '套餐' },
+  { id: 'upload', name: '我的上传' },
+  { id: 'dish', name: '我的菜肴' },
   { id: 'staple', name: '主食' },
-  { id: 'fruit', name: '蔬果' },
+  { id: 'veg', name: '蔬果' },
   { id: 'meat', name: '肉蛋奶' },
-  { id: 'snack', name: '豆类坚果' },
+  { id: 'bean', name: '豆类坚果' },
 ];
 
 const mealTitle = computed(() => {
-  const today = new Date();
-  const month = today.getMonth() + 1;
-  const day = today.getDate();
-  const mealNames = {
+  const d = new Date();
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const meals: Record<string, string> = {
     breakfast: '早餐',
     lunch: '午餐',
     dinner: '晚餐',
     snack: '加餐',
   };
-  return `${month}月${day}日${mealNames[mealType.value]}`;
+  return `${m}月${day}日${meals[mealType.value]}`;
 });
 
-const mealTypeLabel = computed(() => {
-  const labels = {
+const mealLabel = computed(() => {
+  const meals: Record<string, string> = {
     breakfast: '早餐',
     lunch: '午餐',
     dinner: '晚餐',
     snack: '加餐',
   };
-  return labels[mealType.value];
+  return meals[mealType.value];
 });
 
-function getFoodEmoji(name: string): string {
-  const emojiMap: Record<string, string> = {
-    '米饭': '🍚', '馒头': '🥟', '面条': '🍜', '面包': '🍞',
-    '鸡蛋': '🥚', '牛奶': '🥛', '豆浆': '🥤', '咖啡': '☕',
-    '鸡肉': '🍗', '牛肉': '🥩', '猪肉': '🥓', '鱼': '🐟',
-    '苹果': '🍎', '香蕉': '🍌', '橙子': '🍊', '西瓜': '🍉',
-    '番茄': '🍅', '黄瓜': '🥒', '胡萝卜': '🥕', '土豆': '🥔',
-    '水': '💧', '茶': '🍵', '果汁': '🧃',
+function getEmoji(name: string): string {
+  const map: Record<string, string> = {
+    '泉阳泉': '💧',
+    '水': '💧',
+    '米饭': '🍚',
+    '煮鸡蛋': '🥚',
+    '鸡蛋': '🥚',
+    '馒头': '🥟',
+    '蒸红薯': '🍠',
+    '红薯': '🍠',
+    '煎蛋': '🍳',
+    '牛奶': '🥛',
+    '豆浆': '🥤',
+    '面包': '🍞',
+    '鸡肉': '🍗',
+    '苹果': '🍎',
   };
-
-  for (const key in emojiMap) {
-    if (name.includes(key)) {
-      return emojiMap[key];
-    }
+  
+  for (const key in map) {
+    if (name.includes(key)) return map[key];
   }
   return '🍽️';
 }
 
-function selectCategory(catId: string) {
-  selectedCategory.value = catId;
+function switchCategory(id: string) {
+  currentCategory.value = id;
   loadFoods();
 }
 
@@ -202,114 +221,92 @@ async function loadFoods() {
       method: 'GET',
       timeout: 5000,
     });
-
+    
     if (res.statusCode === 200 && res.data) {
-      foodList.value = (res.data as any).data || [];
-    } else {
-      throw new Error('加载失败');
+      const data: any = res.data;
+      foods.value = (data.data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        calories: Math.round(item.calories || 0),
+        serving: item.servingSize || '100克',
+      }));
     }
-  } catch (error) {
-    console.error('加载食物失败:', error);
-    // 使用示例数据
-    foodList.value = [
-      { id: '1', name: '米饭', calories: 116, servingSize: '100克' },
-      { id: '2', name: '煮鸡蛋', calories: 144, servingSize: '1个(50克)' },
-      { id: '3', name: '馒头', calories: 221, servingSize: '100克' },
-      { id: '4', name: '全麦面包', calories: 246, servingSize: '100克' },
-      { id: '5', name: '牛奶', calories: 54, servingSize: '100毫升' },
-      { id: '6', name: '豆浆', calories: 13, servingSize: '100毫升' },
-      { id: '7', name: '鸡胸肉', calories: 133, servingSize: '100克' },
-      { id: '8', name: '蒸红薯', calories: 86, servingSize: '100克' },
-      { id: '9', name: '苹果', calories: 52, servingSize: '1个(中)' },
-      { id: '10', name: '香蕉', calories: 89, servingSize: '1根' },
+  } catch (err) {
+    console.error('加载失败', err);
+    // 示例数据
+    foods.value = [
+      { id: '1', name: '泉阳泉 天然矿泉水', calories: 0, serving: '600毫升' },
+      { id: '2', name: '米饭', calories: 209, serving: '1碗' },
+      { id: '3', name: '煮鸡蛋', calories: 74, serving: '1个(中)带壳' },
+      { id: '4', name: '馒头', calories: 114, serving: '1个' },
+      { id: '5', name: '蒸红薯', calories: 84, serving: '1个(小)' },
+      { id: '6', name: '煎蛋', calories: 117, serving: '1个' },
     ];
   } finally {
     loading.value = false;
   }
 }
 
-function isSelected(foodId: string): boolean {
-  return selectedFoods.value.some(f => f.id === foodId);
+function isAdded(id: string): boolean {
+  return selectedFoods.value.some(f => f.id === id);
 }
 
-function toggleFood(food: FoodItem) {
-  const index = selectedFoods.value.findIndex(f => f.id === food.id);
-  
-  if (index > -1) {
-    selectedFoods.value.splice(index, 1);
+function toggleFood(food: Food) {
+  const idx = selectedFoods.value.findIndex(f => f.id === food.id);
+  if (idx > -1) {
+    selectedFoods.value.splice(idx, 1);
   } else {
     selectedFoods.value.push(food);
-    uni.showToast({
-      title: '已添加',
-      icon: 'success',
-      duration: 800,
-    });
   }
 }
 
-function toggleMealType() {
+function changeMeal() {
   uni.showActionSheet({
     itemList: ['早餐', '午餐', '晚餐', '加餐'],
     success: (res) => {
-      const types: Array<'breakfast' | 'lunch' | 'dinner' | 'snack'> = ['breakfast', 'lunch', 'dinner', 'snack'];
+      const types: Array<typeof mealType.value> = ['breakfast', 'lunch', 'dinner', 'snack'];
       mealType.value = types[res.tapIndex];
     },
   });
 }
 
-function confirmAdd() {
-  if (selectedFoods.value.length === 0) {
-    return;
-  }
-
-  // TODO: 保存到后端
-  const totalCal = selectedFoods.value.reduce((sum, f) => sum + (f.calories || 0), 0);
-  
+function done() {
+  const total = selectedFoods.value.reduce((sum, f) => sum + f.calories, 0);
   uni.showToast({
-    title: `已记录 ${Math.round(totalCal)}千卡`,
+    title: `已记录 ${Math.round(total)}千卡`,
     icon: 'success',
   });
+  setTimeout(() => navigateBack(), 1500);
+}
 
-  setTimeout(() => {
-    navigateBack();
-  }, 1500);
+function goBack() {
+  navigateBack();
+}
+
+function selectDate() {
+  uni.showToast({ title: '功能开发中', icon: 'none' });
 }
 
 function goToSearch() {
-  uni.navigateTo({
-    url: '/pages/food-search/FoodSearchPage?from=meal-add',
-  });
+  uni.navigateTo({ url: '/pages/food-search/FoodSearchPage' });
 }
 
 function copyRecord() {
-  uni.showToast({
-    title: '功能开发中',
-    icon: 'none',
-  });
+  uni.showToast({ title: '功能开发中', icon: 'none' });
 }
 
 function quickAdd() {
-  uni.showToast({
-    title: '功能开发中',
-    icon: 'none',
-  });
+  uni.showToast({ title: '功能开发中', icon: 'none' });
 }
 
-function scanBarcode() {
+function scanCode() {
   uni.scanCode({
-    success: (res) => {
-      uni.showToast({
-        title: '扫描成功',
-        icon: 'success',
-      });
-    },
+    success: () => uni.showToast({ title: '扫描成功', icon: 'success' }),
   });
 }
 
-onLoad((options) => {
-  if (options?.mealType) {
-    mealType.value = options.mealType as any;
-  }
+onLoad((opts) => {
+  if (opts?.mealType) mealType.value = opts.mealType as any;
 });
 
 onMounted(() => {
@@ -320,174 +317,204 @@ onMounted(() => {
 <style scoped>
 .page {
   min-height: 100vh;
-  padding-bottom: 140rpx;
-  background: #f5f8f6;
+  background: #f5f5f5;
+  padding-bottom: 120rpx;
 }
 
-/* 搜索区域 */
-.search-section {
+/* 顶部导航 */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 32rpx;
+  padding-top: calc(20rpx + env(safe-area-inset-top));
+  background: #fff;
+}
+
+.nav-back {
+  width: 64rpx;
+  height: 64rpx;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 40rpx;
+  line-height: 1;
+}
+
+.nav-back::after { border: none; }
+.icon-back { color: #333; }
+
+.nav-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.nav-date {
+  width: 48rpx;
+  height: 48rpx;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 24rpx;
+  line-height: 1;
+  color: #999;
+}
+
+.nav-date::after { border: none; }
+
+.nav-placeholder {
+  width: 64rpx;
+}
+
+/* 搜索 */
+.search-wrap {
   padding: 24rpx 32rpx;
+  background: #fff;
 }
 
 .search-box {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 24rpx;
-  border-radius: 50rpx;
-  background: #ffffff;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  padding: 20rpx 32rpx;
+  border-radius: 60rpx;
+  background: #f5f5f5;
 }
 
 .search-icon {
-  width: 32rpx;
-  height: 32rpx;
-  opacity: 0.4;
+  font-size: 32rpx;
 }
 
-.search-text {
-  flex: 1;
-  color: #999;
+.search-placeholder {
   font-size: 28rpx;
+  color: #999;
 }
 
-/* 快捷操作 */
-.quick-section {
+/* 快捷按钮 */
+.quick-btns {
   display: flex;
-  gap: 16rpx;
-  padding: 0 32rpx 24rpx;
+  padding: 24rpx 32rpx;
+  gap: 24rpx;
+  background: #fff;
 }
 
-.quick-item {
+.quick-btn {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
-  padding: 20rpx;
-  border-radius: 16rpx;
-  background: #ffffff;
-  border: none;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
-}
-
-.quick-item::after {
-  border: none;
+  gap: 12rpx;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: #f8f9fa;
 }
 
 .quick-icon {
-  font-size: 40rpx;
-  line-height: 1;
+  font-size: 44rpx;
 }
 
-.quick-label {
+.quick-text {
+  font-size: 24rpx;
   color: #666;
-  font-size: 22rpx;
-  font-weight: 500;
 }
 
-/* 分类滚动 */
-.category-scroll {
+/* 分类 */
+.categories {
+  background: #fff;
   padding: 0 32rpx 24rpx;
+}
+
+.category-scroll {
   white-space: nowrap;
 }
 
 .category-list {
   display: inline-flex;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
-.category-item {
+.category-tag {
   display: inline-block;
-  padding: 12rpx 24rpx;
+  padding: 12rpx 28rpx;
   border-radius: 40rpx;
-  background: #ffffff;
+  font-size: 26rpx;
   color: #666;
-  font-size: 24rpx;
-  font-weight: 500;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
-  transition: all 0.3s;
+  background: #f5f5f5;
 }
 
-.category-item.active {
-  background: linear-gradient(135deg, #7fcc8f 0%, #6bb97d 100%);
-  color: #ffffff;
-  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.3);
+.category-tag.active {
+  background: #5fbe7a;
+  color: #fff;
 }
 
 /* 标题 */
+.section-header {
+  padding: 32rpx 32rpx 24rpx;
+}
+
 .section-title {
-  padding: 16rpx 32rpx;
-}
-
-.title-text {
+  font-size: 34rpx;
+  font-weight: 600;
   color: #333;
-  font-size: 32rpx;
-  font-weight: 700;
-}
-
-/* 食物区域 */
-.food-section {
-  padding: 0 32rpx 24rpx;
-}
-
-.loading-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 100rpx 20rpx;
-  color: #999;
-  font-size: 28rpx;
-}
-
-.empty-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
 }
 
 /* 食物列表 */
 .food-list {
+  padding: 0 32rpx;
+}
+
+.list-loading,
+.list-empty {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.food-items {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 24rpx;
 }
 
-.food-card {
+.food-item {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 20rpx;
+  gap: 24rpx;
+  padding: 24rpx;
+  background: #fff;
   border-radius: 20rpx;
-  background: #ffffff;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s;
 }
 
-.food-card:active {
-  transform: scale(0.98);
-}
-
-.food-img,
-.food-img-placeholder {
+.food-pic {
   width: 100rpx;
   height: 100rpx;
   border-radius: 16rpx;
-  flex-shrink: 0;
   background: #f5f5f5;
-}
-
-.food-img-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.placeholder-emoji {
-  font-size: 48rpx;
+.food-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 16rpx;
 }
 
-.food-content {
+.food-emoji {
+  font-size: 56rpx;
+}
+
+.food-info {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -495,126 +522,119 @@ onMounted(() => {
 }
 
 .food-name {
-  color: #333;
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: 500;
+  color: #333;
 }
 
-.food-meta {
+.food-stats {
   display: flex;
   align-items: baseline;
   gap: 4rpx;
 }
 
 .food-cal {
-  color: #ff6b6b;
   font-size: 36rpx;
-  font-weight: 800;
+  font-weight: 600;
+  color: #ff6b6b;
 }
 
-.food-unit {
-  color: #999;
-  font-size: 22rpx;
-}
-
+.food-unit,
 .food-serving {
+  font-size: 24rpx;
   color: #999;
-  font-size: 22rpx;
 }
 
-/* 添加按钮 */
+.food-action {
+  flex-shrink: 0;
+}
+
 .add-btn {
-  width: 60rpx;
-  height: 60rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  background: #f0f0f0;
+  padding: 0;
   border: none;
+  background: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
 }
 
-.add-btn::after {
-  border: none;
+.add-btn::after { border: none; }
+
+.add-btn.added {
+  background: #5fbe7a;
 }
 
-.add-btn.selected {
-  background: linear-gradient(135deg, #7fcc8f 0%, #6bb97d 100%);
-}
-
-.btn-text {
-  color: #666;
-  font-size: 36rpx;
+.add-icon {
+  font-size: 40rpx;
   font-weight: 600;
+  color: #999;
   line-height: 1;
 }
 
-.add-btn.selected .btn-text {
-  color: #ffffff;
+.add-btn.added .add-icon {
+  color: #fff;
 }
 
-/* 悬浮栏 */
-.float-bar {
+/* 底部栏 */
+.bottom-bar {
   position: fixed;
-  left: 32rpx;
-  right: 32rpx;
-  bottom: 32rpx;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 16rpx 24rpx;
-  border-radius: 50rpx;
-  background: #ffffff;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
-  z-index: 100;
+  gap: 20rpx;
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2rpx 20rpx rgba(0,0,0,0.08);
 }
 
-.bar-left {
+.bar-meal {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  flex: 1;
+  padding: 16rpx 24rpx;
+  border-radius: 50rpx;
+  background: #f5f5f5;
 }
 
-.bar-icon {
+.meal-icon {
   width: 32rpx;
   height: 32rpx;
 }
 
-.bar-meal {
-  color: #333;
+.meal-name {
   font-size: 28rpx;
-  font-weight: 600;
+  font-weight: 500;
+  color: #333;
 }
 
-.bar-toggle {
+.meal-arrow {
   width: 32rpx;
   height: 32rpx;
   padding: 0;
   border: none;
   background: transparent;
-  color: #999;
   font-size: 20rpx;
-  line-height: 1;
+  color: #999;
 }
 
-.bar-toggle::after {
-  border: none;
-}
+.meal-arrow::after { border: none; }
 
-.bar-confirm {
-  padding: 16rpx 48rpx;
+.bar-done {
+  flex: 1;
+  padding: 20rpx;
   border-radius: 50rpx;
-  background: linear-gradient(135deg, #7fcc8f 0%, #6bb97d 100%);
   border: none;
-  color: #ffffff;
-  font-size: 28rpx;
-  font-weight: 700;
-  box-shadow: 0 4rpx 12rpx rgba(127, 204, 143, 0.3);
+  background: #5fbe7a;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
 }
 
-.bar-confirm::after {
-  border: none;
-}
+.bar-done::after { border: none; }
 </style>

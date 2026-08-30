@@ -191,8 +191,8 @@
           <button class="add-btn" hover-class="button-hover" @tap.stop="openMenstruation">+</button>
         </view>
         <view class="period-content">
-          <text class="period-hint">暂无记录</text>
-          <text class="period-days">距离下次预计 -- 天</text>
+          <text class="period-hint">{{ periodStatusText }}</text>
+          <text class="period-days">{{ periodDaysText }}</text>
         </view>
         <image class="period-icon-img" src="/static/icons/watercolor/menstruation.jpg" mode="aspectFit" />
       </view>
@@ -204,9 +204,9 @@
           <button class="add-btn" hover-class="button-hover" @tap.stop="openMedication">+</button>
         </view>
         <view class="medication-content">
-          <text class="medication-hint">今日待打卡</text>
+          <text class="medication-hint">{{ medicationStatusText }}</text>
           <view class="medication-list">
-            <text class="medication-item">暂无用药计划</text>
+            <text class="medication-item">{{ medicationPlanText }}</text>
           </view>
         </view>
         <image class="medication-icon-img" src="/static/icons/watercolor/medication.jpg" mode="aspectFit" />
@@ -233,7 +233,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
@@ -258,6 +258,20 @@ const dateLabel = computed(() => {
 });
 
 const displayName = computed(() => today.value?.displayName || '朋友');
+const menstruationCycle = ref<{ start?: string; cycleLength?: number } | null>(null);
+const medicationStats = ref({ total: 0, done: 0 });
+const periodStatusText = computed(() =>
+  menstruationCycle.value?.start ? `上次经期 ${menstruationCycle.value.start.slice(5).replace('-', '月')}日开始` : '还没有记录经期',
+);
+const periodDaysText = computed(() => {
+  const start = menstruationCycle.value?.start;
+  if (!start) return '点击记录你的周期';
+  const next = new Date(`${start}T00:00:00`);
+  next.setDate(next.getDate() + (menstruationCycle.value?.cycleLength || 28));
+  return `距离下次预计 ${Math.max(0, Math.ceil((next.getTime() - Date.now()) / 86400000))} 天`;
+});
+const medicationStatusText = computed(() => medicationStats.value.total ? `今日已完成 ${medicationStats.value.done}/${medicationStats.value.total}` : '还没有用药提醒');
+const medicationPlanText = computed(() => medicationStats.value.total ? '按医嘱设置提醒时间' : '添加一条提醒，按时照顾自己');
 
 const experience = computed(() => 
   today.value ? deriveDailyExperience(today.value) : null
@@ -341,9 +355,27 @@ const load = () => {
   healthLoopState.loadToday(today);
 };
 
+const loadPersonalSignals = () => {
+  try {
+    const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
+    menstruationCycle.value = cycleRaw ? (typeof cycleRaw === 'string' ? JSON.parse(cycleRaw) : cycleRaw) : null;
+    const medicationsRaw = uni.getStorageSync('heban_medications');
+    const medications = medicationsRaw ? (typeof medicationsRaw === 'string' ? JSON.parse(medicationsRaw) : medicationsRaw) : [];
+    const today = getTodayDate();
+    medicationStats.value = {
+      total: Array.isArray(medications) ? medications.length : 0,
+      done: Array.isArray(medications) ? medications.filter((item: { checkedDate?: string }) => item.checkedDate === today).length : 0,
+    };
+  } catch {
+    menstruationCycle.value = null;
+    medicationStats.value = { total: 0, done: 0 };
+  }
+};
+
 // 修复：首次进入立即加载
 onMounted(() => {
   load();
+  loadPersonalSignals();
 });
 
 // 每次显示时刷新
@@ -351,6 +383,7 @@ onShow(() => {
   if (today.value) {
     load();
   }
+  loadPersonalSignals();
 });
 </script>
 
