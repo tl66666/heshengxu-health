@@ -109,8 +109,11 @@ export function switchTab(url: string, options?: { fail?: (err: any) => void }) 
     return;
   }
 
+  // tabBar 页面不支持 queryString，需要移除
+  const cleanUrl = url.split('?')[0];
+
   uni.switchTab({
-    url,
+    url: cleanUrl,
     fail: (err) => {
       console.error('[router] switchTab 失败:', err);
       options?.fail?.(err);

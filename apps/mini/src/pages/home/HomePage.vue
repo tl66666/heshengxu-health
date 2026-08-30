@@ -185,10 +185,10 @@
       </view>
 
       <!-- 6. 经期记录卡片 -->
-      <view class="period-card card">
+      <view class="period-card card" @tap="openMenstruation">
         <view class="card-top">
           <text class="card-title">经期</text>
-          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('menstruation')">+</button>
+          <button class="add-btn" hover-class="button-hover" @tap.stop="openMenstruation">+</button>
         </view>
         <view class="period-content">
           <text class="period-hint">暂无记录</text>
@@ -198,10 +198,10 @@
       </view>
 
       <!-- 7. 用药打卡卡片 -->
-      <view class="medication-card card">
+      <view class="medication-card card" @tap="openMedication">
         <view class="card-top">
           <text class="card-title">用药打卡</text>
-          <button class="add-btn" hover-class="button-hover" @tap="goToRecord('medication')">+</button>
+          <button class="add-btn" hover-class="button-hover" @tap.stop="openMedication">+</button>
         </view>
         <view class="medication-content">
           <text class="medication-hint">今日待打卡</text>
@@ -314,6 +314,14 @@ const goToFoodRecognition = () => {
 
 const goToRecord = (type: string) => {
   navigateTo(`/pages/records/RecordsPage?type=${type}`);
+};
+
+const openMenstruation = () => {
+  navigateTo('/pages/menstruation/MenstruationDetailPage');
+};
+
+const openMedication = () => {
+  navigateTo('/pages/medication/MedicationManagePage');
 };
 
 const showWaterDialog = () => {
