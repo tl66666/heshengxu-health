@@ -11,7 +11,16 @@ export class WechatIdentityProvider implements IdentityProvider {
   }
 
   async exchange(code: string): Promise<{ provider: 'wechat'; providerUserId: string }> {
-    void code;
-    throw new Error('WeChat credential exchange is not enabled during stage 0');
+    if (!code.trim()) throw new Error('WECHAT_CODE_REQUIRED');
+    const url = new URL('https://api.weixin.qq.com/sns/jscode2session');
+    url.searchParams.set('appid', this.appId!);
+    url.searchParams.set('secret', this.appSecret!);
+    url.searchParams.set('js_code', code);
+    url.searchParams.set('grant_type', 'authorization_code');
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('WECHAT_EXCHANGE_FAILED');
+    const body = (await response.json()) as { openid?: string; errcode?: number };
+    if (!body.openid) throw new Error(`WECHAT_EXCHANGE_${body.errcode ?? 'UNKNOWN'}`);
+    return { provider: 'wechat', providerUserId: body.openid };
   }
 }

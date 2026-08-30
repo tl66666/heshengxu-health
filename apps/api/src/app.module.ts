@@ -8,9 +8,11 @@ import { FoodCatalogModule } from './modules/food-catalog/food-catalog.module.js
 import { MealEntriesModule } from './modules/meal-entries/meal-entries.module.js';
 import { FoodRecognitionModule } from './modules/food-recognition/food-recognition.module.js';
 import { HealthInsightsModule } from './modules/health-insights/health-insights.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
 
 @Module({
   imports: [
+    AuthModule,
     HealthProfileModule,
     HealthRecordsModule,
     HealthPlansModule,

@@ -1,6 +1,8 @@
 import type { HabitPlan, PlanCategory, PlanTemplate } from './plan-types.js';
 
-const STORAGE_KEY = 'heban.local.habit-plans.v1';
+const GUEST_STORAGE_KEY = 'heban.local.habit-plans.guest.v1';
+const USER_STORAGE_PREFIX = 'heban.local.habit-plans.user.';
+const USER_ID_KEY = 'heban.auth.user-id';
 
 export const PLAN_TEMPLATES: PlanTemplate[] = [
   {
@@ -81,7 +83,7 @@ function today() {
 }
 
 function read(): HabitPlan[] {
-  const raw = uni.getStorageSync(STORAGE_KEY);
+  const raw = uni.getStorageSync(storageKey());
   if (!raw) return [];
   try {
     const value = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -92,8 +94,29 @@ function read(): HabitPlan[] {
 }
 
 function write(plans: HabitPlan[]) {
-  uni.setStorageSync(STORAGE_KEY, plans);
+  uni.setStorageSync(storageKey(), plans);
   return plans;
+}
+
+function storageKey() {
+  const userId = uni.getStorageSync(USER_ID_KEY);
+  return typeof userId === 'string' && userId ? `${USER_STORAGE_PREFIX}${userId}` : GUEST_STORAGE_KEY;
+}
+
+export function migrateGuestPlansToUser(userId: string) {
+  if (!userId.trim()) return [];
+  const guest = uni.getStorageSync(GUEST_STORAGE_KEY);
+  const guestPlans = Array.isArray(guest) ? (guest as HabitPlan[]) : [];
+  const userKey = `${USER_STORAGE_PREFIX}${userId}`;
+  const current = uni.getStorageSync(userKey);
+  const userPlans = Array.isArray(current) ? (current as HabitPlan[]) : [];
+  const merged = [...userPlans];
+  for (const plan of guestPlans) {
+    if (!merged.some((item) => item.title === plan.title)) merged.push(plan);
+  }
+  uni.setStorageSync(userKey, merged);
+  uni.removeStorageSync(GUEST_STORAGE_KEY);
+  return merged;
 }
 
 function hydrate(template: PlanTemplate, id = `habit-${Date.now()}`): HabitPlan {

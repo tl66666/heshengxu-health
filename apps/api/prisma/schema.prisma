@@ -24,6 +24,22 @@ model User {
   mealEntries          MealEntry[]
   foodRecognitionUploads FoodRecognitionUpload[]
   foodRecognitionJobs  FoodRecognitionJob[]
+  authSessions         AuthSession[]
+}
+
+model AuthSession {
+  id           String   @id @default(cuid())
+  userId       String
+  refreshHash  String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  lastUsedAt   DateTime @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  userAgent    String?
+  deviceLabel  String?
+
+  @@index([userId, revokedAt, expiresAt])
 }
 
 model FoodCategory {
