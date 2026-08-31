@@ -19,7 +19,15 @@
       </button>
     </view>
 
-    <view v-if="loading" class="loading">正在整理今天的节律…</view>
+    <view v-if="loading" class="loading-state">
+      <image class="loading-art" src="/static/illustrations/onboarding-guide-vertical.png" mode="aspectFill" />
+      <view class="loading-wash" />
+      <view class="loading-copy">
+        <text class="loading-title">让健康回到自己的节律</text>
+        <text class="loading-subtitle">序序正在把今天的记录整理好</text>
+        <view class="loading-dots"><view /><view /><view /></view>
+      </view>
+    </view>
 
     <template v-else-if="today && experience">
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
@@ -160,7 +168,7 @@
                 class="mini-trend-point"
               />
             </svg>
-            <image v-else class="chart-icon" src="/static/icons/weight-scale.png" mode="aspectFit" />
+            <image v-else class="chart-icon" src="/static/icons/weight.jpg" mode="aspectFill" />
           </view>
         </view>
       </view>
@@ -1450,6 +1458,77 @@ onUnmounted(stopFastingTicker);
 }
 </style>
 <style scoped>
+.loading-state {
+  position: relative;
+  display: flex;
+  min-height: 68vh;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0 -24rpx;
+  border-radius: 0 0 32rpx 32rpx;
+  background: #eef6ef;
+}
+.loading-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.82;
+}
+.loading-wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(244, 249, 244, 0.12) 26%, rgba(244, 249, 244, 0.94) 86%);
+}
+.loading-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 32rpx 74rpx;
+  text-align: center;
+}
+.loading-title {
+  display: block;
+  color: #315b45;
+  font-size: 34rpx;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+.loading-subtitle {
+  display: block;
+  margin-top: 12rpx;
+  color: #76917f;
+  font-size: 21rpx;
+}
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+.loading-dots view {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #79aa88;
+  animation: loading-breathe 1.35s ease-in-out infinite;
+}
+.loading-dots view:nth-child(2) { animation-delay: 0.15s; }
+.loading-dots view:nth-child(3) { animation-delay: 0.3s; }
+@keyframes loading-breathe {
+  0%, 100% { transform: translateY(0); opacity: 0.42; }
+  50% { transform: translateY(-7rpx); opacity: 1; }
+}
+.chart-icon {
+  width: 116rpx;
+  height: 116rpx;
+  opacity: 0.92;
+  mix-blend-mode: multiply;
+}
+</style>
+<style scoped>
 .wellness-scrim { position:fixed; inset:0; z-index:40; display:flex; align-items:flex-end; background:rgba(47,61,56,.46); }
 .wellness-sheet { width:100%; box-sizing:border-box; max-height:82vh; overflow:auto; padding:20rpx 30rpx calc(36rpx + env(safe-area-inset-bottom)); border-radius:34rpx 34rpx 0 0; background:#fffdf8; box-shadow:0 -14rpx 44rpx rgba(67,87,79,.2); }
 .sheet-handle { width:72rpx; height:8rpx; margin:0 auto 24rpx; border-radius:8rpx; background:#d5dfd9; }
@@ -1969,6 +2048,7 @@ onUnmounted(stopFastingTicker);
 <style scoped>
 /* Final visual tokens. Keep all home surfaces in one restrained palette. */
 .page { background: #f2f6f3; color: #29453c; }
+.chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
 .bg-leaf { width: 320rpx; height: 320rpx; opacity: 0.035; }
 .header { margin-bottom: 24rpx; }
 .date-chip { padding: 6rpx 12rpx; border-radius: 10rpx; background: #e6f0ea; color: #5b7d6f; font-size: 19rpx; }
@@ -2029,6 +2109,10 @@ onUnmounted(stopFastingTicker);
 .edit-text { color: #537c6c; font-size: 23rpx; }
 .edit-caption { color: #91a199; }
 .error-state button { background: #e7f1ea; color: #527d69; }
+.chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
+</style>
+<style scoped>
+.chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
 </style>
 <style scoped>
 .page {
