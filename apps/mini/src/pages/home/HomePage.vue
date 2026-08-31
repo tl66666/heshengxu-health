@@ -625,7 +625,10 @@ const goToXuxuCamera = () => {
 
 const goToMealAdd = () => {
   uni.navigateTo({
-    url: '/pages/meal-add/MealAddPage?mealType=lunch',
+    // Keep the home entry on the same real catalog/cart flow used by records.
+    // The legacy MealAddPage is retained for compatibility but must not be the
+    // default user path because it has a separate, less complete data model.
+    url: '/pages/food-search/FoodSearchPage?mealType=lunch',
   });
 };
 
