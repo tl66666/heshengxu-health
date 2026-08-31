@@ -33,7 +33,7 @@
         </button>
       </view>
 
-      <button class="food-entry" @tap="openFoodSearch">
+      <button v-if="activeType === 'meal-structure'" class="food-entry" @tap="openFoodSearch">
         <view class="food-entry-mark">+</view>
         <view class="food-entry-copy"
           ><text>记一份具体食物</text><text>搜索食物并按份量计算热量与营养</text></view
@@ -41,7 +41,7 @@
         <image class="food-entry-arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
       </button>
 
-      <view v-if="foodEntries.length" class="food-summary">
+      <view v-if="activeType === 'meal-structure' && foodEntries.length" class="food-summary">
         <view class="food-summary-head"
           ><view
             ><text class="food-summary-title">今天的食物</text
@@ -119,7 +119,25 @@
         </template>
 
         <template v-else-if="activeType === 'activity'">
-          <text class="field-label">活动类型</text>
+          <view class="activity-overview">
+            <view>
+              <text class="activity-overview-value">{{ activityTotalMinutes }}</text>
+              <text class="activity-overview-unit">分钟</text>
+            </view>
+            <text>今天已记录 {{ activityRecordCount }} 次活动</text>
+          </view>
+          <text class="field-label">选择运动</text>
+          <view class="activity-options">
+            <button
+              v-for="item in activityOptions"
+              :key="item"
+              :class="['activity-option', { selected: activityType === item }]"
+              @tap="selectActivity(item)"
+            >
+              {{ item }}
+            </button>
+          </view>
+          <text class="field-label field-label-spaced">其他运动</text>
           <input v-model="activityType" class="text-input" placeholder="例如 步行、拉伸、瑜伽" />
           <text v-if="fieldError('activityType')" class="field-error">{{
             fieldError('activityType')
@@ -132,6 +150,16 @@
           <text v-if="fieldError('durationMinutes')" class="field-error">{{
             fieldError('durationMinutes')
           }}</text>
+          <view class="duration-options">
+            <button
+              v-for="minutes in activityDurationOptions"
+              :key="minutes"
+              :class="['duration-option', { selected: activityMinutes === String(minutes) }]"
+              @tap="selectActivityMinutes(minutes)"
+            >
+              {{ minutes }} 分钟
+            </button>
+          </view>
         </template>
 
         <template v-else>
@@ -229,6 +257,13 @@ const sleepQuality = ref<SleepQuality>('good');
 const note = ref('');
 const foodEntries = ref<MealEntry[]>([]);
 const foodSummary = computed(() => summarizeFoodEntries(foodEntries.value));
+const activityRecordCount = computed(() => store.records.value?.activities.length || 0);
+const activityTotalMinutes = computed(() =>
+  (store.records.value?.activities || []).reduce(
+    (total, activity) => total + activity.durationMinutes,
+    0,
+  ),
+);
 
 const types: Array<{ type: HealthRecordType; label: string }> = [
   { type: 'weight', label: '体重' },
@@ -252,6 +287,8 @@ const qualities: Array<{ value: SleepQuality; label: string }> = [
   { value: 'fair', label: '一般' },
   { value: 'good', label: '挺好' },
 ];
+const activityOptions = ['步行', '拉伸', '瑜伽', '跑步', '骑行', '力量训练'];
+const activityDurationOptions = [10, 20, 30, 45, 60];
 const formTitle = computed(
   () =>
     ({
@@ -305,6 +342,14 @@ function selectType(type: HealthRecordType) {
     activeType.value = type;
     errors.value = {};
   }
+}
+function selectActivity(value: string) {
+  activityType.value = value;
+  clearErrors();
+}
+function selectActivityMinutes(value: number) {
+  activityMinutes.value = String(value);
+  clearErrors();
 }
 async function submit() {
   const result = await store.save(currentForm(), date, editingId.value);
@@ -765,6 +810,68 @@ onShow(() => {
   border-color: #6da57c;
   color: #286b47;
   background: #e8f4e8;
+}
+.activity-overview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+  padding: 18rpx 20rpx;
+  border: 1rpx solid #dbe9de;
+  border-radius: 16rpx;
+  background: #f2f8f2;
+  color: #7a9180;
+  font-size: 20rpx;
+}
+.activity-overview > view {
+  display: flex;
+  align-items: baseline;
+  gap: 5rpx;
+}
+.activity-overview-value {
+  color: #3d7450;
+  font-size: 38rpx;
+  font-weight: 750;
+  line-height: 1;
+}
+.activity-overview-unit {
+  color: #6f8d78;
+  font-size: 19rpx;
+}
+.activity-options,
+.duration-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+.activity-option,
+.duration-option {
+  min-width: 104rpx;
+  height: 58rpx;
+  padding: 0 18rpx;
+  border: 1rpx solid #dce9df;
+  border-radius: 14rpx;
+  background: #fff;
+  color: #597463;
+  font-size: 21rpx;
+  line-height: 58rpx;
+}
+.activity-option.selected,
+.duration-option.selected {
+  border-color: #86b595;
+  background: #eaf5ec;
+  color: #306b47;
+  font-weight: 700;
+}
+.duration-options {
+  margin-top: 12rpx;
+}
+.duration-option {
+  min-width: 112rpx;
+  height: 52rpx;
+  color: #6f8878;
+  font-size: 19rpx;
+  line-height: 52rpx;
 }
 .field-error,
 .submit-error {
