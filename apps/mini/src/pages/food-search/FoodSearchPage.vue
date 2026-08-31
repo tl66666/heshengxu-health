@@ -74,9 +74,9 @@
       </button>
     </view>
 
-    <!-- 分类筛选 -->
+    <!-- 分类筛选：进入页面即展示，搜索时继续作为筛选条件 -->
     <scroll-view
-      v-if="categories.length > 0 && (query || selectedCategory)"
+      v-if="categories.length > 0"
       class="category-tabs"
       scroll-x
     >
@@ -92,6 +92,11 @@
         </view>
       </view>
     </scroll-view>
+
+    <view v-if="!query && !selectedCategory && !selectedHealthLight" class="common-heading">
+      <text class="common-title">常见食物</text>
+      <text class="common-subtitle">按分类快速记录这一餐</text>
+    </view>
 
     <!-- 结果统计 -->
     <view v-if="query || selectedCategory" class="result-caption">
@@ -418,6 +423,10 @@ onLoad(async (options) => {
   padding: 0 32rpx 140rpx;
   background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
 }
+
+.common-heading { display:flex; align-items:baseline; justify-content:space-between; margin: 20rpx 2rpx 14rpx; }
+.common-title { font-size: 30rpx; font-weight: 800; color: #244735; }
+.common-subtitle { font-size: 22rpx; color: #88a092; }
 
 /* 介绍区域 */
 .intro {
