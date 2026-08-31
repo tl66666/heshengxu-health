@@ -160,7 +160,7 @@
                 class="mini-trend-point"
               />
             </svg>
-            <image v-else class="chart-icon" src="/static/icons/weight.jpg" mode="aspectFit" />
+            <image v-else class="chart-icon" src="/static/icons/weight-scale.png" mode="aspectFit" />
           </view>
         </view>
       </view>
@@ -181,17 +181,14 @@
         <button
           class="grid-item card sleep-card"
           hover-class="button-hover"
-          @tap="openRecordAction('/pages/records/RecordsPage?type=sleep')"
+          @tap="openWellnessSheet('sleep')"
         >
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
           </view>
           <view class="grid-data">
-            <text v-if="today.todayRecords?.sleep" class="grid-num">{{
-              formatSleepHours(today.todayRecords.sleep)
-            }}</text>
-            <text v-if="today.todayRecords?.sleep" class="grid-unit">小时</text>
-            <text v-else class="grid-hint">未记录</text>
+            <text class="grid-num">{{ sleepCardValue }}</text>
+            <text class="grid-unit">{{ sleepCardUnit }}</text>
           </view>
           <image class="grid-icon" src="/static/icons/watercolor/sleep.png" mode="aspectFit" />
         </button>
@@ -211,12 +208,12 @@
           <image class="grid-icon" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
         </button>
 
-        <button class="grid-item card mood-card" hover-class="button-hover" @tap="toXuxu">
+        <button class="grid-item card mood-card" hover-class="button-hover" @tap="openWellnessSheet('mood')">
           <view class="grid-top">
             <text class="grid-title">心情</text>
           </view>
           <view class="grid-data">
-            <text class="grid-hint">记录今天</text>
+            <text class="grid-hint">{{ moodCardValue }}</text>
           </view>
           <image class="grid-icon" src="/static/icons/watercolor/mood-smile.png" mode="aspectFit" />
         </button>
@@ -292,6 +289,29 @@
       </button>
     </template>
 
+    <view v-if="wellnessSheet" class="wellness-scrim" @tap="closeWellnessSheet">
+      <view class="wellness-sheet" @tap.stop>
+        <view class="sheet-handle" />
+        <view class="wellness-head"><view><text class="wellness-title">{{ wellnessSheet === 'sleep' ? '记下昨晚的睡眠' : '记录此刻的心情' }}</text><text class="wellness-subtitle">{{ wellnessSheet === 'sleep' ? '不用完美，先留下真实感受' : '给今天的自己一个温柔标记' }}</text></view><button class="sheet-close" @tap="closeWellnessSheet">×</button></view>
+        <template v-if="wellnessSheet === 'sleep'">
+          <text class="field-label">睡了多久</text>
+          <view class="duration-field"><input v-model="sleepDurationDraft" type="number" placeholder="例如 450" /><text>分钟</text></view>
+          <text class="field-label">睡眠质量</text>
+          <view class="tone-row"><button v-for="item in sleepQualities" :key="item.value" :class="['tone-choice', { selected: sleepQualityDraft === item.value }]" @tap="sleepQualityDraft = item.value">{{ item.label }}</button></view>
+          <text class="field-label">昨晚做了什么梦？<text class="optional">选填</text></text>
+          <textarea v-model="dreamDraft" class="dream-input" maxlength="160" placeholder="记下一点画面、情绪，或只写一句话" />
+          <button class="wellness-save" @tap="saveWellnessSleep">保存睡眠记录</button>
+        </template>
+        <template v-else>
+          <text class="field-label">现在的状态</text>
+          <view class="mood-grid"><button v-for="item in moodOptions" :key="item.value" :class="['mood-choice', { selected: moodToneDraft === item.value }]" @tap="moodToneDraft = item.value"><text class="mood-dot" :class="item.value" />{{ item.label }}</button></view>
+          <text class="field-label">想说点什么？<text class="optional">选填</text></text>
+          <textarea v-model="moodNoteDraft" class="dream-input" maxlength="160" placeholder="今天发生了什么，让你有这样的感觉？" />
+          <button class="wellness-save mood-save" @tap="saveWellnessMood">保存心情</button>
+        </template>
+      </view>
+    </view>
+
     <view v-else-if="error" class="error-state">
       <text>今天的状态还没有加载出来</text>
       <text>检查服务连接后，再试一次就好</text>
@@ -314,6 +334,7 @@ import { foodRecordActions, mealRecordIcons } from './home-actions.js';
 import { loadHomeCardVisibility, type HomeCardId } from './home-card-settings.js';
 import { navigateTo, navigateToWeightDetail, navigateToXuxu } from '../../utils/router.js';
 import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remainingSeconds, type FastingPlan } from '../../features/fasting/fasting-store.js';
+import { loadWellnessJournal, saveMood, saveSleep, type MoodTone, type WellnessJournal } from '../../features/wellness/wellness-journal.js';
 
 const { today, loading, error } = healthLoopState;
 
@@ -353,6 +374,19 @@ const medicationPlanText = computed(() =>
   medicationStats.value.total ? '按医嘱设置提醒时间' : '添加一条提醒，按时照顾自己',
 );
 
+const wellnessJournal = ref<WellnessJournal>(loadWellnessJournal());
+const wellnessSheet = ref<'sleep' | 'mood' | null>(null);
+const sleepDurationDraft = ref('');
+const sleepQualityDraft = ref<'poor' | 'fair' | 'good'>('good');
+const dreamDraft = ref('');
+const moodToneDraft = ref<MoodTone>('calm');
+const moodNoteDraft = ref('');
+const sleepQualities = [{ value: 'poor', label: '不太好' }, { value: 'fair', label: '一般' }, { value: 'good', label: '挺好' }] as const;
+const moodOptions: Array<{ value: MoodTone; label: string }> = [{ value: 'calm', label: '平静' }, { value: 'bright', label: '开心' }, { value: 'tired', label: '疲惫' }, { value: 'low', label: '低落' }, { value: 'anxious', label: '有点焦虑' }];
+const sleepCardValue = computed(() => wellnessJournal.value.sleep ? (wellnessJournal.value.sleep.durationMinutes / 60).toFixed(1) : today.value?.todayRecords?.sleep ? formatSleepHours(today.value.todayRecords.sleep) : '--');
+const sleepCardUnit = computed(() => sleepCardValue.value === '--' ? '待记录' : '小时');
+const moodCardValue = computed(() => wellnessJournal.value.mood ? moodOptions.find((item) => item.value === wellnessJournal.value.mood?.tone)?.label || '已记录' : '记录今天');
+
 const fastingPlan = ref<FastingPlan>(loadFastingPlan());
 const fastingNow = ref(new Date());
 let fastingTicker: ReturnType<typeof setInterval> | undefined;
@@ -368,6 +402,27 @@ function startFastingTicker() {
   if (!fastingTicker) fastingTicker = setInterval(() => { fastingNow.value = new Date(); if (fastingPlan.value.active) fastingPlan.value = remainingSeconds(fastingPlan.value, fastingNow.value) <= 0 ? finishFasting(fastingNow.value) : loadFastingPlan(); }, 1000);
 }
 function stopFastingTicker() { if (fastingTicker) { clearInterval(fastingTicker); fastingTicker = undefined; } }
+function openWellnessSheet(type: 'sleep' | 'mood') {
+  wellnessJournal.value = loadWellnessJournal();
+  wellnessSheet.value = type;
+  if (type === 'sleep') {
+    sleepDurationDraft.value = wellnessJournal.value.sleep ? String(wellnessJournal.value.sleep.durationMinutes) : today.value?.todayRecords?.sleep ? String(today.value.todayRecords.sleep.durationMinutes) : '';
+    sleepQualityDraft.value = wellnessJournal.value.sleep?.quality || 'good';
+    dreamDraft.value = wellnessJournal.value.sleep?.dream || '';
+  } else {
+    moodToneDraft.value = wellnessJournal.value.mood?.tone || 'calm';
+    moodNoteDraft.value = wellnessJournal.value.mood?.note || '';
+  }
+}
+function closeWellnessSheet() { wellnessSheet.value = null; }
+function saveWellnessSleep() {
+  const duration = Number(sleepDurationDraft.value);
+  if (!Number.isFinite(duration) || duration < 30 || duration > 1440) { uni.showToast({ title: '请输入 30–1440 分钟', icon: 'none' }); return; }
+  wellnessJournal.value = saveSleep({ durationMinutes: Math.round(duration), quality: sleepQualityDraft.value, dream: dreamDraft.value.trim() });
+  wellnessSheet.value = null;
+  uni.showToast({ title: '睡眠已记录', icon: 'success' });
+}
+function saveWellnessMood() { wellnessJournal.value = saveMood({ tone: moodToneDraft.value, note: moodNoteDraft.value.trim() }); wellnessSheet.value = null; uni.showToast({ title: '心情已记录', icon: 'success' }); }
 
 const experience = computed(() => (today.value ? deriveDailyExperience(today.value) : null));
 
@@ -609,6 +664,7 @@ onShow(() => {
   loadWeightTrend();
   loadPersonalSignals();
   startFastingTicker();
+  wellnessJournal.value = loadWellnessJournal();
 });
 onHide(stopFastingTicker);
 onUnmounted(stopFastingTicker);
@@ -1089,10 +1145,10 @@ onUnmounted(stopFastingTicker);
 }
 
 .chart-icon {
-  width: 72rpx;
-  height: 72rpx;
-  opacity: 0.94;
-  border-radius: 12rpx;
+  width: 112rpx;
+  height: 112rpx;
+  opacity: 1;
+  border-radius: 0;
   mix-blend-mode: multiply;
 }
 .mini-trend-svg {
@@ -1393,6 +1449,366 @@ onUnmounted(stopFastingTicker);
 }
 </style>
 <style scoped>
+.wellness-scrim { position:fixed; inset:0; z-index:40; display:flex; align-items:flex-end; background:rgba(50,65,60,.34); }
+.wellness-sheet { width:100%; box-sizing:border-box; max-height:86vh; overflow:auto; padding:18rpx 30rpx calc(30rpx + env(safe-area-inset-bottom)); border-radius:32rpx 32rpx 0 0; background:#fffdf8; box-shadow:0 -14rpx 44rpx rgba(67,87,79,.16); }
+.sheet-handle { width:72rpx; height:8rpx; margin:0 auto 24rpx; border-radius:8rpx; background:#d5dfd9; }
+.wellness-head { display:flex; align-items:flex-start; justify-content:space-between; }.wellness-title { display:block; color:#46584f; font-size:32rpx; font-weight:700; }.wellness-subtitle { display:block; margin-top:7rpx; color:#9aa8a1; font-size:20rpx; }.sheet-close { width:56rpx; height:56rpx; display:flex; align-items:center; justify-content:center; color:#91a09a; border:0; background:transparent; font-size:38rpx; }
+.field-label { display:block; margin:26rpx 0 12rpx; color:#73827c; font-size:21rpx; }.optional { margin-left:8rpx; color:#aeb8b2; font-size:18rpx; }
+.duration-field { display:flex; align-items:center; padding:0 18rpx; border:1rpx solid #e3ebe6; border-radius:16rpx; background:#fbfdf9; }.duration-field input { flex:1; height:78rpx; color:#41544c; font-size:28rpx; }.duration-field text { color:#94a39c; font-size:20rpx; }
+.tone-row { display:flex; gap:10rpx; }.tone-choice { flex:1; min-height:64rpx; display:flex; align-items:center; justify-content:center; padding:0 8rpx; border:1rpx solid #e2ebe5; border-radius:16rpx; color:#809089; background:#fff; font-size:20rpx; }.tone-choice.selected { color:#5d9b7d; border-color:#8ac8a7; background:#edf8f0; }
+.dream-input { width:100%; min-height:150rpx; box-sizing:border-box; padding:18rpx; border:1rpx solid #e3ebe6; border-radius:16rpx; color:#52645d; background:#fbfdf9; font-size:21rpx; line-height:1.5; }
+.wellness-save { width:100%; min-height:82rpx; display:flex; align-items:center; justify-content:center; margin-top:26rpx; border-radius:22rpx; color:#fff; background:#6bc49a; font-size:24rpx; font-weight:600; box-shadow:0 10rpx 22rpx rgba(95,186,143,.2); }.mood-save { background:#8a9fda; box-shadow:0 10rpx 22rpx rgba(119,139,200,.18); }
+.mood-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12rpx; }.mood-choice { min-height:68rpx; display:flex; align-items:center; justify-content:center; gap:8rpx; border:1rpx solid #e2ebe5; border-radius:16rpx; color:#7d8c86; background:#fff; font-size:20rpx; }.mood-choice.selected { color:#6f85c2; border-color:#aebce6; background:#f3f5fe; }.mood-dot { width:14rpx; height:14rpx; border-radius:50%; background:#a9b8e7; }.mood-dot.bright { background:#f4c979; }.mood-dot.tired { background:#b9c3cb; }.mood-dot.low { background:#d99cab; }.mood-dot.anxious { background:#9ecdc1; }
+</style>
+<style scoped>
+/* Unified home surface: a quiet sage canvas with warm white content planes. */
+.page {
+  background: #f2f6f3;
+  color: #29453c;
+}
+
+.bg-leaf {
+  width: 320rpx;
+  height: 320rpx;
+  opacity: 0.035;
+}
+
+.header {
+  margin-bottom: 24rpx;
+}
+
+.date-chip {
+  padding: 6rpx 12rpx;
+  border-radius: 10rpx;
+  background: #e6f0ea;
+  color: #5b7d6f;
+  font-size: 19rpx;
+  letter-spacing: 0;
+}
+
+.greeting {
+  color: #25473a;
+  font-size: 34rpx;
+  letter-spacing: 0;
+}
+
+.avatar {
+  border-color: #d4e4db;
+}
+
+.avatar-hint {
+  color: #718b7f;
+}
+
+.card {
+  margin-bottom: 20rpx;
+  border: 1rpx solid #e0eae3;
+  border-radius: 24rpx;
+  background: #fffefa;
+  box-shadow: 0 10rpx 26rpx rgba(44, 73, 61, 0.055);
+  backdrop-filter: none;
+}
+
+.card-top {
+  margin-bottom: 18rpx;
+}
+
+.card-title {
+  color: #315547;
+  font-size: 27rpx;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.week-badge,
+.time-text {
+  color: #879b91;
+}
+
+.weight-card {
+  padding: 24rpx 26rpx 20rpx;
+  background: #fffefa;
+}
+
+.weight-col .num,
+.weight-col.main .num,
+.big-number .number,
+.value,
+.grid-num,
+.fasting-time {
+  color: #2f6b52;
+}
+
+.weight-col .label,
+.stat-label,
+.hint-text,
+.value-unit,
+.grid-unit,
+.fasting-label,
+.period-hint,
+.medication-hint {
+  color: #8a9d94;
+}
+
+.semicircle-svg .track {
+  stroke: #e4eee7;
+}
+
+.semicircle-svg .progress {
+  stroke: #77ad91;
+}
+
+.calorie-card {
+  padding: 24rpx 26rpx 22rpx;
+}
+
+.mode-tag,
+.mode-tag.blue {
+  background: #e8f1eb;
+  color: #5a806e;
+}
+
+.calorie-main {
+  padding: 14rpx 0 12rpx;
+}
+
+.big-number .number {
+  font-size: 66rpx;
+  letter-spacing: 0;
+}
+
+.big-number .unit {
+  color: #628675;
+}
+
+.meal-summary {
+  color: #8b9b92;
+}
+
+.calorie-stats {
+  gap: 18rpx;
+  padding: 12rpx 0;
+}
+
+.stat {
+  min-width: 150rpx;
+  padding: 12rpx 18rpx;
+  border: 1rpx solid #e6eee8;
+  border-radius: 14rpx;
+  background: #f4f8f5;
+}
+
+.stat-num {
+  color: #3b765d;
+}
+
+.meal-progress {
+  gap: 8rpx;
+  margin: 14rpx 12rpx 8rpx;
+}
+
+.meal-progress-segment {
+  height: 7rpx;
+  background: #e6eee8;
+}
+
+.meal-progress-segment.filled {
+  background: #84b39b;
+}
+
+.meals {
+  padding: 12rpx 0 10rpx;
+}
+
+.meal-item {
+  min-width: 112rpx;
+}
+
+.meal-icon-wrap {
+  width: 78rpx;
+  height: 78rpx;
+  border: 1rpx solid #e0ebe3;
+  border-radius: 22rpx;
+  background: #f4f8f5;
+  box-shadow: 0 6rpx 14rpx rgba(55, 91, 73, 0.06);
+}
+
+.meal-name {
+  color: #557668;
+  font-size: 20rpx;
+}
+
+.xuxu-camera-card {
+  min-height: 142rpx;
+  margin-top: 20rpx;
+  padding: 22rpx 22rpx 22rpx 26rpx;
+  border: 1rpx solid #dce9e0;
+  border-radius: 20rpx;
+  background: #f5f9f5;
+  box-shadow: none;
+}
+
+.camera-title {
+  color: #396b57;
+  font-size: 29rpx;
+}
+
+.camera-subtitle {
+  color: #82988d;
+  font-size: 20rpx;
+}
+
+.camera-decoration {
+  width: 174rpx;
+  height: 112rpx;
+  opacity: 0.92;
+}
+
+.camera-arrow {
+  color: #7da38e;
+  font-size: 38rpx;
+}
+
+.record-card {
+  padding: 24rpx 26rpx;
+}
+
+.mini-chart {
+  width: 142rpx;
+  height: 62rpx;
+  border: 1rpx solid #e5eee8;
+  border-radius: 14rpx;
+  background: #f5f9f5;
+}
+
+.mini-trend-line {
+  stroke: #78ad91;
+}
+
+.mini-trend-point {
+  fill: #fffefa;
+  stroke: #78ad91;
+}
+
+.grid-cards {
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.grid-item {
+  min-height: 148rpx;
+  padding: 22rpx 24rpx;
+  border: 1rpx solid #e0eae3;
+  border-radius: 22rpx;
+  background: #fffefa;
+  box-shadow: 0 8rpx 18rpx rgba(44, 73, 61, 0.045);
+}
+
+.grid-title {
+  color: #3b6655;
+  font-size: 25rpx;
+}
+
+.grid-data {
+  margin-bottom: 8rpx;
+}
+
+.grid-num {
+  font-size: 44rpx;
+}
+
+.grid-icon {
+  width: 92rpx;
+  height: 92rpx;
+  right: 8rpx;
+  bottom: 8rpx;
+  opacity: 0.48;
+  border-radius: 0;
+  mix-blend-mode: multiply;
+}
+
+.fasting-card,
+.period-card,
+.medication-card {
+  min-height: 164rpx;
+  padding: 24rpx 26rpx;
+  border: 1rpx solid #e0eae3;
+  border-left-width: 4rpx;
+  border-radius: 22rpx;
+  background: #fffefa;
+  box-shadow: 0 8rpx 20rpx rgba(44, 73, 61, 0.045);
+}
+
+.fasting-card {
+  border-left-color: #85ae98;
+}
+
+.period-card {
+  border-left-color: #d79a9f;
+}
+
+.medication-card {
+  border-left-color: #76a99a;
+}
+
+.fasting-card .fasting-time {
+  color: #356c55;
+}
+
+.period-days {
+  color: #b66f7d;
+}
+
+.medication-item {
+  color: #477b6c;
+}
+
+.fasting-icon-img,
+.period-icon-img,
+.medication-icon-img {
+  right: 20rpx;
+  bottom: 16rpx;
+  width: 104rpx;
+  height: 104rpx;
+  opacity: 0.46;
+  border-radius: 0;
+  background: transparent;
+  mix-blend-mode: multiply;
+}
+
+.fasting-summary {
+  color: #85988f;
+}
+
+.edit-card {
+  min-height: 82rpx;
+  margin: 4rpx 0 16rpx;
+  padding: 18rpx 22rpx 18rpx 24rpx;
+  border: 1rpx solid #dfe9e2;
+  border-radius: 18rpx;
+  background: rgba(255, 254, 250, 0.76);
+  box-shadow: none;
+}
+
+.edit-text {
+  color: #537c6c;
+  font-size: 23rpx;
+}
+
+.edit-caption {
+  color: #91a199;
+}
+
+.edit-arrow {
+  opacity: 0.5;
+}
+
+.error-state button {
+  background: #e7f1ea;
+  color: #527d69;
+}
+</style>
+<style scoped>
 /* Lower cards use quiet editorial surfaces instead of full-bleed pastel fills. */
 .fasting-card,
 .period-card,
@@ -1547,6 +1963,69 @@ onUnmounted(stopFastingTicker);
   height: 28rpx;
   opacity: 0.55;
 }
+</style>
+<style scoped>
+/* Final visual tokens. Keep all home surfaces in one restrained palette. */
+.page { background: #f2f6f3; color: #29453c; }
+.bg-leaf { width: 320rpx; height: 320rpx; opacity: 0.035; }
+.header { margin-bottom: 24rpx; }
+.date-chip { padding: 6rpx 12rpx; border-radius: 10rpx; background: #e6f0ea; color: #5b7d6f; font-size: 19rpx; }
+.greeting { color: #25473a; font-size: 34rpx; }
+.avatar { border-color: #d4e4db; }
+.avatar-hint { color: #718b7f; }
+.card { margin-bottom: 20rpx; border: 1rpx solid #e0eae3; border-radius: 24rpx; background: #fffefa; box-shadow: 0 10rpx 26rpx rgba(44, 73, 61, 0.055); backdrop-filter: none; }
+.card-top { margin-bottom: 18rpx; }
+.card-title { color: #315547; font-size: 27rpx; font-weight: 750; }
+.week-badge, .time-text { color: #879b91; }
+.weight-card, .calorie-card, .record-card { background: #fffefa; }
+.weight-card { padding: 24rpx 26rpx 20rpx; }
+.weight-col .num, .weight-col.main .num, .big-number .number, .value, .grid-num, .fasting-time { color: #2f6b52; }
+.weight-col .label, .stat-label, .hint-text, .value-unit, .grid-unit, .fasting-label, .period-hint, .medication-hint { color: #8a9d94; }
+.semicircle-svg .track { stroke: #e4eee7; }
+.semicircle-svg .progress { stroke: #77ad91; }
+.mode-tag, .mode-tag.blue { background: #e8f1eb; color: #5a806e; }
+.calorie-card { padding: 24rpx 26rpx 22rpx; }
+.calorie-main { padding: 14rpx 0 12rpx; }
+.big-number .number { font-size: 66rpx; letter-spacing: 0; }
+.big-number .unit { color: #628675; }
+.meal-summary { color: #8b9b92; }
+.calorie-stats { gap: 18rpx; padding: 12rpx 0; }
+.stat { min-width: 150rpx; padding: 12rpx 18rpx; border: 1rpx solid #e6eee8; border-radius: 14rpx; background: #f4f8f5; }
+.stat-num { color: #3b765d; }
+.meal-progress { gap: 8rpx; margin: 14rpx 12rpx 8rpx; }
+.meal-progress-segment { height: 7rpx; background: #e6eee8; }
+.meal-progress-segment.filled { background: #84b39b; }
+.meals { padding: 12rpx 0 10rpx; }
+.meal-icon-wrap { width: 78rpx; height: 78rpx; border: 1rpx solid #e0ebe3; border-radius: 22rpx; background: #f4f8f5; box-shadow: 0 6rpx 14rpx rgba(55, 91, 73, 0.06); }
+.meal-name { color: #557668; font-size: 20rpx; }
+.xuxu-camera-card { min-height: 142rpx; margin-top: 20rpx; padding: 22rpx 22rpx 22rpx 26rpx; border: 1rpx solid #dce9e0; border-radius: 20rpx; background: #f5f9f5; box-shadow: none; }
+.camera-title { color: #396b57; font-size: 29rpx; }
+.camera-subtitle { color: #82988d; font-size: 20rpx; }
+.camera-decoration { width: 174rpx; height: 112rpx; opacity: 0.92; }
+.camera-arrow { color: #7da38e; font-size: 38rpx; }
+.record-card { padding: 24rpx 26rpx; }
+.mini-chart { width: 142rpx; height: 62rpx; border: 1rpx solid #e5eee8; border-radius: 14rpx; background: #f5f9f5; }
+.mini-trend-line { stroke: #78ad91; }
+.mini-trend-point { fill: #fffefa; stroke: #78ad91; }
+.grid-cards { gap: 16rpx; margin-bottom: 20rpx; }
+.grid-item { min-height: 154rpx; padding: 24rpx; border: 1rpx solid #dce8e0; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
+.grid-title { color: #3b6655; font-size: 26rpx; font-weight: 650; }
+.grid-num { font-size: 46rpx; }
+.grid-icon { width: 108rpx; height: 108rpx; right: 6rpx; bottom: 4rpx; opacity: 0.78; border-radius: 0; mix-blend-mode: multiply; }
+.chart-icon { width: 48rpx; height: 48rpx; opacity: 0.72; }
+.fasting-card, .period-card, .medication-card { min-height: 170rpx; padding: 25rpx 26rpx; border: 1rpx solid #dce8e0; border-left-width: 4rpx; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
+.fasting-card { border-left-color: #85ae98; }
+.period-card { border-left-color: #d79a9f; }
+.medication-card { border-left-color: #76a99a; }
+.fasting-card .fasting-time { color: #356c55; }
+.period-days { color: #b66f7d; }
+.medication-item { color: #477b6c; }
+.fasting-icon-img, .period-icon-img, .medication-icon-img { right: 18rpx; bottom: 12rpx; width: 120rpx; height: 120rpx; opacity: 0.72; border-radius: 0; background: transparent; mix-blend-mode: multiply; }
+.fasting-summary { color: #85988f; }
+.edit-card { min-height: 82rpx; margin: 4rpx 0 16rpx; padding: 18rpx 22rpx 18rpx 24rpx; border: 1rpx solid #dfe9e2; border-radius: 18rpx; background: rgba(255, 254, 250, 0.76); box-shadow: none; }
+.edit-text { color: #537c6c; font-size: 23rpx; }
+.edit-caption { color: #91a199; }
+.error-state button { background: #e7f1ea; color: #527d69; }
 </style>
 <style scoped>
 .page {
@@ -1725,4 +2204,64 @@ onUnmounted(stopFastingTicker);
   height: 28rpx;
   opacity: 0.55;
 }
+</style>
+<style scoped>
+/* Last rule wins: keep the page coherent after legacy theme blocks. */
+.page { background: #f2f6f3; color: #29453c; }
+.bg-leaf { width: 320rpx; height: 320rpx; opacity: 0.035; }
+.date-chip { border-radius: 10rpx; background: #e6f0ea; color: #5b7d6f; }
+.greeting { color: #25473a; font-size: 34rpx; }
+.avatar { border-color: #d4e4db; }
+.avatar-hint { color: #718b7f; }
+.card { margin-bottom: 20rpx; border: 1rpx solid #e0eae3; border-radius: 24rpx; background: #fffefa; box-shadow: 0 10rpx 26rpx rgba(44, 73, 61, 0.055); backdrop-filter: none; }
+.card-title { color: #315547; font-size: 27rpx; font-weight: 750; }
+.weight-card, .calorie-card, .record-card { background: #fffefa; }
+.weight-card { padding: 24rpx 26rpx 20rpx; }
+.week-badge, .time-text { color: #879b91; }
+.weight-col .num, .weight-col.main .num, .big-number .number, .value, .grid-num, .fasting-time { color: #2f6b52; }
+.weight-col .label, .stat-label, .hint-text, .value-unit, .grid-unit, .fasting-label, .period-hint, .medication-hint { color: #8a9d94; }
+.semicircle-svg .track { stroke: #e4eee7; }
+.semicircle-svg .progress { stroke: #77ad91; }
+.mode-tag, .mode-tag.blue { background: #e8f1eb; color: #5a806e; }
+.calorie-card { padding: 24rpx 26rpx 22rpx; }
+.big-number .number { font-size: 66rpx; letter-spacing: 0; }
+.big-number .unit { color: #628675; }
+.meal-summary { color: #8b9b92; }
+.calorie-stats { gap: 18rpx; padding: 12rpx 0; }
+.stat { min-width: 150rpx; padding: 12rpx 18rpx; border: 1rpx solid #e6eee8; border-radius: 14rpx; background: #f4f8f5; }
+.stat-num { color: #3b765d; }
+.meal-progress { gap: 8rpx; margin: 14rpx 12rpx 8rpx; }
+.meal-progress-segment { height: 7rpx; background: #e6eee8; }
+.meal-progress-segment.filled { background: #84b39b; }
+.meals { padding: 12rpx 0 10rpx; }
+.meal-icon-wrap { width: 78rpx; height: 78rpx; border: 1rpx solid #e0ebe3; border-radius: 22rpx; background: #f4f8f5; box-shadow: 0 6rpx 14rpx rgba(55, 91, 73, 0.06); }
+.meal-name { color: #557668; font-size: 20rpx; }
+.xuxu-camera-card { min-height: 142rpx; margin-top: 20rpx; padding: 22rpx 22rpx 22rpx 26rpx; border: 1rpx solid #dce9e0; border-radius: 20rpx; background: #f5f9f5; box-shadow: none; }
+.camera-title { color: #396b57; font-size: 29rpx; }
+.camera-subtitle { color: #82988d; font-size: 20rpx; }
+.camera-decoration { width: 174rpx; height: 112rpx; opacity: 0.92; }
+.camera-arrow { color: #7da38e; font-size: 38rpx; }
+.record-card { padding: 24rpx 26rpx; }
+.mini-chart { width: 142rpx; height: 62rpx; border: 1rpx solid #e5eee8; border-radius: 14rpx; background: #f5f9f5; }
+.mini-trend-line { stroke: #78ad91; }
+.mini-trend-point { fill: #fffefa; stroke: #78ad91; }
+.grid-cards { gap: 16rpx; margin-bottom: 20rpx; }
+.grid-item { min-height: 154rpx; padding: 24rpx; border: 1rpx solid #dce8e0; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
+.grid-title { color: #3b6655; font-size: 26rpx; font-weight: 650; }
+.grid-num { font-size: 46rpx; }
+.grid-icon { width: 108rpx; height: 108rpx; right: 6rpx; bottom: 4rpx; opacity: 0.78; border-radius: 0; mix-blend-mode: multiply; }
+.chart-icon { width: 48rpx; height: 48rpx; opacity: 0.72; }
+.fasting-card, .period-card, .medication-card { min-height: 170rpx; padding: 25rpx 26rpx; border: 1rpx solid #dce8e0; border-left-width: 4rpx; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
+.fasting-card { border-left-color: #85ae98; }
+.period-card { border-left-color: #d79a9f; }
+.medication-card { border-left-color: #76a99a; }
+.fasting-card .fasting-time { color: #356c55; }
+.period-days { color: #b66f7d; }
+.medication-item { color: #477b6c; }
+.fasting-icon-img, .period-icon-img, .medication-icon-img { right: 18rpx; bottom: 12rpx; width: 120rpx; height: 120rpx; opacity: 0.72; border-radius: 0; background: transparent; mix-blend-mode: multiply; }
+.fasting-summary { color: #85988f; }
+.edit-card { min-height: 82rpx; margin: 4rpx 0 16rpx; padding: 18rpx 22rpx 18rpx 24rpx; border: 1rpx solid #dfe9e2; border-radius: 18rpx; background: rgba(255, 254, 250, 0.76); box-shadow: none; }
+.edit-text { color: #537c6c; font-size: 23rpx; }
+.edit-caption { color: #91a199; }
+.error-state button { background: #e7f1ea; color: #527d69; }
 </style>
