@@ -23,12 +23,7 @@
 
     <template v-else-if="today && experience">
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
-      <view class="weight-card card">
-        <image
-          class="weight-scene-thumb"
-          src="/static/illustrations/weight-weighing-scene.png"
-          mode="aspectFill"
-        />
+      <view v-if="isCardVisible('weight-plan')" class="weight-card card">
         <view class="card-top">
           <text class="card-title">体重管理方案</text>
           <text class="week-badge">第 1/16 周</text>
@@ -73,7 +68,7 @@
       </view>
 
       <!-- 2. 饮食热量卡片 - 真正紧凑 -->
-      <view class="calorie-card card" @tap="goToFoodDetail">
+      <view v-if="isCardVisible('food')" class="calorie-card card" @tap="goToFoodDetail">
         <view class="card-top">
           <text class="card-title">饮食记录</text>
           <view class="mode-tag">今日概览</view>
@@ -101,27 +96,24 @@
 
         <view class="meal-progress" aria-label="今日饮食记录进度">
           <view
-            v-for="slot in 3"
+            v-for="slot in 4"
             :key="slot"
             :class="['meal-progress-segment', slot <= mealCount ? 'filled' : '']"
           />
         </view>
 
         <view class="meals">
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">早餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">午餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">晚餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap.stop="goToFoodRecognition()">
-            <text class="meal-name">加餐</text>
-          </button>
-          <button class="meal-item" hover-class="button-hover" @tap="goToRecord('activity')">
-            <text class="meal-name">运动</text>
+          <button
+            v-for="action in foodRecordActions"
+            :key="action.label"
+            class="meal-item"
+            hover-class="button-hover"
+            @tap.stop="openRecordAction(action.route)"
+          >
+            <view class="meal-icon-wrap">
+              <image class="meal-icon" :src="mealRecordIcons[action.label]" mode="aspectFit" />
+            </view>
+            <text class="meal-name">{{ action.label }}</text>
           </button>
         </view>
 
@@ -137,7 +129,7 @@
       </view>
 
       <!-- 3. 体重记录卡片 -->
-      <view class="record-card card" @tap="goToWeightDetail">
+      <view v-if="isCardVisible('weight-record')" class="record-card card" @tap="goToWeightDetail">
         <view class="card-top">
           <view class="title-group">
             <text class="card-title">体重记录</text>
@@ -174,7 +166,7 @@
       </view>
 
       <!-- 4. 健康追踪网格 -->
-      <view class="grid-cards">
+      <view v-if="isCardVisible('tracking')" class="grid-cards">
         <button class="grid-item card water-card" hover-class="button-hover" @tap="goToWater">
           <view class="grid-top">
             <text class="grid-title">喝水</text>
@@ -189,7 +181,7 @@
         <button
           class="grid-item card sleep-card"
           hover-class="button-hover"
-          @tap="goToRecord('sleep')"
+          @tap="openRecordAction('/pages/records/RecordsPage?type=sleep')"
         >
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
@@ -207,10 +199,10 @@
         <button
           class="grid-item card activity-card"
           hover-class="button-hover"
-          @tap="goToRecord('activity')"
+          @tap="openRecordAction('/pages/records/RecordsPage?type=activity')"
         >
           <view class="grid-top">
-            <text class="grid-title">活动</text>
+            <text class="grid-title">运动</text>
           </view>
           <view class="grid-data">
             <text class="grid-num">{{ todayActivityMinutes }}</text>
@@ -231,15 +223,19 @@
       </view>
 
       <!-- 5. 轻断食卡片 -->
-      <view class="fasting-card card" @tap="go('/pages/fasting/FastingDetailPage')">
+      <view
+        v-if="isCardVisible('fasting')"
+        class="fasting-card card"
+        @tap="go('/pages/fasting/FastingDetailPage')"
+      >
         <view class="card-top">
           <text class="card-title">轻断食</text>
-          <view class="mode-tag blue">16:8 模式</view>
+          <view class="mode-tag blue">{{ fastingPlan.mode }} 模式</view>
         </view>
         <view class="fasting-content">
-          <text class="fasting-label">用餐时间</text>
-          <text class="fasting-time">09:00 - 17:00</text>
-          <text class="fasting-summary">点击进入轻断食计时与用餐打卡</text>
+          <text class="fasting-label">{{ fastingPlan.active ? '断食计时中' : '今日用餐窗口' }}</text>
+          <text class="fasting-time">{{ fastingPlan.active ? fastingElapsed : '尚未开始计时' }}</text>
+          <text class="fasting-summary">{{ fastingPlan.active ? `已开始于 ${fastingStartedLabel}` : `${fastingPlan.eatingStart} - ${fastingPlan.eatingEnd} · 点击开始` }}</text>
         </view>
         <image
           class="fasting-icon-img"
@@ -249,7 +245,7 @@
       </view>
 
       <!-- 6. 经期记录卡片 -->
-      <view class="period-card card" @tap="openMenstruation">
+      <view v-if="isCardVisible('period')" class="period-card card" @tap="openMenstruation">
         <view class="card-top">
           <text class="card-title">经期</text>
         </view>
@@ -265,7 +261,7 @@
       </view>
 
       <!-- 7. 用药打卡卡片 -->
-      <view class="medication-card card" @tap="openMedication">
+      <view v-if="isCardVisible('medication')" class="medication-card card" @tap="openMedication">
         <view class="card-top">
           <text class="card-title">用药打卡</text>
         </view>
@@ -283,8 +279,16 @@
       </view>
 
       <!-- 8. 编辑首页卡片 -->
-      <button class="edit-card" hover-class="button-hover" @tap="go('/pages/home/edit-cards')">
-        <text class="edit-text">编辑首页卡片</text>
+      <button
+        class="edit-card"
+        hover-class="button-hover"
+        @tap="go('/pages/home/edit-cards/EditCardsPage')"
+      >
+        <view class="edit-card-copy">
+          <text class="edit-text">编辑首页卡片</text>
+          <text class="edit-caption">只保留你每天会用到的内容</text>
+        </view>
+        <image class="edit-arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
       </button>
     </template>
 
@@ -299,18 +303,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { onHide, onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { loadWeightHistory } from '../../features/health-loop/health-loop.service.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
-import {
-  navigateTo,
-  navigateToFoodRecognition,
-  navigateToWeightDetail,
-  navigateToXuxu,
-} from '../../utils/router.js';
+import { requestRecordTypeFocus } from '../../features/health-records/records-focus.js';
+import { foodRecordActions, mealRecordIcons } from './home-actions.js';
+import { loadHomeCardVisibility, type HomeCardId } from './home-card-settings.js';
+import { navigateTo, navigateToWeightDetail, navigateToXuxu } from '../../utils/router.js';
+import { elapsedSeconds, formatDuration, loadFastingPlan, type FastingPlan } from '../../features/fasting/fasting-store.js';
 
 const { today, loading, error } = healthLoopState;
 
@@ -327,6 +330,8 @@ const dateLabel = computed(() => {
 const displayName = computed(() => today.value?.displayName || '朋友');
 const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
+const cardVisibility = ref(loadHomeCardVisibility());
+const isCardVisible = (id: HomeCardId) => cardVisibility.value[id] !== false;
 const periodStatusText = computed(() =>
   menstruationCycle.value?.lastPeriodStart
     ? `上次经期 ${menstruationCycle.value.lastPeriodStart.slice(5).replace('-', '月')}日开始`
@@ -347,6 +352,22 @@ const medicationStatusText = computed(() =>
 const medicationPlanText = computed(() =>
   medicationStats.value.total ? '按医嘱设置提醒时间' : '添加一条提醒，按时照顾自己',
 );
+
+const fastingPlan = ref<FastingPlan>(loadFastingPlan());
+const fastingNow = ref(new Date());
+let fastingTicker: ReturnType<typeof setInterval> | undefined;
+const fastingElapsed = computed(() => formatDuration(elapsedSeconds(fastingPlan.value, fastingNow.value)));
+const fastingStartedLabel = computed(() => {
+  if (!fastingPlan.value.startedAt) return '--:--';
+  const date = new Date(fastingPlan.value.startedAt);
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+});
+function refreshFasting() { fastingPlan.value = loadFastingPlan(); fastingNow.value = new Date(); }
+function startFastingTicker() {
+  refreshFasting();
+  if (!fastingTicker) fastingTicker = setInterval(() => { fastingNow.value = new Date(); if (fastingPlan.value.active) fastingPlan.value = loadFastingPlan(); }, 1000);
+}
+function stopFastingTicker() { if (fastingTicker) { clearInterval(fastingTicker); fastingTicker = undefined; } }
 
 const experience = computed(() => (today.value ? deriveDailyExperience(today.value) : null));
 
@@ -460,12 +481,22 @@ const goToFoodDetail = () => {
   navigateTo('/pages/food/FoodDetailPage');
 };
 
-const goToFoodRecognition = () => {
-  navigateToFoodRecognition();
-};
-
-const goToRecord = (type: string) => {
-  navigateTo(`/pages/records/RecordsPage?type=${type}`);
+const openRecordAction = (route: string) => {
+  const [path, query = ''] = route.split('?');
+  if (path === '/pages/records/RecordsPage') {
+    const type = decodeURIComponent(
+      query
+        .split('&')
+        .find((part) => part.startsWith('type='))
+        ?.slice('type='.length) || '',
+    );
+    if (type === 'activity' || type === 'weight' || type === 'sleep' || type === 'meal-structure') {
+      requestRecordTypeFocus(type);
+    }
+    navigateTo('/pages/records/RecordsPage');
+    return;
+  }
+  navigateTo(route);
 };
 
 const openMenstruation = () => {
@@ -566,6 +597,7 @@ onMounted(() => {
   load();
   loadWeightTrend();
   loadPersonalSignals();
+  startFastingTicker();
 });
 
 // 每次显示时刷新
@@ -573,9 +605,13 @@ onShow(() => {
   if (today.value) {
     load();
   }
+  cardVisibility.value = loadHomeCardVisibility();
   loadWeightTrend();
   loadPersonalSignals();
+  startFastingTicker();
 });
+onHide(stopFastingTicker);
+onUnmounted(stopFastingTicker);
 </script>
 
 <style scoped>
@@ -713,17 +749,6 @@ onShow(() => {
   overflow: hidden;
   padding: 20rpx 24rpx 16rpx;
 }
-.weight-scene-thumb {
-  position: absolute;
-  top: -12rpx;
-  right: -20rpx;
-  width: 210rpx;
-  height: 210rpx;
-  opacity: 0.16;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-
 .week-badge {
   color: #76907d;
   font-size: 20rpx;
@@ -887,27 +912,65 @@ onShow(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8rpx;
+  gap: 10rpx;
+  min-width: 112rpx;
   padding: 0;
   background: transparent;
   border: 0;
 }
 
-.meal-icon {
-  width: 56rpx;
-  height: 56rpx;
+.meal-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 76rpx;
+  height: 76rpx;
   border-radius: 50%;
-  background: rgba(232, 247, 237, 0.4);
-  font-size: 28rpx;
+  background: rgba(255, 240, 243, 0.7);
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95),
+    0 6rpx 14rpx rgba(182, 109, 128, 0.08);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.meal-icon {
+  width: 64rpx;
+  height: 64rpx;
+}
+
+.meal-item:active .meal-icon-wrap {
+  transform: translateY(2rpx) scale(0.96);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
 }
 
 .meal-name {
   color: #4a6b56;
   font-size: 20rpx;
   font-weight: 600;
+}
+
+.meal-item:nth-child(2) .meal-icon-wrap {
+  animation: meal-breathe 4.8s ease-in-out 0.4s infinite;
+}
+
+.meal-item:nth-child(3) .meal-icon-wrap {
+  animation: meal-breathe 4.8s ease-in-out 0.8s infinite;
+}
+
+.meal-item:nth-child(4) .meal-icon-wrap {
+  animation: meal-breathe 4.8s ease-in-out 1.2s infinite;
+}
+
+@keyframes meal-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3rpx);
+  }
 }
 
 /* 序序相机卡片 */
@@ -1328,6 +1391,162 @@ onShow(() => {
 }
 </style>
 <style scoped>
+/* Lower cards use quiet editorial surfaces instead of full-bleed pastel fills. */
+.fasting-card,
+.period-card,
+.medication-card {
+  margin-bottom: 18rpx;
+  border: 1rpx solid #e8eeeb;
+  border-radius: 22rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 22rpx rgba(71, 93, 86, 0.06);
+}
+
+.fasting-card {
+  min-height: 188rpx;
+  padding: 24rpx 26rpx;
+  border-left: 6rpx solid #8bb8a8;
+}
+
+.fasting-card .card-top {
+  margin-bottom: 14rpx;
+}
+
+.fasting-card .fasting-time {
+  color: #3f7164;
+  font-size: 40rpx;
+  letter-spacing: 1rpx;
+}
+
+.fasting-card .fasting-summary {
+  max-width: 64%;
+  color: #8b9893;
+}
+
+.fasting-card .fasting-icon-img {
+  right: 22rpx;
+  bottom: 20rpx;
+  width: 112rpx;
+  height: 112rpx;
+  opacity: 0.55;
+  border-radius: 24rpx;
+  background: transparent;
+}
+
+.period-card,
+.medication-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 154rpx;
+  padding: 22rpx 24rpx;
+}
+
+.period-card {
+  border-left: 6rpx solid #d49a9f;
+  background: #fff;
+}
+
+.medication-card {
+  border-left: 6rpx solid #86b6ac;
+  background: #fff;
+}
+
+.period-card .card-top,
+.medication-card .card-top {
+  margin-bottom: 12rpx;
+}
+
+.period-card .card-title,
+.medication-card .card-title {
+  color: #4a5b56;
+  font-size: 27rpx;
+}
+
+.period-content,
+.medication-content {
+  position: relative;
+  z-index: 1;
+  padding-right: 112rpx;
+}
+
+.period-hint,
+.medication-hint {
+  color: #899792;
+  font-size: 20rpx;
+}
+
+.period-days {
+  margin-top: 8rpx;
+  color: #bd737f;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.medication-item {
+  margin-top: 8rpx;
+  color: #4e8179;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.period-icon-img,
+.medication-icon-img {
+  right: 22rpx;
+  bottom: 22rpx;
+  width: 112rpx;
+  height: 112rpx;
+  opacity: 0.58;
+  border-radius: 0;
+  mix-blend-mode: multiply;
+}
+
+.period-icon-img {
+  background: transparent;
+}
+
+.medication-icon-img {
+  background: transparent;
+}
+
+.edit-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 86rpx;
+  padding: 18rpx 22rpx 18rpx 26rpx;
+  margin: 6rpx 0 16rpx;
+  border: 1rpx solid #e6ece9;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 8rpx 18rpx rgba(71, 93, 86, 0.04);
+}
+
+.edit-card-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5rpx;
+}
+
+.edit-text {
+  color: #547d75;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.edit-caption {
+  color: #9aa7a2;
+  font-size: 18rpx;
+}
+
+.edit-arrow {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.55;
+}
+</style>
+<style scoped>
 .page {
   background: #fff7f1;
 }
@@ -1394,5 +1613,114 @@ onShow(() => {
 .error-state button {
   background: #fff0f3;
   color: #b66d80;
+}
+</style>
+<style scoped>
+/* Final surface pass keeps the lower cards quiet after the legacy theme overrides. */
+.fasting-card,
+.period-card,
+.medication-card {
+  border-color: #e8eeeb;
+  border-radius: 22rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 22rpx rgba(71, 93, 86, 0.06);
+}
+.fasting-card {
+  min-height: 188rpx;
+  border-left: 6rpx solid #8bb8a8;
+}
+.fasting-card .fasting-time {
+  color: #3f7164;
+}
+.fasting-card .fasting-summary {
+  color: #8b9893;
+}
+.fasting-card .fasting-icon-img {
+  width: 112rpx;
+  height: 112rpx;
+  right: 22rpx;
+  bottom: 20rpx;
+  border-radius: 0;
+  background: transparent;
+  opacity: 0.55;
+}
+.period-card,
+.medication-card {
+  min-height: 154rpx;
+  padding: 22rpx 24rpx;
+  border-left-width: 6rpx;
+  border-left-style: solid;
+}
+.period-card {
+  border-left-color: #d49a9f;
+}
+.medication-card {
+  border-left-color: #86b6ac;
+}
+.period-card .card-title,
+.medication-card .card-title {
+  color: #4a5b56;
+  font-size: 27rpx;
+}
+.period-content,
+.medication-content {
+  padding-right: 112rpx;
+}
+.period-hint,
+.medication-hint {
+  color: #899792;
+}
+.period-days {
+  margin-top: 8rpx;
+  color: #bd737f;
+  font-size: 26rpx;
+}
+.medication-item {
+  margin-top: 8rpx;
+  color: #4e8179;
+  font-size: 23rpx;
+}
+.period-icon-img,
+.medication-icon-img {
+  width: 112rpx;
+  height: 112rpx;
+  right: 22rpx;
+  bottom: 22rpx;
+  border-radius: 0;
+  opacity: 0.58;
+}
+.period-icon-img {
+  background: transparent;
+}
+.medication-icon-img {
+  background: transparent;
+}
+.edit-card {
+  min-height: 86rpx;
+  margin: 6rpx 0 16rpx;
+  padding: 18rpx 22rpx 18rpx 26rpx;
+  border: 1rpx solid #e6ece9;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 8rpx 18rpx rgba(71, 93, 86, 0.04);
+}
+.edit-card-copy {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 5rpx;
+}
+.edit-text {
+  color: #547d75;
+  font-size: 23rpx;
+}
+.edit-caption {
+  color: #9aa7a2;
+  font-size: 18rpx;
+}
+.edit-arrow {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.55;
 }
 </style>

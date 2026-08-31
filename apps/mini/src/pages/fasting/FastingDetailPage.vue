@@ -165,7 +165,7 @@ onHide(() => { if (ticker) { clearInterval(ticker); ticker = undefined; } });
 </script>
 
 <style scoped>
-.page { min-height:100vh; box-sizing:border-box; padding:28rpx 28rpx calc(56rpx + env(safe-area-inset-bottom)); color:#394458; background:#eef8f5; position:relative; overflow:hidden; }
+.page { min-height:100vh; box-sizing:border-box; padding:calc(24rpx + constant(safe-area-inset-top)) 28rpx calc(56rpx + env(safe-area-inset-bottom)); color:#394458; background:#eef8f5; position:relative; overflow:hidden; }
 .leaf { position:absolute; right:-100rpx; top:-40rpx; width:360rpx; height:300rpx; opacity:.18; pointer-events:none; }
 .nav { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; margin-bottom:18rpx; }
 .icon-button { width:64rpx; height:64rpx; padding:0; border:0; color:#3e4b61; background:transparent; font-size:54rpx; line-height:58rpx; }
