@@ -22,20 +22,21 @@
     <view class="plan-card">
       <view class="plan-head">
         <view>
-          <text class="eyebrow">今日节律</text>
+          <text class="eyebrow">今日计划详情</text>
           <text class="plan-title">{{ plan.mode }} 轻断食</text>
           <text class="plan-subtitle">{{ statusTitle }}</text>
         </view>
-        <button class="reminder" @tap="settingsVisible = true"><text class="bell">◌</text> 设置提醒</button>
+        <button class="reminder" @tap="settingsVisible = true"><text class="bell">⌁</text> 设置提醒</button>
       </view>
 
       <view class="window-line">
-        <view class="window-point"><text>用餐开始</text><strong>{{ plan.eatingStart }}</strong></view>
+        <view class="window-point"><text>计划开始</text><strong>{{ plan.eatingStart }}</strong></view>
         <view class="line-center"><view class="line-track" /><text>{{ eatingHours }} 小时用餐</text></view>
-        <view class="window-point end"><text>用餐结束</text><strong>{{ plan.eatingEnd }}</strong></view>
+        <view class="window-point end"><text>计划结束</text><strong>{{ plan.eatingEnd }}</strong></view>
       </view>
 
       <view class="progress-area">
+        <text class="status-headline">{{ statusHeadline }}</text>
         <view class="progress-ring" :style="{ '--progress': `${progressValue * 360}deg` }">
           <view class="ring-core">
             <text class="ring-kicker">{{ isEating ? '正在用餐' : '正在断食' }}</text>
@@ -43,12 +44,12 @@
             <text class="ring-caption">{{ plan.active ? '今日已开始' : '准备好后开始计时' }}</text>
           </view>
         </view>
-        <view class="phase-note"><view class="phase-icon">{{ isEating ? '☀' : '☾' }}</view><text>{{ isEating ? '在舒服的用餐时间里' : '给身体一段安静时间' }}</text></view>
+        <view class="phase-note"><view class="phase-icon">{{ isEating ? 'EAT' : 'FAST' }}</view><text>{{ isEating ? '在舒服的用餐时间里' : '给身体一段安静时间' }}</text></view>
       </view>
 
       <view class="actions">
-        <button class="primary" :disabled="plan.active" @tap="startFast">{{ plan.active ? '今日已开始' : '开始今天的断食' }}</button>
-        <button class="secondary" :disabled="!plan.active" @tap="finishFast">结束并记录</button>
+        <button class="primary" :disabled="plan.active" @tap="startFast">{{ plan.active ? '今日已开始' : '提前开始断食' }}</button>
+        <button class="secondary" @tap="secondaryAction">{{ plan.active ? '结束并记录' : '修改用餐计划' }}</button>
       </view>
 
       <view class="schedule">
@@ -120,10 +121,12 @@ const fastHours = computed(() => 24 - eatingHours.value);
 const isEating = computed(() => isEatingNow(plan.value, now.value));
 const checkedToday = computed(() => plan.value.checkins.includes(today));
 const statusTitle = computed(() => plan.value.active ? (isEating.value ? '把握舒服的用餐时间' : '给身体一段安静时间') : '准备好后，从一个温和的开始');
+const statusHeadline = computed(() => plan.value.active ? (isEating.value ? '你正在用餐中' : '你正在断食中') : (isEating.value ? '现在是用餐时间' : '现在是断食时间'));
 
 function refresh() { plan.value = loadFastingPlan(); now.value = new Date(); }
 function startFast() { plan.value = saveFastingPlan({ active: true, startedAt: new Date().toISOString() }); }
 function finishFast() { plan.value = saveFastingPlan({ active: false, endedAt: new Date().toISOString() }); }
+function secondaryAction() { if (plan.value.active) finishFast(); else settingsVisible.value = true; }
 function checkin() { plan.value = toggleFasting(today); }
 function selectMode(mode: FastingMode) {
   const hours = Number(mode.split(':')[0]);
@@ -169,12 +172,13 @@ onShow(refresh);
 .line-center:before,.line-center:after { content:''; position:absolute; top:-5rpx; width:12rpx; height:12rpx; border:2rpx solid #9acfb7; border-radius:50%; background:#fff; }
 .line-center:before { left:0; }.line-center:after { right:0; }
 .line-center text { position:absolute; left:50%; top:-30rpx; transform:translateX(-50%); padding:4rpx 12rpx; border-radius:10rpx; color:#78a89d; background:#eef8f2; font-size:19rpx; white-space:nowrap; }
-.progress-area { display:flex; align-items:center; flex-direction:column; padding:36rpx 0 26rpx; }
+.progress-area { display:flex; align-items:center; flex-direction:column; padding:30rpx 0 26rpx; }
+.status-headline { margin-bottom:18rpx; color:#3fbd8b; font-size:34rpx; font-weight:700; letter-spacing:1rpx; }
 .progress-ring { width:390rpx; height:390rpx; display:flex; align-items:center; justify-content:center; border-radius:50%; background:conic-gradient(#72cda7 0deg, #89a6ed var(--progress), #f3dcd7 var(--progress), #f3dcd7 280deg, #edf0f1 280deg 360deg); transform:rotate(-90deg); }
 .ring-core { width:306rpx; height:306rpx; display:flex; align-items:center; justify-content:center; flex-direction:column; border-radius:50%; background:#fff; transform:rotate(90deg); box-shadow:inset 0 0 0 1rpx #f3f5f3; }
 .ring-kicker { color:#86949f; font-size:24rpx; }.ring-time { margin:12rpx 0 8rpx; color:#35435b; font-size:52rpx; font-weight:700; letter-spacing:1rpx; }.ring-caption { color:#a1adb4; font-size:20rpx; }
-.phase-note { display:flex; align-items:center; gap:10rpx; margin-top:18rpx; color:#8a99a1; font-size:21rpx; }.phase-icon { width:36rpx; height:36rpx; display:flex; align-items:center; justify-content:center; border-radius:50%; color:#d39f86; background:#fbefdf; font-size:20rpx; }
-.actions { display:flex; gap:16rpx; }.actions button { flex:1; height:78rpx; border-radius:24rpx; font-size:24rpx; }.primary { color:#fff; background:#69cda2; box-shadow:0 10rpx 20rpx rgba(93,192,150,.2); }.secondary { color:#78a4e2; border:2rpx solid #a6c2ed; background:#f8fbff; }.actions button[disabled] { opacity:.42; }
+.phase-note { display:flex; align-items:center; gap:10rpx; margin-top:18rpx; color:#8a99a1; font-size:21rpx; }.phase-icon { width:42rpx; height:30rpx; display:flex; align-items:center; justify-content:center; border-radius:15rpx; color:#b27f70; background:#fbefdf; font-size:14rpx; font-weight:700; letter-spacing:.5rpx; }
+.actions { display:flex; gap:14rpx; }.actions button { flex:1; height:78rpx; border-radius:40rpx; font-size:24rpx; }.primary { color:#fff; background:#69cda2; box-shadow:0 10rpx 20rpx rgba(93,192,150,.2); }.secondary { color:#7398d5; border:2rpx solid #a9c2ec; background:#fff; }.actions button[disabled] { opacity:.52; }
 .schedule { margin-top:28rpx; padding-top:24rpx; border-top:1rpx solid #edf1ef; }.schedule-head { color:#8a98a1; font-size:20rpx; }.legend { display:flex; align-items:center; margin-right:22rpx; }.dot { width:14rpx; height:14rpx; margin-right:7rpx; border-radius:50%; }.dot.fast { background:#8ea7ed; }.dot.eat { background:#70cea5; }
 .checkin { padding:10rpx 20rpx; border-radius:24rpx; color:#fff; background:#69cda2; font-size:20rpx; }.checkin.done { color:#62aa91; background:#e7f6ee; }
 .timebar { display:flex; height:16rpx; margin-top:22rpx; overflow:hidden; border-radius:10rpx; background:#edf0f5; }.fast-segment { flex:1; background:#8fa8ef; }.eat-segment { flex:2; background:#73cfa7; }.time-labels { margin-top:10rpx; color:#929fa8; font-size:20rpx; }.schedule-note { display:block; margin-top:18rpx; color:#9aa5aa; font-size:20rpx; text-align:center; }
