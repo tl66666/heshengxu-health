@@ -1,20 +1,82 @@
 import type { TodayRecordsDto } from '../../../../../packages/contracts/src/health-loop.js';
-import { createMiniApiClient } from '../../services/mini-api.js';
 import type { HealthRecordRequest } from './health-records.mapper.js';
 
-const paths: Record<HealthRecordRequest['type'], string> = {
-  weight: '/health-records/weights',
-  'meal-structure': '/health-records/meal-structures',
-  activity: '/health-records/activities',
-  sleep: '/health-records/sleeps',
+const LOCAL_RECORDS_KEY = 'heban.health.records.v1';
+type LocalRecord = HealthRecordRequest['data'] & {
+  id: string;
+  type: HealthRecordRequest['type'];
 };
 
+function readLocalRecords(): LocalRecord[] {
+  try {
+    const value = uni.getStorageSync(LOCAL_RECORDS_KEY);
+    return Array.isArray(value) ? (value as LocalRecord[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalRecords(records: LocalRecord[]) {
+  try {
+    uni.setStorageSync(LOCAL_RECORDS_KEY, records);
+  } catch {
+    // Keep the in-memory request successful when storage is temporarily unavailable.
+  }
+}
+
+function recordDate(record: LocalRecord) {
+  const timestamp = new Date(record.recordedAt).getTime();
+  return Number.isNaN(timestamp)
+    ? ''
+    : new Date(timestamp + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function localId() {
+  return `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function emptyTodayRecords(): TodayRecordsDto {
+  return { weight: null, meals: [], activities: [], sleep: null, timeZone: 'Asia/Shanghai' };
+}
+
+function localTodayRecords(date: string): TodayRecordsDto {
+  const today = emptyTodayRecords();
+  for (const record of readLocalRecords().filter((item) => recordDate(item) === date)) {
+    if (record.type === 'weight')
+      today.weight = { id: record.id, ...record, note: record.note || null };
+    if (record.type === 'meal-structure')
+      today.meals.push({ id: record.id, ...record, note: record.note || null });
+    if (record.type === 'activity')
+      today.activities.push({
+        id: record.id,
+        ...record,
+        intensity: record.intensity || null,
+        note: record.note || null,
+      });
+    if (record.type === 'sleep')
+      today.sleep = {
+        id: record.id,
+        ...record,
+        sleepAt: record.sleepAt || null,
+        wakeAt: record.wakeAt || null,
+        note: record.note || null,
+      };
+  }
+  today.meals.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
+  today.activities.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
+  return today;
+}
+
 export function loadTodayRecords(date: string) {
-  return createMiniApiClient().get<TodayRecordsDto>(`/health-records/today?date=${date}`);
+  return Promise.resolve(localTodayRecords(date));
 }
 
 export function createHealthRecord(request: HealthRecordRequest) {
-  return createMiniApiClient().post(paths[request.type], request.data);
+  const record = { id: localId(), type: request.type, ...request.data } as LocalRecord;
+  const records = readLocalRecords();
+  records.push(record);
+  writeLocalRecords(records);
+  return Promise.resolve(record);
 }
 
 export function replaceHealthRecord(
@@ -22,5 +84,12 @@ export function replaceHealthRecord(
   recordId: string,
   data: Record<string, unknown>,
 ) {
-  return createMiniApiClient().patch(`/health-records/${type}/${recordId}`, data);
+  const records = readLocalRecords();
+  const index = records.findIndex((record) => record.id === recordId && record.type === type);
+  if (index >= 0) {
+    records[index] = { ...records[index], ...data, type } as LocalRecord;
+    writeLocalRecords(records);
+    return Promise.resolve(records[index]);
+  }
+  return Promise.reject(new Error('记录不存在'));
 }

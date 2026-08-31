@@ -1,7 +1,9 @@
 import type {
   DailyHomeDto,
+  MealType,
   PersonalPlanDto,
   SaveCurrentPlanRequest,
+  SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
 
 const PROFILE_KEY = 'heshengxu.local.health-profile';
@@ -87,7 +89,51 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
   if (!profile) return null;
   const activePlan = loadLocalPlan();
   const weightRecords = readLocalWeightRecords();
-  const latestWeight = weightRecords.find((record) => record.recordedAt.slice(0, 10) === date);
+  const localRecords = readLocalHealthRecords().filter(
+    (record) => localRecordDate(record.recordedAt) === date,
+  );
+  const localWeight = localRecords.find((record) => record.type === 'weight');
+  const latestWeight = localWeight
+    ? {
+        id: localWeight.id,
+        weight: Number(localWeight.valueKg),
+        recordedAt: localWeight.recordedAt,
+        note: typeof localWeight.note === 'string' ? localWeight.note : undefined,
+      }
+    : weightRecords.find((record) => localRecordDate(record.recordedAt) === date);
+  const meals = localRecords
+    .filter((record) => record.type === 'meal-structure')
+    .map((record) => ({
+      id: record.id,
+      mealType: record.mealType as MealType,
+      hasStaple: Boolean(record.hasStaple),
+      hasProtein: Boolean(record.hasProtein),
+      hasVegetable: Boolean(record.hasVegetable),
+      recordedAt: record.recordedAt,
+      note: record.note || null,
+    }));
+  const activities = localRecords
+    .filter((record) => record.type === 'activity')
+    .map((record) => ({
+      id: record.id,
+      activityType: record.activityType,
+      durationMinutes: Number(record.durationMinutes),
+      intensity: record.intensity || null,
+      recordedAt: record.recordedAt,
+      note: record.note || null,
+    }));
+  const sleepRecord = localRecords.find((record) => record.type === 'sleep');
+  const sleep = sleepRecord
+    ? {
+        id: sleepRecord.id,
+        durationMinutes: Number(sleepRecord.durationMinutes),
+        quality: sleepRecord.quality as SleepQuality,
+        sleepAt: sleepRecord.sleepAt || null,
+        wakeAt: sleepRecord.wakeAt || null,
+        recordedAt: sleepRecord.recordedAt,
+        note: sleepRecord.note || null,
+      }
+    : null;
   return {
     date,
     displayName: profile.displayName,
@@ -101,9 +147,9 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
             note: latestWeight.note || null,
           }
         : null,
-      meals: [],
-      activities: [],
-      sleep: null,
+      meals,
+      activities,
+      sleep,
       timeZone: 'Asia/Shanghai',
     },
     todayTasks: activePlan?.tasks || [],
@@ -116,17 +162,44 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
       route: activePlan ? '/pages/plan/PlanPage' : '/pages/plan-setup/PlanSetupPage',
     },
     recordingProgress: {
-      completed: latestWeight ? 1 : 0,
+      completed:
+        Number(Boolean(latestWeight)) +
+        Number(meals.length > 0) +
+        Number(activities.length > 0) +
+        Number(Boolean(sleep)),
       total: 4,
       hasWeight: Boolean(latestWeight),
-      hasMeal: false,
-      hasActivity: false,
-      hasSleep: false,
+      hasMeal: meals.length > 0,
+      hasActivity: activities.length > 0,
+      hasSleep: Boolean(sleep),
     },
   };
 }
 
 type LocalWeightRecord = { id: string; weight: number; recordedAt: string; note?: string };
+
+type LocalHealthRecord = {
+  id: string;
+  type: 'weight' | 'meal-structure' | 'activity' | 'sleep';
+  recordedAt: string;
+  [key: string]: unknown;
+};
+
+function readLocalHealthRecords(): LocalHealthRecord[] {
+  try {
+    const value = uni.getStorageSync('heban.health.records.v1');
+    return Array.isArray(value) ? (value as LocalHealthRecord[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function localRecordDate(value: string) {
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp)
+    ? ''
+    : new Date(timestamp + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
 
 function readLocalWeightRecords(): LocalWeightRecord[] {
   try {
