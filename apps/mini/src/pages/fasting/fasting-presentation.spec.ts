@@ -13,7 +13,8 @@ describe('fasting page presentation contract', () => {
   it('uses persisted plan data instead of seeded history', () => {
     expect(source).toContain('loadFastingPlan');
     expect(source).toContain('saveFastingPlan');
-    expect(source).toContain('toggleFasting');
+    expect(source).toContain('recordMeal');
+    expect(source).toContain('removeMeal');
     expect(source).not.toContain('2024-');
   });
 });

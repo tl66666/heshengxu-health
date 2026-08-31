@@ -41,7 +41,7 @@
           <view class="ring-core">
             <text class="ring-kicker">{{ isEating ? '正在用餐' : '正在断食' }}</text>
             <text class="ring-time">{{ remaining }}</text>
-            <text class="ring-caption">{{ plan.active ? '今日已开始' : '准备好后开始计时' }}</text>
+            <text class="ring-caption">{{ plan.active ? `已持续 ${elapsedLabel}` : '准备好后开始计时' }}</text>
           </view>
         </view>
         <view class="phase-note"><view class="phase-icon">{{ isEating ? 'EAT' : 'FAST' }}</view><text>{{ isEating ? '在舒服的用餐时间里' : '给身体一段安静时间' }}</text></view>
@@ -62,6 +62,19 @@
         <view class="time-labels"><text>{{ plan.eatingStart }}</text><text>{{ plan.eatingEnd }}</text></view>
         <text class="schedule-note">{{ checkedToday ? '今天的用餐时间已记下，继续按自己的节奏来' : '完成用餐打卡后，才会计入今日节律' }}</text>
       </view>
+    </view>
+
+    <view class="record-section">
+      <view class="record-heading"><view><text class="record-title">最近记录</text><text class="record-subtitle">只显示你亲自保存的内容</text></view><text class="record-count">{{ recordCount }} 条</text></view>
+      <view v-if="mealLogs.length || recentSessions.length" class="record-list">
+        <view v-for="item in mealLogs" :key="item.id" class="record-row">
+          <view class="record-mark meal-mark">餐</view><view class="record-copy"><text>用餐打卡</text><text>{{ formatDateTime(item.recordedAt) }}</text></view><button class="record-delete" @tap="removeMealLog(item.date)">删除</button>
+        </view>
+        <view v-for="session in recentSessions" :key="session.id" class="record-row">
+          <view class="record-mark fast-mark">断</view><view class="record-copy"><text>断食 {{ session.endedAt ? '已完成' : '进行中' }}</text><text>{{ sessionSummary(session) }}</text></view><text class="record-status">{{ session.endedAt ? '已保存' : '计时中' }}</text>
+        </view>
+      </view>
+      <view v-else class="record-empty"><text>还没有记录，开始一次计时或完成用餐打卡吧</text></view>
     </view>
 
     <view class="tips-section">
@@ -96,14 +109,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
-import { durationMinutes, formatRemaining, isEatingNow, loadFastingPlan, localDate, phaseProgress, saveFastingPlan, toggleFasting, type FastingMode } from '../../features/fasting/fasting-store.js';
+import { onHide, onShow } from '@dcloudio/uni-app';
+import { durationMinutes, elapsedSeconds, finishFasting, formatDuration, formatRemaining, isEatingNow, loadFastingPlan, localDate, phaseProgress, recordMeal, removeMeal, remainingSeconds, startFasting, saveFastingPlan, type FastingMode, type FastingSession, type MealLog } from '../../features/fasting/fasting-store.js';
 
 const today = localDate();
 const plan = ref(loadFastingPlan());
 const now = ref(new Date());
 const showTips = ref(false);
 const settingsVisible = ref(false);
+let ticker: ReturnType<typeof setInterval> | undefined;
 const modes: FastingMode[] = ['16:8', '14:10', '12:12'];
 const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -114,20 +128,28 @@ const calendar = computed(() => Array.from({ length: 7 }, (_, index) => {
   return { date: iso, day: date.getDate(), week: weekNames[date.getDay()] };
 }));
 const todayLabel = computed(() => `${now.value.getMonth() + 1}月${now.value.getDate()}日`);
-const progressValue = computed(() => phaseProgress(plan.value, now.value));
 const remaining = computed(() => formatRemaining(plan.value, now.value));
 const eatingHours = computed(() => Math.round(durationMinutes(plan.value) / 60));
 const fastHours = computed(() => 24 - eatingHours.value);
+const progressValue = computed(() => plan.value.active ? Math.min(1, elapsedSeconds(plan.value, now.value) / Math.max(1, fastHours.value * 3600)) : phaseProgress(plan.value, now.value));
 const isEating = computed(() => isEatingNow(plan.value, now.value));
 const checkedToday = computed(() => plan.value.checkins.includes(today));
 const statusTitle = computed(() => plan.value.active ? (isEating.value ? '把握舒服的用餐时间' : '给身体一段安静时间') : '准备好后，从一个温和的开始');
 const statusHeadline = computed(() => plan.value.active ? (isEating.value ? '你正在用餐中' : '你正在断食中') : (isEating.value ? '现在是用餐时间' : '现在是断食时间'));
+const elapsedLabel = computed(() => formatDuration(elapsedSeconds(plan.value, now.value)));
+const mealLogs = computed<MealLog[]>(() => [...plan.value.mealLogs].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).slice(0, 4));
+const recentSessions = computed<FastingSession[]>(() => [...plan.value.sessions].sort((a, b) => b.startedAt.localeCompare(a.startedAt)).slice(0, 4));
+const recordCount = computed(() => mealLogs.value.length + recentSessions.value.length);
+const sessionDuration = (session: FastingSession) => Math.max(0, Math.floor(((session.endedAt ? new Date(session.endedAt) : now.value).getTime() - new Date(session.startedAt).getTime()) / 1000));
+const formatDateTime = (value: string) => { const date = new Date(value); return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`; };
+const sessionSummary = (session: FastingSession) => `${formatDateTime(session.startedAt)}${session.endedAt ? ` · 持续 ${formatDuration(sessionDuration(session))}` : ''}`;
 
 function refresh() { plan.value = loadFastingPlan(); now.value = new Date(); }
-function startFast() { plan.value = saveFastingPlan({ active: true, startedAt: new Date().toISOString() }); }
-function finishFast() { plan.value = saveFastingPlan({ active: false, endedAt: new Date().toISOString() }); }
+function startFast() { plan.value = startFasting(now.value); }
+function finishFast() { plan.value = finishFasting(now.value); }
 function secondaryAction() { if (plan.value.active) finishFast(); else settingsVisible.value = true; }
-function checkin() { plan.value = toggleFasting(today); }
+function checkin() { plan.value = checkedToday.value ? removeMeal(today) : recordMeal(now.value); }
+function removeMealLog(date: string) { plan.value = removeMeal(date); }
 function selectMode(mode: FastingMode) {
   const hours = Number(mode.split(':')[0]);
   const startHour = Number(plan.value.eatingStart.slice(0, 2));
@@ -138,7 +160,8 @@ function modeDescription(mode: FastingMode) { return `${mode.split(':')[0]}小�
 function setStart(event: { detail: { value: string } }) { plan.value = saveFastingPlan({ eatingStart: event.detail.value }); }
 function setEnd(event: { detail: { value: string } }) { plan.value = saveFastingPlan({ eatingEnd: event.detail.value }); }
 function goBack() { uni.navigateBack(); }
-onShow(refresh);
+onShow(() => { refresh(); if (!ticker) ticker = setInterval(() => { now.value = new Date(); if (plan.value.active) plan.value = loadFastingPlan(); }, 1000); });
+onHide(() => { if (ticker) { clearInterval(ticker); ticker = undefined; } });
 </script>
 
 <style scoped>
@@ -184,5 +207,7 @@ onShow(refresh);
 .timebar { display:flex; height:16rpx; margin-top:22rpx; overflow:hidden; border-radius:10rpx; background:#edf0f5; }.fast-segment { flex:1; background:#8fa8ef; }.eat-segment { flex:2; background:#73cfa7; }.time-labels { margin-top:10rpx; color:#929fa8; font-size:20rpx; }.schedule-note { display:block; margin-top:18rpx; color:#9aa5aa; font-size:20rpx; text-align:center; }
 .tips-section { position:relative; z-index:1; margin-top:30rpx; }.tips-heading { color:#526b87; font-size:25rpx; font-weight:600; }.tips-heading button { padding:0; color:#7b9bc7; border:0; background:transparent; font-size:21rpx; }.tips-heading button text { font-size:28rpx; vertical-align:-2rpx; }.tips-preview { display:flex; justify-content:space-between; margin-top:18rpx; padding:18rpx 20rpx; border-bottom:1rpx solid rgba(129,166,165,.25); color:#8999a2; font-size:21rpx; }.arrow { color:#9eb8cf; font-size:28rpx; }.tips-content { margin-top:14rpx; padding:4rpx 4rpx 0; }.tip-row { display:flex; gap:18rpx; padding:16rpx 0; border-bottom:1rpx dashed rgba(129,166,165,.28); color:#74858e; font-size:21rpx; line-height:1.55; }.tip-index { color:#d3a497; font-size:19rpx; letter-spacing:1rpx; }
 .scrim { position:fixed; inset:0; z-index:20; display:flex; align-items:flex-end; background:rgba(45,58,67,.38); }.settings-sheet { width:100%; box-sizing:border-box; padding:14rpx 32rpx calc(30rpx + env(safe-area-inset-bottom)); border-radius:36rpx 36rpx 0 0; background:#fffdf9; box-shadow:0 -16rpx 50rpx rgba(59,81,82,.15); }.sheet-handle { width:74rpx; height:8rpx; margin:0 auto 24rpx; border-radius:8rpx; background:#d6dfdc; }.settings-title { display:block; color:#364358; font-size:32rpx; font-weight:700; }.settings-subtitle { display:block; margin-top:6rpx; color:#9aa6ac; font-size:20rpx; }.close { width:54rpx; height:54rpx; padding:0; color:#93a0a6; border:0; background:transparent; font-size:40rpx; }.section-label { display:block; margin:26rpx 0 14rpx; color:#8d9ca2; font-size:20rpx; letter-spacing:1rpx; }.mode-grid { display:flex; gap:12rpx; }.mode-card { position:relative; flex:1; padding:18rpx 8rpx; border:1rpx solid #e6ece9; border-radius:18rpx; color:#657482; background:#fff; text-align:left; }.mode-card.selected { border-color:#82c9ad; background:#edf8f1; box-shadow:0 8rpx 18rpx rgba(110,191,155,.12); }.mode-name { display:block; color:#43536b; font-size:28rpx; font-weight:700; }.mode-desc { display:block; margin-top:7rpx; color:#94a1a6; font-size:17rpx; line-height:1.4; }.mode-check { position:absolute; top:10rpx; right:10rpx; color:#60b991; font-size:20rpx; }.time-row { display:flex; align-items:center; padding:20rpx 4rpx; border-bottom:1rpx solid #edf1ef; color:#65747e; font-size:23rpx; }.time-row strong { margin-left:auto; color:#42516a; font-size:29rpx; }.chevron { margin-left:18rpx; color:#a1afb4; font-size:30rpx; }.sheet-summary { display:flex; align-items:center; justify-content:space-between; margin:20rpx 0; color:#7fae9d; font-size:20rpx; }.sheet-summary text:last-child { color:#a2adb0; font-size:18rpx; }.save { width:100%; height:80rpx; border-radius:24rpx; color:#fff; background:#6bcba4; font-size:25rpx; box-shadow:0 10rpx 20rpx rgba(95,192,148,.2); }
+.record-section { position:relative; z-index:1; margin-top:22rpx; padding:28rpx 26rpx 10rpx; border:1rpx solid rgba(255,255,255,.72); border-radius:28rpx; background:rgba(255,255,255,.78); }
+.record-heading { display:flex; align-items:flex-end; justify-content:space-between; }.record-title { display:block; color:#4a5867; font-size:27rpx; font-weight:700; }.record-subtitle { display:block; margin-top:6rpx; color:#a0abb0; font-size:18rpx; }.record-count { color:#9babb1; font-size:19rpx; }.record-list { margin-top:18rpx; }.record-row { display:flex; align-items:center; min-height:76rpx; border-top:1rpx solid #edf2ef; }.record-mark { width:42rpx; height:42rpx; display:flex; align-items:center; justify-content:center; margin-right:14rpx; border-radius:14rpx; font-size:18rpx; font-weight:700; }.meal-mark { color:#b47f70; background:#fff0e8; }.fast-mark { color:#6e8ed2; background:#edf2ff; }.record-copy { flex:1; }.record-copy text { display:block; }.record-copy text:first-child { color:#586878; font-size:22rpx; }.record-copy text:last-child { margin-top:5rpx; color:#a0abb0; font-size:18rpx; }.record-delete { padding:8rpx 0 8rpx 16rpx; color:#c09288; font-size:19rpx; }.record-status { color:#70ad95; font-size:18rpx; }.record-empty { padding:24rpx 0 20rpx; color:#a0adb1; font-size:19rpx; text-align:center; }
 @media (max-width: 360px) { .plan-card { padding-left:22rpx; padding-right:22rpx; }.progress-ring { width:340rpx; height:340rpx; }.ring-core { width:266rpx; height:266rpx; }.ring-time { font-size:46rpx; }.window-point { min-width:112rpx; } }
 </style>
