@@ -57,7 +57,7 @@
             @tap="select(candidate)"
           >
             <view class="candidate-icon">
-              <text class="icon-text">{{ candidate.name.slice(0, 1) }}</text>
+              <image class="icon-image" src="/static/icons/svg/food-staple.svg" mode="aspectFit" />
             </view>
             <view class="candidate-content">
               <text class="candidate-name">{{ candidate.name }}</text>
