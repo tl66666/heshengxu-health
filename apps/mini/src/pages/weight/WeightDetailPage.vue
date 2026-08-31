@@ -24,6 +24,13 @@
     </view>
 
     <view class="summary-card card">
+      <view class="summary-heading">
+        <image src="/static/icons/weight.jpg" mode="aspectFit" />
+        <view>
+          <text class="summary-heading-title">今天的体重概览</text>
+          <text class="summary-heading-note">轻轻记下，就能看见变化</text>
+        </view>
+      </view>
       <view class="summary-main">
         <view class="summary-item">
           <text class="summary-label">BMI</text>
@@ -853,12 +860,12 @@ onMounted(loadWeightData);
 }
 .hero-art {
   position: absolute;
-  top: 0;
+  top: 28rpx;
   right: 0;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 28rpx);
   opacity: 1;
   mix-blend-mode: multiply;
 }
@@ -949,6 +956,30 @@ onMounted(loadWeightData);
   padding: 24rpx 22rpx 20rpx;
   border-radius: 20rpx;
   background: rgba(255, 253, 248, 0.96);
+}
+.summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 18rpx;
+}
+.summary-heading image {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 14rpx;
+  mix-blend-mode: multiply;
+}
+.summary-heading-title {
+  display: block;
+  color: #665856;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+.summary-heading-note {
+  display: block;
+  margin-top: 4rpx;
+  color: #ad9a92;
+  font-size: 18rpx;
 }
 .summary-main {
   display: flex;
