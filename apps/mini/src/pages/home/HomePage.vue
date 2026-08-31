@@ -113,6 +113,9 @@
             hover-class="button-hover"
             @tap="openRecordAction(action.route)"
           >
+            <view class="meal-icon-wrap">
+              <image class="meal-icon" :src="mealRecordIcons[action.label]" mode="aspectFit" />
+            </view>
             <text class="meal-name">{{ action.label }}</text>
           </button>
         </view>
@@ -191,10 +194,10 @@
         <button
           class="grid-item card activity-card"
           hover-class="button-hover"
-          @tap="goToRecord('activity')"
+          @tap="openRecordAction('/pages/records/RecordsPage?type=activity')"
         >
           <view class="grid-top">
-            <text class="grid-title">活动</text>
+            <text class="grid-title">运动</text>
             <text class="grid-add">+</text>
           </view>
           <view class="grid-data">
@@ -301,7 +304,8 @@ import {
 } from '../../features/activity/activity-catalog.js';
 import { loadMealEntries } from '../../features/food/food.service.js';
 import { summarizeFoodEntries, type MealEntry } from '../../features/food/food.summary.js';
-import { foodRecordActions } from './home-actions.js';
+import { requestRecordTypeFocus } from '../../features/health-records/records-focus.js';
+import { foodRecordActions, mealRecordIcons } from './home-actions.js';
 import { navigateTo, navigateToWeightDetail, navigateToXuxu } from '../../utils/router.js';
 
 const { today, loading, error } = healthLoopState;
@@ -450,7 +454,18 @@ const goToXuxuCamera = () => {
   navigateTo('/pages/food-recognition/FoodRecognitionPage');
 };
 
-const openRecordAction = (route: string) => navigateTo(route);
+const openRecordAction = (route: string) => {
+  const [path, query = ''] = route.split('?');
+  if (path === '/pages/records/RecordsPage') {
+    const type = new URLSearchParams(query).get('type');
+    if (type === 'activity' || type === 'weight' || type === 'sleep' || type === 'meal-structure') {
+      requestRecordTypeFocus(type);
+    }
+    navigateTo('/pages/records/RecordsPage');
+    return;
+  }
+  navigateTo(route);
+};
 
 const goToMealAdd = () => {
   uni.navigateTo({
@@ -829,24 +844,62 @@ onShow(() => {
   align-items: center;
   gap: 8rpx;
   min-width: 0;
-  height: 58rpx;
+  height: 104rpx;
   flex: 1;
   padding: 0 4rpx;
   border: 1rpx solid #dce8de;
   border-radius: 10rpx;
   background: #fbfdfb;
   justify-content: center;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
-.meal-icon {
-  width: 56rpx;
-  height: 56rpx;
+.meal-item:active {
+  transform: translateY(2rpx);
+  border-color: #9fc5a4;
+  background: #f2f8f2;
+}
+
+.meal-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 58rpx;
+  height: 58rpx;
   border-radius: 50%;
-  background: rgba(232, 247, 237, 0.4);
-  font-size: 28rpx;
+  background: #f0f7f0;
+  box-shadow: inset 0 0 0 1rpx rgba(103, 151, 111, 0.12);
+  animation: meal-breathe 3.6s ease-in-out infinite;
+}
+
+.meal-item:nth-child(2) .meal-icon-wrap {
+  animation-delay: 0.45s;
+}
+
+.meal-item:nth-child(3) .meal-icon-wrap {
+  animation-delay: 0.9s;
+}
+
+.meal-item:nth-child(4) .meal-icon-wrap {
+  animation-delay: 1.35s;
+}
+
+@keyframes meal-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2rpx);
+  }
+}
+
+.meal-icon {
+  width: 50rpx;
+  height: 50rpx;
 }
 
 .meal-name {

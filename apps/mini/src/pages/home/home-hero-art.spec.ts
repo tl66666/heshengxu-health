@@ -47,4 +47,14 @@ describe('home hero daily art rotation', () => {
     expect(homePageSource).toContain('activityCalories');
     expect(homePageSource).toContain('class="calorie-progress-track"');
   });
+
+  it('keeps one activity entry below the meal card and names it 运动', () => {
+    expect(homePageSource).toContain('class="grid-item card activity-card"');
+    expect(homePageSource).toContain('<text class="grid-title">运动</text>');
+    expect(homePageSource).toContain(
+      '@tap="openRecordAction(\'/pages/records/RecordsPage?type=activity\')"',
+    );
+    expect(homePageSource).not.toContain('<text class="meal-name">运动</text>');
+    expect(homePageSource).not.toMatch(/[🍳🍱🍲🍎🥚🍜]/u);
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { foodRecordActions, homeQuickActions } from './home-actions.js';
+import { foodRecordActions, mealRecordIcons, homeQuickActions } from './home-actions.js';
 
 describe('home quick actions', () => {
   it('keeps food recording first and adds weight review shortcuts with distinct icons', () => {
@@ -44,7 +44,12 @@ describe('home quick actions', () => {
       { label: '午餐', route: '/pages/food-search/FoodSearchPage?mealType=lunch' },
       { label: '晚餐', route: '/pages/food-search/FoodSearchPage?mealType=dinner' },
       { label: '加餐', route: '/pages/food-search/FoodSearchPage?mealType=snack' },
-      { label: '运动', route: '/pages/records/RecordsPage?type=activity' },
     ]);
+    expect(mealRecordIcons).toEqual({
+      早餐: '/static/icons/svg/meal-breakfast.svg',
+      午餐: '/static/icons/svg/meal-lunch.svg',
+      晚餐: '/static/icons/svg/meal-dinner.svg',
+      加餐: '/static/icons/svg/meal-snack.svg',
+    });
   });
 });
