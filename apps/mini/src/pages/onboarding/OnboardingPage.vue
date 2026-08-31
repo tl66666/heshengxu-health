@@ -984,6 +984,6 @@ function confirmExit() {
 .btn-primary { display:flex; align-items:center; justify-content:center; box-sizing:border-box; color:#fff; background:#71bd8f; border:2rpx solid #71bd8f; box-shadow:0 12rpx 34rpx rgba(90,168,119,.22); line-height:1; }
 .btn-primary:active { background:#5fa97b; border-color:#5fa97b; }
 .btn-primary[disabled] { color:#fff; background:#b9d7c2; border-color:#b9d7c2; }
-.welcome-fullscreen .btn-primary { color:#52745f; background:#f7e9e5; border-color:#eccdc6; box-shadow:0 12rpx 34rpx rgba(198,145,132,.18); }
-.welcome-fullscreen .btn-primary:active { background:#f0dcd7; border-color:#e4bcb2; }
+.welcome-fullscreen .btn-primary { color:#52745f; background:#edf7f0; border-color:#b8d9c1; box-shadow:0 12rpx 34rpx rgba(90,168,119,.18); }
+.welcome-fullscreen .btn-primary:active { background:#dcefe2; border-color:#9fc9ac; }
 </style>

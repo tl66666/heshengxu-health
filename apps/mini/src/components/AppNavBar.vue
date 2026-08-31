@@ -59,12 +59,12 @@ function close() {
 <style scoped>
 .nav-bar-wrapper {
   position: relative;
-  background: #fff7f1;
+  background: #f5faf7;
 }
 
 .status-bar {
   width: 100%;
-  background: #fff7f1;
+  background: #f5faf7;
 }
 
 .nav-bar {

@@ -1,14 +1,14 @@
 page {
-  --hz-bg: #fff7f1;
-  --hz-surface: #fffdfb;
-  --hz-soft: #fff0f3;
+  --hz-bg: #f5faf7;
+  --hz-surface: #fffdf9;
+  --hz-soft: #edf7f0;
   --hz-warm: #fffaf0;
-  --hz-ink: #51484b;
-  --hz-muted: #98898b;
-  --hz-green: #7f9b88;
-  --hz-green-soft: #eef4ee;
-  --hz-rule: #efdfda;
-  --hz-rule-light: #f3e7e2;
+  --hz-ink: #46564f;
+  --hz-muted: #8d9d95;
+  --hz-green: #6fbb8e;
+  --hz-green-soft: #edf7f0;
+  --hz-rule: #dfeae3;
+  --hz-rule-light: #eaf1ec;
   --hz-danger: #b85e43;
   --hz-danger-soft: #fff1ed;
   --hz-tabbar-height: 124rpx;
@@ -33,8 +33,8 @@ page {
 }
 page {
   /* 柔和主按钮体系：与水彩插画同氛围，坚决不用实心深绿 */
-  --hz-primary-soft: #fff0f3;
-  --hz-primary-soft-active: #f9dfe6;
-  --hz-primary-border: #e9c3cc;
-  --hz-primary-ink: #b45f78;
+  --hz-primary-soft: #eaf6ee;
+  --hz-primary-soft-active: #d8eddf;
+  --hz-primary-border: #a9d3b5;
+  --hz-primary-ink: #5f9a75;
 }
