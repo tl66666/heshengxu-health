@@ -8,13 +8,17 @@
     /></view>
     <view class="hero"
       ><view class="art-stage"
-        ><image src="/static/illustrations/xuxu-sleep-reminder-crop.png" mode="aspectFit" /></view
+        ><image src="/static/illustrations/xuxu-sleep-reminder-crop.png" mode="widthFix" /></view
       ><view class="hero-copy"
         ><text>把昨晚的安稳，留给今天</text><text>序序会帮你把作息和梦境轻轻收好</text></view
       ></view
     >
     <view class="section"
-      ><text class="section-title">昨晚的作息</text
+      ><view class="section-heading"
+        ><text class="section-title">昨晚的作息</text
+        ><text v-if="editingDate !== today" class="editing-badge"
+          >正在编辑 {{ editingDate }}</text
+        ></view
       ><text class="section-sub">选好入睡和起床时间，睡眠时长会自动算好</text>
       <view class="time-pair"
         ><picker mode="time" :value="bedtime" @change="setBedtime"
@@ -49,7 +53,7 @@
     >
     <view class="section"
       ><view class="section-title-row"
-        ><text class="section-title">给梦留一句话</text><text class="optional">选填</text></view
+        ><text class="section-title">记录你的梦境</text><text class="optional">选填</text></view
       ><textarea
         v-model="dream"
         class="dream"
@@ -61,7 +65,12 @@
     <view class="history"
       ><view class="history-head"
         ><text>睡眠小档案</text><text>{{ history.length }} 条记录</text></view
-      ><view v-if="history.length" v-for="item in history" :key="item.date" class="history-row"
+      ><view
+        v-if="history.length"
+        v-for="item in history"
+        :key="item.date"
+        class="history-row"
+        @tap="editRecord(item)"
         ><view class="history-main"
           ><text class="history-date">{{ item.date }}</text
           ><text class="history-meta"
@@ -69,7 +78,15 @@
             {{ formatSleepDuration(item.sleep?.durationMinutes || 0) }} ·
             {{ qualityLabel(item.sleep?.quality) }}</text
           ></view
-        ><text class="dream-preview">{{ item.sleep?.dream || '这晚没有留下梦境文字' }}</text></view
+        ><view class="history-side"
+          ><text class="dream-preview">{{ item.sleep?.dream || '这晚没有留下梦境文字' }}</text
+          ><view class="history-actions"
+            ><button class="history-action edit-action" @tap.stop="editRecord(item)">编辑</button
+            ><button class="history-action delete-action" @tap.stop="removeRecord(item.date)">
+              删除
+            </button></view
+          ></view
+        ></view
       ><view v-else class="empty">保存后，这里会出现你的睡眠记录。</view></view
     >
   </view>
@@ -82,6 +99,7 @@ import {
   listWellnessJournals,
   loadWellnessJournal,
   saveSleep,
+  clearSleep,
   sleepDuration,
   type SleepQuality,
 } from '../../features/wellness/wellness-journal.js';
@@ -92,6 +110,7 @@ const bedtime = ref(loadWellnessJournal().sleep?.bedtime || '23:00');
 const wakeTime = ref(loadWellnessJournal().sleep?.wakeTime || '07:00');
 const quality = ref<SleepQuality>(loadWellnessJournal().sleep?.quality || 'good');
 const dream = ref(loadWellnessJournal().sleep?.dream || '');
+const editingDate = ref(today);
 const history = ref(listWellnessJournals().filter((item) => item.sleep));
 const sleepMinutes = computed(() => sleepDuration(bedtime.value, wakeTime.value));
 const qualities = [
@@ -116,10 +135,43 @@ function save() {
       quality: quality.value,
       dream: dream.value.trim(),
     },
-    today,
+    editingDate.value,
   );
   history.value = listWellnessJournals().filter((item) => item.sleep);
-  uni.showToast({ title: '睡眠已保存', icon: 'success' });
+  uni.showToast({
+    title: editingDate.value === today ? '睡眠已保存' : '睡眠记录已修改',
+    icon: 'success',
+  });
+}
+function editRecord(item: ReturnType<typeof listWellnessJournals>[number]) {
+  if (!item.sleep) return;
+  editingDate.value = item.date;
+  bedtime.value = item.sleep.bedtime || '23:00';
+  wakeTime.value = item.sleep.wakeTime || '07:00';
+  quality.value = item.sleep.quality;
+  dream.value = item.sleep.dream || '';
+  uni.pageScrollTo({ scrollTop: 0, duration: 220 });
+}
+function removeRecord(date: string) {
+  uni.showModal({
+    title: '删除这条睡眠记录？',
+    content: '删除后无法恢复',
+    confirmColor: '#709a79',
+    success: (result) => {
+      if (!result.confirm) return;
+      clearSleep(date);
+      history.value = listWellnessJournals().filter((item) => item.sleep);
+      if (editingDate.value === date) {
+        editingDate.value = today;
+        const current = loadWellnessJournal();
+        bedtime.value = current.sleep?.bedtime || '23:00';
+        wakeTime.value = current.sleep?.wakeTime || '07:00';
+        quality.value = current.sleep?.quality || 'good';
+        dream.value = current.sleep?.dream || '';
+      }
+      uni.showToast({ title: '已删除', icon: 'success' });
+    },
+  });
 }
 function goBack() {
   uni.navigateBack();
@@ -562,6 +614,56 @@ onShow(() => {
 .empty {
   color: #95a49a;
   font-size: 18rpx;
+}
+</style>
+<style scoped>
+.art-stage {
+  height: auto;
+  display: block;
+  line-height: 0;
+}
+.art-stage image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+.editing-badge {
+  color: #6f9a79;
+  font-size: 17rpx;
+  white-space: nowrap;
+}
+.history-side {
+  display: flex;
+  flex: 0 0 46%;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10rpx;
+}
+.history-actions {
+  display: flex;
+  gap: 8rpx;
+}
+.history-action {
+  min-width: 62rpx;
+  height: 42rpx;
+  padding: 0 10rpx;
+  border: 1rpx solid #dce7dc;
+  border-radius: 10rpx;
+  color: #6f8878;
+  background: #f8fbf6;
+  font-size: 17rpx;
+  line-height: 42rpx;
+}
+.delete-action {
+  border-color: #ead9d3;
+  color: #b47d72;
+  background: #fffaf8;
 }
 </style>
 <style scoped>

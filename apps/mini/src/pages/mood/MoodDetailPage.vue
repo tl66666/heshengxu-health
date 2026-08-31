@@ -8,13 +8,17 @@
     /></view>
     <view class="intro"
       ><view class="art-stage"
-        ><image src="/static/illustrations/program-mood-crop.png" mode="aspectFit" /></view
+        ><image src="/static/illustrations/program-mood-crop.png" mode="widthFix" /></view
       ><view class="intro-copy"
         ><text>给今天的心情留一页</text><text>不用解释得很完整，先把此刻收好</text></view
       ></view
     >
     <view class="section"
-      ><text class="section-title">此刻更接近哪一种感觉？</text
+      ><view class="section-heading"
+        ><text class="section-title">此刻更接近哪一种感觉？</text
+        ><text v-if="editingDate !== today" class="editing-badge"
+          >正在编辑 {{ editingDate }}</text
+        ></view
       ><text class="section-sub">选一个最像你的，不需要想太久</text
       ><view class="mood-grid"
         ><button
@@ -41,11 +45,24 @@
     <view class="history"
       ><view class="history-head"
         ><text>最近心情</text><text>{{ history.length }} 条</text></view
-      ><view v-if="history.length" v-for="item in history" :key="item.date" class="history-row"
+      ><view
+        v-if="history.length"
+        v-for="item in history"
+        :key="item.date"
+        class="history-row"
+        @tap="editRecord(item)"
         ><view
           ><text>{{ item.date }}</text
           ><text>{{ moodLabel(item.mood?.tone) }}</text></view
-        ><text class="note-preview">{{ item.mood?.note || '没有写下文字' }}</text></view
+        ><view class="history-side"
+          ><text class="note-preview">{{ item.mood?.note || '没有写下文字' }}</text
+          ><view class="history-actions"
+            ><button class="history-action edit-action" @tap.stop="editRecord(item)">编辑</button
+            ><button class="history-action delete-action" @tap.stop="removeRecord(item.date)">
+              删除
+            </button></view
+          ></view
+        ></view
       ><view v-else class="empty">保存后，这里会出现你的心情轨迹。</view></view
     >
   </view>
@@ -57,6 +74,7 @@ import {
   listWellnessJournals,
   loadWellnessJournal,
   saveMood,
+  clearMood,
   type MoodTone,
 } from '../../features/wellness/wellness-journal.js';
 const now = new Date();
@@ -72,14 +90,44 @@ const options: Array<{ value: MoodTone; label: string }> = [
 const existing = loadWellnessJournal();
 const tone = ref<MoodTone>(existing.mood?.tone || 'calm');
 const note = ref(existing.mood?.note || '');
+const editingDate = ref(today);
 const history = ref(listWellnessJournals().filter((item) => item.mood));
 function moodLabel(value?: MoodTone) {
   return options.find((item) => item.value === value)?.label || '未记录';
 }
 function save() {
-  saveMood({ tone: tone.value, note: note.value.trim() }, today);
+  saveMood({ tone: tone.value, note: note.value.trim() }, editingDate.value);
   history.value = listWellnessJournals().filter((item) => item.mood);
-  uni.showToast({ title: '心情已保存', icon: 'success' });
+  uni.showToast({
+    title: editingDate.value === today ? '心情已保存' : '心情记录已修改',
+    icon: 'success',
+  });
+}
+function editRecord(item: ReturnType<typeof listWellnessJournals>[number]) {
+  if (!item.mood) return;
+  editingDate.value = item.date;
+  tone.value = item.mood.tone;
+  note.value = item.mood.note || '';
+  uni.pageScrollTo({ scrollTop: 0, duration: 220 });
+}
+function removeRecord(date: string) {
+  uni.showModal({
+    title: '删除这条心情记录？',
+    content: '删除后无法恢复',
+    confirmColor: '#78967c',
+    success: (result) => {
+      if (!result.confirm) return;
+      clearMood(date);
+      history.value = listWellnessJournals().filter((item) => item.mood);
+      if (editingDate.value === date) {
+        editingDate.value = today;
+        const current = loadWellnessJournal();
+        tone.value = current.mood?.tone || 'calm';
+        note.value = current.mood?.note || '';
+      }
+      uni.showToast({ title: '已删除', icon: 'success' });
+    },
+  });
 }
 function goBack() {
   uni.navigateBack();
@@ -490,6 +538,56 @@ onShow(() => {
 .empty {
   color: #a3a69e;
   font-size: 18rpx;
+}
+</style>
+<style scoped>
+.art-stage {
+  height: auto;
+  display: block;
+  line-height: 0;
+}
+.art-stage image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+.editing-badge {
+  color: #6f967b;
+  font-size: 17rpx;
+  white-space: nowrap;
+}
+.history-side {
+  display: flex;
+  flex: 0 0 46%;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10rpx;
+}
+.history-actions {
+  display: flex;
+  gap: 8rpx;
+}
+.history-action {
+  min-width: 62rpx;
+  height: 42rpx;
+  padding: 0 10rpx;
+  border: 1rpx solid #e4e3da;
+  border-radius: 10rpx;
+  color: #708178;
+  background: #fafbf7;
+  font-size: 17rpx;
+  line-height: 42rpx;
+}
+.delete-action {
+  border-color: #eadbd5;
+  color: #b47d72;
+  background: #fffaf8;
 }
 </style>
 <style scoped>
