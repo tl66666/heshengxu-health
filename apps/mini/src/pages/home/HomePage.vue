@@ -294,6 +294,7 @@
         <view class="sheet-handle" />
         <view class="wellness-head"><view><text class="wellness-title">{{ wellnessSheet === 'sleep' ? '记下昨晚的睡眠' : '记录此刻的心情' }}</text><text class="wellness-subtitle">{{ wellnessSheet === 'sleep' ? '不用完美，先留下真实感受' : '给今天的自己一个温柔标记' }}</text></view><button class="sheet-close" @tap="closeWellnessSheet">×</button></view>
         <template v-if="wellnessSheet === 'sleep'">
+          <image class="sleep-art" src="/static/illustrations/xuxu-sleep-reminder.png" mode="aspectFill" />
           <text class="field-label">睡了多久</text>
           <view class="duration-field"><input v-model="sleepDurationDraft" type="number" placeholder="例如 450" /><text>分钟</text></view>
           <text class="field-label">睡眠质量</text>
@@ -1453,6 +1454,7 @@ onUnmounted(stopFastingTicker);
 .wellness-sheet { width:100%; box-sizing:border-box; max-height:86vh; overflow:auto; padding:18rpx 30rpx calc(30rpx + env(safe-area-inset-bottom)); border-radius:32rpx 32rpx 0 0; background:#fffdf8; box-shadow:0 -14rpx 44rpx rgba(67,87,79,.16); }
 .sheet-handle { width:72rpx; height:8rpx; margin:0 auto 24rpx; border-radius:8rpx; background:#d5dfd9; }
 .wellness-head { display:flex; align-items:flex-start; justify-content:space-between; }.wellness-title { display:block; color:#46584f; font-size:32rpx; font-weight:700; }.wellness-subtitle { display:block; margin-top:7rpx; color:#9aa8a1; font-size:20rpx; }.sheet-close { width:56rpx; height:56rpx; display:flex; align-items:center; justify-content:center; color:#91a09a; border:0; background:transparent; font-size:38rpx; }
+.sleep-art { width:100%; height:170rpx; margin:4rpx 0 4rpx; border-radius:20rpx; object-fit:cover; object-position:center 58%; opacity:.92; }
 .field-label { display:block; margin:26rpx 0 12rpx; color:#73827c; font-size:21rpx; }.optional { margin-left:8rpx; color:#aeb8b2; font-size:18rpx; }
 .duration-field { display:flex; align-items:center; padding:0 18rpx; border:1rpx solid #e3ebe6; border-radius:16rpx; background:#fbfdf9; }.duration-field input { flex:1; height:78rpx; color:#41544c; font-size:28rpx; }.duration-field text { color:#94a39c; font-size:20rpx; }
 .tone-row { display:flex; gap:10rpx; }.tone-choice { flex:1; min-height:64rpx; display:flex; align-items:center; justify-content:center; padding:0 8rpx; border:1rpx solid #e2ebe5; border-radius:16rpx; color:#809089; background:#fff; font-size:20rpx; }.tone-choice.selected { color:#5d9b7d; border-color:#8ac8a7; background:#edf8f0; }
@@ -2004,7 +2006,8 @@ onUnmounted(stopFastingTicker);
 .camera-decoration { width: 174rpx; height: 112rpx; opacity: 0.92; }
 .camera-arrow { color: #7da38e; font-size: 38rpx; }
 .record-card { padding: 24rpx 26rpx; }
-.mini-chart { width: 142rpx; height: 62rpx; border: 1rpx solid #e5eee8; border-radius: 14rpx; background: #f5f9f5; }
+.record-content { min-height: 112rpx; }
+.mini-chart { width: 128rpx; height: 112rpx; border: 0; border-radius: 0; background: transparent; }
 .mini-trend-line { stroke: #78ad91; }
 .mini-trend-point { fill: #fffefa; stroke: #78ad91; }
 .grid-cards { gap: 16rpx; margin-bottom: 20rpx; }
