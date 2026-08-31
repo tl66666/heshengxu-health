@@ -1,5 +1,5 @@
-export type FastingMode = '16:8' | '14:10' | '12:12';
-export type FastingSession = { id: string; date: string; startedAt: string; endedAt?: string; plannedMinutes: number };
+export type FastingMode = '16:8' | '14:10' | '12:12' | '18:6';
+export type FastingSession = { id: string; date: string; startedAt: string; endedAt?: string; plannedEndAt?: string; plannedMinutes: number };
 export type MealLog = { id: string; date: string; recordedAt: string };
 export type FastingPlan = {
   mode: FastingMode;
@@ -20,7 +20,7 @@ function normalize(value: unknown): FastingPlan {
   if (!value || typeof value !== 'object') return { ...DEFAULT_PLAN };
   const raw = value as Partial<FastingPlan>;
   const sessions = Array.isArray(raw.sessions) ? raw.sessions.filter((item): item is FastingSession => Boolean(item && typeof item.id === 'string' && typeof item.startedAt === 'string')) : [];
-  if (!sessions.length && raw.active && raw.startedAt) sessions.push({ id: `fast-migrated-${new Date(raw.startedAt).getTime()}`, date: localDate(new Date(raw.startedAt)), startedAt: raw.startedAt, endedAt: raw.endedAt, plannedMinutes: 1440 - durationMinutes({ ...DEFAULT_PLAN, ...raw } as FastingPlan) });
+  if (!sessions.length && raw.active && raw.startedAt) { const plannedMinutes = 1440 - durationMinutes({ ...DEFAULT_PLAN, ...raw } as FastingPlan); sessions.push({ id: `fast-migrated-${new Date(raw.startedAt).getTime()}`, date: localDate(new Date(raw.startedAt)), startedAt: raw.startedAt, endedAt: raw.endedAt, plannedEndAt: new Date(new Date(raw.startedAt).getTime() + plannedMinutes * 60000).toISOString(), plannedMinutes }); }
   const mealLogs = Array.isArray(raw.mealLogs) ? raw.mealLogs.filter((item): item is MealLog => Boolean(item && typeof item.id === 'string' && typeof item.recordedAt === 'string')) : [];
   const activeSession = sessions.find((item) => !item.endedAt);
   return { ...DEFAULT_PLAN, ...raw, sessions, mealLogs, checkins: Array.isArray(raw.checkins) ? raw.checkins : [], active: Boolean(activeSession || raw.active), startedAt: activeSession?.startedAt ?? raw.startedAt, endedAt: raw.endedAt };
@@ -37,7 +37,8 @@ export function saveFastingPlan(patch: Partial<FastingPlan>) { const next = norm
 export function startFasting(at = new Date()) {
   const plan = loadFastingPlan();
   if (plan.active) return plan;
-  const session: FastingSession = { id: `fast-${at.getTime()}`, date: localDate(at), startedAt: at.toISOString(), plannedMinutes: 1440 - durationMinutes(plan) };
+  const plannedMinutes = 1440 - durationMinutes(plan);
+  const session: FastingSession = { id: `fast-${at.getTime()}`, date: localDate(at), startedAt: at.toISOString(), plannedEndAt: new Date(at.getTime() + plannedMinutes * 60000).toISOString(), plannedMinutes };
   return saveFastingPlan({ active: true, startedAt: session.startedAt, endedAt: undefined, sessions: [...plan.sessions, session] });
 }
 
@@ -73,7 +74,7 @@ export function progress(plan: FastingPlan, now = new Date()) { const eating = d
 export function isEatingNow(plan: FastingPlan, now = new Date()) { const current = now.getHours() * 60 + now.getMinutes(); const start = minutes(plan.eatingStart); const end = minutes(plan.eatingEnd); return start < end ? current >= start && current < end : current >= start || current < end; }
 export function phaseProgress(plan: FastingPlan, now = new Date()) { const current = now.getHours() * 60 + now.getMinutes(); const start = minutes(plan.eatingStart); const end = minutes(plan.eatingEnd); if (isEatingNow(plan, now)) return Math.max(0, Math.min(1, ((current - start + 1440) % 1440) / durationMinutes(plan))); const fasting = 1440 - durationMinutes(plan); return Math.max(0, Math.min(1, ((current - end + 1440) % 1440) / fasting)); }
 export function elapsedSeconds(plan: FastingPlan, now = new Date()) { const session = [...plan.sessions].reverse().find((item) => plan.active ? !item.endedAt : Boolean(item.endedAt)); if (!session) return 0; const end = session.endedAt ? new Date(session.endedAt) : now; return Math.max(0, Math.floor((end.getTime() - new Date(session.startedAt).getTime()) / 1000)); }
-export function remainingSeconds(plan: FastingPlan, now = new Date()) { const active = [...plan.sessions].reverse().find((item) => !item.endedAt); if (!active) return 0; return Math.max(0, active.plannedMinutes * 60 - elapsedSeconds(plan, now)); }
+export function remainingSeconds(plan: FastingPlan, now = new Date()) { const active = [...plan.sessions].reverse().find((item) => !item.endedAt); if (!active) return 0; const end = active.plannedEndAt ? new Date(active.plannedEndAt).getTime() : new Date(active.startedAt).getTime() + active.plannedMinutes * 60000; return Math.max(0, Math.floor((end - now.getTime()) / 1000)); }
 export function formatDuration(totalSeconds: number) { const seconds = Math.max(0, Math.floor(totalSeconds)); return `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
 export function formatRemaining(plan: FastingPlan, now = new Date()) { if (plan.active) return formatDuration(remainingSeconds(plan, now)); const current = now.getHours() * 60 + now.getMinutes(); const target = isEatingNow(plan, now) ? minutes(plan.eatingEnd) : minutes(plan.eatingStart); const remaining = (target - current + 1440) % 1440; return `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}:00`; }
 export function localDate(now = new Date()) { return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }

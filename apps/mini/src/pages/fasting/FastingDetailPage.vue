@@ -30,10 +30,12 @@
       </view>
 
       <view class="window-line">
-        <view class="window-point"><text>计划开始</text><strong>{{ plan.eatingStart }}</strong></view>
-        <view class="line-center"><view class="line-track" /><text>{{ eatingHours }} 小时用餐</text></view>
-        <view class="window-point end"><text>计划结束</text><strong>{{ plan.eatingEnd }}</strong></view>
+        <view class="window-point"><text>{{ plan.active ? '本次开始' : '用餐开始' }}</text><strong>{{ displayStart }}</strong></view>
+        <view class="line-center"><view class="line-track" /><text>{{ plan.active ? `${fastHours} 小时断食` : `${eatingHours} 小时用餐` }}</text></view>
+        <view class="window-point end"><text>{{ plan.active ? '预计结束' : '用餐结束' }}</text><strong>{{ displayEnd }}</strong></view>
       </view>
+
+      <view class="howto"><view class="howto-mark">今天这样做</view><view class="howto-copy"><text>{{ nextWindowText }}</text><text>{{ plan.mode }} = {{ fastHours }} 小时断食 + {{ eatingHours }} 小时用餐</text></view></view>
 
       <view class="progress-area">
         <text class="status-headline">{{ statusHeadline }}</text>
@@ -44,7 +46,7 @@
             <text class="ring-caption">{{ plan.active ? `已持续 ${elapsedLabel}` : '准备好后开始计时' }}</text>
           </view>
         </view>
-        <view class="phase-note"><view class="phase-icon">{{ isEating ? 'EAT' : 'FAST' }}</view><text>{{ isEating ? '在舒服的用餐时间里' : '给身体一段安静时间' }}</text></view>
+        <view class="phase-note"><view class="phase-icon">{{ isEating ? '用餐' : '断食' }}</view><text>{{ isEating ? '现在可以正常用餐，记得记录第一口' : '现在先喝水，等到用餐窗口再进食' }}</text></view>
       </view>
 
       <view class="actions">
@@ -56,7 +58,7 @@
         <view class="schedule-head">
           <view class="legend"><i class="dot fast" />断食计划</view>
           <view class="legend"><i class="dot eat" />用餐计划</view>
-          <button class="checkin" :class="{ done: checkedToday }" @tap="checkin">{{ checkedToday ? '已记录用餐' : '用餐打卡' }}</button>
+          <button class="checkin" :class="{ done: checkedToday }" @tap="checkin">{{ checkinLabel }}</button>
         </view>
         <view class="timebar"><view class="fast-segment" /><view class="eat-segment" /><view class="fast-segment" /></view>
         <view class="time-labels"><text>{{ plan.eatingStart }}</text><text>{{ plan.eatingEnd }}</text></view>
@@ -118,7 +120,7 @@ const now = ref(new Date());
 const showTips = ref(false);
 const settingsVisible = ref(false);
 let ticker: ReturnType<typeof setInterval> | undefined;
-const modes: FastingMode[] = ['16:8', '14:10', '12:12'];
+const modes: FastingMode[] = ['16:8', '14:10', '12:12', '18:6'];
 const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
 
 const calendar = computed(() => Array.from({ length: 7 }, (_, index) => {
@@ -136,19 +138,29 @@ const isEating = computed(() => isEatingNow(plan.value, now.value));
 const checkedToday = computed(() => plan.value.checkins.includes(today));
 const statusTitle = computed(() => plan.value.active ? (isEating.value ? '把握舒服的用餐时间' : '给身体一段安静时间') : '准备好后，从一个温和的开始');
 const statusHeadline = computed(() => plan.value.active ? (isEating.value ? '你正在用餐中' : '你正在断食中') : (isEating.value ? '现在是用餐时间' : '现在是断食时间'));
+const activeSession = computed(() => [...plan.value.sessions].reverse().find((session) => !session.endedAt));
+const displayStart = computed(() => activeSession.value ? formatClock(activeSession.value.startedAt) : plan.value.eatingStart);
+const displayEnd = computed(() => activeSession.value?.plannedEndAt ? formatClock(activeSession.value.plannedEndAt) : plan.value.eatingEnd);
+const nextWindowText = computed(() => isEating.value ? `用餐窗口 ${plan.value.eatingStart} - ${plan.value.eatingEnd}` : `下一次用餐从 ${plan.value.eatingStart} 开始`);
+const checkinLabel = computed(() => checkedToday.value ? '撤销用餐记录' : (plan.value.active && !isEating.value ? '提前结束并记录' : '用餐打卡'));
 const elapsedLabel = computed(() => formatDuration(elapsedSeconds(plan.value, now.value)));
 const mealLogs = computed<MealLog[]>(() => [...plan.value.mealLogs].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).slice(0, 4));
 const recentSessions = computed<FastingSession[]>(() => [...plan.value.sessions].sort((a, b) => b.startedAt.localeCompare(a.startedAt)).slice(0, 4));
 const recordCount = computed(() => mealLogs.value.length + recentSessions.value.length);
 const sessionDuration = (session: FastingSession) => Math.max(0, Math.floor(((session.endedAt ? new Date(session.endedAt) : now.value).getTime() - new Date(session.startedAt).getTime()) / 1000));
-const formatDateTime = (value: string) => { const date = new Date(value); return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`; };
+const formatClock = (value: string) => { const date = new Date(value); return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`; };
+const formatDateTime = (value: string) => { const date = new Date(value); return `${date.getMonth() + 1}月${date.getDate()}日 ${formatClock(value)}`; };
 const sessionSummary = (session: FastingSession) => `${formatDateTime(session.startedAt)}${session.endedAt ? ` · 持续 ${formatDuration(sessionDuration(session))}` : ''}`;
 
 function refresh() { plan.value = loadFastingPlan(); now.value = new Date(); }
 function startFast() { plan.value = startFasting(now.value); }
 function finishFast() { plan.value = finishFasting(now.value); }
 function secondaryAction() { if (plan.value.active) finishFast(); else settingsVisible.value = true; }
-function checkin() { plan.value = checkedToday.value ? removeMeal(today) : recordMeal(now.value); }
+function checkin() {
+  if (checkedToday.value) { plan.value = removeMeal(today); return; }
+  if (plan.value.active && !isEating.value) finishFasting(now.value);
+  plan.value = recordMeal(now.value);
+}
 function removeMealLog(date: string) { plan.value = removeMeal(date); }
 function selectMode(mode: FastingMode) {
   const hours = Number(mode.split(':')[0]);
@@ -186,7 +198,7 @@ onHide(() => { if (ticker) { clearInterval(ticker); ticker = undefined; } });
 .plan-subtitle { display:block; margin-top:8rpx; color:#82919c; font-size:22rpx; }
 .reminder { padding:0; color:#62b996; border:0; background:transparent; font-size:21rpx; }
 .bell { display:inline-flex; align-items:center; justify-content:center; width:34rpx; height:34rpx; margin-right:4rpx; border-radius:50%; color:#fff; background:#7bcdae; font-size:21rpx; }
-.window-line { display:flex; align-items:flex-end; margin-top:38rpx; }
+.window-line { display:flex; align-items:flex-end; margin-top:34rpx; }
 .window-point { min-width:126rpx; color:#9aa7af; font-size:20rpx; }
 .window-point strong { display:block; margin-top:8rpx; color:#425069; font-size:30rpx; }
 .window-point.end { text-align:right; }
@@ -195,6 +207,7 @@ onHide(() => { if (ticker) { clearInterval(ticker); ticker = undefined; } });
 .line-center:before,.line-center:after { content:''; position:absolute; top:-5rpx; width:12rpx; height:12rpx; border:2rpx solid #9acfb7; border-radius:50%; background:#fff; }
 .line-center:before { left:0; }.line-center:after { right:0; }
 .line-center text { position:absolute; left:50%; top:-30rpx; transform:translateX(-50%); padding:4rpx 12rpx; border-radius:10rpx; color:#78a89d; background:#eef8f2; font-size:19rpx; white-space:nowrap; }
+.howto { display:flex; align-items:center; gap:16rpx; margin-top:24rpx; padding:18rpx 18rpx; border-radius:18rpx; background:#f7faf5; }.howto-mark { flex:0 0 auto; padding:8rpx 10rpx; border-radius:12rpx; color:#6da48e; background:#e7f4eb; font-size:18rpx; font-weight:700; }.howto-copy { flex:1; }.howto-copy text { display:block; }.howto-copy text:first-child { color:#60766f; font-size:21rpx; font-weight:600; }.howto-copy text:last-child { margin-top:5rpx; color:#a0ada9; font-size:18rpx; }
 .progress-area { display:flex; align-items:center; flex-direction:column; padding:30rpx 0 26rpx; }
 .status-headline { margin-bottom:18rpx; color:#3fbd8b; font-size:34rpx; font-weight:700; letter-spacing:1rpx; }
 .progress-ring { width:390rpx; height:390rpx; display:flex; align-items:center; justify-content:center; border-radius:50%; background:conic-gradient(#72cda7 0deg, #89a6ed var(--progress), #f3dcd7 var(--progress), #f3dcd7 280deg, #edf0f1 280deg 360deg); transform:rotate(-90deg); }
