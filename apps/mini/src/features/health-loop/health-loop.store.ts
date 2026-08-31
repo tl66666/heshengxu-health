@@ -31,8 +31,8 @@ export const healthLoopState = {
     if (!options.force && today.value?.date === date) return;
     if (!options.force && Date.now() < offlineUntil) {
       const fallback =
-        (uni.getStorageSync(`${HOME_CACHE_PREFIX}${date}`) as DailyHomeDto | null) ||
-        createLocalDailyHome(date);
+        createLocalDailyHome(date) ||
+        (uni.getStorageSync(`${HOME_CACHE_PREFIX}${date}`) as DailyHomeDto | null);
       if (fallback) {
         today.value = fallback;
         plan.value = fallback.activePlan;
@@ -51,10 +51,18 @@ export const healthLoopState = {
   },
   async loadTodayInternal(date: string) {
     const cachedToday = uni.getStorageSync(`${HOME_CACHE_PREFIX}${date}`) as DailyHomeDto | null;
-    const localToday = cachedToday || createLocalDailyHome(date);
+    // A completed local profile is the source of truth. Cached/API home data may predate an edit.
+    const localToday = createLocalDailyHome(date) || cachedToday;
     if (!today.value && localToday) {
       today.value = localToday;
       plan.value = localToday.activePlan;
+    }
+    if (localToday) {
+      today.value = localToday;
+      plan.value = localToday.activePlan;
+      loading.value = false;
+      error.value = null;
+      return;
     }
     loading.value = !today.value;
     error.value = null;
@@ -65,11 +73,6 @@ export const healthLoopState = {
     } catch (reason) {
       offlineUntil = Date.now() + 30_000;
       error.value = reason instanceof Error ? reason.message : '暂时无法加载今日状态';
-      if (localToday) {
-        today.value = localToday;
-        plan.value = localToday.activePlan;
-        error.value = null;
-      }
     } finally {
       loading.value = false;
     }

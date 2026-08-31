@@ -43,8 +43,8 @@
         </button>
         <button class="row" @tap="resetDemo">
           <view class="row-copy"
-            ><text class="reset-title">重置演示数据</text
-            ><text>清除本机保存的建档与计划，重新体验建档流程</text></view
+            ><text class="reset-title">重置本机数据</text
+            ><text>清除本机保存的建档与计划，重新开始建档</text></view
           >
           <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
@@ -63,21 +63,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { loadLocalProfile, resetLocalDemoData } from '../../features/health-loop/local-demo.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { goalLabels, type HealthGoal } from '../../features/health-profile/health-profile.types.js';
 import { resetOnboarding } from '../../stores/onboarding.js';
 import { mePrimaryActions } from './me-actions.js';
 
 const date = localDate();
-const localProfile = computed(() => loadLocalProfile());
+const localProfile = ref(loadLocalProfile());
 const displayName = computed(
   () => healthLoopState.today.value?.displayName || localProfile.value?.displayName || '健康管理者',
 );
 const initial = computed(() => displayName.value.trim().slice(0, 1) || '我');
 const profileText = computed(() => {
+  const goals = (localProfile.value?.goals || []).filter(
+    (goal): goal is HealthGoal => goal in goalLabels,
+  );
+  if (goals.length) return goals.map((goal) => goalLabels[goal]).join(' · ');
   const plan = healthLoopState.today.value?.activePlan;
   if (plan) return plan.kind === 'sleep' ? '睡眠与精力计划进行中' : '体重管理计划进行中';
   return '查看并调整自己的健康档案';
@@ -99,8 +104,8 @@ function manageData() {
 }
 function resetDemo() {
   uni.showModal({
-    title: '重置演示数据',
-    content: '将清除本机保存的建档与计划数据，并重新进入建档流程。仅影响当前设备的演示数据。',
+    title: '重置本机数据',
+    content: '将清除本机保存的建档与计划数据，并重新进入建档流程。仅影响当前设备。',
     confirmText: '重置',
     success: (result) => {
       if (!result.confirm) return;
@@ -114,7 +119,10 @@ function localDate() {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
-onShow(() => healthLoopState.loadToday(date));
+onShow(() => {
+  localProfile.value = loadLocalProfile();
+  healthLoopState.loadToday(date, { force: true });
+});
 </script>
 
 <style scoped>

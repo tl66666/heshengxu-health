@@ -11,6 +11,8 @@ const PLAN_KEY = 'heshengxu.local.health-plan';
 
 export type LocalHealthProfile = {
   displayName: string;
+  sex?: 'female' | 'male' | 'unspecified';
+  birthDate?: string;
   heightCm: number;
   weightKg: number;
   primaryGoal: string;
@@ -26,6 +28,11 @@ export function loadLocalProfile(): LocalHealthProfile | null {
   if (!value || !value.heightCm || !value.weightKg || !value.primaryGoal) return null;
   return {
     displayName: value.displayName || '新朋友',
+    sex:
+      value.sex === 'female' || value.sex === 'male' || value.sex === 'unspecified'
+        ? value.sex
+        : 'unspecified',
+    birthDate: typeof value.birthDate === 'string' ? value.birthDate : '',
     heightCm: Number(value.heightCm),
     weightKg: Number(value.weightKg),
     primaryGoal: value.primaryGoal,
@@ -66,6 +73,11 @@ export function saveLocalPlan(request: SaveCurrentPlanRequest): PersonalPlanDto 
 
 export function loadLocalPlan(): PersonalPlanDto | null {
   return (uni.getStorageSync(PLAN_KEY) as PersonalPlanDto | null) || null;
+}
+
+export function clearLocalPlan() {
+  uni.removeStorageSync(PLAN_KEY);
+  return null;
 }
 
 export function resetLocalDemoData() {

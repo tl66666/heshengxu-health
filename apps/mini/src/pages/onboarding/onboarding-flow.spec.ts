@@ -41,4 +41,10 @@ describe('onboarding flow', () => {
       limited: true,
     });
   });
+
+  it('does not persist placeholder height or weight as user data', () => {
+    expect(onboardingPageSource).not.toContain("form.heightCm = '168'");
+    expect(onboardingPageSource).not.toContain("form.weightKg = '60.0'");
+    expect(onboardingPageSource).toContain("note: '建档初始体重'");
+  });
 });

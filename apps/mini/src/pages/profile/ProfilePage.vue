@@ -52,6 +52,22 @@
         >
       </view>
 
+      <view class="section goal-section">
+        <view class="section-head"
+          ><text class="section-title">我的健康方向</text
+          ><button @tap="edit('goal')">调整</button></view
+        >
+        <view class="goal-cards">
+          <button v-for="goal in profileGoals" :key="goal" class="goal-card" @tap="openGoal(goal)">
+            <view
+              ><text>{{ goalLabels[goal] }}</text
+              ><text>{{ goalDetails[goal] }}</text></view
+            >
+            <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+          </button>
+        </view>
+      </view>
+
       <view class="section">
         <text class="section-title">档案信息</text>
         <view class="card">
@@ -94,7 +110,10 @@ import { loadProfileForDisplay } from '../../features/health-profile/profile-loa
 import { loadHealthProfile } from '../../features/health-profile/health-profile.service.js';
 import {
   goalLabels,
+  goalDetails,
+  goalRoutes,
   sexLabels,
+  type HealthGoal,
   type HealthProfile,
 } from '../../features/health-profile/health-profile.types.js';
 
@@ -119,8 +138,17 @@ const completion = computed(() => {
 });
 const initial = computed(() => profile.value?.displayName?.trim().slice(0, 1) || '我');
 const sexLabel = computed(() => (profile.value ? sexLabels[profile.value.sex] : '暂不说明'));
+const profileGoals = computed(() =>
+  profile.value?.goals?.length
+    ? profile.value.goals
+    : profile.value?.primaryGoal
+      ? [profile.value.primaryGoal]
+      : [],
+);
 const goalLabel = computed(() =>
-  profile.value?.primaryGoal ? goalLabels[profile.value.primaryGoal] : '还没有设置目标',
+  profileGoals.value.length
+    ? profileGoals.value.map((goal) => goalLabels[goal]).join(' · ')
+    : '还没有设置目标',
 );
 const bodySummary = computed(() => {
   if (profile.value?.heightCm && profile.value.weightKg) {
@@ -131,6 +159,9 @@ const bodySummary = computed(() => {
 
 function edit(section: 'basic' | 'body' | 'goal') {
   uni.navigateTo({ url: `/pages/profile-edit/ProfileEditPage?section=${section}` });
+}
+function openGoal(goal: HealthGoal) {
+  uni.navigateTo({ url: goalRoutes[goal] });
 }
 
 async function load() {
@@ -277,6 +308,55 @@ onShow(load);
   color: #63806d;
   font-size: 22rpx;
   font-weight: 700;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 4rpx 12rpx;
+}
+.section-head .section-title {
+  margin: 0;
+}
+.section-head button {
+  padding: 0;
+  border: 0;
+  color: #648470;
+  background: transparent;
+  font-size: 20rpx;
+  line-height: 1;
+}
+.goal-cards {
+  border-top: 1rpx solid #e7eee8;
+}
+.goal-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 92rpx;
+  padding: 16rpx 4rpx;
+  border: 0;
+  border-bottom: 1rpx solid #edf2ee;
+  background: transparent;
+  text-align: left;
+}
+.goal-card > view {
+  flex: 1;
+  min-width: 0;
+}
+.goal-card text {
+  display: block;
+}
+.goal-card text:first-child {
+  color: #315641;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.goal-card text:last-child {
+  margin-top: 5rpx;
+  color: #829387;
+  font-size: 19rpx;
+  line-height: 1.45;
 }
 .card {
   overflow: hidden;

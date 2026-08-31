@@ -24,6 +24,13 @@
           {{ item.label }}
         </button>
       </view>
+      <text class="label">出生日期</text>
+      <picker mode="date" :value="form.birthDate" @change="form.birthDate = $event.detail.value">
+        <view class="date-picker"
+          ><text>{{ form.birthDate || '请选择出生日期' }}</text
+          ><text>›</text></view
+        >
+      </picker>
     </view>
 
     <view v-else-if="section === 'body'" class="panel">
@@ -55,23 +62,23 @@
     </view>
 
     <view v-else class="panel">
-      <text class="label">你想先关注什么？</text>
+      <text class="label">你想关注什么？</text>
+      <text class="goal-hint">最多选择 3 项，第一项作为首页主要方向</text>
       <view class="goal-list">
         <button
           v-for="item in goals"
           :key="item.value"
-          :class="['goal', { selected: form.primaryGoal === item.value }]"
-          @tap="form.primaryGoal = item.value"
+          :class="['goal', { selected: form.goals.includes(item.value) }]"
+          @tap="toggleGoal(item.value)"
         >
           <view
             ><text>{{ item.label }}</text
             ><text>{{ item.detail }}</text></view
           >
-          <image
-            v-if="form.primaryGoal === item.value"
-            src="/static/icons/svg/check.svg"
-            mode="aspectFit"
-          />
+          <view v-if="form.goals.includes(item.value)" class="goal-state">
+            <text v-if="form.primaryGoal === item.value">主要</text>
+            <image src="/static/icons/svg/check.svg" mode="aspectFit" />
+          </view>
         </button>
       </view>
     </view>
@@ -89,6 +96,10 @@ import { onLoad } from '@dcloudio/uni-app';
 import { calculateBmi, classifyBmi } from '../../../../../packages/domain/src/bmi.js';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { loadLocalProfile, saveLocalProfile } from '../../features/health-loop/local-demo.js';
+import {
+  syncHabitPlansForGoals,
+  syncPrimaryHealthPlan,
+} from '../../features/health-profile/health-goal-sync.js';
 import { loadProfileForDisplay } from '../../features/health-profile/profile-loader.js';
 import { localProfileFromEdit } from '../../features/health-profile/profile-save.js';
 import {
@@ -97,10 +108,15 @@ import {
 } from '../../features/health-profile/health-profile.service.js';
 import {
   goalLabels,
+  goalDetails,
   sexLabels,
   type HealthGoal,
   type HealthProfile,
 } from '../../features/health-profile/health-profile.types.js';
+import {
+  createLocalWeightRecord,
+  listLocalWeightRecords,
+} from '../../features/weight/weight-records.local.js';
 
 const section = ref<'basic' | 'body' | 'goal'>('basic');
 const saving = ref(false);
@@ -109,9 +125,11 @@ const showLocalHint = ref(false);
 const form = reactive({
   displayName: '',
   sex: 'unspecified' as HealthProfile['sex'],
+  birthDate: '',
   heightCm: '',
   weightKg: '',
   primaryGoal: null as HealthGoal | null,
+  goals: [] as HealthGoal[],
 });
 const sexes = Object.entries(sexLabels).map(([value, label]) => ({
   value: value as HealthProfile['sex'],
@@ -120,8 +138,7 @@ const sexes = Object.entries(sexLabels).map(([value, label]) => ({
 const goals = Object.entries(goalLabels).map(([value, label]) => ({
   value: value as HealthGoal,
   label,
-  detail:
-    value === 'weight_management' ? '建立更轻松的饮食与活动节奏' : '从一个容易坚持的小行动开始',
+  detail: goalDetails[value as HealthGoal],
 }));
 const sectionTitle = computed(
   () => ({ basic: '基础资料', body: '身体指标', goal: '健康目标' })[section.value],
@@ -145,9 +162,26 @@ function clearError() {
 function fillForm(profile: HealthProfile) {
   form.displayName = profile.displayName || '';
   form.sex = profile.sex;
+  form.birthDate = profile.birthDate || '';
   form.heightCm = profile.heightCm ? String(profile.heightCm) : '';
   form.weightKg = profile.weightKg ? String(profile.weightKg) : '';
   form.primaryGoal = profile.primaryGoal;
+  form.goals = profile.goals?.length
+    ? [...profile.goals]
+    : profile.primaryGoal
+      ? [profile.primaryGoal]
+      : [];
+}
+function toggleGoal(goal: HealthGoal) {
+  if (form.goals.includes(goal)) {
+    form.goals = form.goals.filter((item) => item !== goal);
+  } else if (form.goals.length < 3) {
+    form.goals = [...form.goals, goal];
+  } else {
+    uni.showToast({ title: '最多选择 3 项', icon: 'none' });
+    return;
+  }
+  form.primaryGoal = form.goals[0] || null;
 }
 async function load() {
   error.value = '';
@@ -163,28 +197,39 @@ async function save() {
   error.value = '';
   saving.value = true;
   const fallback = localProfileFromEdit(form);
-  try {
-    await saveHealthProfile({
-      displayName: form.displayName || null,
-      sex: form.sex,
-      heightCm: Number(form.heightCm) || null,
-      weightKg: Number(form.weightKg) || null,
-      primaryGoal: form.primaryGoal,
-    });
-    if (fallback) saveLocalProfile(fallback);
-    uni.showToast({ title: '档案已更新', icon: 'success' });
-    setTimeout(() => uni.navigateBack(), 450);
-  } catch {
-    if (!fallback) {
-      error.value = '网络不可用时，需要完整的身高、体重和健康目标才能保存到本机。';
-      return;
-    }
-    saveLocalProfile(fallback);
-    uni.showToast({ title: '已保存到本机', icon: 'success' });
-    setTimeout(() => uni.navigateBack(), 450);
-  } finally {
+  if (!fallback) {
+    error.value = '请完整填写身高、体重并选择至少一个健康目标。';
     saving.value = false;
+    return;
   }
+  const previousWeight = loadLocalProfile()?.weightKg;
+  saveLocalProfile(fallback);
+  syncPrimaryHealthPlan(fallback.primaryGoal);
+  syncHabitPlansForGoals(fallback.goals);
+  if (section.value === 'body' && previousWeight !== fallback.weightKg) {
+    createLocalWeightRecord({
+      weight: fallback.weightKg,
+      recordedAt: new Date().toISOString(),
+      note: '健康档案更新',
+    });
+  } else if (!listLocalWeightRecords().length) {
+    createLocalWeightRecord({
+      weight: fallback.weightKg,
+      recordedAt: new Date().toISOString(),
+      note: '档案初始体重',
+    });
+  }
+  saveHealthProfile({
+    displayName: form.displayName || null,
+    sex: form.sex,
+    birthDate: form.birthDate || null,
+    heightCm: Number(form.heightCm) || null,
+    weightKg: Number(form.weightKg) || null,
+    primaryGoal: form.primaryGoal,
+  }).catch(() => null);
+  uni.showToast({ title: '档案已更新', icon: 'success' });
+  saving.value = false;
+  setTimeout(() => uni.navigateBack(), 450);
 }
 onLoad((options) => {
   const requested = options?.section;
@@ -277,6 +322,35 @@ onLoad((options) => {
 .choices {
   display: flex;
   gap: 10rpx;
+}
+.date-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 78rpx;
+  padding: 0 18rpx;
+  border: 1rpx solid #d7e6d9;
+  border-radius: 12rpx;
+  color: #4d6857;
+  background: #fbfdfb;
+  font-size: 23rpx;
+}
+.goal-hint {
+  display: block;
+  margin: -2rpx 0 14rpx;
+  color: #8b9c91;
+  font-size: 19rpx;
+}
+.goal-state {
+  display: flex;
+  align-items: center;
+  gap: 7rpx;
+  color: #5d8069;
+  font-size: 17rpx;
+}
+.goal-state image {
+  width: 28rpx;
+  height: 28rpx;
 }
 .choice {
   flex: 1;

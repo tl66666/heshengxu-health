@@ -111,7 +111,7 @@
                   <input
                     v-model="form.heightCm"
                     type="number"
-                    placeholder="168"
+                    placeholder="请填写"
                     class="input-field"
                   />
                   <text class="input-unit">cm</text>
@@ -139,7 +139,7 @@
                   <input
                     v-model="form.weightKg"
                     type="digit"
-                    placeholder="60.0"
+                    placeholder="请填写"
                     class="input-field"
                   />
                   <text class="input-unit">kg</text>
@@ -284,6 +284,14 @@ import { toggleOnboardingGoal } from './onboarding-flow.js';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { shouldConfirmOnboardingExit } from '../../components/navigation.js';
 import { saveLocalProfile } from '../../features/health-loop/local-demo.js';
+import {
+  syncHabitPlansForGoals,
+  syncPrimaryHealthPlan,
+} from '../../features/health-profile/health-goal-sync.js';
+import {
+  createLocalWeightRecord,
+  listLocalWeightRecords,
+} from '../../features/weight/weight-records.local.js';
 
 const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(0);
@@ -309,6 +317,8 @@ const goalOptions = [
   },
   { value: 'muscle_gain' as const, label: '增肌塑形', detail: '通过运动和营养增强体质' },
   { value: 'sleep' as const, label: '改善睡眠', detail: '建立规律作息和睡眠习惯' },
+  { value: 'energy' as const, label: '提升精力', detail: '从饮食、喝水和活动找回活力' },
+  { value: 'mood' as const, label: '情绪与压力', detail: '记录感受，照顾自己的心理节律' },
 ];
 
 const todayStr = computed(() => new Date().toISOString().slice(0, 10));
@@ -384,9 +394,6 @@ function toggleGoal(goal: (typeof goalOptions)[0]['value']) {
 }
 
 function startOnboarding() {
-  // 初始化默认身高体重，确保 BMI 立即显示
-  if (!form.heightCm) form.heightCm = '168';
-  if (!form.weightKg) form.weightKg = '60.0';
   step.value = 1;
 }
 
@@ -404,13 +411,26 @@ async function nextStep() {
   error.value = '';
 
   try {
-    await saveLocalProfile({
+    const primaryGoal = form.primaryGoal || form.goals[0];
+    if (!primaryGoal) throw new Error('请选择至少一个健康目标');
+    saveLocalProfile({
       displayName: form.displayName || '新朋友',
+      sex: form.sex,
+      birthDate: form.birthDate,
       heightCm: Number(form.heightCm),
       weightKg: Number(form.weightKg),
-      primaryGoal: form.primaryGoal || form.goals[0] || '',
+      primaryGoal,
       goals: form.goals as string[],
     });
+    if (!listLocalWeightRecords().length) {
+      createLocalWeightRecord({
+        weight: Number(form.weightKg),
+        recordedAt: new Date().toISOString(),
+        note: '建档初始体重',
+      });
+    }
+    syncPrimaryHealthPlan(primaryGoal);
+    syncHabitPlansForGoals(form.goals);
 
     onboardingState.step.value = 5;
     onboardingState.completed.value = true;
@@ -981,13 +1001,62 @@ function confirmExit() {
 </style>
 <style scoped>
 /* Onboarding uses the same sage-and-cream action language as the rest of the app. */
-.btn-primary { display:flex; align-items:center; justify-content:center; box-sizing:border-box; color:#fff; background:#71bd8f; border:2rpx solid #71bd8f; box-shadow:0 12rpx 34rpx rgba(90,168,119,.22); line-height:1; }
-.btn-primary:active { background:#5fa97b; border-color:#5fa97b; }
-.btn-primary[disabled] { color:#fff; background:#b9d7c2; border-color:#b9d7c2; }
-.welcome-fullscreen .btn-primary { color:#52745f; background:#edf7f0; border-color:#b8d9c1; box-shadow:0 12rpx 34rpx rgba(90,168,119,.18); }
-.welcome-fullscreen .btn-primary:active { background:#dcefe2; border-color:#9fc9ac; }
-.step-footer { padding:24rpx 36rpx calc(48rpx + env(safe-area-inset-bottom)); background:linear-gradient(180deg, rgba(247,251,248,0) 0%, rgba(247,251,248,.94) 28%, #f7fbf8 100%); }
-.step-footer .btn-primary { color:#5f9270; background:#edf7f0; border-color:#b7d8c1; box-shadow:0 10rpx 26rpx rgba(95,170,119,.16), inset 0 1rpx 0 rgba(255,255,255,.85); }
-.step-footer .btn-primary:active { color:#537f62; background:#dfefe4; border-color:#9fc9ad; }
-.step-footer .btn-primary[disabled] { color:#91a79a; background:#e8f1eb; border-color:#d4e2d7; box-shadow:none; }
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: #fff;
+  background: #71bd8f;
+  border: 2rpx solid #71bd8f;
+  box-shadow: 0 12rpx 34rpx rgba(90, 168, 119, 0.22);
+  line-height: 1;
+}
+.btn-primary:active {
+  background: #5fa97b;
+  border-color: #5fa97b;
+}
+.btn-primary[disabled] {
+  color: #fff;
+  background: #b9d7c2;
+  border-color: #b9d7c2;
+}
+.welcome-fullscreen .btn-primary {
+  color: #52745f;
+  background: #edf7f0;
+  border-color: #b8d9c1;
+  box-shadow: 0 12rpx 34rpx rgba(90, 168, 119, 0.18);
+}
+.welcome-fullscreen .btn-primary:active {
+  background: #dcefe2;
+  border-color: #9fc9ac;
+}
+.step-footer {
+  padding: 24rpx 36rpx calc(48rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    180deg,
+    rgba(247, 251, 248, 0) 0%,
+    rgba(247, 251, 248, 0.94) 28%,
+    #f7fbf8 100%
+  );
+}
+.step-footer .btn-primary {
+  color: #5f9270;
+  background: #edf7f0;
+  border-color: #b7d8c1;
+  box-shadow:
+    0 10rpx 26rpx rgba(95, 170, 119, 0.16),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+}
+.step-footer .btn-primary:active {
+  color: #537f62;
+  background: #dfefe4;
+  border-color: #9fc9ad;
+}
+.step-footer .btn-primary[disabled] {
+  color: #91a79a;
+  background: #e8f1eb;
+  border-color: #d4e2d7;
+  box-shadow: none;
+}
 </style>

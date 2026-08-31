@@ -2,13 +2,19 @@ import { describe, expect, it } from 'vitest';
 import mePageSource from './MePage.vue?raw';
 import localDemoSource from '../../features/health-loop/local-demo.js?raw';
 
-describe('demo data reset entry on the me page', () => {
+describe('local health data on the me page', () => {
   it('offers an explicit local-only reset guarded by a confirm dialog', () => {
-    expect(mePageSource).toContain('重置演示数据');
+    expect(mePageSource).toContain('重置本机数据');
     expect(mePageSource).toContain('resetLocalDemoData()');
     expect(mePageSource).toContain('resetOnboarding()');
     expect(mePageSource).toContain('uni.showModal');
     expect(mePageSource).toContain('仅影响当前设备');
+  });
+
+  it('summarizes the health goals saved in the local profile', () => {
+    expect(mePageSource).toContain('goalLabels[goal]');
+    expect(mePageSource).toContain('localProfile.value?.goals');
+    expect(mePageSource).toContain('localProfile.value = loadLocalProfile()');
   });
 
   it('reenters onboarding directly so a surviving demo API profile cannot skip the flow', () => {

@@ -2,16 +2,22 @@ import type { HealthGoal } from './health-profile.types.js';
 
 type EditableProfile = {
   displayName: string;
+  sex: 'female' | 'male' | 'unspecified';
+  birthDate: string;
   heightCm: string;
   weightKg: string;
   primaryGoal: HealthGoal | null;
+  goals: HealthGoal[];
 };
 
 export type CompleteLocalProfile = {
   displayName: string;
+  sex: 'female' | 'male' | 'unspecified';
+  birthDate: string;
   heightCm: number;
   weightKg: number;
   primaryGoal: HealthGoal;
+  goals: HealthGoal[];
 };
 
 export function localProfileFromEdit(input: EditableProfile): CompleteLocalProfile | null {
@@ -22,8 +28,11 @@ export function localProfileFromEdit(input: EditableProfile): CompleteLocalProfi
 
   return {
     displayName: input.displayName.trim() || '新朋友',
+    sex: input.sex,
+    birthDate: input.birthDate,
     heightCm,
     weightKg,
     primaryGoal: input.primaryGoal,
+    goals: input.goals.length ? input.goals : [input.primaryGoal],
   };
 }
