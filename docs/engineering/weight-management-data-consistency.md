@@ -14,6 +14,7 @@ This note records the persistence rules for the weight-management module so othe
 - Trend charts are scoped to the selected 7/30/90-day window. A single record is shown as a point with a prompt to record again; change labels and insights only appear once two records can be compared.
 - The home weight card loads the latest seven real records and renders a compact sparkline; when today's record is missing it falls back to the latest recorded weight instead of showing a misleading blank card.
 - The detail chart exposes interval average, minimum, maximum, target reference line, and a selectable point detail. The recording sheet supports backfilling a date and keeps records sorted by recorded time.
+- The weight page hero now uses the full `weight-weighing-scene.png` as a down-shifted, edge-to-edge scene with a warm wash overlay; the generated `assets/icon/weight.jpg` is copied to `apps/mini/src/static/icons/weight.jpg` and shown in the weight summary header.
 
 ## Migration
 
