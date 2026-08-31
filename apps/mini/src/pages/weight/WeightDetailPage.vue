@@ -324,27 +324,50 @@
     <view v-if="showDialog" class="dialog-mask" @tap="closeDialog">
       <view class="dialog" @tap.stop>
         <view class="dialog-handle" />
-        <view class="dialog-head"
-          ><text class="dialog-title">{{
-            editingRecordId ? '编辑体重记录' : '记录今天的体重'
-          }}</text
-          ><button class="dialog-close" @tap="closeDialog">×</button></view
-        >
-        <text class="dialog-hint">建议在起床后、早餐前记录，变化会更稳定</text>
-        <view class="field-label">体重（kg）</view>
-        <input v-model="inputWeight" class="weight-input" type="digit" placeholder="例如 65.5" />
-        <view class="field-label">记录日期</view>
-        <picker mode="date" :value="recordedDate" @change="recordedDate = $event.detail.value">
-          <view class="date-picker-value">{{ recordedDate || '选择日期' }}</view>
-        </picker>
-        <view class="field-label">今天的心情（可选）</view>
-        <input
-          v-model="inputNote"
-          class="note-input"
-          type="text"
-          placeholder="例如：睡得很好，状态轻盈"
-        />
-        <button class="save-button" @tap="saveWeight">保存记录</button>
+        <view class="dialog-head">
+          <view>
+            <text class="dialog-title">{{
+              editingRecordId ? '编辑体重记录' : '记录今天的体重'
+            }}</text>
+            <text class="dialog-subtitle">每天一次，记录身体真实的变化</text>
+          </view>
+          <button class="dialog-close" aria-label="关闭" @tap="closeDialog">×</button>
+        </view>
+        <view class="dialog-hint">
+          <view class="hint-dot" />
+          <text>建议起床后、早餐前记录，变化会更稳定</text>
+        </view>
+        <view class="field-block weight-field-block">
+          <view class="field-label">今天的体重</view>
+          <view class="weight-input-wrap">
+            <input
+              v-model="inputWeight"
+              class="weight-input"
+              type="digit"
+              placeholder="例如 65.5"
+            />
+            <text class="input-unit">kg</text>
+          </view>
+        </view>
+        <view class="field-block">
+          <view class="field-label">记录日期</view>
+          <picker mode="date" :value="recordedDate" @change="recordedDate = $event.detail.value">
+            <view class="date-picker-value">
+              <text>{{ recordedDate || '选择日期' }}</text>
+              <text class="picker-chevron">›</text>
+            </view>
+          </picker>
+        </view>
+        <view class="field-block">
+          <view class="field-label">此刻的状态 <text class="optional-label">可选</text></view>
+          <input
+            v-model="inputNote"
+            class="note-input"
+            type="text"
+            placeholder="例如：睡得很好，状态轻盈"
+          />
+        </view>
+        <button class="save-button" @tap="saveWeight">保存体重记录</button>
       </view>
     </view>
   </view>
@@ -1843,5 +1866,252 @@ onMounted(loadWeightData);
     padding-left: 16rpx;
     padding-right: 16rpx;
   }
+}
+
+/* Product-level polish for the weight workflow. */
+.hero-copy {
+  top: 34rpx;
+  left: 22rpx;
+  width: 56%;
+  padding: 14rpx 16rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 252, 244, 0.58);
+  box-shadow: 0 8rpx 20rpx rgba(106, 126, 103, 0.08);
+  backdrop-filter: blur(8rpx);
+}
+.hero-kicker {
+  margin-bottom: 14rpx;
+  color: #5f806f;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+.hero-number {
+  font-size: 70rpx;
+}
+.hero-bubble {
+  right: 24rpx;
+  top: 34rpx;
+  padding: 14rpx 18rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.78);
+  border-radius: 20rpx;
+  background: rgba(255, 253, 247, 0.9);
+}
+.view-switch {
+  margin-top: 20rpx;
+  padding: 4rpx;
+  border-radius: 18rpx;
+  background: #f0e8e1;
+}
+.view-tab {
+  min-height: 66rpx;
+  padding: 11rpx 6rpx 10rpx;
+  border-radius: 14rpx;
+}
+.view-tab-title {
+  font-size: 23rpx;
+}
+.view-tab-caption {
+  margin-top: 4rpx;
+  color: #a7958f;
+  font-size: 17rpx;
+}
+.view-tab.active .view-tab-caption {
+  color: #85a892;
+}
+.range-tab {
+  min-width: 60rpx;
+  height: 42rpx;
+  padding: 0 12rpx;
+  line-height: 42rpx;
+}
+.trend-empty {
+  min-height: 168rpx;
+  padding: 28rpx 22rpx 26rpx;
+  justify-content: center;
+}
+.trend-empty-title {
+  color: #66585a;
+  font-size: 27rpx;
+}
+.trend-empty-copy {
+  color: #a3948e;
+  font-size: 20rpx;
+  line-height: 1.45;
+}
+.trend-empty-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 210rpx;
+  height: 62rpx;
+  margin-top: 6rpx;
+  padding: 0 24rpx;
+  border-radius: 16rpx;
+  background: #78a886;
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 62rpx;
+}
+.milestone-row {
+  gap: 10rpx;
+  margin: 0 22rpx;
+}
+.milestone {
+  min-height: 120rpx;
+  padding: 16rpx 10rpx 14rpx;
+  border: 1rpx solid #eee4dc;
+  border-radius: 16rpx;
+  background: rgba(255, 253, 249, 0.76);
+}
+.milestone.achieved {
+  border-color: #cfe4d5;
+  background: #f0f8f1;
+}
+.milestone-icon {
+  width: 38rpx;
+  height: 38rpx;
+  margin-bottom: 8rpx;
+  font-size: 22rpx;
+}
+.milestone-title {
+  font-size: 20rpx;
+}
+.milestone-note {
+  font-size: 17rpx;
+}
+.dialog-mask {
+  padding: 0 14rpx calc(14rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: rgba(74, 59, 55, 0.28);
+}
+.dialog {
+  max-height: 82vh;
+  margin: 0;
+  padding: 18rpx 22rpx calc(22rpx + env(safe-area-inset-bottom));
+  border-radius: 28rpx;
+  background: #fffaf4;
+  box-shadow: 0 12rpx 36rpx rgba(79, 63, 57, 0.16);
+}
+.dialog-handle {
+  width: 60rpx;
+  height: 6rpx;
+  margin-bottom: 18rpx;
+  background: #dfd2c8;
+}
+.dialog-head {
+  align-items: flex-start;
+}
+.dialog-title {
+  font-size: 30rpx;
+  line-height: 1.25;
+}
+.dialog-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  color: #ab9890;
+  font-size: 19rpx;
+}
+.dialog-close {
+  width: 46rpx;
+  height: 46rpx;
+  color: #9e8c85;
+  background: #f5ede7;
+  font-size: 30rpx;
+  line-height: 46rpx;
+}
+.dialog-hint {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin: 18rpx 0 4rpx;
+  color: #958a82;
+  font-size: 19rpx;
+}
+.hint-dot {
+  width: 12rpx;
+  height: 12rpx;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #87b497;
+}
+.field-block {
+  margin-top: 20rpx;
+}
+.weight-field-block {
+  margin-top: 16rpx;
+}
+.field-label {
+  margin: 0 0 9rpx;
+  color: #6c5d5b;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+.optional-label {
+  margin-left: 6rpx;
+  color: #b5a49c;
+  font-size: 18rpx;
+  font-weight: 400;
+}
+.weight-input-wrap {
+  display: flex;
+  align-items: center;
+  height: 78rpx;
+  padding: 0 20rpx;
+  border: 1rpx solid #eadfd7;
+  border-radius: 16rpx;
+  background: #fffdf9;
+  box-sizing: border-box;
+}
+.weight-input {
+  flex: 1;
+  width: auto;
+  height: 76rpx;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.input-unit {
+  margin-left: 8rpx;
+  color: #7a9a82;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.date-picker-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76rpx;
+  padding: 0 20rpx;
+  border: 1rpx solid #eadfd7;
+  border-radius: 16rpx;
+  background: #fffdf9;
+  color: #51484b;
+  font-size: 24rpx;
+  box-sizing: border-box;
+}
+.picker-chevron {
+  color: #b09d94;
+  font-size: 34rpx;
+  line-height: 1;
+}
+.note-input {
+  height: 76rpx;
+  padding: 0 20rpx;
+  border: 1rpx solid #eadfd7;
+  border-radius: 16rpx;
+  background: #fffdf9;
+  font-size: 23rpx;
+}
+.save-button {
+  height: 76rpx;
+  margin-top: 24rpx;
+  border-radius: 18rpx;
+  background: #739d7c;
+  box-shadow: 0 8rpx 16rpx rgba(106, 150, 116, 0.18);
+  font-size: 24rpx;
+  line-height: 76rpx;
 }
 </style>
