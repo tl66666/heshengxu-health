@@ -31,10 +31,10 @@
 
     <template v-else-if="today && experience">
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
-      <view v-if="isCardVisible('weight-plan')" class="weight-card card">
+      <view v-if="isCardVisible('weight-plan')" class="weight-card card" @tap="goToWeightProgress">
         <view class="card-top">
           <text class="card-title">体重管理方案</text>
-          <text class="week-badge">第 1/16 周</text>
+          <text class="week-badge">{{ planWeekLabel }}</text>
         </view>
 
         <view class="weight-visual">
@@ -58,6 +58,7 @@
               stroke-dashoffset="0"
             />
           </svg>
+          <text class="weight-progress-label">已完成 {{ progress.toFixed(0) }}%</text>
           <view class="weight-row">
             <view class="weight-col">
               <text class="num">{{ startWeight }}</text>
@@ -137,14 +138,15 @@
       </view>
 
       <!-- 3. 体重记录卡片 -->
-      <view v-if="isCardVisible('weight-record')" class="record-card card" @tap="goToWeightDetail">
+      <view v-if="isCardVisible('weight-record')" class="record-card card" @tap="goToWeightRecords">
         <view class="card-top">
           <view class="title-group">
             <text class="card-title">体重记录</text>
-            <text v-if="today.todayRecords?.weight" class="time-text">
-              {{ formatTime(today.todayRecords.weight.recordedAt) }} 更新
+            <text v-if="latestWeightRecord" class="time-text">
+              {{ formatTime(latestWeightRecord.recordedAt) }} 更新
             </text>
           </view>
+          <button class="weight-add" aria-label="记录体重" @tap.stop="openWeightRecorder">＋</button>
         </view>
         <view class="record-content">
           <view class="big-value">
@@ -336,12 +338,12 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { onHide, onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
-import { loadWeightHistory } from '../../features/health-loop/health-loop.service.js';
+import { listLocalWeightRecords } from '../../features/weight/weight-records.local.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { requestRecordTypeFocus } from '../../features/health-records/records-focus.js';
 import { foodRecordActions, mealRecordIcons } from './home-actions.js';
 import { loadHomeCardVisibility, type HomeCardId } from './home-card-settings.js';
-import { navigateTo, navigateToWeightDetail, navigateToXuxu } from '../../utils/router.js';
+import { navigateTo, navigateToXuxu } from '../../utils/router.js';
 import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remainingSeconds, type FastingPlan } from '../../features/fasting/fasting-store.js';
 import { loadWellnessJournal, saveMood, saveSleep, type MoodTone, type WellnessJournal } from '../../features/wellness/wellness-journal.js';
 
@@ -442,10 +444,11 @@ const startWeight = computed(
 const weightHistory = ref<Array<{ id: string; valueKg: number; recordedAt: string }>>([]);
 const currentWeight = computed(
   () =>
-    today.value?.todayRecords?.weight?.valueKg?.toFixed(1) ||
     weightHistory.value[0]?.valueKg.toFixed(1) ||
+    today.value?.todayRecords?.weight?.valueKg?.toFixed(1) ||
     '--',
 );
+const latestWeightRecord = computed(() => weightHistory.value[0] || today.value?.todayRecords?.weight || null);
 const miniWeightData = computed(() =>
   weightHistory.value
     .slice()
@@ -469,6 +472,22 @@ const miniWeightPath = computed(() =>
   miniWeightPoints.value
     .map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`)
     .join(' '),
+);
+
+const planStartDate = computed(() => today.value?.activePlan?.healthTarget?.startDate || '');
+const planTotalWeeks = computed(() => {
+  const start = today.value?.activePlan?.healthTarget?.startWeightKg;
+  const target = today.value?.activePlan?.healthTarget?.targetWeightKg;
+  if (start == null || target == null) return 0;
+  return Math.max(1, Math.ceil(Math.abs(start - target) / 0.5));
+});
+const planCurrentWeek = computed(() => {
+  if (!planStartDate.value) return 1;
+  const elapsed = Math.max(0, Date.now() - new Date(`${planStartDate.value}T00:00:00`).getTime());
+  return Math.min(planTotalWeeks.value || 1, Math.floor(elapsed / (7 * 86400000)) + 1);
+});
+const planWeekLabel = computed(() =>
+  planTotalWeeks.value ? `第 ${planCurrentWeek.value}/${planTotalWeeks.value} 周` : '设置目标',
 );
 
 const targetWeight = computed(
@@ -514,11 +533,11 @@ const recordingMessage = computed(
 );
 
 const progress = computed(() => {
-  if (!today.value?.todayRecords?.weight || !today.value?.activePlan?.healthTarget) {
+  if (currentWeight.value === '--' || !today.value?.activePlan?.healthTarget) {
     return 0;
   }
   const start = today.value.activePlan.healthTarget.startWeightKg;
-  const current = today.value.todayRecords.weight.valueKg;
+  const current = Number(currentWeight.value);
   const target = today.value.activePlan.healthTarget.targetWeightKg;
   if (start == null || target == null || start === target) return 0;
 
@@ -537,9 +556,9 @@ const go = (url: string) => {
   navigateTo(url);
 };
 
-const goToWeightDetail = () => {
-  navigateToWeightDetail();
-};
+const goToWeightProgress = () => navigateTo('/pages/weight/WeightDetailPage?view=progress');
+const goToWeightRecords = () => navigateTo('/pages/weight/WeightDetailPage?view=records');
+const openWeightRecorder = () => navigateTo('/pages/weight/WeightDetailPage?view=records&action=new');
 
 const goToFoodDetail = () => {
   navigateTo('/pages/food/FoodDetailPage');
@@ -618,9 +637,12 @@ const load = () => {
   healthLoopState.loadToday(today);
 };
 
-const loadWeightTrend = async () => {
-  const history = await loadWeightHistory().catch(() => null);
-  if (history) weightHistory.value = history;
+const loadWeightTrend = () => {
+  weightHistory.value = listLocalWeightRecords().map((record) => ({
+    id: record.id,
+    valueKg: record.weight,
+    recordedAt: record.recordedAt,
+  }));
 };
 
 const loadPersonalSignals = () => {
@@ -2351,4 +2373,8 @@ onUnmounted(stopFastingTicker);
 .edit-text { color: #537c6c; font-size: 23rpx; }
 .edit-caption { color: #91a199; }
 .error-state button { background: #e7f1ea; color: #527d69; }
+.weight-visual { position: relative; }
+.weight-progress-label { position: absolute; top: 46rpx; left: 50%; transform: translateX(-50%); color: #688476; font-size: 19rpx; white-space: nowrap; }
+.weight-add { display: flex; width: 52rpx; height: 52rpx; align-items: center; justify-content: center; padding: 0; border: 1rpx solid #d9e9df; border-radius: 50%; color: #47745f; background: #edf6f0; font-size: 32rpx; line-height: 52rpx; }
+.weight-add::after { border: 0; }
 </style>

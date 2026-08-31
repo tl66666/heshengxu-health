@@ -30,6 +30,9 @@
           <text class="summary-heading-title">今天的体重概览</text>
           <text class="summary-heading-note">轻轻记下，就能看见变化</text>
         </view>
+        <button class="plan-settings" @tap="openPlanSetup">
+          {{ targetWeight ? '调整目标' : '设置目标' }}
+        </button>
       </view>
       <view class="summary-main">
         <view class="summary-item">
@@ -55,6 +58,10 @@
         <text>开始 {{ startWeight ? startWeight.toFixed(1) : '--' }} kg</text>
         <text class="progress-message">已完成 {{ progress.toFixed(0) }}%</text>
         <text>目标 {{ targetWeight ? targetWeight.toFixed(1) : '--' }} kg</text>
+      </view>
+      <view class="plan-timeline">
+        <text>{{ planWeekLabel }}</text>
+        <text>{{ planStartLabel }}</text>
       </view>
     </view>
 
@@ -368,38 +375,51 @@
           />
         </view>
         <button class="save-button" @tap="saveWeight">保存体重记录</button>
+        <button v-if="editingRecordId" class="delete-record-button" @tap="deleteEditingRecord">
+          删除这条记录
+        </button>
+      </view>
+    </view>
+
+    <view v-if="showSuccess" class="dialog-mask" @tap="showSuccess = false">
+      <view class="success-sheet" @tap.stop>
+        <view class="success-mark">✓</view>
+        <text class="success-title">已记录 {{ savedWeight.toFixed(1) }} kg</text>
+        <text class="success-copy">{{ saveComparisonText }}</text>
+        <view class="success-metrics">
+          <view
+            ><text>{{ bmi }}</text
+            ><text>BMI · {{ bmiStatus }}</text></view
+          >
+          <view
+            ><text>{{ progress.toFixed(0) }}%</text><text>目标进度</text></view
+          >
+        </view>
+        <button class="success-done" @tap="showSuccess = false">完成</button>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
+import { loadLocalPlan, loadLocalProfile } from '../../features/health-loop/local-demo.js';
 import {
-  createWeightRecord,
-  loadHealthProfile,
-  loadWeightHistory,
-  replaceRecord as replaceWeightRecord,
-} from '../../features/health-loop/health-loop.service.js';
+  createLocalWeightRecord,
+  deleteLocalWeightRecord,
+  listLocalWeightRecords,
+  updateLocalWeightRecord,
+  type LocalWeightRecord,
+} from '../../features/weight/weight-records.local.js';
 
-type WeightRecord = { id: string; weight: number; recordedAt: string; note?: string };
-const STORAGE_KEY = 'heban-weight-records';
-const readRecords = (): WeightRecord[] => {
-  try {
-    const value = uni.getStorageSync(STORAGE_KEY);
-    if (Array.isArray(value) && value.length) return value as WeightRecord[];
-  } catch {
-    /* use seed data */
-  }
-  return [];
-};
+type WeightRecord = LocalWeightRecord;
 
-const records = ref<WeightRecord[]>(
-  readRecords().sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt)),
-);
+const records = ref<WeightRecord[]>(listLocalWeightRecords());
 const profile = ref<{ heightCm: number | null; weightKg: number | null } | null>(null);
+const localPlan = ref(loadLocalPlan());
 const loadingRecords = ref(true);
 const selectedRange = ref<'7' | '30' | '90'>('30');
 const activeView = ref<'progress' | 'data' | 'records'>('progress');
@@ -408,6 +428,16 @@ const editingRecordId = ref<string | null>(null);
 const inputWeight = ref('');
 const inputNote = ref('');
 const recordedDate = ref('');
+const showSuccess = ref(false);
+const savedWeight = ref(0);
+const savedDelta = ref<number | null>(null);
+const saveComparisonText = computed(() =>
+  savedDelta.value === null
+    ? '这是你的第一条体重记录'
+    : Math.abs(savedDelta.value) < 0.05
+      ? '与上一次记录基本持平'
+      : `比上一次${savedDelta.value < 0 ? '减少' : '增加'} ${Math.abs(savedDelta.value).toFixed(1)} kg`,
+);
 const recordFilter = ref<'all' | '30' | '90'>('all');
 const recordFilters = [
   { label: '全部', value: 'all' as const },
@@ -426,16 +456,23 @@ const viewTabs = [
 ];
 const startWeight = computed(
   () =>
+    localPlan.value?.healthTarget?.startWeightKg ??
     healthLoopState.today.value?.activePlan?.healthTarget?.startWeightKg ??
     records.value[records.value.length - 1]?.weight ??
     profile.value?.weightKg ??
     0,
 );
 const targetWeight = computed(
-  () => healthLoopState.today.value?.activePlan?.healthTarget?.targetWeightKg ?? 0,
+  () =>
+    localPlan.value?.healthTarget?.targetWeightKg ??
+    healthLoopState.today.value?.activePlan?.healthTarget?.targetWeightKg ??
+    0,
 );
 const targetDirection = computed(
-  () => healthLoopState.today.value?.activePlan?.healthTarget?.direction ?? 'lose',
+  () =>
+    localPlan.value?.healthTarget?.direction ??
+    healthLoopState.today.value?.activePlan?.healthTarget?.direction ??
+    'lose',
 );
 const heightCm = computed(() => profile.value?.heightCm ?? 0);
 
@@ -448,7 +485,15 @@ const bmi = computed(() =>
     : '--',
 );
 const bmiStatus = computed(() =>
-  bmi.value === '--' ? '待完善身高数据' : Number(bmi.value) < 24 ? '健康范围' : '请继续观察',
+  bmi.value === '--'
+    ? '待完善身高数据'
+    : Number(bmi.value) < 18.5
+      ? '偏轻'
+      : Number(bmi.value) < 24
+        ? '健康范围'
+        : Number(bmi.value) < 28
+          ? '偏高'
+          : '较高',
 );
 const progress = computed(() =>
   startWeight.value > 0 && targetWeight.value > 0 && startWeight.value !== targetWeight.value
@@ -467,7 +512,52 @@ const progress = computed(() =>
       )
     : 0,
 );
-const targetDate = computed(() => (targetWeight.value ? '根据当前节奏估算' : '先设置目标体重'));
+const planStartDate = computed(
+  () =>
+    localPlan.value?.healthTarget.startDate ||
+    healthLoopState.today.value?.activePlan?.healthTarget.startDate ||
+    '',
+);
+const planTotalWeeks = computed(() => {
+  if (!startWeight.value || !targetWeight.value) return 0;
+  return Math.max(1, Math.ceil(Math.abs(startWeight.value - targetWeight.value) / 0.5));
+});
+const planCurrentWeek = computed(() => {
+  if (!planStartDate.value) return 1;
+  const elapsed = Math.max(0, Date.now() - new Date(`${planStartDate.value}T00:00:00`).getTime());
+  return Math.min(planTotalWeeks.value || 1, Math.floor(elapsed / (7 * 86400000)) + 1);
+});
+const planWeekLabel = computed(() =>
+  planTotalWeeks.value
+    ? `第 ${planCurrentWeek.value}/${planTotalWeeks.value} 周`
+    : '尚未设置体重目标',
+);
+const planStartLabel = computed(() =>
+  planStartDate.value
+    ? `${planStartDate.value.replaceAll('-', '.')} 开始`
+    : '设置目标后开始计算周期',
+);
+const chronologicalRecords = computed(() =>
+  records.value.slice().sort((a, b) => +new Date(a.recordedAt) - +new Date(b.recordedAt)),
+);
+const observedWeeklyChange = computed(() => {
+  if (chronologicalRecords.value.length < 3) return null;
+  const first = chronologicalRecords.value[0];
+  const last = chronologicalRecords.value[chronologicalRecords.value.length - 1];
+  if (!first || !last) return null;
+  const weeks = (+new Date(last.recordedAt) - +new Date(first.recordedAt)) / (7 * 86400000);
+  if (weeks < 1) return null;
+  const change =
+    targetDirection.value === 'gain' ? last.weight - first.weight : first.weight - last.weight;
+  return change / weeks;
+});
+const targetDate = computed(() =>
+  !targetWeight.value
+    ? '先设置目标体重'
+    : observedWeeklyChange.value && observedWeeklyChange.value > 0
+      ? forecastDate.value
+      : '积累 3 次跨周记录后估算',
+);
 const remainingKg = computed(() =>
   currentWeight.value && targetWeight.value
     ? Math.max(
@@ -483,15 +573,19 @@ const forecastDate = computed(() =>
     ? '记录体重后开始预测'
     : targetWeight.value && remainingKg.value <= 0
       ? '已经到达目标'
-      : targetWeight.value
-        ? '根据记录动态估算'
-        : '等待目标体重',
+      : targetWeight.value && observedWeeklyChange.value && observedWeeklyChange.value > 0
+        ? formatForecastDate(Math.ceil((remainingKg.value / observedWeeklyChange.value) * 7))
+        : targetWeight.value
+          ? '等待更多真实记录'
+          : '等待目标体重',
 );
 const forecastNote = computed(() => {
   if (!currentWeight.value) return '记录 3 次以上后，预测会更准确';
   if (!targetWeight.value) return '设置目标体重后，这里会显示预计进度';
   if (remainingKg.value <= 0) return '已达到目标，保持现在的节奏就很好';
-  return `还需要 ${remainingKg.value.toFixed(1)} kg，保持每周 0.4 kg 的舒适节奏`;
+  if (!observedWeeklyChange.value || observedWeeklyChange.value <= 0)
+    return `还需要 ${remainingKg.value.toFixed(1)} kg，积累跨周记录后再估算速度`;
+  return `还需要 ${remainingKg.value.toFixed(1)} kg，最近平均每周变化 ${observedWeeklyChange.value.toFixed(2)} kg`;
 });
 const latestRecordLabel = computed(() =>
   records.value[0] ? `${formatDate(records.value[0].recordedAt)} 更新` : '还没有记录',
@@ -593,7 +687,6 @@ const insightText = computed(() =>
     ? '小絮说：曲线在向下走，今天也值得被好好夸奖。'
     : '小絮说：体重有波动很正常，先照顾好今天的自己。',
 );
-const visibleRecords = computed(() => records.value.slice(0, 4));
 const recordList = computed(() => {
   if (recordFilter.value === 'all') return records.value;
   const cutoff = Date.now() - Number(recordFilter.value) * 86400000;
@@ -603,8 +696,8 @@ const gridLines = [28, 60, 92, 124];
 const milestones = computed(() => [
   {
     title: '连续记录',
-    note: `${Math.min(records.value.length, 7)} / 7 天`,
-    achieved: records.value.length >= 5,
+    note: `${recordStreak.value} 天`,
+    achieved: recordStreak.value >= 3,
   },
   {
     title: targetDirection.value === 'gain' ? '稳步增加 1kg' : '轻盈 1kg',
@@ -625,13 +718,25 @@ const milestones = computed(() => [
     achieved: progress.value >= 60,
   },
 ]);
-const rhythmScore = computed(() => Math.min(7, records.value.length));
+const recordDates = computed(
+  () => new Set(records.value.map((record) => localRecordDate(record.recordedAt))),
+);
+const recordStreak = computed(() => {
+  let streak = 0;
+  const cursor = new Date();
+  while (recordDates.value.has(localRecordDate(cursor.toISOString()))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+});
+const rhythmScore = computed(() => weeklyRhythm.value.filter((day) => day.filled).length);
 const weeklyRhythm = computed(() => {
   const labels = ['一', '二', '三', '四', '五', '六', '日'];
   const todayIndex = (new Date().getDay() + 6) % 7;
   return labels.map((label, index) => ({
     label,
-    filled: index >= Math.max(0, todayIndex - rhythmScore.value + 1) && index <= todayIndex,
+    filled: recordDates.value.has(weekDate(index)),
     today: index === todayIndex,
   }));
 });
@@ -641,8 +746,8 @@ const bodyMetrics = computed(() => [
     unit: 'kg/m²',
     value: bmi.value,
     status: bmiStatus.value,
-    tone: Number(bmi.value) < 24 ? 'good' : 'warm',
-    percent: Math.min(100, (Number(bmi.value) / 30) * 100),
+    tone: bmi.value === '--' ? 'soft' : bmiStatus.value === '健康范围' ? 'good' : 'warm',
+    percent: bmi.value === '--' ? 0 : Math.min(100, (Number(bmi.value) / 30) * 100),
     range: '健康范围 18.5 - 24.0',
   },
   {
@@ -725,27 +830,7 @@ function editRecord(record: WeightRecord) {
   recordedDate.value = new Date(record.recordedAt).toISOString().slice(0, 10);
   showDialog.value = true;
 }
-function saveLocalWeight() {
-  const value = Number(inputWeight.value);
-  if (!value || value < 20 || value > 300) {
-    uni.showToast({ title: '请输入正确的体重', icon: 'none' });
-    return;
-  }
-  records.value = [
-    ...records.value,
-    {
-      id: `r-${Date.now()}`,
-      weight: Number(value.toFixed(1)),
-      recordedAt: recordedDate.value
-        ? new Date(`${recordedDate.value}T08:00:00`).toISOString()
-        : new Date().toISOString(),
-      note: inputNote.value || '晨起空腹',
-    },
-  ].sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
-  uni.setStorageSync(STORAGE_KEY, records.value);
-  closeDialog();
-}
-async function saveWeight() {
+function saveWeight() {
   const value = Number(inputWeight.value);
   if (!value || value < 20 || value > 300) {
     uni.showToast({ title: '请输入正确的体重', icon: 'none' });
@@ -755,7 +840,7 @@ async function saveWeight() {
     ? records.value.find((record) => record.id === editingRecordId.value)
     : undefined;
   const payload = {
-    valueKg: Number(value.toFixed(1)),
+    weight: Number(value.toFixed(1)),
     recordedAt: recordedDate.value
       ? new Date(
           `${recordedDate.value}T${previous ? new Date(previous.recordedAt).toTimeString().slice(0, 8) : '08:00:00'}`,
@@ -763,91 +848,44 @@ async function saveWeight() {
       : new Date().toISOString(),
     note: inputNote.value || undefined,
   };
-  try {
-    if (editingRecordId.value) {
-      const replaced = (await replaceWeightRecord('weight', editingRecordId.value, payload)) as {
-        id: string;
-        valueKg: number;
-        recordedAt: string;
-        note: string | null;
-      };
-      records.value = records.value
-        .map((record) =>
-          record.id === editingRecordId.value
-            ? {
-                id: replaced.id,
-                weight: replaced.valueKg,
-                recordedAt: replaced.recordedAt,
-                note: replaced.note || undefined,
-              }
-            : record,
-        )
-        .sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
-      uni.setStorageSync(STORAGE_KEY, records.value);
-      uni.showToast({ title: '已更新记录', icon: 'success' });
-      closeDialog();
-      return;
-    }
-    const saved = await createWeightRecord(payload);
-    records.value = [
-      ...records.value,
-      {
-        id: saved.id,
-        weight: saved.valueKg,
-        recordedAt: saved.recordedAt,
-        note: saved.note || undefined,
-      },
-    ].sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
-    uni.setStorageSync(STORAGE_KEY, records.value);
-    uni.showToast({ title: '记录成功', icon: 'success' });
-    closeDialog();
-  } catch {
-    if (editingRecordId.value) {
-      records.value = records.value
-        .map((record) =>
-          record.id === editingRecordId.value
-            ? {
-                ...record,
-                weight: payload.valueKg,
-                recordedAt: payload.recordedAt,
-                note: payload.note,
-              }
-            : record,
-        )
-        .sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
-      uni.setStorageSync(STORAGE_KEY, records.value);
-      uni.showToast({ title: '网络不可用，已更新本地记录', icon: 'none' });
-      closeDialog();
-      return;
-    }
-    saveLocalWeight();
-    uni.showToast({ title: '网络不可用，已保存到本地', icon: 'none' });
-  }
+  const comparison = records.value.find((record) => record.id !== editingRecordId.value);
+  savedDelta.value = comparison ? payload.weight - comparison.weight : null;
+  const saved = editingRecordId.value
+    ? updateLocalWeightRecord(editingRecordId.value, payload)
+    : createLocalWeightRecord(payload);
+  records.value = listLocalWeightRecords();
+  savedWeight.value = saved.weight;
+  closeDialog();
+  showSuccess.value = true;
+  healthLoopState.loadToday(localDate(), { force: true });
 }
 
-async function loadWeightData() {
-  const cached = readRecords();
-  if (cached.length)
-    records.value = cached.sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
-  try {
-    const [profileResult, historyResult] = await Promise.all([
-      loadHealthProfile().catch(() => null),
-      loadWeightHistory().catch(() => null),
-      healthLoopState.loadToday(localDate()),
-    ]);
-    if (profileResult) profile.value = profileResult;
-    if (historyResult) {
-      records.value = historyResult.map((item) => ({
-        id: item.id,
-        weight: item.valueKg,
-        recordedAt: item.recordedAt,
-        note: item.note || undefined,
-      }));
-      uni.setStorageSync(STORAGE_KEY, records.value);
-    }
-  } finally {
-    loadingRecords.value = false;
-  }
+function deleteEditingRecord() {
+  const id = editingRecordId.value;
+  if (!id) return;
+  uni.showModal({
+    title: '删除这条体重记录？',
+    content: '删除后趋势和目标进度会同步更新',
+    confirmColor: '#b56f66',
+    success: (result) => {
+      if (!result.confirm) return;
+      deleteLocalWeightRecord(id);
+      records.value = listLocalWeightRecords();
+      closeDialog();
+      uni.showToast({ title: '已删除', icon: 'success' });
+      healthLoopState.loadToday(localDate(), { force: true });
+    },
+  });
+}
+
+function loadWeightData() {
+  records.value = listLocalWeightRecords();
+  const localProfile = loadLocalProfile();
+  profile.value = localProfile
+    ? { heightCm: localProfile.heightCm, weightKg: localProfile.weightKg }
+    : null;
+  localPlan.value = loadLocalPlan();
+  loadingRecords.value = false;
 }
 
 function localDate() {
@@ -855,7 +893,34 @@ function localDate() {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
-onMounted(loadWeightData);
+function localRecordDate(value: string) {
+  const date = new Date(value);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+function weekDate(index: number) {
+  const now = new Date();
+  const mondayOffset = (now.getDay() + 6) % 7;
+  now.setDate(now.getDate() - mondayOffset + index);
+  return localRecordDate(now.toISOString());
+}
+
+function formatForecastDate(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+}
+
+function openPlanSetup() {
+  uni.navigateTo({ url: '/pages/plan-setup/PlanSetupPage' });
+}
+
+onLoad((options) => {
+  if (options?.view === 'records') activeView.value = 'records';
+  if (options?.view === 'data') activeView.value = 'data';
+  if (options?.action === 'new') setTimeout(openNewRecord, 120);
+});
+onShow(loadWeightData);
 </script>
 
 <style scoped>
@@ -979,6 +1044,18 @@ onMounted(loadWeightData);
   align-items: center;
   gap: 12rpx;
   margin-bottom: 18rpx;
+}
+.plan-settings {
+  margin-left: auto;
+  padding: 0;
+  color: #628271;
+  border: 0;
+  background: transparent;
+  font-size: 19rpx;
+  line-height: 1;
+}
+.plan-settings::after {
+  border: 0;
 }
 .summary-heading image {
   width: 68rpx;
@@ -2112,6 +2189,102 @@ onMounted(loadWeightData);
   background: #739d7c;
   box-shadow: 0 8rpx 16rpx rgba(106, 150, 116, 0.18);
   font-size: 24rpx;
+  line-height: 76rpx;
+}
+</style>
+<style scoped>
+.plan-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #eee7df;
+  color: #71897b;
+  font-size: 18rpx;
+}
+.plan-timeline text:last-child {
+  color: #a1948d;
+}
+.delete-record-button {
+  width: 100%;
+  height: 68rpx;
+  margin-top: 12rpx;
+  border: 0;
+  color: #b3766d;
+  background: transparent;
+  font-size: 21rpx;
+  line-height: 68rpx;
+}
+.delete-record-button::after {
+  border: 0;
+}
+.success-sheet {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 38rpx 28rpx calc(38rpx + env(safe-area-inset-bottom));
+  border-radius: 28rpx 28rpx 0 0;
+  background: #fbfdf9;
+  text-align: center;
+}
+.success-mark {
+  display: flex;
+  width: 72rpx;
+  height: 72rpx;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18rpx;
+  border-radius: 50%;
+  color: #fff;
+  background: #78a984;
+  font-size: 34rpx;
+}
+.success-title {
+  display: block;
+  color: #405748;
+  font-size: 32rpx;
+  font-weight: 750;
+}
+.success-copy {
+  display: block;
+  margin-top: 10rpx;
+  color: #84968a;
+  font-size: 21rpx;
+}
+.success-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 28rpx;
+  border-top: 1rpx solid #e5ece5;
+  border-bottom: 1rpx solid #e5ece5;
+}
+.success-metrics view {
+  padding: 22rpx 12rpx;
+}
+.success-metrics view + view {
+  border-left: 1rpx solid #e5ece5;
+}
+.success-metrics text {
+  display: block;
+}
+.success-metrics text:first-child {
+  color: #496452;
+  font-size: 30rpx;
+  font-weight: 750;
+}
+.success-metrics text:last-child {
+  margin-top: 6rpx;
+  color: #91a096;
+  font-size: 18rpx;
+}
+.success-done {
+  width: 100%;
+  height: 76rpx;
+  margin-top: 28rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  background: #709a79;
+  font-size: 23rpx;
   line-height: 76rpx;
 }
 </style>
