@@ -312,7 +312,12 @@ async function load(page = 1) {
     if (page === 1 && !query.value && !selectedHealthLight.value) {
       const keywords = selectedCategory.value ? (commonByCategory[categories.value.find((cat) => cat.id === selectedCategory.value)?.slug || ''] || []) : commonFoodKeywords;
       const commonResults = await Promise.all(keywords.map((keyword) => searchFoods({ query: keyword, categoryId: selectedCategory.value || undefined, pageSize: 2 })));
-      const common = commonResults.flatMap((item) => item.items);
+      const common = commonResults.flatMap((item, index) => item.items.map((food) => ({ food, keyword: keywords[index] })))
+        .sort((a, b) => {
+          const score = (entry: { food: FoodItem; keyword: string }) => entry.food.name === entry.keyword ? 0 : entry.food.name.startsWith(entry.keyword) ? 1 : 2;
+          return score(a) - score(b);
+        })
+        .map((entry) => entry.food);
       const seen = new Set<string>();
       foods.value = [...common, ...result.items].filter((item) => !seen.has(item.id) && seen.add(item.id)).slice(0, pageSize);
     } else {
