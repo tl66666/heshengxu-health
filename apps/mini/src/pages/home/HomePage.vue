@@ -196,7 +196,7 @@
         <button
           class="grid-item card activity-card"
           hover-class="button-hover"
-          @tap="openRecordAction('/pages/records/RecordsPage?type=activity')"
+          @tap="go('/pages/activity/ActivityDetailPage')"
         >
           <view class="grid-top">
             <text class="grid-title">运动</text>

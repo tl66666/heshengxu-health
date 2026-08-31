@@ -1,25 +1,501 @@
 <template>
   <view class="page">
-    <view class="nav"><button class="back" @tap="goBack">‹</button><view><text class="title">心情记录</text><text class="date">{{ dateLabel }}</text></view><view class="nav-space" /></view>
-    <view class="intro"><view class="art-stage"><image src="/static/illustrations/program-mood.png" mode="aspectFit" /></view><view class="intro-copy"><text>给今天的心情留一页</text><text>不用解释得很完整，先把此刻收好</text></view></view>
-    <view class="section"><text class="section-title">此刻更接近哪一种感觉？</text><text class="section-sub">选一个最像你的，不需要想太久</text><view class="mood-grid"><button v-for="item in options" :key="item.value" :class="['mood-choice', item.value, { selected: tone === item.value }]" @tap="tone = item.value"><view class="mood-dot" />{{ item.label }}</button></view></view>
-    <view class="section"><view class="section-title-row"><text class="section-title">留一句给自己的话</text><text class="optional">选填</text></view><textarea v-model="note" class="note" maxlength="240" placeholder="比如：今天终于把一件拖了很久的事做完了" /><text class="count">{{ note.length }}/240</text></view>
+    <view class="nav"
+      ><button class="back" @tap="goBack">‹</button
+      ><view
+        ><text class="title">心情记录</text><text class="date">{{ dateLabel }}</text></view
+      ><view class="nav-space"
+    /></view>
+    <view class="intro"
+      ><view class="art-stage"
+        ><image src="/static/illustrations/program-mood-crop.png" mode="aspectFit" /></view
+      ><view class="intro-copy"
+        ><text>给今天的心情留一页</text><text>不用解释得很完整，先把此刻收好</text></view
+      ></view
+    >
+    <view class="section"
+      ><text class="section-title">此刻更接近哪一种感觉？</text
+      ><text class="section-sub">选一个最像你的，不需要想太久</text
+      ><view class="mood-grid"
+        ><button
+          v-for="item in options"
+          :key="item.value"
+          :class="['mood-choice', item.value, { selected: tone === item.value }]"
+          @tap="tone = item.value"
+        >
+          <view class="mood-dot" />{{ item.label }}
+        </button></view
+      ></view
+    >
+    <view class="section"
+      ><view class="section-title-row"
+        ><text class="section-title">留一句给自己的话</text><text class="optional">选填</text></view
+      ><textarea
+        v-model="note"
+        class="note"
+        maxlength="240"
+        placeholder="比如：今天终于把一件拖了很久的事做完了"
+      /><text class="count">{{ note.length }}/240</text></view
+    >
     <button class="save" @tap="save">保存今天的心情</button>
-    <view class="history"><view class="history-head"><text>最近心情</text><text>{{ history.length }} 条</text></view><view v-if="history.length" v-for="item in history" :key="item.date" class="history-row"><view><text>{{ item.date }}</text><text>{{ moodLabel(item.mood?.tone) }}</text></view><text class="note-preview">{{ item.mood?.note || '没有写下文字' }}</text></view><view v-else class="empty">保存后，这里会出现你的心情轨迹。</view></view>
+    <view class="history"
+      ><view class="history-head"
+        ><text>最近心情</text><text>{{ history.length }} 条</text></view
+      ><view v-if="history.length" v-for="item in history" :key="item.date" class="history-row"
+        ><view
+          ><text>{{ item.date }}</text
+          ><text>{{ moodLabel(item.mood?.tone) }}</text></view
+        ><text class="note-preview">{{ item.mood?.note || '没有写下文字' }}</text></view
+      ><view v-else class="empty">保存后，这里会出现你的心情轨迹。</view></view
+    >
   </view>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
-import { listWellnessJournals, loadWellnessJournal, saveMood, type MoodTone } from '../../features/wellness/wellness-journal.js';
-const now = new Date(); const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10); const dateLabel = `${now.getMonth() + 1}月${now.getDate()}日`;
-const options: Array<{ value: MoodTone; label: string }> = [{ value: 'calm', label: '平静' }, { value: 'bright', label: '开心' }, { value: 'tired', label: '疲惫' }, { value: 'low', label: '低落' }, { value: 'anxious', label: '有点焦虑' }];
-const existing = loadWellnessJournal(); const tone = ref<MoodTone>(existing.mood?.tone || 'calm'); const note = ref(existing.mood?.note || ''); const history = ref(listWellnessJournals().filter((item) => item.mood));
-function moodLabel(value?: MoodTone) { return options.find((item) => item.value === value)?.label || '未记录'; }
-function save() { saveMood({ tone: tone.value, note: note.value.trim() }, today); history.value = listWellnessJournals().filter((item) => item.mood); uni.showToast({ title: '心情已保存', icon: 'success' }); }
-function goBack() { uni.navigateBack(); } onShow(() => { history.value = listWellnessJournals().filter((item) => item.mood); });
+import {
+  listWellnessJournals,
+  loadWellnessJournal,
+  saveMood,
+  type MoodTone,
+} from '../../features/wellness/wellness-journal.js';
+const now = new Date();
+const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const dateLabel = `${now.getMonth() + 1}月${now.getDate()}日`;
+const options: Array<{ value: MoodTone; label: string }> = [
+  { value: 'calm', label: '平静' },
+  { value: 'bright', label: '开心' },
+  { value: 'tired', label: '疲惫' },
+  { value: 'low', label: '低落' },
+  { value: 'anxious', label: '有点焦虑' },
+];
+const existing = loadWellnessJournal();
+const tone = ref<MoodTone>(existing.mood?.tone || 'calm');
+const note = ref(existing.mood?.note || '');
+const history = ref(listWellnessJournals().filter((item) => item.mood));
+function moodLabel(value?: MoodTone) {
+  return options.find((item) => item.value === value)?.label || '未记录';
+}
+function save() {
+  saveMood({ tone: tone.value, note: note.value.trim() }, today);
+  history.value = listWellnessJournals().filter((item) => item.mood);
+  uni.showToast({ title: '心情已保存', icon: 'success' });
+}
+function goBack() {
+  uni.navigateBack();
+}
+onShow(() => {
+  history.value = listWellnessJournals().filter((item) => item.mood);
+});
 </script>
 <style scoped>
-.page{min-height:100vh;box-sizing:border-box;padding:calc(112rpx + env(safe-area-inset-top)) 28rpx calc(40rpx + env(safe-area-inset-bottom));background:#f7fafb;color:#465568}.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:24rpx}.back,.nav-space{width:64rpx;height:64rpx}.back{padding:0;color:#435367;border:0;background:transparent;font-size:56rpx;line-height:64rpx}.title{display:block;text-align:center;font-size:34rpx;font-weight:700}.date{display:block;margin-top:4rpx;color:#9aa8b0;font-size:19rpx;text-align:center}.intro{overflow:hidden;border-radius:26rpx;background:#eef5fb}.art-stage{width:100%;height:300rpx;display:flex;align-items:center;justify-content:center;background:#eef5fb}.art-stage image{width:100%;height:100%;opacity:.96}.intro-copy{padding:18rpx 24rpx 20rpx;background:#f8fbff}.intro-copy text{display:block}.intro-copy text:first-child{color:#4b6381;font-size:26rpx;font-weight:700}.intro-copy text:last-child{margin-top:8rpx;color:#8e9eaa;font-size:19rpx;line-height:1.45}.section{margin-top:20rpx;padding:26rpx 24rpx;border:1rpx solid #e5ecf0;border-radius:24rpx;background:#fff;box-shadow:0 8rpx 24rpx rgba(73,99,121,.05)}.section-title{display:block;color:#516376;font-size:26rpx;font-weight:700}.section-sub{display:block;margin-top:6rpx;color:#9caab3;font-size:19rpx}.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12rpx;margin-top:18rpx}.mood-choice{min-height:68rpx;display:flex;align-items:center;justify-content:center;gap:8rpx;border:1rpx solid #e1e9ef;border-radius:16rpx;color:#82909b;background:#fff;font-size:20rpx}.mood-choice.selected{color:#637dbd;border-color:#abbce8;background:#f2f5ff}.mood-dot{width:14rpx;height:14rpx;border-radius:50%;background:#aab9e4}.mood-choice.bright .mood-dot{background:#f3c76e}.mood-choice.tired .mood-dot{background:#b8c2cc}.mood-choice.low .mood-dot{background:#d99daa}.mood-choice.anxious .mood-dot{background:#9fcfc2}.section-title-row{display:flex;justify-content:space-between}.optional{color:#aab5bd;font-size:18rpx}.note{width:100%;min-height:190rpx;box-sizing:border-box;margin-top:16rpx;padding:16rpx;border:1rpx solid #e1e9ef;border-radius:16rpx;color:#536579;background:#fbfdff;font-size:20rpx;line-height:1.5}.count{display:block;margin-top:8rpx;color:#a4b0b8;font-size:18rpx;text-align:right}.save{width:100%;height:88rpx;display:flex;align-items:center;justify-content:center;margin-top:24rpx;border-radius:24rpx;color:#fff;background:#8498d1;font-size:25rpx;font-weight:600}.history{margin-top:28rpx}.history-head{display:flex;justify-content:space-between;color:#526579;font-size:24rpx;font-weight:700}.history-head text:last-child{color:#a3afb8;font-size:19rpx;font-weight:400}.history-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx;margin-top:12rpx;padding:18rpx 12rpx;border:1rpx solid #e5ecf0;border-radius:18rpx;background:#fff}.history-row text{display:block}.history-main{flex:1}.history-date{color:#627587;font-size:20rpx}.history-meta{margin-top:5rpx;color:#8e9eaa;font-size:18rpx}.note-preview{max-width:48%;color:#718292;font-size:18rpx;line-height:1.45;word-break:break-all}.empty{margin-top:14rpx;padding:22rpx 0;color:#a4b0b8;font-size:19rpx;text-align:center}
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: calc(112rpx + env(safe-area-inset-top)) 28rpx calc(40rpx + env(safe-area-inset-bottom));
+  background: #f7fafb;
+  color: #465568;
+}
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+.back,
+.nav-space {
+  width: 64rpx;
+  height: 64rpx;
+}
+.back {
+  padding: 0;
+  color: #435367;
+  border: 0;
+  background: transparent;
+  font-size: 56rpx;
+  line-height: 64rpx;
+}
+.title {
+  display: block;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.date {
+  display: block;
+  margin-top: 4rpx;
+  color: #9aa8b0;
+  font-size: 19rpx;
+  text-align: center;
+}
+.intro {
+  overflow: hidden;
+  border-radius: 26rpx;
+  background: #eef5fb;
+}
+.art-stage {
+  width: 100%;
+  height: 300rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef5fb;
+}
+.art-stage image {
+  width: 100%;
+  height: 100%;
+  opacity: 0.96;
+}
+.intro-copy {
+  padding: 18rpx 24rpx 20rpx;
+  background: #f8fbff;
+}
+.intro-copy text {
+  display: block;
+}
+.intro-copy text:first-child {
+  color: #4b6381;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.intro-copy text:last-child {
+  margin-top: 8rpx;
+  color: #8e9eaa;
+  font-size: 19rpx;
+  line-height: 1.45;
+}
+.section {
+  margin-top: 20rpx;
+  padding: 26rpx 24rpx;
+  border: 1rpx solid #e5ecf0;
+  border-radius: 24rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(73, 99, 121, 0.05);
+}
+.section-title {
+  display: block;
+  color: #516376;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.section-sub {
+  display: block;
+  margin-top: 6rpx;
+  color: #9caab3;
+  font-size: 19rpx;
+}
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+.mood-choice {
+  min-height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  border: 1rpx solid #e1e9ef;
+  border-radius: 16rpx;
+  color: #82909b;
+  background: #fff;
+  font-size: 20rpx;
+}
+.mood-choice.selected {
+  color: #637dbd;
+  border-color: #abbce8;
+  background: #f2f5ff;
+}
+.mood-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #aab9e4;
+}
+.mood-choice.bright .mood-dot {
+  background: #f3c76e;
+}
+.mood-choice.tired .mood-dot {
+  background: #b8c2cc;
+}
+.mood-choice.low .mood-dot {
+  background: #d99daa;
+}
+.mood-choice.anxious .mood-dot {
+  background: #9fcfc2;
+}
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+}
+.optional {
+  color: #aab5bd;
+  font-size: 18rpx;
+}
+.note {
+  width: 100%;
+  min-height: 190rpx;
+  box-sizing: border-box;
+  margin-top: 16rpx;
+  padding: 16rpx;
+  border: 1rpx solid #e1e9ef;
+  border-radius: 16rpx;
+  color: #536579;
+  background: #fbfdff;
+  font-size: 20rpx;
+  line-height: 1.5;
+}
+.count {
+  display: block;
+  margin-top: 8rpx;
+  color: #a4b0b8;
+  font-size: 18rpx;
+  text-align: right;
+}
+.save {
+  width: 100%;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24rpx;
+  border-radius: 24rpx;
+  color: #fff;
+  background: #8498d1;
+  font-size: 25rpx;
+  font-weight: 600;
+}
+.history {
+  margin-top: 28rpx;
+}
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  color: #526579;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.history-head text:last-child {
+  color: #a3afb8;
+  font-size: 19rpx;
+  font-weight: 400;
+}
+.history-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 12rpx;
+  padding: 18rpx 12rpx;
+  border: 1rpx solid #e5ecf0;
+  border-radius: 18rpx;
+  background: #fff;
+}
+.history-row text {
+  display: block;
+}
+.history-main {
+  flex: 1;
+}
+.history-date {
+  color: #627587;
+  font-size: 20rpx;
+}
+.history-meta {
+  margin-top: 5rpx;
+  color: #8e9eaa;
+  font-size: 18rpx;
+}
+.note-preview {
+  max-width: 48%;
+  color: #718292;
+  font-size: 18rpx;
+  line-height: 1.45;
+  word-break: break-all;
+}
+.empty {
+  margin-top: 14rpx;
+  padding: 22rpx 0;
+  color: #a4b0b8;
+  font-size: 19rpx;
+  text-align: center;
+}
 </style>
-<style scoped>button{box-sizing:border-box;line-height:1;white-space:nowrap}</style>
+<style scoped>
+.page {
+  padding: calc(96rpx + env(safe-area-inset-top)) 24rpx calc(44rpx + env(safe-area-inset-bottom));
+  background: #f6f5ef;
+  color: #4a574f;
+}
+.nav {
+  margin-bottom: 18rpx;
+}
+.back {
+  width: 58rpx;
+  height: 58rpx;
+  color: #64736a;
+  font-size: 48rpx;
+  line-height: 58rpx;
+}
+.nav-space {
+  width: 58rpx;
+  height: 58rpx;
+}
+.title {
+  color: #4b5a50;
+  font-size: 32rpx;
+  letter-spacing: 0;
+}
+.date {
+  color: #a7aaa0;
+  font-size: 18rpx;
+}
+.intro {
+  border: 1rpx solid #ebe8dd;
+  border-radius: 22rpx;
+  background: #eeeade;
+  box-shadow: 0 8rpx 22rpx rgba(106, 102, 78, 0.06);
+}
+.art-stage {
+  height: 620rpx;
+  background: #eeeade;
+}
+.art-stage image {
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: multiply;
+}
+.intro-copy {
+  padding: 20rpx 22rpx 22rpx;
+  background: #fffdf7;
+}
+.intro-copy text:first-child {
+  color: #4e5f52;
+  font-size: 28rpx;
+}
+.intro-copy text:last-child {
+  margin-top: 8rpx;
+  color: #989b90;
+  font-size: 19rpx;
+}
+.section {
+  margin-top: 16rpx;
+  padding: 24rpx 22rpx;
+  border: 1rpx solid #e8e5da;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+}
+.section-title {
+  color: #526157;
+  font-size: 25rpx;
+}
+.section-sub {
+  color: #a09f95;
+  font-size: 18rpx;
+}
+.mood-grid {
+  gap: 10rpx;
+  margin-top: 16rpx;
+}
+.mood-choice {
+  min-height: 64rpx;
+  border-color: #e4e3da;
+  border-radius: 14rpx;
+  color: #81877f;
+  background: #fdfcf8;
+  font-size: 19rpx;
+}
+.mood-choice.selected {
+  border-color: #a2bca5;
+  color: #4f765c;
+  background: #edf4eb;
+}
+.mood-dot {
+  width: 13rpx;
+  height: 13rpx;
+  background: #aec4ae;
+}
+.mood-choice.calm .mood-dot {
+  background: #9dbfa8;
+}
+.mood-choice.bright .mood-dot {
+  background: #e6bf78;
+}
+.mood-choice.tired .mood-dot {
+  background: #b9bcb3;
+}
+.mood-choice.low .mood-dot {
+  background: #d39b9b;
+}
+.mood-choice.anxious .mood-dot {
+  background: #9bbab8;
+}
+.note {
+  min-height: 162rpx;
+  border-color: #e4e3da;
+  border-radius: 14rpx;
+  background: #fdfcf8;
+  color: #59675d;
+  font-size: 19rpx;
+}
+.count {
+  color: #aaa99f;
+  font-size: 17rpx;
+}
+.save {
+  height: 78rpx;
+  margin-top: 18rpx;
+  border-radius: 17rpx;
+  background: #78967c;
+  box-shadow: 0 8rpx 18rpx rgba(101, 133, 105, 0.16);
+  font-size: 24rpx;
+}
+.history {
+  margin-top: 28rpx;
+}
+.history-head {
+  padding: 0 2rpx 12rpx;
+  border-bottom: 1rpx solid #e4e2d7;
+  color: #59665d;
+  font-size: 23rpx;
+}
+.history-head text:last-child {
+  color: #aaa99f;
+  font-size: 18rpx;
+}
+.history-row {
+  margin-top: 0;
+  padding: 18rpx 2rpx;
+  border: 0;
+  border-bottom: 1rpx solid #e9e7df;
+  border-radius: 0;
+  background: transparent;
+}
+.history-row > view text:first-child {
+  color: #68746b;
+  font-size: 19rpx;
+}
+.history-row > view text:last-child {
+  margin-top: 5rpx;
+  color: #8d9a90;
+  font-size: 17rpx;
+}
+.note-preview {
+  max-width: 44%;
+  color: #79847b;
+  font-size: 17rpx;
+}
+.empty {
+  color: #a3a69e;
+  font-size: 18rpx;
+}
+</style>
+<style scoped>
+button {
+  box-sizing: border-box;
+  line-height: 1;
+  white-space: nowrap;
+}
+</style>
