@@ -705,6 +705,8 @@ onLoad(async (options) => {
 /* 分类筛选 */
 .category-tabs {
   float: left;
+  position: sticky;
+  top: 0;
   width: 164rpx;
   height: 980rpx;
   margin: 0 20rpx 20rpx 0;

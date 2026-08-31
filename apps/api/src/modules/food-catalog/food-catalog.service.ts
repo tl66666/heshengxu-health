@@ -64,25 +64,32 @@ export class FoodCatalogService {
       where.healthLight = healthLight;
     }
 
-    // 查询总数
-    const total = await this.prisma.foodItem.count({ where });
-
-    // 查询数据
-    const items = await this.prisma.foodItem.findMany({
+    // 先按目录排序取轻量索引，再按标准名称去重。食物 SQL 中同一基础
+    // 食物常有多个重复导入行，这里保证分页不会把重复项拆散到各页。
+    const indexed = await this.prisma.foodItem.findMany({
       where,
-      include: {
-        category: true,
-        nutrition: true,
-        servings: true,
-      },
+      select: { id: true, name: true },
       orderBy: [
         { catalogRank: 'desc' }, // 基础食材和无品牌名称优先
         { healthLight: 'asc' },
         { name: 'asc' },
       ],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
     });
+    const seenNames = new Set<string>();
+    const uniqueIds = indexed.filter((item) => {
+      const key = item.name.trim().replace(/\s+/gu, '');
+      if (seenNames.has(key)) return false;
+      seenNames.add(key);
+      return true;
+    }).map((item) => item.id);
+    const total = uniqueIds.length;
+    const pageIds = uniqueIds.slice((page - 1) * pageSize, page * pageSize);
+    const loaded = await this.prisma.foodItem.findMany({
+      where: { id: { in: pageIds } },
+      include: { category: true, nutrition: true, servings: true },
+    });
+    const byId = new Map(loaded.map((item) => [item.id, item]));
+    const items = pageIds.map((id) => byId.get(id)).filter(Boolean);
 
     return {
       items,
