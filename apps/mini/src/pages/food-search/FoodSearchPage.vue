@@ -151,6 +151,11 @@
           {{ getHealthLabel(food.healthLight) }}
         </view>
       </button>
+      <view v-if="totalPages > 1" class="pagination">
+        <button class="page-button" :disabled="currentPage <= 1" @tap="goToPage(currentPage - 1)">上一页</button>
+        <text class="page-number">{{ currentPage }} / {{ totalPages }}</text>
+        <button class="page-button page-button--primary" :disabled="currentPage >= totalPages" @tap="goToPage(currentPage + 1)">下一页</button>
+      </view>
     </view>
 
     <!-- 拍照识别入口 -->
@@ -217,8 +222,12 @@ let searchTimer: number | null = null;
 // 所有分类（包含"全部"选项）
 const allCategories = computed(() => {
   const all = { id: null, name: '全部', slug: 'all', sortOrder: 0, count: totalCount.value };
-  return [all, ...categories.value];
+  const order = ['staple', 'vegetable', 'meat-egg', 'soy', 'dairy', 'fruit', 'nut', 'beverage', 'snack', 'restaurant', 'oil', 'seasoning'];
+  const rank = (slug: string) => { const index = order.indexOf(slug); return index < 0 ? 999 : index; };
+  return [all, ...[...categories.value].sort((a, b) => rank(a.slug) - rank(b.slug))];
 });
+
+const commonFoodKeywords = ['米饭', '鸡蛋', '鸡胸肉', '西兰花', '苹果', '牛奶', '香蕉', '豆腐', '燕麦', '红薯'];
 
 // 加载搜索历史
 function loadSearchHistory() {
@@ -291,7 +300,14 @@ async function load(page = 1) {
       healthLight: selectedHealthLight.value,
     });
 
-    foods.value = result.items;
+    if (page === 1 && !query.value && !selectedCategory.value && !selectedHealthLight.value) {
+      const commonResults = await Promise.all(commonFoodKeywords.map((keyword) => searchFoods({ query: keyword, pageSize: 2 })));
+      const common = commonResults.flatMap((item) => item.items);
+      const seen = new Set<string>();
+      foods.value = [...common, ...result.items].filter((item) => !seen.has(item.id) && seen.add(item.id)).slice(0, pageSize);
+    } else {
+      foods.value = result.items;
+    }
     totalCount.value = result.total;
     currentPage.value = result.page;
     totalPages.value = result.totalPages;
@@ -306,6 +322,12 @@ async function load(page = 1) {
   } finally {
     loading.value = false;
   }
+}
+
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value || loading.value) return;
+  load(page);
+  uni.pageScrollTo({ scrollTop: 0, duration: 180 });
 }
 
 // 搜索输入防抖
