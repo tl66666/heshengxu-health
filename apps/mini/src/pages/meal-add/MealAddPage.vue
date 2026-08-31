@@ -493,6 +493,14 @@ onMounted(() => {
   border-radius: 20rpx;
 }
 
+/* 薄荷式目录布局：分类固定在左侧，右侧专注浏览与加号记录 */
+.categories { padding: 0; position: relative; background: transparent; }
+.category-scroll { width: 170rpx; height: 760rpx; white-space: normal; }
+.category-list { display: flex; flex-direction: column; gap: 8rpx; padding: 8rpx 0; }
+.category-tag { display: block; padding: 22rpx 18rpx; border-radius: 0 24rpx 24rpx 0; background: transparent; text-align: left; }
+.category-tag.active { background: #fff; color: #2e7d4f; font-weight: 700; box-shadow: 0 6rpx 18rpx rgba(42,92,57,.06); }
+.section-header, .food-list { margin-left: 170rpx; padding-left: 24rpx; }
+
 .food-pic {
   width: 100rpx;
   height: 100rpx;
