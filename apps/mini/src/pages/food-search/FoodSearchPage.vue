@@ -319,9 +319,17 @@ async function load(page = 1) {
         })
         .map((entry) => entry.food);
       const seen = new Set<string>();
-      foods.value = [...common, ...result.items].filter((item) => !seen.has(item.id) && seen.add(item.id)).slice(0, pageSize);
+      foods.value = [...common, ...result.items].filter((item) => !seen.has(item.id) && seen.add(item.id))
+        .filter((item, index, list) => !commonFoodKeywords.includes(item.name) || list.findIndex((candidate) => candidate.name === item.name) === index)
+        .slice(0, pageSize);
     } else {
-      foods.value = result.items;
+      const seenNames = new Set<string>();
+      foods.value = result.items.filter((item) => {
+        if (!commonFoodKeywords.includes(item.name)) return true;
+        if (seenNames.has(item.name)) return false;
+        seenNames.add(item.name);
+        return true;
+      });
     }
     totalCount.value = result.total;
     currentPage.value = result.page;

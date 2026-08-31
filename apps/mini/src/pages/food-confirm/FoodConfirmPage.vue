@@ -2,7 +2,8 @@
   <view class="page">
     <AppNavBar title="确认这份食物" route="/pages/food-confirm/FoodConfirmPage" />
 
-    <view v-if="!food" class="state">正在准备食物信息...</view>
+    <view v-if="!food && !error" class="state">正在准备食物信息...</view>
+    <view v-else-if="!food" class="state state--error">{{ error }}</view>
     <template v-else>
       <view class="food-hero">
         <view class="food-mark">
