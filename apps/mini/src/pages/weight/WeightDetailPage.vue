@@ -25,7 +25,7 @@
 
     <view class="summary-card card">
       <view class="summary-heading">
-        <image src="/static/icons/weight.jpg" mode="aspectFit" />
+        <image src="/static/icons/weight-scale.png" mode="aspectFit" />
         <view>
           <text class="summary-heading-title">今天的体重概览</text>
           <text class="summary-heading-note">轻轻记下，就能看见变化</text>
@@ -958,9 +958,9 @@ onMounted(loadWeightData);
   margin-bottom: 18rpx;
 }
 .summary-heading image {
-  width: 52rpx;
-  height: 52rpx;
-  border-radius: 14rpx;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 0;
   mix-blend-mode: multiply;
 }
 .summary-heading-title {
@@ -1458,14 +1458,15 @@ onMounted(loadWeightData);
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  width: 244rpx;
-  height: 76rpx;
-  border-radius: 38rpx;
-  background: rgba(117, 155, 123, 0.96);
-  color: #fffdfb;
-  font-size: 24rpx;
+  width: 216rpx;
+  height: 70rpx;
+  border: 1rpx solid #bfd7c4;
+  border-radius: 20rpx;
+  background: rgba(255, 254, 250, 0.98);
+  color: #5d8a6c;
+  font-size: 23rpx;
   font-weight: 800;
-  box-shadow: 0 8rpx 18rpx rgba(102, 132, 101, 0.2);
+  box-shadow: 0 8rpx 18rpx rgba(87, 126, 96, 0.14);
 }
 .plus {
   display: flex;
@@ -1473,8 +1474,9 @@ onMounted(loadWeightData);
   justify-content: center;
   width: 34rpx;
   height: 34rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.85);
+  border: 2rpx solid #83ad8f;
   border-radius: 50%;
+  color: #6d9c7b;
   font-size: 28rpx;
   font-weight: 400;
   line-height: 1;
