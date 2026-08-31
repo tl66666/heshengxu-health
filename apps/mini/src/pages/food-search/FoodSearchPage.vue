@@ -473,6 +473,8 @@ onLoad(async (options) => {
 .common-heading { display:flex; align-items:baseline; justify-content:space-between; margin: 20rpx 2rpx 14rpx; }
 .common-title { font-size: 30rpx; font-weight: 800; color: #244735; }
 .common-subtitle { font-size: 22rpx; color: #88a092; }
+.common-heading, .result-caption, .state, .food-list, .pagination { margin-left: 184rpx; }
+.photo-entry { clear: both; }
 
 /* 介绍区域 */
 .intro {
@@ -702,24 +704,31 @@ onLoad(async (options) => {
 
 /* 分类筛选 */
 .category-tabs {
-  margin-bottom: 20rpx;
-  white-space: nowrap;
+  float: left;
+  width: 164rpx;
+  height: 980rpx;
+  margin: 0 20rpx 20rpx 0;
+  overflow: hidden;
+  background: #f3f7f4;
+  border-radius: 20rpx;
 }
 
 .category-list {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   gap: 12rpx;
-  padding: 0 4rpx 12rpx;
+  padding: 12rpx 0;
 }
 
 .category-tab {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6rpx;
-  padding: 14rpx 24rpx;
-  border: 2rpx solid #d4e5d4;
-  border-radius: 30rpx;
-  background: #fff;
+  min-height: 72rpx;
+  padding: 12rpx;
+  border: none;
+  border-radius: 0 22rpx 22rpx 0;
+  background: transparent;
   color: #5c7a67;
   font-size: 24rpx;
   font-weight: 500;
@@ -728,8 +737,8 @@ onLoad(async (options) => {
 }
 
 .category-tab.active {
-  border-color: #6b9478;
-  background: linear-gradient(135deg, #e8f3ea 0%, #d4e5d4 100%);
+  border-left: 6rpx solid #2e7d4f;
+  background: #ffffff;
   color: #244735;
   font-weight: 600;
 }
