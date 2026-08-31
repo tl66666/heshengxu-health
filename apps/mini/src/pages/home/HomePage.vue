@@ -181,7 +181,7 @@
         <button
           class="grid-item card sleep-card"
           hover-class="button-hover"
-          @tap="openWellnessSheet('sleep')"
+          @tap="go('/pages/sleep/SleepDetailPage')"
         >
           <view class="grid-top">
             <text class="grid-title">睡眠</text>
@@ -208,7 +208,7 @@
           <image class="grid-icon" src="/static/icons/watercolor/activity.png" mode="aspectFit" />
         </button>
 
-        <button class="grid-item card mood-card" hover-class="button-hover" @tap="openWellnessSheet('mood')">
+        <button class="grid-item card mood-card" hover-class="button-hover" @tap="go('/pages/mood/MoodDetailPage')">
           <view class="grid-top">
             <text class="grid-title">心情</text>
           </view>

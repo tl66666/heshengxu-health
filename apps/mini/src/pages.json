@@ -15,6 +15,10 @@
       "style": { "navigationBarTitleText": "和生序" }
     },
     {
+      "path": "pages/home/edit-cards/EditCardsPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "首页卡片" }
+    },
+    {
       "path": "pages/records/RecordsPage",
       "style": { "navigationBarTitleText": "记录" }
     },
@@ -37,6 +41,14 @@
     {
       "path": "pages/fasting/FastingDetailPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "轻断食" }
+    },
+    {
+      "path": "pages/sleep/SleepDetailPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "睡眠记录" }
+    },
+    {
+      "path": "pages/mood/MoodDetailPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "心情记录" }
     },
     {
       "path": "pages/weekly-review/WeeklyReviewPage",
