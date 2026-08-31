@@ -205,6 +205,14 @@ async function main() {
       ] = values;
       
       const categoryId = categoryMap.get(Number(category_id));
+      const cleanName = String(name);
+      const catalogRank = COMMON_FOODS.includes(cleanName)
+        ? 30
+        : !/[A-Za-z0-9（）()\s]/u.test(cleanName)
+          ? 20
+          : !/\s/u.test(cleanName)
+            ? 10
+            : 0;
 
       // Keep the importer safe to re-run after an interrupted batch. The
       // source table has no stable unique key in our schema, so name + pinyin
@@ -226,6 +234,7 @@ async function main() {
           thumbImageUrl: thumb_image_url || null,
           isLiquid: is_liquid === '1',
           healthLight: Number(health_light) || 0,
+          catalogRank,
           isActive: true
         }
       });

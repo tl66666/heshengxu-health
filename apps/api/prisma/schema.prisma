@@ -65,6 +65,7 @@ model FoodItem {
   thumbImageUrl String?         // 缩略图
   isLiquid      Boolean         @default(false) // 是否流食
   healthLight   Int             @default(0) // 健康灯：0未知 1绿 2黄 3红
+  catalogRank   Int             @default(0) // 目录展示优先级：基础食材 > 无品牌名称 > 品牌商品
   category      FoodCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   aliases       FoodAlias[]
   nutrition     FoodNutrition?
@@ -77,6 +78,7 @@ model FoodItem {
   @@index([isActive, name])
   @@index([categoryId, isActive])
   @@index([pinyinCode])
+  @@index([categoryId, catalogRank, name])
 }
 
 model FoodAlias {

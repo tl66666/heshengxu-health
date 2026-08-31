@@ -76,7 +76,8 @@ export class FoodCatalogService {
         servings: true,
       },
       orderBy: [
-        { healthLight: 'asc' }, // 健康食物优先
+        { catalogRank: 'desc' }, // 基础食材和无品牌名称优先
+        { healthLight: 'asc' },
         { name: 'asc' },
       ],
       skip: (page - 1) * pageSize,
