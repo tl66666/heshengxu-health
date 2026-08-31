@@ -187,6 +187,7 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = 20;
 const mealType = ref<MealType>('lunch');
+const selectedHealthLight = ref<number | undefined>(undefined);
 
 // 搜索历史（localStorage）
 const searchHistory = ref<string[]>([]);
@@ -282,6 +283,7 @@ async function load(page = 1) {
       categoryId: selectedCategory.value || undefined,
       page,
       pageSize,
+      healthLight: selectedHealthLight.value,
     });
 
     foods.value = result.items;
@@ -349,6 +351,7 @@ function selectCategory(categoryId: string | null) {
 function filterByHealthLight(level: number) {
   // 这里可以扩展，暂时跳转到全部绿灯食物
   selectedCategory.value = null;
+  selectedHealthLight.value = level;
   currentPage.value = 1;
   // TODO: 添加 healthLight 参数到搜索
   load(1);

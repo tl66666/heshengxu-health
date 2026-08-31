@@ -87,7 +87,7 @@ import AppNavBar from '../../components/AppNavBar.vue';
 import {
   createMealEntry,
   replaceMealEntry,
-  searchFoods,
+  getFoodById,
 } from '../../features/food/food.service.js';
 import {
   calculateFoodNutrition,
@@ -135,8 +135,7 @@ async function load(options?: Record<string, string>) {
   mealType.value = (options?.mealType as MealType) || 'lunch';
   note.value = options?.note ? decodeURIComponent(options.note) : '';
   try {
-    const result = await searchFoods({ pageSize: 100 });
-    food.value = result.items.find((item) => item.id === options?.foodId) || null;
+    food.value = options?.foodId ? await getFoodById(options.foodId) : null;
     if (!food.value) error.value = '没有找到这份食物';
   } catch {
     error.value = '食物信息加载失败，请返回重试';

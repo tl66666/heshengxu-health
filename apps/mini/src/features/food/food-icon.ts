@@ -20,6 +20,12 @@ const FOOD_CATEGORY_ICONS: Record<string, string> = {
   soy: '/static/icons/svg/food-soy.svg',
   bean: '/static/icons/svg/food-soy.svg',
   beans: '/static/icons/svg/food-soy.svg',
+  nut: '/static/icons/svg/food-soy.svg',
+  beverage: '/static/icons/svg/food-dairy.svg',
+  snack: '/static/icons/svg/food-grain.svg',
+  restaurant: '/static/icons/svg/food-staple.svg',
+  oil: '/static/icons/svg/food-soy.svg',
+  seasoning: '/static/icons/svg/food-vegetable.svg',
 };
 
 export function getFoodCategoryIcon(categorySlug?: string | null) {

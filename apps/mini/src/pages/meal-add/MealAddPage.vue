@@ -136,6 +136,7 @@ import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack } from '../../utils/router.js';
 import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
+import { createMealEntry } from '../../features/food/food.service.js';
 
 interface Food {
   id: string;
@@ -219,8 +220,8 @@ async function loadFoods() {
       foods.value = (data.data || []).map((item: any) => ({
         id: item.id,
         name: item.name,
-        calories: Math.round(item.calories || 0),
-        serving: item.servingSize || '100克',
+        calories: Math.round(item.nutrition?.energyKcal || 0),
+        serving: item.servings?.[0]?.label || '100克',
       }));
     }
   } catch (err) {
@@ -262,7 +263,10 @@ function changeMeal() {
   });
 }
 
-function done() {
+async function done() {
+  for (const food of selectedFoods.value) {
+    await createMealEntry({ mealType: mealType.value, foodId: food.id, grams: 100, recordedAt: new Date().toISOString() });
+  }
   const total = selectedFoods.value.reduce((sum, f) => sum + f.calories, 0);
   uni.showToast({
     title: `已记录 ${Math.round(total)}千卡`,
@@ -280,7 +284,7 @@ function selectDate() {
 }
 
 function goToSearch() {
-  uni.navigateTo({ url: '/pages/food-search/FoodSearchPage' });
+  uni.navigateTo({ url: `/pages/food-search/FoodSearchPage?mealType=${mealType.value}` });
 }
 
 function copyRecord() {
