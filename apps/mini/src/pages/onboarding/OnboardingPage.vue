@@ -986,4 +986,8 @@ function confirmExit() {
 .btn-primary[disabled] { color:#fff; background:#b9d7c2; border-color:#b9d7c2; }
 .welcome-fullscreen .btn-primary { color:#52745f; background:#edf7f0; border-color:#b8d9c1; box-shadow:0 12rpx 34rpx rgba(90,168,119,.18); }
 .welcome-fullscreen .btn-primary:active { background:#dcefe2; border-color:#9fc9ac; }
+.step-footer { padding:24rpx 36rpx calc(48rpx + env(safe-area-inset-bottom)); background:linear-gradient(180deg, rgba(247,251,248,0) 0%, rgba(247,251,248,.94) 28%, #f7fbf8 100%); }
+.step-footer .btn-primary { color:#5f9270; background:#edf7f0; border-color:#b7d8c1; box-shadow:0 10rpx 26rpx rgba(95,170,119,.16), inset 0 1rpx 0 rgba(255,255,255,.85); }
+.step-footer .btn-primary:active { color:#537f62; background:#dfefe4; border-color:#9fc9ad; }
+.step-footer .btn-primary[disabled] { color:#91a79a; background:#e8f1eb; border-color:#d4e2d7; box-shadow:none; }
 </style>
