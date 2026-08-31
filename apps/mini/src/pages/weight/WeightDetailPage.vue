@@ -829,40 +829,44 @@ onMounted(loadWeightData);
 <style scoped>
 .weight-page {
   min-height: 100vh;
-  padding-bottom: 140rpx;
-  background: #fff7f1;
+  padding-bottom: 176rpx;
+  background: #fbf5ef;
   color: #51484b;
 }
 .hero-wrap {
   position: relative;
-  min-height: 310rpx;
-  padding: 38rpx 36rpx 30rpx;
+  min-height: 520rpx;
+  padding: 48rpx 34rpx 34rpx;
   overflow: hidden;
-  background: linear-gradient(145deg, #dff5eb 0%, #f7fbef 56%, #fff7ed 100%);
+  background: #edf7ec;
 }
 .hero-wrap::after {
   content: '';
   position: absolute;
-  right: -100rpx;
-  bottom: -160rpx;
-  width: 430rpx;
-  height: 280rpx;
+  right: -160rpx;
+  bottom: -190rpx;
+  width: 520rpx;
+  height: 320rpx;
   border-radius: 50%;
   background: rgba(255, 244, 212, 0.7);
 }
 .hero-art {
   position: absolute;
-  right: -32rpx;
-  bottom: -26rpx;
-  width: 360rpx;
-  height: 360rpx;
-  opacity: 0.96;
+  right: -10rpx;
+  bottom: -15rpx;
+  width: 560rpx;
+  height: 560rpx;
+  opacity: 1;
   mix-blend-mode: multiply;
 }
 .hero-copy,
 .hero-bubble {
   position: relative;
   z-index: 1;
+}
+.hero-copy {
+  width: 44%;
+  padding-top: 24rpx;
 }
 .hero-kicker {
   display: block;
@@ -877,7 +881,7 @@ onMounted(loadWeightData);
 }
 .hero-number {
   color: #3f6553;
-  font-size: 86rpx;
+  font-size: 76rpx;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 1rpx;
@@ -916,14 +920,14 @@ onMounted(loadWeightData);
   font-weight: 800;
 }
 .card {
-  margin: 22rpx 24rpx 0;
-  border-radius: 24rpx;
+  margin: 18rpx 20rpx 0;
+  border-radius: 20rpx;
   background: rgba(255, 253, 251, 0.92);
   box-shadow: 0 10rpx 26rpx rgba(139, 102, 89, 0.07);
   border: 1rpx solid rgba(255, 255, 255, 0.95);
 }
 .summary-card {
-  padding: 30rpx 28rpx 24rpx;
+  padding: 24rpx 22rpx 20rpx;
 }
 .summary-main {
   display: flex;
@@ -934,7 +938,8 @@ onMounted(loadWeightData);
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 210rpx;
+  flex: 1;
+  min-width: 0;
 }
 .summary-label {
   color: #a08d8b;
@@ -1399,25 +1404,32 @@ onMounted(loadWeightData);
 }
 .record-button {
   position: fixed;
-  right: 24rpx;
-  bottom: 30rpx;
-  left: 24rpx;
+  right: 20rpx;
+  bottom: calc(20rpx + env(safe-area-inset-bottom));
+  left: 20rpx;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  height: 96rpx;
-  border-radius: 48rpx;
-  background: #72b48d;
-  color: #fff;
-  font-size: 29rpx;
+  height: 84rpx;
+  border-radius: 22rpx;
+  background: #74b58b;
+  color: #fffdfb;
+  font-size: 27rpx;
   font-weight: 800;
   box-shadow: 0 12rpx 28rpx rgba(85, 152, 109, 0.28);
 }
 .plus {
-  font-size: 40rpx;
-  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34rpx;
+  height: 34rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  font-size: 28rpx;
+  font-weight: 400;
   line-height: 1;
 }
 .record-button-hover {
@@ -1434,8 +1446,8 @@ onMounted(loadWeightData);
 }
 .dialog {
   width: 100%;
-  padding: 34rpx 30rpx 42rpx;
-  border-radius: 32rpx 32rpx 0 0;
+  padding: 30rpx 24rpx calc(34rpx + env(safe-area-inset-bottom));
+  border-radius: 26rpx 26rpx 0 0;
   background: #fffdfb;
   box-sizing: border-box;
 }
@@ -1496,7 +1508,7 @@ onMounted(loadWeightData);
   width: 100%;
   margin-top: 28rpx;
   height: 84rpx;
-  border-radius: 42rpx;
+  border-radius: 20rpx;
   background: #72b48d;
   color: #fff;
   font-size: 27rpx;
@@ -1505,10 +1517,10 @@ onMounted(loadWeightData);
 .view-switch {
   display: flex;
   gap: 10rpx;
-  margin: 24rpx 24rpx 0;
-  padding: 8rpx;
-  border-radius: 22rpx;
-  background: #f1e8e1;
+  margin: 18rpx 20rpx 0;
+  padding: 6rpx;
+  border-radius: 16rpx;
+  background: #f2e9e2;
 }
 .view-tab {
   flex: 1;
@@ -1526,6 +1538,15 @@ onMounted(loadWeightData);
   background: #fffdfb;
   color: #629978;
   box-shadow: 0 5rpx 14rpx rgba(139, 102, 89, 0.08);
+}
+.section-heading {
+  margin-left: 22rpx;
+  margin-right: 22rpx;
+}
+.milestone-row,
+.metric-grid {
+  margin-left: 20rpx;
+  margin-right: 20rpx;
 }
 .view-tab-title {
   display: block;
