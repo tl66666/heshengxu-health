@@ -160,7 +160,7 @@
                 class="mini-trend-point"
               />
             </svg>
-            <image v-else class="chart-icon" src="/static/icons/svg/scale.svg" mode="aspectFit" />
+            <image v-else class="chart-icon" src="/static/icons/weight.jpg" mode="aspectFit" />
           </view>
         </view>
       </view>
@@ -1089,9 +1089,11 @@ onUnmounted(stopFastingTicker);
 }
 
 .chart-icon {
-  width: 40rpx;
-  height: 40rpx;
-  opacity: 0.4;
+  width: 72rpx;
+  height: 72rpx;
+  opacity: 0.94;
+  border-radius: 12rpx;
+  mix-blend-mode: multiply;
 }
 .mini-trend-svg {
   width: 132rpx;

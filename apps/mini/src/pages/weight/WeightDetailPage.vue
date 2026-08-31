@@ -6,7 +6,7 @@
       <image
         class="hero-art"
         src="/static/illustrations/weight-weighing-scene.png"
-        mode="aspectFill"
+        mode="widthFix"
       />
       <view class="hero-wash" />
       <view class="hero-copy">
@@ -323,6 +323,7 @@
 
     <view v-if="showDialog" class="dialog-mask" @tap="closeDialog">
       <view class="dialog" @tap.stop>
+        <view class="dialog-handle" />
         <view class="dialog-head"
           ><text class="dialog-title">{{
             editingRecordId ? '编辑体重记录' : '记录今天的体重'
@@ -843,29 +844,20 @@ onMounted(loadWeightData);
 }
 .hero-wrap {
   position: relative;
-  min-height: 470rpx;
-  padding: 34rpx 26rpx 32rpx;
+  min-height: 0;
+  padding: 0;
   overflow: hidden;
   background: #f4f1e7;
 }
-.hero-wrap::after {
-  content: '';
-  position: absolute;
-  right: -160rpx;
-  bottom: -190rpx;
-  width: 520rpx;
-  height: 320rpx;
-  border-radius: 50%;
-  background: rgba(255, 244, 212, 0.7);
-}
 .hero-art {
-  position: absolute;
-  top: 28rpx;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  position: relative;
+  display: block;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
   width: 100%;
-  height: calc(100% - 28rpx);
+  height: auto;
   opacity: 1;
   mix-blend-mode: multiply;
 }
@@ -877,9 +869,9 @@ onMounted(loadWeightData);
   left: 0;
   background: linear-gradient(
     90deg,
-    rgba(255, 252, 245, 0.92) 0%,
-    rgba(255, 252, 245, 0.72) 37%,
-    rgba(255, 252, 245, 0.05) 74%
+    rgba(255, 252, 245, 0.72) 0%,
+    rgba(255, 252, 245, 0.28) 45%,
+    rgba(255, 252, 245, 0) 78%
   );
 }
 .hero-copy,
@@ -888,8 +880,10 @@ onMounted(loadWeightData);
   z-index: 1;
 }
 .hero-copy {
+  position: absolute;
+  top: 42rpx;
+  left: 26rpx;
   width: 55%;
-  padding-top: 20rpx;
 }
 .hero-kicker {
   display: block;
@@ -1452,25 +1446,26 @@ onMounted(loadWeightData);
   color: #d79786;
 }
 .bottom-space {
-  height: 80rpx;
+  height: 132rpx;
 }
 .record-button {
   position: fixed;
-  right: 20rpx;
+  right: 24rpx;
   bottom: calc(20rpx + env(safe-area-inset-bottom));
-  left: 20rpx;
+  left: auto;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  height: 84rpx;
-  border-radius: 22rpx;
-  background: #74b58b;
+  width: 244rpx;
+  height: 76rpx;
+  border-radius: 38rpx;
+  background: rgba(117, 155, 123, 0.96);
   color: #fffdfb;
-  font-size: 27rpx;
+  font-size: 24rpx;
   font-weight: 800;
-  box-shadow: 0 12rpx 28rpx rgba(85, 152, 109, 0.28);
+  box-shadow: 0 8rpx 18rpx rgba(102, 132, 101, 0.2);
 }
 .plus {
   display: flex;
@@ -1494,14 +1489,23 @@ onMounted(loadWeightData);
   z-index: 20;
   display: flex;
   align-items: flex-end;
-  background: rgba(74, 59, 55, 0.28);
+  background: rgba(74, 59, 55, 0.22);
 }
 .dialog {
   width: 100%;
-  padding: 30rpx 24rpx calc(34rpx + env(safe-area-inset-bottom));
+  max-height: calc(100vh - 110rpx);
+  overflow-y: auto;
+  padding: 26rpx 24rpx calc(30rpx + env(safe-area-inset-bottom));
   border-radius: 26rpx 26rpx 0 0;
-  background: #fffdfb;
+  background: #fffaf4;
   box-sizing: border-box;
+}
+.dialog-handle {
+  width: 64rpx;
+  height: 6rpx;
+  margin: 0 auto 22rpx;
+  border-radius: 999rpx;
+  background: #e6d9cf;
 }
 .dialog-head {
   display: flex;
@@ -1559,9 +1563,9 @@ onMounted(loadWeightData);
 .save-button {
   width: 100%;
   margin-top: 28rpx;
-  height: 84rpx;
-  border-radius: 20rpx;
-  background: #72b48d;
+  height: 78rpx;
+  border-radius: 18rpx;
+  background: #759b7b;
   color: #fff;
   font-size: 27rpx;
   font-weight: 800;
