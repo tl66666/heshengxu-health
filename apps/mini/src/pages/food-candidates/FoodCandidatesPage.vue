@@ -59,7 +59,7 @@
             <view class="candidate-icon">
               <image class="icon-image" src="/static/icons/svg/food-staple.svg" mode="aspectFit" />
             </view>
-            <view class="candidate-content">
+            <view class="candidate-copy">
               <text class="candidate-name">{{ candidate.name }}</text>
               <view class="candidate-meta">
                 <view class="confidence-badge">
@@ -469,7 +469,7 @@ onLoad((options) => {
   color: #2e7d4f;
 }
 
-.candidate-content {
+.candidate-copy {
   flex: 1;
   display: flex;
   flex-direction: column;
