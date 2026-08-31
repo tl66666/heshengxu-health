@@ -100,7 +100,9 @@ function write(plans: HabitPlan[]) {
 
 function storageKey() {
   const userId = uni.getStorageSync(USER_ID_KEY);
-  return typeof userId === 'string' && userId ? `${USER_STORAGE_PREFIX}${userId}` : GUEST_STORAGE_KEY;
+  return typeof userId === 'string' && userId
+    ? `${USER_STORAGE_PREFIX}${userId}`
+    : GUEST_STORAGE_KEY;
 }
 
 export function migrateGuestPlansToUser(userId: string) {
@@ -124,7 +126,11 @@ function hydrate(template: PlanTemplate, id = `habit-${Date.now()}`): HabitPlan 
     ...template,
     id,
     createdAt: new Date().toISOString(),
-    tasks: template.tasks.map((task, index) => ({ ...task, id: `${id}-task-${index}`, doneDates: [] })),
+    tasks: template.tasks.map((task, index) => ({
+      ...task,
+      id: `${id}-task-${index}`,
+      doneDates: [],
+    })),
   };
 }
 
@@ -150,7 +156,7 @@ export function addCustomPlan(input: {
     title: input.title,
     subtitle: input.subtitle || '从今天开始，给自己一个轻轻的约定',
     category: input.category,
-    icon: '/static/illustrations/leaf-corner-decoration.png',
+    icon: '/static/illustrations/custom-plan-planning.png',
     tint: '#f5eadf',
     frequency: input.frequency || '每天 1 个小行动',
     tasks: [{ title: input.title, note: '完成后给自己一个小小的肯定' }],
@@ -173,7 +179,10 @@ export function removeHabitPlan(planId: string) {
   return write(read().filter((plan) => plan.id !== planId));
 }
 
-export function updateHabitPlan(planId: string, patch: Partial<Pick<HabitPlan, 'title' | 'subtitle' | 'frequency'>>) {
+export function updateHabitPlan(
+  planId: string,
+  patch: Partial<Pick<HabitPlan, 'title' | 'subtitle' | 'frequency'>>,
+) {
   const plans = read();
   const plan = plans.find((item) => item.id === planId);
   if (!plan) return plans;
@@ -185,7 +194,12 @@ export function addHabitTask(planId: string, title: string, note = '完成后给
   const plans = read();
   const plan = plans.find((item) => item.id === planId);
   if (!plan || !title.trim()) return plans;
-  plan.tasks.push({ id: `${plan.id}-task-${Date.now()}`, title: title.trim(), note, doneDates: [] });
+  plan.tasks.push({
+    id: `${plan.id}-task-${Date.now()}`,
+    title: title.trim(),
+    note,
+    doneDates: [],
+  });
   return write(plans);
 }
 
@@ -195,14 +209,20 @@ export function isTaskDone(task: { doneDates: string[] }, date = today()) {
 
 export function planStats(plan: HabitPlan, date = today()) {
   const completed = plan.tasks.filter((task) => isTaskDone(task, date)).length;
-  return { completed, total: plan.tasks.length, progress: plan.tasks.length ? Math.round((completed / plan.tasks.length) * 100) : 0 };
+  return {
+    completed,
+    total: plan.tasks.length,
+    progress: plan.tasks.length ? Math.round((completed / plan.tasks.length) * 100) : 0,
+  };
 }
 
 export function streakFor(plan: HabitPlan) {
   let streak = 0;
   const cursor = new Date();
   while (true) {
-    const date = new Date(cursor.getTime() - cursor.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    const date = new Date(cursor.getTime() - cursor.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 10);
     if (!plan.tasks.length || !plan.tasks.every((task) => task.doneDates.includes(date))) break;
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);
@@ -215,9 +235,19 @@ export function weekCheckins(plans: HabitPlan[]) {
   for (let offset = 0; offset < 7; offset += 1) {
     const date = new Date();
     date.setDate(date.getDate() - offset);
-    dates.add(new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10));
+    dates.add(
+      new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10),
+    );
   }
-  return plans.reduce((sum, plan) => sum + plan.tasks.reduce((taskSum, task) => taskSum + task.doneDates.filter((date) => dates.has(date)).length, 0), 0);
+  return plans.reduce(
+    (sum, plan) =>
+      sum +
+      plan.tasks.reduce(
+        (taskSum, task) => taskSum + task.doneDates.filter((date) => dates.has(date)).length,
+        0,
+      ),
+    0,
+  );
 }
 
 export function weekSummary(plans: HabitPlan[]) {
@@ -225,8 +255,13 @@ export function weekSummary(plans: HabitPlan[]) {
   return Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - index));
-    const key = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-    const completed = plans.reduce((sum, plan) => sum + plan.tasks.filter((task) => task.doneDates.includes(key)).length, 0);
+    const key = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 10);
+    const completed = plans.reduce(
+      (sum, plan) => sum + plan.tasks.filter((task) => task.doneDates.includes(key)).length,
+      0,
+    );
     return { key, label: labels[date.getDay()], completed };
   });
 }
