@@ -4,6 +4,6 @@ describe('sleep detail page', () => {
   it('uses bedtime and wake time instead of manual minute entry', () => {
     expect(source).toContain('入睡时间'); expect(source).toContain('起床时间'); expect(source).toContain('sleepDuration'); expect(source).toContain('梦');
     expect(source).toContain('mode="aspectFit"');
-    expect(source).toContain('padding:calc(104rpx + env(safe-area-inset-top))');
+    expect(source).toContain('padding:calc(112rpx + env(safe-area-inset-top))');
   });
 });
