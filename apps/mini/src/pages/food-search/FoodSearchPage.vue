@@ -75,11 +75,7 @@
     </view>
 
     <!-- 分类筛选：进入页面即展示，搜索时继续作为筛选条件 -->
-    <scroll-view
-      v-if="categories.length > 0"
-      class="category-tabs"
-      scroll-x
-    >
+    <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-x>
       <view class="category-list">
         <view
           v-for="cat in allCategories"
@@ -125,7 +121,7 @@
 
     <!-- 食物列表 -->
     <view v-else-if="foods.length > 0" class="food-list">
-      <button
+      <view
         v-for="food in foods"
         :key="food.id"
         class="food-card"
@@ -150,11 +146,31 @@
         >
           {{ getHealthLabel(food.healthLight) }}
         </view>
-      </button>
+        <button class="food-add" aria-label="加入餐次" @tap.stop="choose(food)">
+          <text>＋</text>
+        </button>
+      </view>
       <view v-if="totalPages > 1" class="pagination">
-        <button class="page-button" :disabled="currentPage <= 1" @tap="goToPage(currentPage - 1)">上一页</button>
-        <text class="page-number">{{ currentPage }} / {{ totalPages }}</text>
-        <button class="page-button page-button--primary" :disabled="currentPage >= totalPages" @tap="goToPage(currentPage + 1)">下一页</button>
+        <button
+          class="page-button"
+          aria-label="上一页"
+          :disabled="currentPage <= 1"
+          @tap="goToPage(currentPage - 1)"
+        >
+          <image src="/static/icons/svg/back.svg" mode="aspectFit" />
+        </button>
+        <view class="page-progress"
+          ><text>{{ currentPage }}</text
+          ><text class="page-divider">/</text><text>{{ totalPages }}</text></view
+        >
+        <button
+          class="page-button"
+          aria-label="下一页"
+          :disabled="currentPage >= totalPages"
+          @tap="goToPage(currentPage + 1)"
+        >
+          <image class="next-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        </button>
       </view>
     </view>
 
@@ -222,12 +238,39 @@ let searchTimer: number | null = null;
 // 所有分类（包含"全部"选项）
 const allCategories = computed(() => {
   const all = { id: null, name: '全部', slug: 'all', sortOrder: 0, count: totalCount.value };
-  const order = ['staple', 'vegetable', 'meat-egg', 'soy', 'dairy', 'fruit', 'nut', 'beverage', 'snack', 'restaurant', 'oil', 'seasoning'];
-  const rank = (slug: string) => { const index = order.indexOf(slug); return index < 0 ? 999 : index; };
+  const order = [
+    'staple',
+    'vegetable',
+    'meat-egg',
+    'soy',
+    'dairy',
+    'fruit',
+    'nut',
+    'beverage',
+    'snack',
+    'restaurant',
+    'oil',
+    'seasoning',
+  ];
+  const rank = (slug: string) => {
+    const index = order.indexOf(slug);
+    return index < 0 ? 999 : index;
+  };
   return [all, ...[...categories.value].sort((a, b) => rank(a.slug) - rank(b.slug))];
 });
 
-const commonFoodKeywords = ['米饭', '鸡蛋', '鸡胸肉', '西兰花', '苹果', '牛奶', '香蕉', '豆腐', '燕麦', '红薯'];
+const commonFoodKeywords = [
+  '米饭',
+  '鸡蛋',
+  '鸡胸肉',
+  '西兰花',
+  '苹果',
+  '牛奶',
+  '香蕉',
+  '豆腐',
+  '燕麦',
+  '红薯',
+];
 const commonByCategory: Record<string, string[]> = {
   staple: ['米饭', '面条', '馒头', '燕麦', '红薯', '玉米'],
   vegetable: ['西兰花', '番茄', '黄瓜', '菠菜', '生菜', '胡萝卜'],
@@ -310,17 +353,40 @@ async function load(page = 1) {
     });
 
     if (page === 1 && !query.value && !selectedHealthLight.value) {
-      const keywords = selectedCategory.value ? (commonByCategory[categories.value.find((cat) => cat.id === selectedCategory.value)?.slug || ''] || []) : commonFoodKeywords;
-      const commonResults = await Promise.all(keywords.map((keyword) => searchFoods({ query: keyword, categoryId: selectedCategory.value || undefined, pageSize: 2 })));
-      const common = commonResults.flatMap((item, index) => item.items.map((food) => ({ food, keyword: keywords[index] })))
+      const keywords = selectedCategory.value
+        ? commonByCategory[
+            categories.value.find((cat) => cat.id === selectedCategory.value)?.slug || ''
+          ] || []
+        : commonFoodKeywords;
+      const commonResults = await Promise.all(
+        keywords.map((keyword) =>
+          searchFoods({
+            query: keyword,
+            categoryId: selectedCategory.value || undefined,
+            pageSize: 2,
+          }),
+        ),
+      );
+      const common = commonResults
+        .flatMap((item, index) => item.items.map((food) => ({ food, keyword: keywords[index] })))
         .sort((a, b) => {
-          const score = (entry: { food: FoodItem; keyword: string }) => entry.food.name === entry.keyword ? 0 : entry.food.name.startsWith(entry.keyword) ? 1 : 2;
+          const score = (entry: { food: FoodItem; keyword: string }) =>
+            entry.food.name === entry.keyword
+              ? 0
+              : entry.food.name.startsWith(entry.keyword)
+                ? 1
+                : 2;
           return score(a) - score(b);
         })
         .map((entry) => entry.food);
       const seen = new Set<string>();
-      foods.value = [...common, ...result.items].filter((item) => !seen.has(item.id) && seen.add(item.id))
-        .filter((item, index, list) => !commonFoodKeywords.includes(item.name) || list.findIndex((candidate) => candidate.name === item.name) === index)
+      foods.value = [...common, ...result.items]
+        .filter((item) => !seen.has(item.id) && seen.add(item.id))
+        .filter(
+          (item, index, list) =>
+            !commonFoodKeywords.includes(item.name) ||
+            list.findIndex((candidate) => candidate.name === item.name) === index,
+        )
         .slice(0, pageSize);
     } else {
       const seenNames = new Set<string>();
@@ -470,11 +536,31 @@ onLoad(async (options) => {
   background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
 }
 
-.common-heading { display:flex; align-items:baseline; justify-content:space-between; margin: 20rpx 2rpx 14rpx; }
-.common-title { font-size: 30rpx; font-weight: 800; color: #244735; }
-.common-subtitle { font-size: 22rpx; color: #88a092; }
-.common-heading, .result-caption, .state, .food-list, .pagination { margin-left: 184rpx; }
-.photo-entry { clear: both; }
+.common-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 20rpx 2rpx 14rpx;
+}
+.common-title {
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #244735;
+}
+.common-subtitle {
+  font-size: 22rpx;
+  color: #88a092;
+}
+.common-heading,
+.result-caption,
+.state,
+.food-list,
+.pagination {
+  margin-left: 184rpx;
+}
+.photo-entry {
+  clear: both;
+}
 
 /* 介绍区域 */
 .intro {
@@ -771,11 +857,35 @@ onLoad(async (options) => {
   font-weight: 500;
 }
 
-.pagination { display:flex; align-items:center; justify-content:center; gap:20rpx; padding:24rpx 0 8rpx; }
-.page-button { min-width:150rpx; height:68rpx; line-height:68rpx; border:1rpx solid #d8e7dc; border-radius:18rpx; background:#fff; color:#4e725a; font-size:24rpx; }
-.page-button--primary { background:#2e7d4f; border-color:#2e7d4f; color:#fff; }
-.page-button[disabled] { color:#aab8ad; background:#f2f5f2; border-color:#e3eae4; }
-.page-number { min-width:90rpx; text-align:center; color:#6b9478; font-size:24rpx; font-weight:700; }
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  padding: 24rpx 0 8rpx;
+}
+.page-button {
+  min-width: 150rpx;
+  height: 68rpx;
+  line-height: 68rpx;
+  border: 1rpx solid #d8e7dc;
+  border-radius: 18rpx;
+  background: #fff;
+  color: #4e725a;
+  font-size: 24rpx;
+}
+.page-button[disabled] {
+  color: #aab8ad;
+  background: #f2f5f2;
+  border-color: #e3eae4;
+}
+.page-number {
+  min-width: 90rpx;
+  text-align: center;
+  color: #6b9478;
+  font-size: 24rpx;
+  font-weight: 700;
+}
 
 /* 食物列表 */
 .food-list {
@@ -991,5 +1101,113 @@ onLoad(async (options) => {
   height: 28rpx;
   margin-left: auto;
   opacity: 0.56;
+}
+/* 统一食物目录的高级奶油绿质感，去除旧版粉红与厚重分页按钮 */
+.page {
+  background: #f8f7f1;
+  color: #365343;
+}
+.intro .eyebrow,
+.result-caption,
+.section-title {
+  color: #6f9f7a;
+}
+.title,
+.food-name {
+  color: #365343;
+}
+.subtitle,
+.food-calories,
+.page-info {
+  color: #84988c;
+}
+.search-box {
+  border-color: #d9e6d9;
+  background: #fffdf8;
+  box-shadow: 0 8rpx 22rpx rgba(73, 112, 84, 0.07);
+}
+.tag-btn,
+.filter-btn {
+  border-color: #d9e6d9;
+  color: #5f8069;
+  background: #fffdf8;
+}
+.filter-btn.green {
+  border-color: #bcd7bf;
+  background: #edf5e8;
+}
+.category-tab {
+  color: #789180;
+}
+.category-tab.active {
+  color: #3d7650;
+  border-color: #9fc8a4;
+  background: #edf5e8;
+}
+.food-card {
+  border-color: #e2ebe0;
+  background: #fffdf8;
+  box-shadow: 0 8rpx 20rpx rgba(76, 108, 82, 0.06);
+}
+.food-icon {
+  border-color: #dce9df;
+  background: #f1f7ee;
+}
+.food-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  margin-left: 12rpx;
+  padding: 0;
+  border: 1rpx solid #c8dec9;
+  border-radius: 50%;
+  color: #5d966a;
+  background: #edf5e8;
+}
+.food-add::after {
+  border: 0;
+}
+.food-add text {
+  font-size: 34rpx;
+  line-height: 1;
+}
+.pagination {
+  gap: 28rpx;
+  padding: 28rpx 0 16rpx;
+}
+.page-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64rpx;
+  width: 64rpx;
+  height: 64rpx;
+  padding: 0;
+  border: 1rpx solid #d7e5d7;
+  border-radius: 50%;
+  background: #fffdf8;
+}
+.page-button image {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.75;
+}
+.page-button[disabled] {
+  opacity: 0.35;
+  background: #f1f4ee;
+}
+.page-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  color: #4d7458;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.page-divider {
+  color: #a4b7a7;
+  font-weight: 400;
 }
 </style>

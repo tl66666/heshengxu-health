@@ -25,3 +25,7 @@
 ## 继续开发注意事项
 
 只启动一个小程序 watcher，避免多个会话同时写入 `apps/mini/dist/dev/mp-weixin`。首页改动请留在 `pages/home` 和对应 feature 中，不要把首页业务条件塞入计划组件。
+
+## 饮食页边界
+
+食物目录和餐次添加属于 `pages/food-search`、`pages/meal-add` 与 `features/food`，不由计划页消费。餐次添加页维护本餐临时购物车，保存时通过 `createMealEntry` 写入饮食记录；每日热量目标使用 `heban.food.daily-target-kcal`，缺省值 1800 仅作为估算展示。

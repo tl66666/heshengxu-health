@@ -10,6 +10,9 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).not.toContain('>›<');
     expect(foodSearchPageSource).not.toContain('>✦<');
     expect(foodSearchPageSource).not.toContain('getFoodEmoji');
+    expect(foodSearchPageSource).toContain('class="food-add"');
+    expect(foodSearchPageSource).toContain('class="page-progress"');
+    expect(foodSearchPageSource).not.toContain('page-button--primary');
     expect(foodSearchPageSource).not.toMatch(/[🔥📚🟢🍽️🔍]/u);
   });
 });
