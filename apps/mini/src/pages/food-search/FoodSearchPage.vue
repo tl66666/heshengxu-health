@@ -163,8 +163,16 @@
         >
           {{ getHealthLabel(food.healthLight) }}
         </view>
-        <button class="food-add" aria-label="加入餐次" @tap.stop="toggleCart(food)">
-          <text>{{ selectedCount(food.id) ? selectedCount(food.id) : '＋' }}</text>
+        <button
+          class="food-add"
+          :class="{ selected: selectedCount(food.id) > 0 }"
+          aria-label="加入餐次"
+          @tap.stop="toggleCart(food)"
+        >
+          <text>{{ selectedCount(food.id) ? '✓' : '＋' }}</text>
+          <text v-if="selectedCount(food.id)" class="food-add-count">{{
+            selectedCount(food.id)
+          }}</text>
         </button>
       </view>
       <view v-if="totalPages > 1" class="pagination">
@@ -194,9 +202,7 @@
     <view v-if="selectedFoods.length" class="cart-bar">
       <view class="cart-bar-summary" @tap="cartOpen = !cartOpen">
         <view class="cart-badge"
-          ><image src="/static/icons/svg/meal.svg" mode="aspectFit" /><text>{{
-            selectedFoods.length
-          }}</text></view
+          ><image :src="mealIcon" mode="aspectFit" /><text>{{ selectedFoods.length }}</text></view
         >
         <view class="cart-bar-copy"
           ><text>已选 {{ selectedFoods.length }} 份 · 本餐 {{ selectedCalories }} 千卡</text
@@ -284,6 +290,15 @@ const dailyTarget = ref(1800);
 const budget = computed(() => calorieBudget(dailyTarget.value, sumCalories(todayEntries.value)));
 const selectedCalories = computed(() =>
   selectedFoods.value.reduce((sum, item) => sum + item.calories, 0),
+);
+const mealIcon = computed(
+  () =>
+    ({
+      breakfast: '/static/icons/svg/meal-breakfast.svg',
+      lunch: '/static/icons/svg/meal-lunch.svg',
+      dinner: '/static/icons/svg/meal-dinner.svg',
+      snack: '/static/icons/svg/meal-snack.svg',
+    })[mealType.value],
 );
 
 // 搜索历史（localStorage）
@@ -603,6 +618,9 @@ async function saveCart() {
     selectedFoods.value = [];
     cartOpen.value = false;
     await loadTodayEntries();
+    uni.navigateTo({
+      url: `/pages/food-summary/FoodSummaryPage?date=${encodeURIComponent(localDate())}`,
+    });
   } catch {
     uni.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
   } finally {
@@ -1319,6 +1337,29 @@ onLoad(async (options) => {
 .food-add text {
   font-size: 34rpx;
   line-height: 1;
+}
+.food-add.selected {
+  position: relative;
+  color: #fff;
+  border-color: #6f9f7a;
+  background: #6f9f7a;
+}
+.food-add.selected > text:first-child {
+  font-size: 24rpx;
+}
+.food-add-count {
+  position: absolute;
+  top: -12rpx;
+  right: -10rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  padding: 0 6rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  text-align: center;
+  font-size: 16rpx !important;
+  line-height: 28rpx !important;
+  background: #d18b72;
 }
 .pagination {
   gap: 28rpx;

@@ -117,6 +117,10 @@
     {
       "path": "pages/meal-add/MealAddPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "添加饮食" }
+    },
+    {
+      "path": "pages/food-summary/FoodSummaryPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "今日饮食" }
     }
   ],
   "tabBar": {

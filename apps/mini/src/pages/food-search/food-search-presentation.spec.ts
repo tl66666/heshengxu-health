@@ -13,6 +13,11 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('class="food-add"');
     expect(foodSearchPageSource).toContain('class="page-progress"');
     expect(foodSearchPageSource).not.toContain('page-button--primary');
+    expect(foodSearchPageSource).toContain('class="cart-bar"');
+    expect(foodSearchPageSource).toContain('class="cart-panel"');
+    expect(foodSearchPageSource).toContain('class="budget-strip"');
+    expect(foodSearchPageSource).toContain('meal-breakfast.svg');
+    expect(foodSearchPageSource).toContain('FoodSummaryPage');
     expect(foodSearchPageSource).not.toMatch(/[🔥📚🟢🍽️🔍]/u);
   });
 });

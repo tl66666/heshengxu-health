@@ -126,10 +126,9 @@
     <view v-if="selectedFoods.length > 0" class="bottom-bar">
       <view class="cart-summary" @tap="cartOpen = !cartOpen">
         <view class="cart-icon-wrap"
-          ><image class="meal-icon" src="/static/icons/svg/meal.svg" mode="aspectFit" /><text
-            class="cart-count"
-            >{{ selectedFoods.length }}</text
-          ></view
+          ><image class="meal-icon" :src="mealIcon" mode="aspectFit" /><text class="cart-count">{{
+            selectedFoods.length
+          }}</text></view
         >
         <view class="cart-copy"
           ><text class="meal-name">{{ mealLabel }} · 已选 {{ selectedFoods.length }} 份</text
@@ -195,6 +194,15 @@ const dailyTarget = ref(1800);
 const budget = computed(() => calorieBudget(dailyTarget.value, sumCalories(todayEntries.value)));
 const selectedCalories = computed(() =>
   selectedFoods.value.reduce((sum, food) => sum + food.caloriesForGram, 0),
+);
+const mealIcon = computed(
+  () =>
+    ({
+      breakfast: '/static/icons/svg/meal-breakfast.svg',
+      lunch: '/static/icons/svg/meal-lunch.svg',
+      dinner: '/static/icons/svg/meal-dinner.svg',
+      snack: '/static/icons/svg/meal-snack.svg',
+    })[mealType.value],
 );
 
 const categories = [
