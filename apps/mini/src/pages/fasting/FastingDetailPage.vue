@@ -3,12 +3,12 @@
     <image class="leaf" src="/static/illustrations/leaf-corner-decoration.png" mode="aspectFit" />
 
     <view class="nav">
-      <button class="icon-button" aria-label="返回" @tap="goBack">‹</button>
+      <button class="icon-button back" aria-label="返回" @tap="goBack"><text>‹</text></button>
       <view class="nav-title">
-        <text>当前时刻</text>
-        <text class="nav-date">{{ todayLabel }}</text>
+        <text>轻断食</text>
+        <text class="nav-date">{{ todayLabel }} · 当前计划</text>
       </view>
-      <button class="icon-button help" aria-label="轻断食说明" @tap="showTips = !showTips">?</button>
+      <button class="icon-button help" aria-label="轻断食说明" @tap="showTips = !showTips"><text>i</text></button>
     </view>
 
     <view class="calendar" aria-label="本周日期">
@@ -177,13 +177,12 @@ onHide(() => { if (ticker) { clearInterval(ticker); ticker = undefined; } });
 </script>
 
 <style scoped>
-.page { min-height:100vh; box-sizing:border-box; padding:calc(24rpx + constant(safe-area-inset-top)) 28rpx calc(56rpx + env(safe-area-inset-bottom)); color:#394458; background:#eef8f5; position:relative; overflow:hidden; }
+.page { min-height:100vh; box-sizing:border-box; padding:calc(104rpx + env(safe-area-inset-top)) 28rpx calc(56rpx + env(safe-area-inset-bottom)); color:#394458; background:#f1faf7; position:relative; overflow:hidden; }
 .leaf { position:absolute; right:-100rpx; top:-40rpx; width:360rpx; height:300rpx; opacity:.18; pointer-events:none; }
-.nav { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; margin-bottom:18rpx; }
-.icon-button { width:64rpx; height:64rpx; padding:0; border:0; color:#3e4b61; background:transparent; font-size:54rpx; line-height:58rpx; }
-.help { color:#7c8d98; font-size:32rpx; }
-.nav-title { display:flex; align-items:center; flex-direction:column; gap:4rpx; font-size:34rpx; font-weight:700; letter-spacing:1rpx; }
-.nav-date { color:#8b9aa5; font-size:20rpx; font-weight:500; letter-spacing:0; }
+.nav { min-height:72rpx; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; margin-bottom:24rpx; }
+.icon-button { width:72rpx; height:72rpx; padding:0; border:0; color:#3e4b61; background:transparent; line-height:72rpx; }.icon-button text { display:block; text-align:center; }
+.back { font-size:58rpx; }.help { color:#7c8d98; font-size:30rpx; }.help text { width:38rpx; height:38rpx; margin:17rpx auto 0; border:2rpx solid #9eafb1; border-radius:50%; line-height:34rpx; }
+.nav-title { display:flex; align-items:center; flex-direction:column; gap:6rpx; font-size:36rpx; font-weight:700; letter-spacing:1rpx; }.nav-date { color:#8b9aa5; font-size:20rpx; font-weight:500; letter-spacing:0; }
 .calendar { display:flex; margin:0 -4rpx 24rpx; position:relative; z-index:1; }
 .cal-day { width:14.285%; min-height:100rpx; display:flex; align-items:center; flex-direction:column; gap:11rpx; color:#8b9aa7; font-size:22rpx; position:relative; }
 .weekday { font-size:21rpx; }
