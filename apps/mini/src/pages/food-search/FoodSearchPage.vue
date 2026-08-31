@@ -228,6 +228,15 @@ const allCategories = computed(() => {
 });
 
 const commonFoodKeywords = ['米饭', '鸡蛋', '鸡胸肉', '西兰花', '苹果', '牛奶', '香蕉', '豆腐', '燕麦', '红薯'];
+const commonByCategory: Record<string, string[]> = {
+  staple: ['米饭', '面条', '馒头', '燕麦', '红薯', '玉米'],
+  vegetable: ['西兰花', '番茄', '黄瓜', '菠菜', '生菜', '胡萝卜'],
+  'meat-egg': ['鸡蛋', '鸡胸肉', '牛肉', '猪里脊', '虾仁', '三文鱼'],
+  soy: ['豆腐', '豆浆', '豆干', '毛豆'],
+  dairy: ['牛奶', '无糖酸奶', '奶酪'],
+  fruit: ['苹果', '香蕉', '橙子', '猕猴桃', '草莓'],
+  nut: ['核桃', '杏仁', '花生'],
+};
 
 // 加载搜索历史
 function loadSearchHistory() {
@@ -300,8 +309,9 @@ async function load(page = 1) {
       healthLight: selectedHealthLight.value,
     });
 
-    if (page === 1 && !query.value && !selectedCategory.value && !selectedHealthLight.value) {
-      const commonResults = await Promise.all(commonFoodKeywords.map((keyword) => searchFoods({ query: keyword, pageSize: 2 })));
+    if (page === 1 && !query.value && !selectedHealthLight.value) {
+      const keywords = selectedCategory.value ? (commonByCategory[categories.value.find((cat) => cat.id === selectedCategory.value)?.slug || ''] || []) : commonFoodKeywords;
+      const commonResults = await Promise.all(keywords.map((keyword) => searchFoods({ query: keyword, categoryId: selectedCategory.value || undefined, pageSize: 2 })));
       const common = commonResults.flatMap((item) => item.items);
       const seen = new Set<string>();
       foods.value = [...common, ...result.items].filter((item) => !seen.has(item.id) && seen.add(item.id)).slice(0, pageSize);
@@ -386,6 +396,7 @@ function filterByHealthLight(level: number) {
 
 // 选择食物
 function choose(food: FoodItem) {
+  uni.setStorageSync('pendingFoodSelection', food);
   navigateToFoodConfirm(food.id, mealType.value);
   uni.$emit('food-selected', food);
 }
@@ -735,6 +746,12 @@ onLoad(async (options) => {
   font-size: 22rpx;
   font-weight: 500;
 }
+
+.pagination { display:flex; align-items:center; justify-content:center; gap:20rpx; padding:24rpx 0 8rpx; }
+.page-button { min-width:150rpx; height:68rpx; line-height:68rpx; border:1rpx solid #d8e7dc; border-radius:18rpx; background:#fff; color:#4e725a; font-size:24rpx; }
+.page-button--primary { background:#2e7d4f; border-color:#2e7d4f; color:#fff; }
+.page-button[disabled] { color:#aab8ad; background:#f2f5f2; border-color:#e3eae4; }
+.page-number { min-width:90rpx; text-align:center; color:#6b9478; font-size:24rpx; font-weight:700; }
 
 /* 食物列表 */
 .food-list {

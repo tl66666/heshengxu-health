@@ -136,6 +136,10 @@ async function load(options?: Record<string, string>) {
   note.value = options?.note ? decodeURIComponent(options.note) : '';
   try {
     food.value = options?.foodId ? await getFoodById(options.foodId) : null;
+    if (!food.value && options?.foodId) {
+      const pending = uni.getStorageSync('pendingFoodSelection') as FoodItem | undefined;
+      if (pending?.id === options.foodId) food.value = pending;
+    }
     if (!food.value) error.value = '没有找到这份食物';
   } catch {
     error.value = '食物信息加载失败，请返回重试';
