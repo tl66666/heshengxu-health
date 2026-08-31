@@ -313,7 +313,7 @@ import { requestRecordTypeFocus } from '../../features/health-records/records-fo
 import { foodRecordActions, mealRecordIcons } from './home-actions.js';
 import { loadHomeCardVisibility, type HomeCardId } from './home-card-settings.js';
 import { navigateTo, navigateToWeightDetail, navigateToXuxu } from '../../utils/router.js';
-import { elapsedSeconds, formatDuration, loadFastingPlan, type FastingPlan } from '../../features/fasting/fasting-store.js';
+import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remainingSeconds, type FastingPlan } from '../../features/fasting/fasting-store.js';
 
 const { today, loading, error } = healthLoopState;
 
@@ -365,7 +365,7 @@ const fastingStartedLabel = computed(() => {
 function refreshFasting() { fastingPlan.value = loadFastingPlan(); fastingNow.value = new Date(); }
 function startFastingTicker() {
   refreshFasting();
-  if (!fastingTicker) fastingTicker = setInterval(() => { fastingNow.value = new Date(); if (fastingPlan.value.active) fastingPlan.value = loadFastingPlan(); }, 1000);
+  if (!fastingTicker) fastingTicker = setInterval(() => { fastingNow.value = new Date(); if (fastingPlan.value.active) fastingPlan.value = remainingSeconds(fastingPlan.value, fastingNow.value) <= 0 ? finishFasting(fastingNow.value) : loadFastingPlan(); }, 1000);
 }
 function stopFastingTicker() { if (fastingTicker) { clearInterval(fastingTicker); fastingTicker = undefined; } }
 

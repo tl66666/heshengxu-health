@@ -160,7 +160,7 @@ function modeDescription(mode: FastingMode) { return `${mode.split(':')[0]}å°æ—
 function setStart(event: { detail: { value: string } }) { plan.value = saveFastingPlan({ eatingStart: event.detail.value }); }
 function setEnd(event: { detail: { value: string } }) { plan.value = saveFastingPlan({ eatingEnd: event.detail.value }); }
 function goBack() { uni.navigateBack(); }
-onShow(() => { refresh(); if (!ticker) ticker = setInterval(() => { now.value = new Date(); if (plan.value.active) plan.value = loadFastingPlan(); }, 1000); });
+onShow(() => { refresh(); if (!ticker) ticker = setInterval(() => { now.value = new Date(); if (plan.value.active) plan.value = remainingSeconds(plan.value, now.value) <= 0 ? finishFasting(now.value) : loadFastingPlan(); }, 1000); });
 onHide(() => { if (ticker) { clearInterval(ticker); ticker = undefined; } });
 </script>
 
