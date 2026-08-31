@@ -184,31 +184,181 @@ const LOCAL_CATEGORIES = {
 };
 
 LOCAL_FOOD_CATALOG.push(
-  makeLocalFood('banana', '香蕉', LOCAL_CATEGORIES.fruit, { energyKcal: 93, proteinG: 1.4, fatG: 0.2, carbohydrateG: 22 }, ['一根', 100]),
-  makeLocalFood('tomato', '番茄', LOCAL_CATEGORIES.vegetable, { energyKcal: 20, proteinG: 0.9, fatG: 0.2, carbohydrateG: 3.9 }, ['一个', 150]),
-  makeLocalFood('cucumber', '黄瓜', LOCAL_CATEGORIES.vegetable, { energyKcal: 16, proteinG: 0.8, fatG: 0.2, carbohydrateG: 2.9 }, ['一根', 150]),
-  makeLocalFood('spinach', '菠菜', LOCAL_CATEGORIES.vegetable, { energyKcal: 28, proteinG: 2.6, fatG: 0.3, carbohydrateG: 4.5 }, ['一小碗', 100]),
-  makeLocalFood('lettuce', '生菜', LOCAL_CATEGORIES.vegetable, { energyKcal: 15, proteinG: 1.4, fatG: 0.2, carbohydrateG: 2.1 }, ['一盘', 150]),
-  makeLocalFood('carrot', '胡萝卜', LOCAL_CATEGORIES.vegetable, { energyKcal: 41, proteinG: 0.9, fatG: 0.2, carbohydrateG: 9.6 }, ['一根', 100]),
-  makeLocalFood('sweet-potato', '红薯', LOCAL_CATEGORIES.staple, { energyKcal: 86, proteinG: 1.6, fatG: 0.1, carbohydrateG: 20.1 }, ['一根', 150]),
-  makeLocalFood('corn', '玉米', LOCAL_CATEGORIES.staple, { energyKcal: 112, proteinG: 4, fatG: 1.2, carbohydrateG: 22.8 }, ['一根', 200]),
-  makeLocalFood('whole-wheat-bread', '全麦面包', LOCAL_CATEGORIES.staple, { energyKcal: 246, proteinG: 8.5, fatG: 3.5, carbohydrateG: 46 }, ['两片', 60]),
-  makeLocalFood('noodles', '面条', LOCAL_CATEGORIES.staple, { energyKcal: 137, proteinG: 4.5, fatG: 1.5, carbohydrateG: 27.5 }, ['一碗', 180]),
-  makeLocalFood('steamed-bun', '馒头', LOCAL_CATEGORIES.staple, { energyKcal: 223, proteinG: 7, fatG: 1.1, carbohydrateG: 47 }, ['一个', 100]),
-  makeLocalFood('salmon', '三文鱼', LOCAL_CATEGORIES.protein, { energyKcal: 139, proteinG: 20.5, fatG: 6.5, carbohydrateG: 0 }, ['一块', 120]),
-  makeLocalFood('beef', '牛肉', LOCAL_CATEGORIES.protein, { energyKcal: 125, proteinG: 20.2, fatG: 4.2, carbohydrateG: 0 }, ['一掌心', 100]),
-  makeLocalFood('pork-tenderloin', '猪里脊', LOCAL_CATEGORIES.protein, { energyKcal: 155, proteinG: 20.3, fatG: 7.2, carbohydrateG: 0 }, ['一掌心', 100]),
-  makeLocalFood('chicken-leg', '鸡腿肉', LOCAL_CATEGORIES.protein, { energyKcal: 181, proteinG: 18.5, fatG: 11.2, carbohydrateG: 0 }, ['一只', 120]),
-  makeLocalFood('shrimp', '虾仁', LOCAL_CATEGORIES.protein, { energyKcal: 93, proteinG: 18.6, fatG: 1.7, carbohydrateG: 1.5 }, ['一小碗', 100]),
-  makeLocalFood('soy-milk', '豆浆', LOCAL_CATEGORIES.protein, { energyKcal: 31, proteinG: 3, fatG: 1.6, carbohydrateG: 1.2 }, ['一杯', 250]),
-  makeLocalFood('yogurt', '无糖酸奶', LOCAL_CATEGORIES.dairy, { energyKcal: 72, proteinG: 3.5, fatG: 3.3, carbohydrateG: 6.5 }, ['一杯', 200]),
-  makeLocalFood('cheese', '奶酪', LOCAL_CATEGORIES.dairy, { energyKcal: 328, proteinG: 25.4, fatG: 23.5, carbohydrateG: 3.5 }, ['两片', 40]),
-  makeLocalFood('walnut', '核桃', LOCAL_CATEGORIES.nut, { energyKcal: 646, proteinG: 14.9, fatG: 58.8, carbohydrateG: 18 }, ['三颗', 30]),
-  makeLocalFood('almond', '杏仁', LOCAL_CATEGORIES.nut, { energyKcal: 578, proteinG: 21.3, fatG: 49.4, carbohydrateG: 19.1 }, ['一小把', 25]),
-  makeLocalFood('peanut', '花生', LOCAL_CATEGORIES.nut, { energyKcal: 574, proteinG: 24.8, fatG: 44.3, carbohydrateG: 21.7 }, ['一小把', 25]),
-  makeLocalFood('orange', '橙子', LOCAL_CATEGORIES.fruit, { energyKcal: 48, proteinG: 0.8, fatG: 0.2, carbohydrateG: 11.1 }, ['一个', 180]),
-  makeLocalFood('kiwi', '猕猴桃', LOCAL_CATEGORIES.fruit, { energyKcal: 61, proteinG: 0.9, fatG: 0.5, carbohydrateG: 14 }, ['一个', 100]),
-  makeLocalFood('strawberry', '草莓', LOCAL_CATEGORIES.fruit, { energyKcal: 32, proteinG: 1, fatG: 0.2, carbohydrateG: 7.1 }, ['一小碗', 150]),
+  makeLocalFood(
+    'banana',
+    '香蕉',
+    LOCAL_CATEGORIES.fruit,
+    { energyKcal: 93, proteinG: 1.4, fatG: 0.2, carbohydrateG: 22 },
+    ['一根', 100],
+  ),
+  makeLocalFood(
+    'tomato',
+    '番茄',
+    LOCAL_CATEGORIES.vegetable,
+    { energyKcal: 20, proteinG: 0.9, fatG: 0.2, carbohydrateG: 3.9 },
+    ['一个', 150],
+  ),
+  makeLocalFood(
+    'cucumber',
+    '黄瓜',
+    LOCAL_CATEGORIES.vegetable,
+    { energyKcal: 16, proteinG: 0.8, fatG: 0.2, carbohydrateG: 2.9 },
+    ['一根', 150],
+  ),
+  makeLocalFood(
+    'spinach',
+    '菠菜',
+    LOCAL_CATEGORIES.vegetable,
+    { energyKcal: 28, proteinG: 2.6, fatG: 0.3, carbohydrateG: 4.5 },
+    ['一小碗', 100],
+  ),
+  makeLocalFood(
+    'lettuce',
+    '生菜',
+    LOCAL_CATEGORIES.vegetable,
+    { energyKcal: 15, proteinG: 1.4, fatG: 0.2, carbohydrateG: 2.1 },
+    ['一盘', 150],
+  ),
+  makeLocalFood(
+    'carrot',
+    '胡萝卜',
+    LOCAL_CATEGORIES.vegetable,
+    { energyKcal: 41, proteinG: 0.9, fatG: 0.2, carbohydrateG: 9.6 },
+    ['一根', 100],
+  ),
+  makeLocalFood(
+    'sweet-potato',
+    '红薯',
+    LOCAL_CATEGORIES.staple,
+    { energyKcal: 86, proteinG: 1.6, fatG: 0.1, carbohydrateG: 20.1 },
+    ['一根', 150],
+  ),
+  makeLocalFood(
+    'corn',
+    '玉米',
+    LOCAL_CATEGORIES.staple,
+    { energyKcal: 112, proteinG: 4, fatG: 1.2, carbohydrateG: 22.8 },
+    ['一根', 200],
+  ),
+  makeLocalFood(
+    'whole-wheat-bread',
+    '全麦面包',
+    LOCAL_CATEGORIES.staple,
+    { energyKcal: 246, proteinG: 8.5, fatG: 3.5, carbohydrateG: 46 },
+    ['两片', 60],
+  ),
+  makeLocalFood(
+    'noodles',
+    '面条',
+    LOCAL_CATEGORIES.staple,
+    { energyKcal: 137, proteinG: 4.5, fatG: 1.5, carbohydrateG: 27.5 },
+    ['一碗', 180],
+  ),
+  makeLocalFood(
+    'steamed-bun',
+    '馒头',
+    LOCAL_CATEGORIES.staple,
+    { energyKcal: 223, proteinG: 7, fatG: 1.1, carbohydrateG: 47 },
+    ['一个', 100],
+  ),
+  makeLocalFood(
+    'salmon',
+    '三文鱼',
+    LOCAL_CATEGORIES.protein,
+    { energyKcal: 139, proteinG: 20.5, fatG: 6.5, carbohydrateG: 0 },
+    ['一块', 120],
+  ),
+  makeLocalFood(
+    'beef',
+    '牛肉',
+    LOCAL_CATEGORIES.protein,
+    { energyKcal: 125, proteinG: 20.2, fatG: 4.2, carbohydrateG: 0 },
+    ['一掌心', 100],
+  ),
+  makeLocalFood(
+    'pork-tenderloin',
+    '猪里脊',
+    LOCAL_CATEGORIES.protein,
+    { energyKcal: 155, proteinG: 20.3, fatG: 7.2, carbohydrateG: 0 },
+    ['一掌心', 100],
+  ),
+  makeLocalFood(
+    'chicken-leg',
+    '鸡腿肉',
+    LOCAL_CATEGORIES.protein,
+    { energyKcal: 181, proteinG: 18.5, fatG: 11.2, carbohydrateG: 0 },
+    ['一只', 120],
+  ),
+  makeLocalFood(
+    'shrimp',
+    '虾仁',
+    LOCAL_CATEGORIES.protein,
+    { energyKcal: 93, proteinG: 18.6, fatG: 1.7, carbohydrateG: 1.5 },
+    ['一小碗', 100],
+  ),
+  makeLocalFood(
+    'soy-milk',
+    '豆浆',
+    LOCAL_CATEGORIES.protein,
+    { energyKcal: 31, proteinG: 3, fatG: 1.6, carbohydrateG: 1.2 },
+    ['一杯', 250],
+  ),
+  makeLocalFood(
+    'yogurt',
+    '无糖酸奶',
+    LOCAL_CATEGORIES.dairy,
+    { energyKcal: 72, proteinG: 3.5, fatG: 3.3, carbohydrateG: 6.5 },
+    ['一杯', 200],
+  ),
+  makeLocalFood(
+    'cheese',
+    '奶酪',
+    LOCAL_CATEGORIES.dairy,
+    { energyKcal: 328, proteinG: 25.4, fatG: 23.5, carbohydrateG: 3.5 },
+    ['两片', 40],
+  ),
+  makeLocalFood(
+    'walnut',
+    '核桃',
+    LOCAL_CATEGORIES.nut,
+    { energyKcal: 646, proteinG: 14.9, fatG: 58.8, carbohydrateG: 18 },
+    ['三颗', 30],
+  ),
+  makeLocalFood(
+    'almond',
+    '杏仁',
+    LOCAL_CATEGORIES.nut,
+    { energyKcal: 578, proteinG: 21.3, fatG: 49.4, carbohydrateG: 19.1 },
+    ['一小把', 25],
+  ),
+  makeLocalFood(
+    'peanut',
+    '花生',
+    LOCAL_CATEGORIES.nut,
+    { energyKcal: 574, proteinG: 24.8, fatG: 44.3, carbohydrateG: 21.7 },
+    ['一小把', 25],
+  ),
+  makeLocalFood(
+    'orange',
+    '橙子',
+    LOCAL_CATEGORIES.fruit,
+    { energyKcal: 48, proteinG: 0.8, fatG: 0.2, carbohydrateG: 11.1 },
+    ['一个', 180],
+  ),
+  makeLocalFood(
+    'kiwi',
+    '猕猴桃',
+    LOCAL_CATEGORIES.fruit,
+    { energyKcal: 61, proteinG: 0.9, fatG: 0.5, carbohydrateG: 14 },
+    ['一个', 100],
+  ),
+  makeLocalFood(
+    'strawberry',
+    '草莓',
+    LOCAL_CATEGORIES.fruit,
+    { energyKcal: 32, proteinG: 1, fatG: 0.2, carbohydrateG: 7.1 },
+    ['一小碗', 150],
+  ),
 );
 
 function localSearch(options: SearchFoodsOptions = {}): SearchFoodsResult {
@@ -269,7 +419,12 @@ export function searchFoodsSimple(query = '') {
 export function getFoodById(foodId: string) {
   return createMiniApiClient()
     .get<FoodItem>(`/foods/${encodeURIComponent(foodId)}`)
+    .then((food) => food || LOCAL_FOOD_CATALOG.find((item) => item.id === foodId) || null)
     .catch(() => LOCAL_FOOD_CATALOG.find((food) => food.id === foodId) || null);
+}
+
+export function getLocalFoodById(foodId: string) {
+  return LOCAL_FOOD_CATALOG.find((food) => food.id === foodId) || null;
 }
 
 /**

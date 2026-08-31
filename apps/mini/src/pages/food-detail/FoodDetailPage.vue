@@ -33,7 +33,7 @@
       <view class="nutrition-overview card">
         <view class="card-title">营养概览</view>
         <text class="card-subtitle">每 {{ nutrition?.basisGrams || 100 }}g</text>
-        
+
         <view class="macro-grid">
           <view class="macro-item main">
             <text class="macro-value">{{ nutrition?.energyKcal || 0 }}</text>
@@ -61,10 +61,7 @@
               <text class="bar-value">{{ formatNutrient(nutrition.proteinG) }}g</text>
             </view>
             <view class="bar-track">
-              <view 
-                class="bar-fill protein" 
-                :style="{ width: getProteinPercentage() + '%' }"
-              />
+              <view class="bar-fill protein" :style="{ width: getProteinPercentage() + '%' }" />
             </view>
           </view>
 
@@ -74,10 +71,7 @@
               <text class="bar-value">{{ formatNutrient(nutrition.fatG) }}g</text>
             </view>
             <view class="bar-track">
-              <view 
-                class="bar-fill fat" 
-                :style="{ width: getFatPercentage() + '%' }"
-              />
+              <view class="bar-fill fat" :style="{ width: getFatPercentage() + '%' }" />
             </view>
           </view>
 
@@ -87,10 +81,7 @@
               <text class="bar-value">{{ formatNutrient(nutrition.carbohydrateG) }}g</text>
             </view>
             <view class="bar-track">
-              <view 
-                class="bar-fill carbs" 
-                :style="{ width: getCarbsPercentage() + '%' }"
-              />
+              <view class="bar-fill carbs" :style="{ width: getCarbsPercentage() + '%' }" />
             </view>
           </view>
         </view>
@@ -111,11 +102,7 @@
       <view v-if="food.servings && food.servings.length > 0" class="servings card">
         <view class="card-title">常见份量</view>
         <view class="serving-list">
-          <view 
-            v-for="serving in food.servings" 
-            :key="serving.id"
-            class="serving-item"
-          >
+          <view v-for="serving in food.servings" :key="serving.id" class="serving-item">
             <text class="serving-label">{{ serving.label }}</text>
             <text class="serving-grams">{{ serving.grams }}g</text>
             <text class="serving-kcal">{{ calculateCalories(serving.grams) }} 千卡</text>
@@ -224,7 +211,9 @@
             </view>
             <view v-if="nutrition.cholesterolMg" class="nutrient-item">
               <text class="nutrient-name">胆固醇</text>
-              <text class="nutrient-value">{{ formatNutrient(nutrition.cholesterolMg, 'mg') }}</text>
+              <text class="nutrient-value">{{
+                formatNutrient(nutrition.cholesterolMg, 'mg')
+              }}</text>
             </view>
             <view v-if="nutrition.saturatedFatG" class="nutrient-item">
               <text class="nutrient-name">饱和脂肪</text>
@@ -271,35 +260,40 @@ const nutrition = computed(() => food.value?.nutrition);
 const highlights = computed(() => {
   if (!nutrition.value) return [];
   const list = generateNutritionHighlights(nutrition.value);
-  
+
   // 添加更多亮点
   const extras: string[] = [];
-  
+
   if (food.value?.healthLight === 1) {
     extras.push('绿灯食物，可以放心吃');
   } else if (food.value?.healthLight === 2) {
     extras.push('黄灯食物，建议适量食用');
   }
-  
+
   if (nutrition.value.energyKcal < 50) {
     extras.push('热量极低，适合减脂期');
   }
-  
+
   if (nutrition.value.proteinG && nutrition.value.proteinG > 20) {
     extras.push('蛋白质含量丰富，适合增肌');
   }
-  
+
   return [...list, ...extras];
 });
 
 async function loadFood() {
   if (!foodId.value) return;
-  
+
   loading.value = true;
   error.value = false;
-  
+
   try {
     food.value = await getFoodById(foodId.value);
+    if (!food.value) {
+      const pending = uni.getStorageSync('pendingFoodSelection') as FoodItem | undefined;
+      if (pending?.id === foodId.value) food.value = pending;
+    }
+    if (!food.value) error.value = '没有找到这份食物';
   } catch (err) {
     console.error('加载食物详情失败:', err);
     error.value = true;
@@ -458,10 +452,16 @@ onLoad((options: any) => {
   background: currentColor;
 }
 
-.health-icon-1 { color: #6ca982; }
-.health-icon-2 { color: #c59a54; }
+.health-icon-1 {
+  color: #6ca982;
+}
+.health-icon-2 {
+  color: #c59a54;
+}
 .health-icon-0,
-.health-icon-3 { color: #c67b6d; }
+.health-icon-3 {
+  color: #c67b6d;
+}
 
 .card-title {
   color: #315547;
