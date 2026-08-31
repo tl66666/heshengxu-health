@@ -576,7 +576,9 @@ const openHealthGoal = (goal: HealthGoal) => navigateTo(goalRoutes[goal]);
 const editHealthGoals = () => navigateTo('/pages/profile-edit/ProfileEditPage?section=goal');
 
 const goToFoodDetail = () => {
-  navigateTo('/pages/food/FoodDetailPage');
+  // The summary page reads the user's saved meal entries. The legacy food
+  // detail page contains a static demo layout and must not be the home flow.
+  navigateTo('/pages/food-summary/FoodSummaryPage');
 };
 
 const openRecordAction = (route: string) => {
