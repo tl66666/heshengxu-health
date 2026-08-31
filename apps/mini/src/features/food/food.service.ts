@@ -1,5 +1,5 @@
 import { createMiniApiClient } from '../../services/mini-api.js';
-import type { FoodItem, MealType } from './food.types.js';
+import { calculateFoodNutrition, type FoodItem, type MealType } from './food.types.js';
 import type { MealEntry } from './food.summary.js';
 
 export interface SearchFoodsOptions {
@@ -472,12 +472,19 @@ export function createMealEntry(input: {
   grams: number;
   recordedAt: string;
   note?: string;
+  foodSnapshot?: FoodItem;
 }) {
-  return createMiniApiClient().post('/meal-entries', input);
+  const { foodSnapshot, ...request } = input;
+  return createMiniApiClient()
+    .post<MealEntry>('/meal-entries', request)
+    .catch(() => saveLocalMealEntry(request, foodSnapshot));
 }
 
 export function loadMealEntries(date: string) {
-  return createMiniApiClient().get<MealEntry[]>(`/meal-entries?date=${encodeURIComponent(date)}`);
+  return createMiniApiClient()
+    .get<MealEntry[]>(`/meal-entries?date=${encodeURIComponent(date)}`)
+    .then((remote) => mergeMealEntries(remote, localMealEntries(date)))
+    .catch(() => localMealEntries(date));
 }
 
 export function replaceMealEntry(
@@ -494,5 +501,64 @@ export function replaceMealEntry(
 }
 
 export function deleteMealEntry(recordId: string) {
-  return createMiniApiClient().delete(`/meal-entries/${encodeURIComponent(recordId)}`);
+  return createMiniApiClient()
+    .delete(`/meal-entries/${encodeURIComponent(recordId)}`)
+    .catch(() => removeLocalMealEntry(recordId));
+}
+
+const LOCAL_MEAL_PREFIX = 'heban.local.meal-entries.';
+
+function mealStorageKey() {
+  const userId = uni.getStorageSync('heban.auth.user-id');
+  return `${LOCAL_MEAL_PREFIX}${typeof userId === 'string' && userId ? `user.${userId}` : 'guest'}`;
+}
+
+function readLocalMeals(): MealEntry[] {
+  const value = uni.getStorageSync(mealStorageKey());
+  if (!value) return [];
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalMeals(entries: MealEntry[]) {
+  uni.setStorageSync(mealStorageKey(), entries);
+  return entries;
+}
+
+function saveLocalMealEntry(
+  input: { mealType: MealType; foodId: string; grams: number; recordedAt: string; note?: string },
+  snapshot?: FoodItem,
+) {
+  const food = snapshot || getLocalFoodById(input.foodId);
+  if (!food) throw new Error('FOOD_SNAPSHOT_REQUIRED');
+  const nutrition = calculateFoodNutrition(food, input.grams);
+  const entry: MealEntry = {
+    id: `local-meal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    mealType: input.mealType,
+    foodId: food.id,
+    foodNameSnapshot: food.name,
+    grams: input.grams,
+    ...nutrition,
+    recordedAt: input.recordedAt,
+    note: input.note || null,
+  };
+  writeLocalMeals([entry, ...readLocalMeals()]);
+  return entry;
+}
+
+function localMealEntries(date: string) {
+  return readLocalMeals().filter((entry) => entry.recordedAt.slice(0, 10) === date);
+}
+
+function mergeMealEntries(remote: MealEntry[], local: MealEntry[]) {
+  const seen = new Set(remote.map((entry) => entry.id));
+  return [...remote, ...local.filter((entry) => !seen.has(entry.id))];
+}
+
+function removeLocalMealEntry(recordId: string) {
+  writeLocalMeals(readLocalMeals().filter((entry) => entry.id !== recordId));
 }

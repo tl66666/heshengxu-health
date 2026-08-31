@@ -23,6 +23,23 @@
       </button>
     </view>
 
+    <view class="budget-strip">
+      <view
+        ><text>今日摄入</text
+        ><text class="budget-number">{{ budget.consumedKcal }} <text>千卡</text></text></view
+      >
+      <view class="budget-line"
+        ><view
+          :style="{
+            width: `${Math.min(100, budget.targetKcal ? (budget.consumedKcal / budget.targetKcal) * 100 : 0)}%`,
+          }"
+      /></view>
+      <view class="budget-right"
+        ><text>还可吃</text
+        ><text class="budget-remaining">{{ budget.remainingKcal }} 千卡</text></view
+      >
+    </view>
+
     <!-- 热门搜索 - 仅在未搜索时显示 -->
     <view v-if="!query && !selectedCategory" class="hot-searches">
       <view class="section-header">
@@ -146,8 +163,8 @@
         >
           {{ getHealthLabel(food.healthLight) }}
         </view>
-        <button class="food-add" aria-label="加入餐次" @tap.stop="choose(food)">
-          <text>＋</text>
+        <button class="food-add" aria-label="加入餐次" @tap.stop="toggleCart(food)">
+          <text>{{ selectedCount(food.id) ? selectedCount(food.id) : '＋' }}</text>
         </button>
       </view>
       <view v-if="totalPages > 1" class="pagination">
@@ -171,6 +188,46 @@
         >
           <image class="next-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
+      </view>
+    </view>
+
+    <view v-if="selectedFoods.length" class="cart-bar">
+      <view class="cart-bar-summary" @tap="cartOpen = !cartOpen">
+        <view class="cart-badge"
+          ><image src="/static/icons/svg/meal.svg" mode="aspectFit" /><text>{{
+            selectedFoods.length
+          }}</text></view
+        >
+        <view class="cart-bar-copy"
+          ><text>已选 {{ selectedFoods.length }} 份 · 本餐 {{ selectedCalories }} 千卡</text
+          ><text>今日还可吃 {{ budget.remainingKcal }} 千卡</text></view
+        >
+        <image
+          class="cart-arrow"
+          :class="{ open: cartOpen }"
+          src="/static/icons/svg/forward.svg"
+          mode="aspectFit"
+        />
+      </view>
+      <button class="cart-done" :disabled="saving" @tap="saveCart">
+        {{ saving ? '保存中' : '完成记录' }}
+      </button>
+    </view>
+    <view v-if="cartOpen && selectedFoods.length" class="cart-panel">
+      <view class="cart-panel-head"
+        ><text>本餐清单</text><text>{{ selectedCalories }} 千卡</text></view
+      >
+      <view v-for="item in selectedFoods" :key="item.food.id" class="cart-row">
+        <view
+          ><text class="cart-food-name">{{ item.food.name }}</text
+          ><text class="cart-food-meta"
+            >{{ item.grams * item.quantity }}g · {{ item.calories }} 千卡</text
+          ></view
+        >
+        <view class="cart-quantity"
+          ><button @tap="changeQuantity(item.food.id, -1)">−</button><text>{{ item.quantity }}</text
+          ><button @tap="changeQuantity(item.food.id, 1)">＋</button></view
+        >
       </view>
     </view>
 
@@ -201,6 +258,10 @@ import type { FoodItem, MealType } from '../../features/food/food.types.js';
 import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 import { generateNutritionHighlights, getHealthLightLabel } from '../../utils/nutrition.js';
 import { navigateToFoodConfirm, navigateToFoodRecognition } from '../../utils/router.js';
+import { createMealEntry, loadMealEntries } from '../../features/food/food.service.js';
+import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.js';
+import type { MealEntry } from '../../features/food/food.summary.js';
+import { calculateFoodNutrition } from '../../features/food/food.types.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
@@ -214,6 +275,16 @@ const totalPages = ref(1);
 const pageSize = 20;
 const mealType = ref<MealType>('lunch');
 const selectedHealthLight = ref<number | undefined>(undefined);
+type CartItem = { food: FoodItem; grams: number; quantity: number; calories: number };
+const selectedFoods = ref<CartItem[]>([]);
+const cartOpen = ref(false);
+const saving = ref(false);
+const todayEntries = ref<MealEntry[]>([]);
+const dailyTarget = ref(1800);
+const budget = computed(() => calorieBudget(dailyTarget.value, sumCalories(todayEntries.value)));
+const selectedCalories = computed(() =>
+  selectedFoods.value.reduce((sum, item) => sum + item.calories, 0),
+);
 
 // 搜索历史（localStorage）
 const searchHistory = ref<string[]>([]);
@@ -480,6 +551,81 @@ function choose(food: FoodItem) {
   uni.$emit('food-selected', food);
 }
 
+function selectedCount(foodId: string) {
+  return selectedFoods.value.find((item) => item.food.id === foodId)?.quantity || 0;
+}
+
+function toggleCart(food: FoodItem) {
+  const existing = selectedFoods.value.find((item) => item.food.id === food.id);
+  if (existing) {
+    changeQuantity(food.id, 1);
+    return;
+  }
+  const grams = food.servings?.[0]?.grams || 100;
+  selectedFoods.value.push({
+    food,
+    grams,
+    quantity: 1,
+    calories: calculateFoodNutrition(food, grams).energyKcal,
+  });
+}
+
+function changeQuantity(foodId: string, delta: number) {
+  const item = selectedFoods.value.find((entry) => entry.food.id === foodId);
+  if (!item) return;
+  item.quantity = Math.max(0, item.quantity + delta);
+  item.calories = calculateFoodNutrition(item.food, item.grams * item.quantity).energyKcal;
+  if (!item.quantity)
+    selectedFoods.value = selectedFoods.value.filter((entry) => entry.food.id !== foodId);
+}
+
+async function saveCart() {
+  if (!selectedFoods.value.length || saving.value) return;
+  saving.value = true;
+  try {
+    for (const item of selectedFoods.value) {
+      await createMealEntry({
+        mealType: mealType.value,
+        foodId: item.food.id,
+        grams: item.grams * item.quantity,
+        recordedAt: new Date().toISOString(),
+        foodSnapshot: item.food,
+      });
+    }
+    const after = calorieBudget(
+      dailyTarget.value,
+      budget.value.consumedKcal + selectedCalories.value,
+    );
+    uni.showToast({
+      title: `已记录 ${selectedCalories.value} 千卡，还可吃 ${after.remainingKcal} 千卡`,
+      icon: 'none',
+    });
+    selectedFoods.value = [];
+    cartOpen.value = false;
+    await loadTodayEntries();
+  } catch {
+    uni.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
+  } finally {
+    saving.value = false;
+  }
+}
+
+async function loadTodayEntries() {
+  try {
+    const date = localDate();
+    todayEntries.value = await loadMealEntries(date);
+  } catch {
+    todayEntries.value = [];
+  }
+  const target = Number(uni.getStorageSync('heban.food.daily-target-kcal'));
+  if (target > 0) dailyTarget.value = target;
+}
+
+function localDate() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
 // 打开拍照识别
 function openRecognition() {
   navigateToFoodRecognition(mealType.value);
@@ -523,6 +669,7 @@ onLoad(async (options) => {
   }
   loadSearchHistory();
   await loadCategories();
+  await loadTodayEntries();
   // 进入餐次记录页时直接展示目录；接口不可用时 searchFoods 会返回本地目录兜底。
   await load(1);
 });
@@ -1209,5 +1356,222 @@ onLoad(async (options) => {
 .page-divider {
   color: #a4b7a7;
   font-weight: 400;
+}
+
+.budget-strip {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin: 0 0 18rpx;
+  padding: 16rpx 20rpx;
+  border: 1rpx solid #dfebdf;
+  border-radius: 16rpx;
+  background: #fffdf8;
+  box-shadow: 0 6rpx 18rpx rgba(76, 108, 82, 0.05);
+}
+.budget-strip text {
+  display: block;
+  color: #8b9e90;
+  font-size: 17rpx;
+}
+.budget-number {
+  margin-top: 4rpx;
+  color: #4f8a61 !important;
+  font-size: 24rpx !important;
+  font-weight: 700;
+}
+.budget-number text {
+  display: inline;
+  color: #75917c;
+  font-size: 15rpx;
+  font-weight: 400;
+}
+.budget-line {
+  width: 130rpx;
+  height: 8rpx;
+  overflow: hidden;
+  border-radius: 8rpx;
+  background: #edf2e9;
+}
+.budget-line view {
+  height: 100%;
+  border-radius: inherit;
+  background: #77ad82;
+}
+.budget-right {
+  margin-left: auto;
+  text-align: right;
+}
+.budget-remaining {
+  margin-top: 4rpx;
+  color: #365343 !important;
+  font-size: 19rpx !important;
+  font-weight: 600;
+}
+.cart-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 14rpx 24rpx;
+  padding-bottom: calc(14rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #e1e9dd;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 -10rpx 28rpx rgba(72, 103, 78, 0.12);
+}
+.cart-bar-summary {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.cart-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 50%;
+  background: #edf5e8;
+}
+.cart-badge image {
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.75;
+}
+.cart-badge text {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  padding: 0 6rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  text-align: center;
+  font-size: 16rpx;
+  line-height: 28rpx;
+  background: #d18b72;
+}
+.cart-bar-copy {
+  min-width: 0;
+  flex: 1;
+}
+.cart-bar-copy text:first-child {
+  overflow: hidden;
+  color: #365343;
+  font-size: 21rpx;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cart-bar-copy text:last-child {
+  margin-top: 4rpx;
+  color: #78907f;
+  font-size: 17rpx;
+}
+.cart-arrow {
+  width: 26rpx;
+  height: 26rpx;
+  transform: rotate(90deg);
+  opacity: 0.55;
+}
+.cart-arrow.open {
+  transform: rotate(-90deg);
+}
+.cart-done {
+  flex: none;
+  width: 178rpx;
+  height: 72rpx;
+  padding: 0;
+  border-radius: 38rpx;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+  background: #6f9f7a;
+}
+.cart-done::after {
+  border: 0;
+}
+.cart-done[disabled] {
+  opacity: 0.55;
+}
+.cart-panel {
+  position: fixed;
+  right: 20rpx;
+  bottom: calc(108rpx + env(safe-area-inset-bottom));
+  left: 20rpx;
+  z-index: 24;
+  max-height: 58vh;
+  overflow: auto;
+  padding: 20rpx 22rpx;
+  border: 1rpx solid #e1e9dd;
+  border-radius: 20rpx;
+  background: #fffdf8;
+  box-shadow: 0 12rpx 32rpx rgba(72, 103, 78, 0.16);
+}
+.cart-panel-head,
+.cart-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cart-panel-head {
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #edf1e9;
+  color: #365343;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+.cart-row {
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #f0f3ed;
+}
+.cart-row:last-child {
+  border-bottom: 0;
+}
+.cart-food-name,
+.cart-food-meta {
+  display: block;
+}
+.cart-food-name {
+  color: #4e6656;
+  font-size: 21rpx;
+}
+.cart-food-meta {
+  margin-top: 4rpx;
+  color: #8da092;
+  font-size: 17rpx;
+}
+.cart-quantity {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.cart-quantity button {
+  width: 42rpx;
+  height: 42rpx;
+  padding: 0;
+  border: 1rpx solid #d6e5d4;
+  border-radius: 50%;
+  color: #5c8b67;
+  font-size: 24rpx;
+  line-height: 40rpx;
+  background: #f3f8ef;
+}
+.cart-quantity button::after {
+  border: 0;
+}
+.cart-quantity text {
+  min-width: 24rpx;
+  color: #4d6555;
+  text-align: center;
+  font-size: 20rpx;
 }
 </style>

@@ -384,6 +384,22 @@ async function done() {
       foodId: food.id,
       grams: food.grams * food.quantity,
       recordedAt: new Date().toISOString(),
+      foodSnapshot: {
+        id: food.id,
+        name: food.name,
+        brand: null,
+        category: null,
+        nutrition: {
+          basisGrams: 100,
+          energyKcal: food.calories,
+          proteinG: 0,
+          fatG: 0,
+          carbohydrateG: 0,
+          dietaryFiberG: null,
+          sodiumMg: null,
+        },
+        servings: [{ id: `${food.id}-serving`, label: food.serving, grams: food.grams }],
+      },
     });
   }
   const total = selectedCalories.value;
