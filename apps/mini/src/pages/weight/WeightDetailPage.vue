@@ -6,8 +6,9 @@
       <image
         class="hero-art"
         src="/static/illustrations/weight-weighing-scene.png"
-        mode="aspectFit"
+        mode="aspectFill"
       />
+      <view class="hero-wash" />
       <view class="hero-copy">
         <text class="hero-kicker">慢慢变轻，也慢慢喜欢自己</text>
         <view class="hero-number-row">
@@ -830,15 +831,15 @@ onMounted(loadWeightData);
 .weight-page {
   min-height: 100vh;
   padding-bottom: 176rpx;
-  background: #fbf5ef;
+  background: #f8f1e9;
   color: #51484b;
 }
 .hero-wrap {
   position: relative;
-  min-height: 520rpx;
-  padding: 48rpx 34rpx 34rpx;
+  min-height: 470rpx;
+  padding: 34rpx 26rpx 32rpx;
   overflow: hidden;
-  background: #edf7ec;
+  background: #f4f1e7;
 }
 .hero-wrap::after {
   content: '';
@@ -852,12 +853,27 @@ onMounted(loadWeightData);
 }
 .hero-art {
   position: absolute;
-  right: -10rpx;
-  bottom: -15rpx;
-  width: 560rpx;
-  height: 560rpx;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   opacity: 1;
   mix-blend-mode: multiply;
+}
+.hero-wash {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 252, 245, 0.92) 0%,
+    rgba(255, 252, 245, 0.72) 37%,
+    rgba(255, 252, 245, 0.05) 74%
+  );
 }
 .hero-copy,
 .hero-bubble {
@@ -865,8 +881,8 @@ onMounted(loadWeightData);
   z-index: 1;
 }
 .hero-copy {
-  width: 44%;
-  padding-top: 24rpx;
+  width: 55%;
+  padding-top: 20rpx;
 }
 .hero-kicker {
   display: block;
@@ -880,8 +896,8 @@ onMounted(loadWeightData);
   gap: 10rpx;
 }
 .hero-number {
-  color: #3f6553;
-  font-size: 76rpx;
+  color: #536b56;
+  font-size: 74rpx;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 1rpx;
@@ -927,7 +943,12 @@ onMounted(loadWeightData);
   border: 1rpx solid rgba(255, 255, 255, 0.95);
 }
 .summary-card {
+  position: relative;
+  z-index: 2;
+  margin-top: -18rpx;
   padding: 24rpx 22rpx 20rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 253, 248, 0.96);
 }
 .summary-main {
   display: flex;
@@ -948,7 +969,7 @@ onMounted(loadWeightData);
 .summary-value {
   margin-top: 8rpx;
   color: #51484b;
-  font-size: 42rpx;
+  font-size: 38rpx;
   font-weight: 800;
 }
 .small-unit {
@@ -1011,14 +1032,14 @@ onMounted(loadWeightData);
 .section-title {
   display: block;
   color: #584b50;
-  font-size: 33rpx;
+  font-size: 30rpx;
   font-weight: 800;
 }
 .section-subtitle {
   display: block;
   margin-top: 6rpx;
   color: #ad9b98;
-  font-size: 20rpx;
+  font-size: 19rpx;
 }
 .range-tabs {
   display: flex;
@@ -1050,7 +1071,7 @@ onMounted(loadWeightData);
   font-weight: 700;
 }
 .trend-card {
-  padding: 28rpx 24rpx 22rpx;
+  padding: 24rpx 20rpx 20rpx;
 }
 .trend-topline {
   display: flex;
@@ -1309,7 +1330,7 @@ onMounted(loadWeightData);
   font-size: 20rpx;
 }
 .history-card {
-  padding: 6rpx 24rpx;
+  padding: 6rpx 20rpx;
 }
 .record-filters {
   display: flex;
@@ -1763,14 +1784,14 @@ onMounted(loadWeightData);
   line-height: 1.5;
 }
 @media (max-width: 360px) {
-  .hero-number {
-    font-size: 76rpx;
+  .hero-wrap {
+    min-height: 440rpx;
   }
-  .hero-art {
-    right: -72rpx;
-    bottom: -18rpx;
-    width: 320rpx;
-    height: 320rpx;
+  .hero-copy {
+    width: 60%;
+  }
+  .hero-number {
+    font-size: 68rpx;
   }
   .hero-bubble {
     right: 24rpx;
