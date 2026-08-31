@@ -28,3 +28,17 @@ export const homeQuickActions = [
     tone: 'blush',
   },
 ] as const;
+
+export const foodRecordActions = [
+  { label: '早餐', route: '/pages/food-search/FoodSearchPage?mealType=breakfast' },
+  { label: '午餐', route: '/pages/food-search/FoodSearchPage?mealType=lunch' },
+  { label: '晚餐', route: '/pages/food-search/FoodSearchPage?mealType=dinner' },
+  { label: '加餐', route: '/pages/food-search/FoodSearchPage?mealType=snack' },
+] as const;
+
+export const mealRecordIcons = {
+  早餐: '/static/icons/svg/meal-breakfast.svg',
+  午餐: '/static/icons/svg/meal-lunch.svg',
+  晚餐: '/static/icons/svg/meal-dinner.svg',
+  加餐: '/static/icons/svg/meal-snack.svg',
+} as const;

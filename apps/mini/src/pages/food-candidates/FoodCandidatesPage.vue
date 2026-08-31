@@ -1,10 +1,10 @@
 <template>
   <view class="page">
     <AppNavBar title="识别结果" route="/pages/food-candidates/FoodCandidatesPage" />
-    
+
     <!-- 加载状态 -->
     <view v-if="loading" class="loading-state">
-      <view class="loading-icon">🔍</view>
+      <image class="loading-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
       <text class="loading-text">正在整理候选食物…</text>
     </view>
 
@@ -20,9 +20,11 @@
 
       <!-- 失败状态 -->
       <view v-if="job.status === 'failed'" class="failure-state card">
-        <text class="failure-icon">😕</text>
+        <view class="failure-icon" />
         <text class="failure-title">这次识别没有完成</text>
-        <text class="failure-desc">图片不会自动记入饮食记录，你可以重新拍摄，或改用食物目录手动记录。</text>
+        <text class="failure-desc"
+          >图片不会自动记入饮食记录，你可以重新拍摄，或改用食物目录手动记录。</text
+        >
         <view class="action-btns">
           <button class="retry-btn" @tap="retry">重新拍摄</button>
           <button class="manual-btn" @tap="manualRecord">手动记录</button>
@@ -31,7 +33,7 @@
 
       <!-- 无结果状态 -->
       <view v-else-if="!job.candidates.length" class="empty-state card">
-        <text class="empty-icon">🤔</text>
+        <image class="empty-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
         <text class="empty-title">还没有找到可确认的食物</text>
         <text class="empty-desc">试试换一张更清晰的照片</text>
         <view class="action-btns">
@@ -51,7 +53,7 @@
           <button
             v-for="candidate in job.candidates"
             :key="candidate.id"
-            :class="['candidate-card', 'card', { 'selected': candidate.id === candidateId }]"
+            :class="['candidate-card', 'card', { selected: candidate.id === candidateId }]"
             @tap="select(candidate)"
           >
             <view class="candidate-icon">
@@ -77,12 +79,7 @@
           <view class="input-section">
             <text class="input-label">实际吃了多少？</text>
             <view class="gram-input">
-              <input 
-                v-model="grams" 
-                type="digit" 
-                placeholder="输入克数"
-                class="gram-field"
-              />
+              <input v-model="grams" type="digit" placeholder="输入克数" class="gram-field" />
               <text class="gram-unit">克</text>
             </view>
           </view>
@@ -93,7 +90,7 @@
               <button
                 v-for="item in meals"
                 :key="item.value"
-                :class="['meal-option', { 'selected': mealType === item.value }]"
+                :class="['meal-option', { selected: mealType === item.value }]"
                 @tap="mealType = item.value"
               >
                 {{ item.label }}
@@ -104,15 +101,15 @@
 
         <!-- 错误提示 -->
         <view v-if="error" class="error-banner">
-          <text class="error-icon">⚠️</text>
+          <view class="error-icon" />
           <text class="error-text">{{ error }}</text>
         </view>
 
         <!-- 确认按钮 -->
-        <button 
-          class="confirm-btn" 
-          :class="{ 'disabled': saving || !candidateId }"
-          :disabled="saving || !candidateId" 
+        <button
+          class="confirm-btn"
+          :class="{ disabled: saving || !candidateId }"
+          :disabled="saving || !candidateId"
           @tap="confirm"
         >
           <text class="btn-text">{{ saving ? '保存中…' : '确认并保存' }}</text>
@@ -122,7 +119,7 @@
 
     <!-- 加载失败 -->
     <view v-else class="error-state card">
-      <text class="error-icon">⚠️</text>
+      <view class="error-icon" />
       <text class="error-title">识别结果加载失败</text>
       <button class="retry-btn" @tap="back">返回重试</button>
     </view>
@@ -182,10 +179,10 @@ async function confirm() {
     error.value = '请输入大于 0 克的份量';
     return;
   }
-  
+
   saving.value = true;
   error.value = '';
-  
+
   try {
     await confirmRecognition({
       candidateId: candidateId.value,
@@ -193,7 +190,7 @@ async function confirm() {
       grams: Number(grams.value),
       recordedAt: new Date().toISOString(),
     });
-    
+
     uni.showToast({ title: '已记录这份食物', icon: 'success' });
     setTimeout(() => uni.navigateBack({ delta: 2 }), 450);
   } catch {
@@ -264,8 +261,12 @@ onLoad((options) => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -376,8 +377,8 @@ onLoad((options) => {
 }
 
 .retry-btn::after,
-.manual-btn::after { 
-  border: none; 
+.manual-btn::after {
+  border: none;
 }
 
 .retry-btn:active,
@@ -424,11 +425,19 @@ onLoad((options) => {
   animation: fadeIn 0.4s ease backwards;
 }
 
-.candidate-card:nth-child(1) { animation-delay: 0.25s; }
-.candidate-card:nth-child(2) { animation-delay: 0.3s; }
-.candidate-card:nth-child(3) { animation-delay: 0.35s; }
+.candidate-card:nth-child(1) {
+  animation-delay: 0.25s;
+}
+.candidate-card:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.candidate-card:nth-child(3) {
+  animation-delay: 0.35s;
+}
 
-.candidate-card::after { border: none; }
+.candidate-card::after {
+  border: none;
+}
 
 .candidate-card:active {
   transform: scale(0.97);
@@ -572,7 +581,9 @@ onLoad((options) => {
   transition: all 0.12s ease;
 }
 
-.meal-option::after { border: none; }
+.meal-option::after {
+  border: none;
+}
 
 .meal-option.selected {
   border-color: #2e7d4f;
@@ -610,7 +621,9 @@ onLoad((options) => {
   animation: fadeIn 0.4s ease 0.5s backwards;
 }
 
-.confirm-btn::after { border: none; }
+.confirm-btn::after {
+  border: none;
+}
 
 .confirm-btn:active {
   transform: scale(0.97);

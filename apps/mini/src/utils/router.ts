@@ -16,7 +16,7 @@ const TAB_BAR_PAGES = [
  * 判断是否为 tabBar 页面
  */
 function isTabBarPage(url: string): boolean {
-  return TAB_BAR_PAGES.some(page => url.includes(page));
+  return TAB_BAR_PAGES.some((page) => url.includes(page));
 }
 
 /**
@@ -84,7 +84,7 @@ export function redirectTo(url: string, options?: { fail?: (err: any) => void })
  */
 export function navigateBack(delta: number = 1) {
   const pages = getCurrentPages();
-  
+
   if (pages.length > delta) {
     uni.navigateBack({ delta });
   } else {
@@ -138,15 +138,19 @@ export function navigateToFoodDetail(foodId: string) {
 /**
  * 跳转到食物确认页
  */
-export function navigateToFoodConfirm(foodId: string) {
-  navigateTo(`/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(foodId)}`);
+export function navigateToFoodConfirm(foodId: string, mealType?: string) {
+  const mealQuery = mealType ? `&mealType=${encodeURIComponent(mealType)}` : '';
+  navigateTo(
+    `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(foodId)}${mealQuery}`,
+  );
 }
 
 /**
  * 跳转到食物识别页
  */
-export function navigateToFoodRecognition() {
-  navigateTo('/pages/food-recognition/FoodRecognitionPage');
+export function navigateToFoodRecognition(mealType?: string) {
+  const mealQuery = mealType ? `?mealType=${encodeURIComponent(mealType)}` : '';
+  navigateTo(`/pages/food-recognition/FoodRecognitionPage${mealQuery}`);
 }
 
 /**

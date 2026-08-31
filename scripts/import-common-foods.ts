@@ -6,6 +6,7 @@
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'node:url';
 
 const prisma = new PrismaClient();
 
@@ -129,7 +130,16 @@ async function main() {
   
   // 2. 解析和筛选食物
   console.log('📖 解析 food.sql...');
-  const sqlPath = path.join(__dirname, '../food.sql');
+  // Resolve from either the current package or the repository root. This keeps
+  // `npm --prefix apps/api run food:import` and root-level invocations equivalent.
+  const candidates = [
+    path.resolve(process.cwd(), 'food.sql'),
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'food.sql'),
+  ];
+  const sqlPath = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!sqlPath) {
+    throw new Error(`food.sql not found. Checked: ${candidates.join(', ')}`);
+  }
   const sqlContent = fs.readFileSync(sqlPath, 'utf-8');
   const lines = sqlContent.split('\n');
   
@@ -195,6 +205,18 @@ async function main() {
       ] = values;
       
       const categoryId = categoryMap.get(Number(category_id));
+
+      // Keep the importer safe to re-run after an interrupted batch. The
+      // source table has no stable unique key in our schema, so name + pinyin
+      // is the closest deterministic identity available here.
+      const existing = await prisma.foodItem.findFirst({
+        where: { name: String(name), pinyinCode: code || null },
+        select: { id: true },
+      });
+      if (existing) {
+        imported++;
+        continue;
+      }
       
       const food = await prisma.foodItem.create({
         data: {

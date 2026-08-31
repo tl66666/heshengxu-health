@@ -5,7 +5,9 @@
     <view v-if="!food" class="state">正在准备食物信息...</view>
     <template v-else>
       <view class="food-hero">
-        <view class="food-mark">{{ food.name.slice(0, 1) }}</view>
+        <view class="food-mark">
+          <image :src="getFoodCategoryIcon(food.category?.slug)" mode="aspectFit" />
+        </view>
         <view class="food-copy">
           <text class="food-name">{{ food.name }}</text>
           <text class="food-meta"
@@ -92,6 +94,7 @@ import {
   type FoodItem,
   type MealType,
 } from '../../features/food/food.types.js';
+import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 import { foodConfirmMode } from '../../features/food/food-entry-form.js';
 
 const food = ref<FoodItem | null>(null);
@@ -132,8 +135,8 @@ async function load(options?: Record<string, string>) {
   mealType.value = (options?.mealType as MealType) || 'lunch';
   note.value = options?.note ? decodeURIComponent(options.note) : '';
   try {
-    const all = await searchFoods('');
-    food.value = all.find((item) => item.id === options?.foodId) || null;
+    const result = await searchFoods({ pageSize: 100 });
+    food.value = result.items.find((item) => item.id === options?.foodId) || null;
     if (!food.value) error.value = '没有找到这份食物';
   } catch {
     error.value = '食物信息加载失败，请返回重试';
@@ -197,11 +200,14 @@ onLoad((options) => load(options as Record<string, string>));
   height: 82rpx;
   flex: none;
   margin-right: 18rpx;
+  border: 1rpx solid #dce9e0;
   border-radius: 22rpx;
-  color: #fff;
-  background: #7eae86;
-  font-size: 36rpx;
-  font-weight: 700;
+  background: #f1f6f2;
+}
+
+.food-mark image {
+  width: 62rpx;
+  height: 62rpx;
 }
 .food-copy {
   min-width: 0;

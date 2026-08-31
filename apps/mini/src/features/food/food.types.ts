@@ -14,6 +14,7 @@ export type FoodItem = {
   name: string;
   brand: string | null;
   category: { id: string; name: string; slug: string } | null;
+  healthLight?: number;
   nutrition: FoodNutrition;
   servings: FoodServing[];
 };

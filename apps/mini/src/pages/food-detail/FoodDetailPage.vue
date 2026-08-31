@@ -18,11 +18,13 @@
     <view v-else-if="food" class="content">
       <!-- 顶部信息卡片 -->
       <view class="food-header card">
-        <view class="food-icon-large">{{ getFoodEmoji(food.name, food.category?.slug) }}</view>
+        <view class="food-icon-large">
+          <image :src="getFoodCategoryIcon(food.category?.slug)" mode="aspectFit" />
+        </view>
         <text class="food-name">{{ food.name }}</text>
         <view v-if="food.category" class="food-category">{{ food.category.name }}</view>
         <view :class="['health-tag', 'health-' + food.healthLight]">
-          <text class="health-icon">{{ getHealthIcon(food.healthLight) }}</text>
+          <view class="health-icon" :class="'health-icon-' + food.healthLight" />
           <text>{{ getHealthLabel(food.healthLight) }}</text>
         </view>
       </view>
@@ -96,7 +98,7 @@
 
       <!-- 营养亮点 -->
       <view v-if="highlights.length > 0" class="highlights card">
-        <view class="card-title">💡 营养亮点</view>
+        <view class="card-title">营养亮点</view>
         <view class="highlight-list">
           <view v-for="(highlight, index) in highlights" :key="index" class="highlight-item">
             <text class="highlight-dot">•</text>
@@ -107,7 +109,7 @@
 
       <!-- 常见份量 -->
       <view v-if="food.servings && food.servings.length > 0" class="servings card">
-        <view class="card-title">📏 常见份量</view>
+        <view class="card-title">常见份量</view>
         <view class="serving-list">
           <view 
             v-for="serving in food.servings" 
@@ -123,7 +125,7 @@
 
       <!-- 详细营养成分 -->
       <view v-if="nutrition" class="detailed-nutrition card">
-        <view class="card-title">🔬 详细营养成分</view>
+        <view class="card-title">详细营养成分</view>
         <text class="card-subtitle">每 100g</text>
 
         <!-- 矿物质 -->
@@ -251,11 +253,10 @@ import { ref, computed } from 'vue';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { getFoodById } from '../../features/food/food.service.js';
 import type { FoodItem, FoodNutrition } from '../../features/food/food.types.js';
+import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 import {
-  getFoodEmoji,
   generateNutritionHighlights,
   getHealthLightLabel,
-  getHealthLightIcon,
   formatNutrient,
 } from '../../utils/nutrition.js';
 import { navigateBack, navigateToFoodConfirm } from '../../utils/router.js';
@@ -309,10 +310,6 @@ async function loadFood() {
 
 function getHealthLabel(level: number): string {
   return getHealthLightLabel(level);
-}
-
-function getHealthIcon(level: number): string {
-  return getHealthLightIcon(level);
 }
 
 function getProteinPercentage(): number {
@@ -399,11 +396,17 @@ onLoad((options: any) => {
   width: 120rpx;
   height: 120rpx;
   margin-bottom: 16rpx;
-  font-size: 80rpx;
-  line-height: 120rpx;
-  text-align: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e8f3ea 0%, #d4e5d4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid #dce9e0;
+  border-radius: 28rpx;
+  background: #f1f6f2;
+}
+
+.food-icon-large image {
+  width: 96rpx;
+  height: 96rpx;
 }
 
 .food-name {
@@ -449,7 +452,21 @@ onLoad((options: any) => {
 }
 
 .health-icon {
-  font-size: 28rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.health-icon-1 { color: #6ca982; }
+.health-icon-2 { color: #c59a54; }
+.health-icon-0,
+.health-icon-3 { color: #c67b6d; }
+
+.card-title {
+  color: #315547;
+  font-size: 27rpx;
+  font-weight: 750;
 }
 
 /* 营养概览 */

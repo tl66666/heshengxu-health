@@ -17,7 +17,7 @@
     <!-- 搜索框 -->
     <view class="search-wrap">
       <view class="search-box" @tap="goToSearch">
-        <text class="search-icon">🔍</text>
+        <image class="search-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
         <text class="search-placeholder">请输入食物名称</text>
       </view>
     </view>
@@ -25,15 +25,15 @@
     <!-- 快捷按钮 -->
     <view class="quick-btns">
       <view class="quick-btn" @tap="copyRecord">
-        <text class="quick-icon">📋</text>
+        <image class="quick-icon" src="/static/icons/svg/review.svg" mode="aspectFit" />
         <text class="quick-text">复制记录</text>
       </view>
       <view class="quick-btn" @tap="quickAdd">
-        <text class="quick-icon">⚡</text>
+        <image class="quick-icon" src="/static/icons/svg/check.svg" mode="aspectFit" />
         <text class="quick-text">快速记录</text>
       </view>
       <view class="quick-btn" @tap="scanCode">
-        <text class="quick-icon">📷</text>
+        <image class="quick-icon" src="/static/icons/svg/camera.svg" mode="aspectFit" />
         <text class="quick-text">扫条形码</text>
       </view>
     </view>
@@ -83,7 +83,12 @@
               class="food-img" 
               mode="aspectFill"
             />
-            <text v-else class="food-emoji">{{ getEmoji(food.name) }}</text>
+            <image
+              v-else
+              class="food-img food-img--icon"
+              :src="getFoodCategoryIcon(categorySlugForFood(food.name))"
+              mode="aspectFit"
+            />
           </view>
 
           <!-- 中间信息 -->
@@ -112,7 +117,7 @@
     <!-- 底部栏 -->
     <view v-if="selectedFoods.length > 0" class="bottom-bar">
       <view class="bar-meal">
-        <image class="meal-icon" src="/static/icons/svg/restaurant.svg" mode="aspectFit" />
+        <image class="meal-icon" src="/static/icons/svg/meal.svg" mode="aspectFit" />
         <text class="meal-name">{{ mealLabel }}</text>
         <button class="meal-arrow" @tap="changeMeal">
           <text>▼</text>
@@ -130,6 +135,7 @@ import { ref, computed, onMounted } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack } from '../../utils/router.js';
+import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 
 interface Food {
   id: string;
@@ -183,28 +189,14 @@ const mealLabel = computed(() => {
   return meals[mealType.value];
 });
 
-function getEmoji(name: string): string {
-  const map: Record<string, string> = {
-    '泉阳泉': '💧',
-    '水': '💧',
-    '米饭': '🍚',
-    '煮鸡蛋': '🥚',
-    '鸡蛋': '🥚',
-    '馒头': '🥟',
-    '蒸红薯': '🍠',
-    '红薯': '🍠',
-    '煎蛋': '🍳',
-    '牛奶': '🥛',
-    '豆浆': '🥤',
-    '面包': '🍞',
-    '鸡肉': '🍗',
-    '苹果': '🍎',
-  };
-  
-  for (const key in map) {
-    if (name.includes(key)) return map[key];
-  }
-  return '🍽️';
+function categorySlugForFood(name: string) {
+  if (/蛋/.test(name)) return 'egg';
+  if (/鸡|牛|猪|鱼|虾|肉/.test(name)) return 'protein';
+  if (/菜|瓜|茄|萝卜|菠菜|番茄/.test(name)) return 'vegetable';
+  if (/果|苹果|香蕉|橙|莓/.test(name)) return 'fruit';
+  if (/奶|酸奶|奶酪/.test(name)) return 'dairy';
+  if (/豆|腐|花生|核桃|杏仁/.test(name)) return 'soy';
+  return 'staple';
 }
 
 function switchCategory(id: string) {
@@ -389,7 +381,9 @@ onMounted(() => {
 }
 
 .search-icon {
-  font-size: 32rpx;
+  width: 32rpx;
+  height: 32rpx;
+  opacity: 0.58;
 }
 
 .search-placeholder {
@@ -417,7 +411,9 @@ onMounted(() => {
 }
 
 .quick-icon {
-  font-size: 44rpx;
+  width: 44rpx;
+  height: 44rpx;
+  opacity: 0.72;
 }
 
 .quick-text {
@@ -510,8 +506,10 @@ onMounted(() => {
   border-radius: 16rpx;
 }
 
-.food-emoji {
-  font-size: 56rpx;
+.food-img--icon {
+  width: 70rpx;
+  height: 70rpx;
+  opacity: 1;
 }
 
 .food-info {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { homeQuickActions } from './home-actions.js';
+import { foodRecordActions, homeQuickActions, mealRecordIcons } from './home-actions.js';
 
 describe('home quick actions', () => {
   it('keeps food recording first and adds weight review shortcuts with distinct icons', () => {
@@ -36,5 +36,16 @@ describe('home quick actions', () => {
   it('uses each existing icon only once so tiles stay scannable', () => {
     const icons = homeQuickActions.map((item) => item.icon);
     expect(new Set(icons).size).toBe(icons.length);
+  });
+
+  it('keeps four meal shortcuts with explicit meal types and premium line icons', () => {
+    expect(foodRecordActions.map(({ label, route }) => ({ label, route }))).toEqual([
+      { label: '早餐', route: '/pages/food-search/FoodSearchPage?mealType=breakfast' },
+      { label: '午餐', route: '/pages/food-search/FoodSearchPage?mealType=lunch' },
+      { label: '晚餐', route: '/pages/food-search/FoodSearchPage?mealType=dinner' },
+      { label: '加餐', route: '/pages/food-search/FoodSearchPage?mealType=snack' },
+    ]);
+    expect(Object.values(mealRecordIcons)).toHaveLength(4);
+    expect(Object.values(mealRecordIcons).every((icon) => icon.endsWith('.svg'))).toBe(true);
   });
 });
