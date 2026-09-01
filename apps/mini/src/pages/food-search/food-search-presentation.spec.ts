@@ -15,6 +15,8 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).not.toContain('page-button--primary');
     expect(foodSearchPageSource).toContain('class="cart-bar"');
     expect(foodSearchPageSource).toContain('class="cart-panel"');
+    expect(foodSearchPageSource).toContain('<image :src="mealIcon"');
+    expect(foodSearchPageSource).toContain('const mealIcon = computed');
     expect(foodSearchPageSource).toContain('class="budget-strip"');
     expect(foodSearchPageSource).toContain('/static/icons/breakfast.png');
     expect(foodSearchPageSource).toContain('FoodSummaryPage');

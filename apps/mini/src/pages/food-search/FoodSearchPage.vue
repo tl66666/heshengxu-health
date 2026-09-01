@@ -314,6 +314,10 @@ const selectedCountTotal = computed(() =>
 const remainingAfterSelection = computed(() =>
   calorieBudget(dailyTarget.value, budget.value.consumedKcal + selectedCalories.value).remainingKcal,
 );
+const mealLabel = computed(() => mealOptions.find((item) => item.value === mealType.value)?.label || '午餐');
+
+// 搜索历史（localStorage）
+const searchHistory = ref<string[]>([]);
 const mealIcon = computed(
   () =>
     ({
@@ -323,10 +327,6 @@ const mealIcon = computed(
       snack: '/static/icons/snack.png',
     })[mealType.value],
 );
-const mealLabel = computed(() => mealOptions.find((item) => item.value === mealType.value)?.label || '午餐');
-
-// 搜索历史（localStorage）
-const searchHistory = ref<string[]>([]);
 const MAX_HISTORY = 10;
 
 // 热门搜索关键词
@@ -1220,8 +1220,8 @@ onLoad(async (options) => {
 }
 
 .state-icon {
-  width: 54rpx;
-  height: 54rpx;
+  width: 68rpx;
+  height: 68rpx;
   margin-bottom: 10rpx;
   opacity: 0.56;
 }
@@ -1521,12 +1521,13 @@ onLoad(async (options) => {
   width: 54rpx;
   height: 54rpx;
   border-radius: 50%;
-  background: #edf5e8;
+  background: #f0f8f2;
 }
 .cart-badge image {
-  width: 32rpx;
-  height: 32rpx;
-  opacity: 0.75;
+  width: 52rpx;
+  height: 52rpx;
+  opacity: 1;
+  filter: none;
 }
 .cart-badge text {
   position: absolute;
@@ -1677,21 +1678,23 @@ onLoad(async (options) => {
 @keyframes cartPulse { 0% { transform:scale(1); } 40% { transform:scale(1.12); } 100% { transform:scale(1); } }
 
 /* Refined catalog surface: quiet canvas, crisp hierarchy, no decorative gradients. */
-.page { background:#f4f6f3; }
+.page { background:#f7faf8; }
 .intro { padding-top:28rpx; padding-bottom:18rpx; }
 .title { font-size:36rpx; letter-spacing:0; }
 .subtitle { color:#8a9890; }
 .search-box { border:1rpx solid #dce6de; border-radius:16rpx; background:#fff; box-shadow:0 6rpx 18rpx rgba(40,72,50,.05); }
-.meal-switch { border-color:#e1e9e3; border-radius:18rpx; background:#edf3ee; }
+.meal-switch { border-color:#dce9df; border-radius:18rpx; background:#f0f7f2; }
 .meal-switch-item { height:92rpx; border-radius:14rpx; font-size:21rpx; }
 .meal-switch-item.active { color:#245f3b; box-shadow:0 5rpx 12rpx rgba(47,91,58,.10); }
 .budget-strip { border:1rpx solid #e1e9e3; border-radius:18rpx; background:#fff; box-shadow:0 6rpx 18rpx rgba(40,72,50,.04); }
-.category-tabs { top:12rpx; height:calc(100vh - 390rpx); border:1rpx solid #e2ebe4; background:#edf3ee; box-shadow:0 4rpx 14rpx rgba(40,72,50,.04); }
+.category-tabs { top:12rpx; height:calc(100vh - 390rpx); border:1rpx solid #dfeae2; background:#f0f7f2; box-shadow:0 4rpx 14rpx rgba(40,72,50,.04); }
 .category-tab { min-height:66rpx; color:#7d9183; font-size:21rpx; }
 .category-tab.active { border-left:5rpx solid #2f7b4e; background:#fff; color:#2f7048; }
-.food-card { min-height:122rpx; border:1rpx solid #e4ebe5; border-radius:16rpx; background:#fff; box-shadow:0 5rpx 14rpx rgba(40,72,50,.045); }
+.food-card { min-height:122rpx; border:1rpx solid #e1ebe4; border-radius:16rpx; background:#fffefa; box-shadow:0 5rpx 14rpx rgba(40,72,50,.045); }
 .food-name { font-size:25rpx; color:#315f42; }
 .food-calories { font-size:20rpx; color:#8b9b90; }
+.food-icon { width:82rpx; height:82rpx; background:#f4faf5; border-color:#d8e8dc; }
+.food-icon image { width:72rpx; height:72rpx; opacity:1; }
 .food-add, .food-stepper { flex-shrink:0; }
 .pagination { padding-top:22rpx; }
 .page-button { display:flex; align-items:center; justify-content:center; height:58rpx; min-width:116rpx; border:1rpx solid #dbe7de; border-radius:16rpx; background:#fff; line-height:58rpx; }
