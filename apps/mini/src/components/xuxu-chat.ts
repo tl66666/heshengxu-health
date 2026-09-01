@@ -16,9 +16,15 @@ export type XuxuErrorKind = 'network' | 'auth' | 'service' | 'unknown';
 
 export function classifyXuxuError(error: unknown): XuxuErrorKind {
   const message = error instanceof Error ? error.message : String(error);
-  if (/NETWORK_TIMEOUT|NETWORK_ERROR|timeout|network/i.test(message)) return 'network';
+  if (
+    /NETWORK_TIMEOUT|NETWORK_ERROR|Failed to fetch|Network request failed|timeout|network/i.test(
+      message,
+    )
+  )
+    return 'network';
   if (/UNAUTHORIZED|AUTH|401|login/i.test(message)) return 'auth';
-  if (/SERVICE_UNAVAILABLE|503|provider|model/i.test(message)) return 'service';
+  if (/SERVICE_UNAVAILABLE|INTERNAL_ERROR|503|500|provider|model|CloudBase/i.test(message))
+    return 'service';
   return 'unknown';
 }
 

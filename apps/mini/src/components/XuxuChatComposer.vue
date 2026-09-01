@@ -40,7 +40,11 @@
         v-for="message in messages"
         :id="message.id"
         :key="message.id"
-        :class="['message', message.role]"
+        :class="[
+          'message',
+          message.role,
+          { 'message-error': message.id.startsWith('assistant-error') },
+        ]"
       >
         <image
           v-if="message.role === 'assistant'"
@@ -51,6 +55,13 @@
         <view class="message-body">
           <text v-if="message.role === 'assistant'" class="message-label">序序</text>
           <text class="message-text">{{ message.text }}</text>
+          <button
+            v-if="message.id.startsWith('assistant-error')"
+            class="retry-message"
+            @tap="retryLast"
+          >
+            再试一次
+          </button>
           <view v-if="message.sourceTitle" class="source-card"
             ><image src="/static/icons/svg/journal.svg" mode="aspectFit" /><text
               >知识来源 · {{ message.sourceTitle }}</text
@@ -169,6 +180,11 @@ function errorMessage(error: unknown) {
   if (kind === 'auth') return '登录状态已过期，重新进入小程序后再和序序聊聊。';
   if (kind === 'service') return '序序正在整理回答，稍后再试一次就好。';
   return '这条消息没有送达，稍后再试一次就好。';
+}
+
+function retryLast() {
+  const lastUserMessage = [...messages.value].reverse().find((message) => message.role === 'user');
+  if (lastUserMessage) send(lastUserMessage.text);
 }
 </script>
 
@@ -327,6 +343,24 @@ function errorMessage(error: unknown) {
   color: #315a70;
   background: #edf5f8;
 }
+
+.message-error .message-text {
+  border-color: #f0dfd7;
+  color: #8d685c;
+  background: #fff9f6;
+}
+
+.retry-message {
+  align-self: flex-start;
+  margin: 8rpx 0 0 4rpx;
+  padding: 4rpx 10rpx;
+  border: 1rpx solid #ead5cc;
+  border-radius: 12rpx;
+  color: #a06f60;
+  background: #fffdfb;
+  font-size: 19rpx;
+  line-height: 32rpx;
+}
 .source-card {
   display: flex;
   align-items: center;
@@ -438,7 +472,7 @@ function errorMessage(error: unknown) {
 /* Bright cream watercolor surface: soft depth without the gray wash of the old shell. */
 .chat-shell {
   padding: 20rpx 0 12rpx;
-  background: linear-gradient(180deg, #fffdf8 0%, #fffefa 42%, #f7fbf8 100%);
+  background: #fffdf5;
   color: #263f35;
 }
 
@@ -589,19 +623,18 @@ function errorMessage(error: unknown) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 232rpx;
-  height: 190rpx;
+  width: 270rpx;
+  height: 205rpx;
   margin-bottom: 8rpx;
   overflow: hidden;
-  border-radius: 40rpx;
-  background: #fffdf4;
+  background: transparent;
 }
 
 .empty-illustration image {
-  width: 232rpx;
-  height: 232rpx;
+  width: 270rpx;
+  height: 270rpx;
   margin: 0;
-  opacity: 0.96;
+  opacity: 0.9;
 }
 
 .empty-kicker {

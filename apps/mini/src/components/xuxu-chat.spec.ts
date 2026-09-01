@@ -31,6 +31,7 @@ describe('Xuxu chat contracts', () => {
 
   it('distinguishes connection, authentication, and provider errors', () => {
     expect(classifyXuxuError(new Error('NETWORK_TIMEOUT'))).toBe('network');
+    expect(classifyXuxuError(new Error('TypeError: Failed to fetch'))).toBe('network');
     expect(classifyXuxuError(new Error('UNAUTHORIZED [req]: login required'))).toBe('auth');
     expect(classifyXuxuError(new Error('SERVICE_UNAVAILABLE [req]: try later'))).toBe('service');
     expect(classifyXuxuError(new Error('unexpected'))).toBe('unknown');

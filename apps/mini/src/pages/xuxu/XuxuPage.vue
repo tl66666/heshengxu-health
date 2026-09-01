@@ -31,7 +31,7 @@ function localDate() {
   display: flex;
   flex-direction: column;
   padding: 0;
-  background: #fffdf8;
+  background: #fffdf5;
   color: #1d3d2a;
 }
 .chat-area {
