@@ -163,16 +163,13 @@
         >
           {{ getHealthLabel(food.healthLight) }}
         </view>
-        <button
-          class="food-add"
-          :class="{ selected: selectedCount(food.id) > 0 }"
-          aria-label="加入餐次"
-          @tap.stop="toggleCart(food)"
-        >
-          <text>{{ selectedCount(food.id) ? '✓' : '＋' }}</text>
-          <text v-if="selectedCount(food.id)" class="food-add-count">{{
-            selectedCount(food.id)
-          }}</text>
+        <view v-if="selectedCount(food.id) > 0" class="food-stepper" @tap.stop>
+          <button class="stepper-btn stepper-btn--minus" aria-label="减少份数" @tap="changeQuantity(food.id, -1)">−</button>
+          <text class="stepper-number">{{ selectedCount(food.id) }}</text>
+          <button class="stepper-btn stepper-btn--plus" aria-label="增加份数" @tap="changeQuantity(food.id, 1)">＋</button>
+        </view>
+        <button v-else class="food-add" aria-label="加入餐次" @tap.stop="toggleCart(food)">
+          <text>＋</text>
         </button>
       </view>
       <view v-if="totalPages > 1" class="pagination">
@@ -202,11 +199,11 @@
     <view v-if="selectedFoods.length" class="cart-bar">
       <view class="cart-bar-summary" @tap="cartOpen = !cartOpen">
         <view class="cart-badge"
-          ><image :src="mealIcon" mode="aspectFit" /><text>{{ selectedFoods.length }}</text></view
+          ><image :src="mealIcon" mode="aspectFit" /><text>{{ selectedCountTotal }}</text></view
         >
         <view class="cart-bar-copy"
-          ><text>已选 {{ selectedFoods.length }} 份 · 本餐 {{ selectedCalories }} 千卡</text
-          ><text>今日还可吃 {{ budget.remainingKcal }} 千卡</text></view
+          ><text>已选 {{ selectedCountTotal }} 份 · 本餐 {{ selectedCalories }} 千卡</text
+          ><text>今日还可吃 {{ remainingAfterSelection }} 千卡</text></view
         >
         <image
           class="cart-arrow"
@@ -290,6 +287,12 @@ const dailyTarget = ref(1800);
 const budget = computed(() => calorieBudget(dailyTarget.value, sumCalories(todayEntries.value)));
 const selectedCalories = computed(() =>
   selectedFoods.value.reduce((sum, item) => sum + item.calories, 0),
+);
+const selectedCountTotal = computed(() =>
+  selectedFoods.value.reduce((sum, item) => sum + item.quantity, 0),
+);
+const remainingAfterSelection = computed(() =>
+  calorieBudget(dailyTarget.value, budget.value.consumedKcal + selectedCalories.value).remainingKcal,
 );
 const mealIcon = computed(
   () =>
@@ -1107,6 +1110,7 @@ onLoad(async (options) => {
 
 .food-info {
   flex: 1;
+  min-width: 0;
 }
 
 .food-name {
@@ -1143,6 +1147,9 @@ onLoad(async (options) => {
   border-radius: 8rpx;
   font-size: 20rpx;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badge-1 {
@@ -1615,4 +1622,15 @@ onLoad(async (options) => {
   text-align: center;
   font-size: 20rpx;
 }
+
+/* Inline quantity control used directly on every food row. */
+.food-stepper { display:flex; align-items:center; justify-content:center; gap:6rpx; width:150rpx; height:58rpx; box-sizing:border-box; padding:5rpx; border:1rpx solid #d7e8dc; border-radius:18rpx; background:#f4faf5; }
+.stepper-btn { display:flex; align-items:center; justify-content:center; width:44rpx; height:44rpx; margin:0; padding:0; border:0; border-radius:13rpx; line-height:44rpx; font-size:28rpx; font-weight:600; }
+.stepper-btn--minus { background:#e5f0e6; color:#51745b; }
+.stepper-btn--plus { background:#3d8b5c; color:#fff; }
+.stepper-number { display:flex; align-items:center; justify-content:center; min-width:26rpx; height:44rpx; color:#294a36; font-size:24rpx; font-weight:700; line-height:44rpx; }
+.food-add { display:flex; align-items:center; justify-content:center; width:58rpx; height:58rpx; margin:0; padding:0; border:1rpx solid #cfe1d0; border-radius:50%; line-height:58rpx; }
+.food-add text { display:block; line-height:58rpx; }
+.food-add::after, .stepper-btn::after, .cart-done::after, .cart-quantity button::after { border:0; }
+.cart-done { display:flex; align-items:center; justify-content:center; line-height:72rpx; }
 </style>
