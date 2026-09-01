@@ -124,6 +124,7 @@ export class FoodCatalogService {
    */
   async getCategories() {
     return this.prisma.foodCategory.findMany({
+      where: { isActive: true },
       orderBy: { sortOrder: 'asc' },
     });
   }
@@ -133,6 +134,7 @@ export class FoodCatalogService {
    */
   async getCategoryStats() {
     const categories = await this.prisma.foodCategory.findMany({
+      where: { isActive: true },
       orderBy: { sortOrder: 'asc' },
     });
 
@@ -170,7 +172,7 @@ export class FoodCatalogService {
         nutrition: true,
         servings: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: [{ catalogRank: 'desc' }, { name: 'asc' }],
       take: limit,
     });
   }
@@ -192,7 +194,7 @@ export class FoodCatalogService {
         nutrition: true,
         servings: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: [{ catalogRank: 'desc' }, { name: 'asc' }],
       take: limit,
     });
   }

@@ -103,7 +103,7 @@ function isCommonFood(name: string): boolean {
 }
 
 async function main() {
-  console.log('🚀 导入精选食物数据\n');
+  console.log('🚀 导入完整食物库（无品牌优先）\n');
   
   // 1. 导入分类
   console.log('📂 导入分类...');
@@ -127,9 +127,27 @@ async function main() {
     const cat = await prisma.foodCategory.upsert({
       where: { slug: categories[i].slug },
       create: categories[i],
-      update: categories[i]
+      update: { ...categories[i], isActive: true }
     });
     categoryMap.set(i + 1, cat.id);
+  }
+
+  // Older seed data used `protein` for the same category now called
+  // `meat-egg`. Move its items to the canonical category and hide the legacy
+  // category so re-running this importer cannot recreate duplicate sections.
+  const legacyProtein = await prisma.foodCategory.findUnique({
+    where: { slug: 'protein' },
+  });
+  const canonicalProteinId = categoryMap.get(2);
+  if (legacyProtein && canonicalProteinId && legacyProtein.id !== canonicalProteinId) {
+    await prisma.foodItem.updateMany({
+      where: { categoryId: legacyProtein.id },
+      data: { categoryId: canonicalProteinId },
+    });
+    await prisma.foodCategory.update({
+      where: { id: legacyProtein.id },
+      data: { isActive: false },
+    });
   }
   console.log(`✅ ${categories.length} 个分类\n`);
   
@@ -174,8 +192,8 @@ async function main() {
   
   console.log(`📊 总共 ${allFoods.length} 条食物`);
   
-  // 3. 筛选常见食物
-  console.log('🔍 筛选常见食物...');
+  // 3. 解析完整食物库；常见程度只影响 catalogRank，不会丢弃数据
+  console.log('🔍 整理完整食物库...');
   const selectedFoods: any[] = [];
   
   for (const row of allFoods) {
@@ -183,15 +201,15 @@ async function main() {
       const values = parseValueRow(row);
       const name = String(values[2]); // 名称在第3列
       
-      if (isCommonFood(name)) {
-        selectedFoods.push(values);
-      }
+      selectedFoods.push(values);
     } catch (err) {
       // 跳过解析失败的
     }
   }
   
-  console.log(`✅ 筛选出 ${selectedFoods.length} 条常见食物\n`);
+  // The public catalog keeps the full source dataset. Ordering decides what
+  // users see first; it must not remove branded products from search.
+  console.log(`✅ 保留完整食物库 ${selectedFoods.length} 条，开始按无品牌优先导入\n`);
 
   // Rebuild the curated public catalog. Older importers created rows without a
   // reliable marker, so hide all public rows, then restore deterministic seed
@@ -223,7 +241,13 @@ async function main() {
       
       const categoryId = categoryMap.get(Number(category_id));
       const cleanName = String(name);
-      const catalogRank = isCommonFood(cleanName) ? 30 : 0;
+  const catalogRank = isCommonFood(cleanName)
+    ? 30
+    : !/[A-Za-z0-9（）()\s]/u.test(cleanName)
+      ? 20
+      : !/\s/u.test(cleanName)
+        ? 10
+        : 0;
 
       // Keep the importer safe to re-run after an interrupted batch. The
       // source table has no stable unique key in our schema, so name + pinyin
