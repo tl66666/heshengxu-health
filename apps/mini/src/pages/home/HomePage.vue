@@ -30,16 +30,6 @@
     </view>
 
     <template v-else-if="today && experience">
-      <view v-if="healthGoals.length" class="goal-overview">
-        <view class="goal-overview-head"><view><text>我的健康方向</text><text>建档信息已同步</text></view><button @tap="editHealthGoals">调整</button></view>
-        <view class="goal-overview-list">
-          <button v-for="goal in healthGoals" :key="goal" @tap="openHealthGoal(goal)">
-            <view><text>{{ goalLabels[goal] }}</text><text>{{ goalDetails[goal] }}</text></view>
-            <text class="goal-arrow">›</text>
-          </button>
-        </view>
-      </view>
-
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
       <view v-if="isCardVisible('weight-plan')" class="weight-card card" @tap="goToWeightProgress">
         <view class="card-top">
@@ -348,8 +338,6 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { onHide, onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
-import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
-import { goalDetails, goalLabels, goalRoutes, type HealthGoal } from '../../features/health-profile/health-profile.types.js';
 import { listLocalWeightRecords } from '../../features/weight/weight-records.local.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { requestRecordTypeFocus } from '../../features/health-records/records-focus.js';
@@ -375,7 +363,6 @@ const displayName = computed(() => today.value?.displayName || '朋友');
 const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
 const cardVisibility = ref(loadHomeCardVisibility());
-const healthGoals = ref<HealthGoal[]>([]);
 const isCardVisible = (id: HomeCardId) => cardVisibility.value[id] !== false;
 const periodStatusText = computed(() =>
   menstruationCycle.value?.lastPeriodStart
@@ -572,8 +559,6 @@ const go = (url: string) => {
 const goToWeightProgress = () => navigateTo('/pages/weight/WeightDetailPage?view=progress');
 const goToWeightRecords = () => navigateTo('/pages/weight/WeightDetailPage?view=records');
 const openWeightRecorder = () => navigateTo('/pages/weight/WeightDetailPage?view=records&action=new');
-const openHealthGoal = (goal: HealthGoal) => navigateTo(goalRoutes[goal]);
-const editHealthGoals = () => navigateTo('/pages/profile-edit/ProfileEditPage?section=goal');
 
 const goToFoodDetail = () => {
   // The summary page reads the user's saved meal entries. The legacy food
@@ -667,10 +652,6 @@ const loadWeightTrend = () => {
 
 const loadPersonalSignals = () => {
   try {
-    const profile = loadLocalProfile();
-    healthGoals.value = (profile?.goals || (profile?.primaryGoal ? [profile.primaryGoal] : [])).filter(
-      (goal): goal is HealthGoal => goal in goalLabels,
-    );
     const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
     menstruationCycle.value = cycleRaw
       ? typeof cycleRaw === 'string'
@@ -2399,96 +2380,4 @@ onUnmounted(stopFastingTicker);
 .weight-progress-label { position: absolute; top: 46rpx; left: 50%; transform: translateX(-50%); color: #688476; font-size: 19rpx; white-space: nowrap; }
 .weight-add { display: flex; width: 52rpx; height: 52rpx; align-items: center; justify-content: center; padding: 0; border: 1rpx solid #d9e9df; border-radius: 50%; color: #47745f; background: #edf6f0; font-size: 32rpx; line-height: 52rpx; }
 .weight-add::after { border: 0; }
-</style>
-<style scoped>
-.goal-overview {
-  margin: 4rpx 2rpx 22rpx;
-  padding: 22rpx 24rpx 8rpx;
-  border: 1rpx solid #dce9e1;
-  border-radius: 22rpx;
-  background: rgba(255, 254, 250, 0.9);
-  box-shadow: 0 9rpx 22rpx rgba(49, 80, 65, 0.05);
-}
-.goal-overview-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20rpx;
-  padding: 0 2rpx 14rpx;
-}
-.goal-overview-head > view {
-  min-width: 0;
-}
-.goal-overview-head text {
-  display: block;
-}
-.goal-overview-head text:first-child {
-  color: #315547;
-  font-size: 26rpx;
-  font-weight: 700;
-}
-.goal-overview-head text:last-child {
-  margin-top: 5rpx;
-  color: #94a49c;
-  font-size: 18rpx;
-}
-.goal-overview-head button {
-  flex: none;
-  padding: 6rpx 2rpx;
-  border: 0;
-  color: #618472;
-  background: transparent;
-  font-size: 20rpx;
-  line-height: 1.2;
-}
-.goal-overview-head button::after,
-.goal-overview-list button::after {
-  border: 0;
-}
-.goal-overview-list {
-  border-top: 1rpx solid #e8efea;
-}
-.goal-overview-list button {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 90rpx;
-  padding: 14rpx 2rpx;
-  border: 0;
-  border-bottom: 1rpx solid #edf2ee;
-  border-radius: 0;
-  background: transparent;
-  text-align: left;
-}
-.goal-overview-list button:last-child {
-  border-bottom: 0;
-}
-.goal-overview-list button > view {
-  min-width: 0;
-  flex: 1;
-}
-.goal-overview-list button text {
-  display: block;
-}
-.goal-overview-list button text:first-child {
-  color: #3b6655;
-  font-size: 23rpx;
-  font-weight: 650;
-}
-.goal-overview-list button text:nth-child(2) {
-  margin-top: 5rpx;
-  overflow: hidden;
-  color: #84978d;
-  font-size: 18rpx;
-  line-height: 1.45;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.goal-arrow {
-  flex: none;
-  margin-left: 14rpx;
-  color: #9baba2;
-  font-size: 32rpx;
-  font-weight: 400;
-}
 </style>
