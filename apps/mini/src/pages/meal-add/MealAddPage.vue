@@ -114,8 +114,13 @@
 
           <!-- 右侧按钮 -->
           <view class="food-action">
-            <button :class="['add-btn', isAdded(food.id) ? 'added' : '']" @tap="toggleFood(food)">
-              <text class="add-icon">{{ isAdded(food.id) ? selectedCount(food.id) : '+' }}</text>
+            <view v-if="isAdded(food.id)" class="quantity-stepper" @tap.stop>
+              <button class="stepper-button" @tap="changeQuantity(food.id, -1)">−</button>
+              <text class="stepper-value">{{ selectedCount(food.id) }}</text>
+              <button class="stepper-button stepper-button--plus" @tap="changeQuantity(food.id, 1)">＋</button>
+            </view>
+            <button v-else class="add-btn" @tap="toggleFood(food)">
+              <text class="add-icon">＋</text>
             </button>
           </view>
         </view>
@@ -133,7 +138,7 @@
         <view class="cart-copy"
           ><text class="meal-name">{{ mealLabel }} · 已选 {{ selectedFoods.length }} 份</text
           ><text class="cart-kcal"
-            >本餐 {{ selectedCalories }} 千卡 · 今日还可吃 {{ budget.remainingKcal }} 千卡</text
+            >本餐 {{ selectedCalories }} 千卡 · 今日还可吃 {{ remainingAfterSelection }} 千卡</text
           ></view
         >
         <image
@@ -168,7 +173,7 @@ import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack } from '../../utils/router.js';
 import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
-import { createMealEntry, loadMealEntries } from '../../features/food/food.service.js';
+import { createMealEntry, loadMealEntries, searchFoods } from '../../features/food/food.service.js';
 import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.js';
 import type { MealEntry } from '../../features/food/food.summary.js';
 
@@ -181,6 +186,11 @@ interface Food {
   grams: number;
   quantity: number;
   caloriesForGram: number;
+  proteinG?: number;
+  fatG?: number;
+  carbohydrateG?: number;
+  dietaryFiberG?: number | null;
+  sodiumMg?: number | null;
 }
 
 const mealType = ref<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
@@ -192,6 +202,10 @@ const cartOpen = ref(false);
 const todayEntries = ref<MealEntry[]>([]);
 const dailyTarget = ref(1800);
 const budget = computed(() => calorieBudget(dailyTarget.value, sumCalories(todayEntries.value)));
+const remainingAfterSelection = computed(() =>
+  calorieBudget(dailyTarget.value, budget.value.consumedKcal + selectedCalories.value).remainingKcal,
+);
+const saving = ref(false);
 const selectedCalories = computed(() =>
   selectedFoods.value.reduce((sum, food) => sum + food.caloriesForGram, 0),
 );
@@ -262,21 +276,27 @@ async function loadFoods() {
   loading.value = true;
 
   try {
-    const res = await uni.request({
-      url: 'http://localhost:3000/api/v1/foods/popular/list',
-      method: 'GET',
-      timeout: 5000,
-    });
-
-    if (res.statusCode === 200 && res.data) {
-      const data: any = res.data;
-      foods.value = (data.data || []).map((item: any) => ({
+    const categoryMap: Record<string, string> = {
+      staple: 'cmt9u89tg0000t2ekr5513a7m', vegetable: 'cmt9u89tw0002t2ek60uuvssk',
+      'meat-egg': 'cmtebeb1y0001t2fszv4je2kq', soy: 'cmtebeb270002t2fs2nzfveeg',
+      dairy: 'cmtebeb2x0005t2fsa2l2t7dw', fruit: 'cmt9u89u10003t2eklb9zmb0m',
+      nut: 'cmtguysjq0007t2pwn1qwl7gp', beverage: 'cmtguysk10009t2pwucud7zrl',
+    };
+    const slug = currentCategory.value === 'veg' ? 'vegetable' : currentCategory.value === 'meat' ? 'meat-egg' : currentCategory.value === 'bean' ? 'soy' : currentCategory.value;
+    const result = await searchFoods({ categoryId: categoryMap[slug], pageSize: 20 });
+    if (result.items.length) {
+      foods.value = result.items.map((item: any) => ({
         id: item.id,
         name: item.name,
         calories: Math.round(item.nutrition?.energyKcal || 0),
         serving: item.servings?.[0]?.label || '100克',
         grams: item.servings?.[0]?.grams || 100,
         quantity: 1,
+        proteinG: item.nutrition?.proteinG || 0,
+        fatG: item.nutrition?.fatG || 0,
+        carbohydrateG: item.nutrition?.carbohydrateG || 0,
+        dietaryFiberG: item.nutrition?.dietaryFiberG || null,
+        sodiumMg: item.nutrition?.sodiumMg || null,
         caloriesForGram: Math.round(
           ((item.nutrition?.energyKcal || 0) * (item.servings?.[0]?.grams || 100)) / 100,
         ),
@@ -386,7 +406,10 @@ function changeMeal() {
 }
 
 async function done() {
-  for (const food of selectedFoods.value) {
+  if (saving.value || !selectedFoods.value.length) return;
+  saving.value = true;
+  try {
+    for (const food of selectedFoods.value) {
     await createMealEntry({
       mealType: mealType.value,
       foodId: food.id,
@@ -400,23 +423,28 @@ async function done() {
         nutrition: {
           basisGrams: 100,
           energyKcal: food.calories,
-          proteinG: 0,
-          fatG: 0,
-          carbohydrateG: 0,
-          dietaryFiberG: null,
-          sodiumMg: null,
+          proteinG: food.proteinG || 0,
+          fatG: food.fatG || 0,
+          carbohydrateG: food.carbohydrateG || 0,
+          dietaryFiberG: food.dietaryFiberG ?? null,
+          sodiumMg: food.sodiumMg ?? null,
         },
         servings: [{ id: `${food.id}-serving`, label: food.serving, grams: food.grams }],
       },
-    });
-  }
+      });
+    }
   const total = selectedCalories.value;
   const after = calorieBudget(dailyTarget.value, budget.value.consumedKcal + total);
   uni.showToast({
     title: `已记录 ${Math.round(total)} 千卡，还可吃 ${after.remainingKcal} 千卡`,
     icon: 'none',
   });
-  setTimeout(() => navigateBack(), 1500);
+    setTimeout(() => navigateBack(), 1500);
+  } catch {
+    uni.showToast({ title: '保存失败，请重试', icon: 'none' });
+  } finally {
+    saving.value = false;
+  }
 }
 
 function goBack() {
@@ -654,6 +682,11 @@ async function loadTodayEntries() {
   background: #fff;
   border-radius: 20rpx;
 }
+
+.quantity-stepper { display:flex; align-items:center; gap:8rpx; padding:6rpx; border:1rpx solid #d7e8dc; border-radius:22rpx; background:#f5faf6; }
+.stepper-button { width:48rpx; height:48rpx; line-height:44rpx; padding:0; border:0; border-radius:16rpx; background:#e4f0e6; color:#2e7d4f; font-size:34rpx; font-weight:500; }
+.stepper-button--plus { background:#2e7d4f; color:#fff; }
+.stepper-value { min-width:28rpx; text-align:center; color:#244735; font-size:25rpx; font-weight:700; }
 
 /* 薄荷式目录布局：分类固定在左侧，右侧专注浏览与加号记录 */
 .categories {
