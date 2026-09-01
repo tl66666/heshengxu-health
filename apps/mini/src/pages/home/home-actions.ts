@@ -37,8 +37,8 @@ export const foodRecordActions = [
 ] as const;
 
 export const mealRecordIcons = {
-  早餐: '/static/icons/svg/meal-breakfast.svg',
-  午餐: '/static/icons/svg/meal-lunch.svg',
-  晚餐: '/static/icons/svg/meal-dinner.svg',
-  加餐: '/static/icons/svg/meal-snack.svg',
+  早餐: '/static/icons/breakfast.png',
+  午餐: '/static/icons/lunch.png',
+  晚餐: '/static/icons/dinner.png',
+  加餐: '/static/icons/snack.png',
 } as const;

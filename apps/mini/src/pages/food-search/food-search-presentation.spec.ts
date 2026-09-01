@@ -5,7 +5,7 @@ describe('food search presentation', () => {
   it('uses the shared navigation and icon assets for food selection', () => {
     expect(foodSearchPageSource).toContain('<AppNavBar title="选择食物"');
     expect(foodSearchPageSource).toContain('/static/icons/svg/search.svg');
-    expect(foodSearchPageSource).toContain('/static/icons/camera.jpg');
+    expect(foodSearchPageSource).toContain('/static/icons/camera.png');
     expect(foodSearchPageSource).toContain('/static/icons/svg/forward.svg');
     expect(foodSearchPageSource).not.toContain('>›<');
     expect(foodSearchPageSource).not.toContain('>✦<');
@@ -16,7 +16,7 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('class="cart-bar"');
     expect(foodSearchPageSource).toContain('class="cart-panel"');
     expect(foodSearchPageSource).toContain('class="budget-strip"');
-    expect(foodSearchPageSource).toContain('/static/icons/breakfast.jpg');
+    expect(foodSearchPageSource).toContain('/static/icons/breakfast.png');
     expect(foodSearchPageSource).toContain('FoodSummaryPage');
     expect(foodSearchPageSource).not.toMatch(/[🔥📚🟢🍽️🔍]/u);
   });
@@ -24,13 +24,13 @@ describe('food search presentation', () => {
   it('provides an explicit meal switch for the active recording context', () => {
     expect(foodSearchPageSource).toContain('class="meal-switch"');
     expect(foodSearchPageSource).toContain('switchMealType');
-    expect(foodSearchPageSource).toContain('/static/icons/lunch.jpg');
+    expect(foodSearchPageSource).toContain('/static/icons/lunch.png');
     expect(foodSearchPageSource).toContain('{{ mealLabel }}');
   });
 
   it('uses the provided meal art and exposes selection feedback', () => {
-    expect(foodSearchPageSource).toContain('/static/icons/breakfast.jpg');
-    expect(foodSearchPageSource).toContain('/static/icons/lunch.jpg');
+    expect(foodSearchPageSource).toContain('/static/icons/breakfast.png');
+    expect(foodSearchPageSource).toContain('/static/icons/lunch.png');
     expect(foodSearchPageSource).toContain('cart-badge--pulse');
     expect(foodSearchPageSource).toContain('food-card--added');
   });

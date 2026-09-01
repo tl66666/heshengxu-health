@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import homePageSource from './HomePage.vue?raw';
+import homeActionsSource from './home-actions.ts?raw';
 
 describe('home card presentation contracts', () => {
   it('removes decorative add controls from home cards', () => {
@@ -29,7 +30,7 @@ describe('home card presentation contracts', () => {
     );
     expect(homePageSource).not.toContain('weight-weighing-scene.png');
     expect(homePageSource).toContain('meal-icon-wrap');
-    expect(homePageSource).toContain('/static/icons/camera.jpg');
+    expect(homePageSource).toContain('/static/icons/camera.png');
     expect(homePageSource).not.toContain(
       'class="camera-decoration"\n            src="/static/illustrations/home-companion-banner.png"',
     );
@@ -37,5 +38,24 @@ describe('home card presentation contracts', () => {
 
   it('links the home editor to a registered page', () => {
     expect(homePageSource).toContain('/pages/home/edit-cards/EditCardsPage');
+  });
+
+  it('uses the transparent meal and camera artwork on the home food card', () => {
+    expect(homeActionsSource).toContain('/static/icons/breakfast.png');
+    expect(homeActionsSource).toContain('/static/icons/lunch.png');
+    expect(homeActionsSource).toContain('/static/icons/dinner.png');
+    expect(homeActionsSource).toContain('/static/icons/snack.png');
+    expect(homePageSource).toContain('/static/icons/camera.png');
+    expect(homePageSource).not.toContain('/static/icons/camera.jpg');
+  });
+
+  it('keeps meal artwork bright and gives home buttons one consistent pressed state', () => {
+    expect(homePageSource).toContain('.meal-icon {\n  width: 76rpx;\n  height: 76rpx;\n}');
+    expect(homePageSource).toContain('.meal-item:nth-child(3) .meal-icon');
+    expect(homePageSource).toContain('.meal-item:nth-child(4) .meal-icon');
+    expect(homePageSource).toContain('.camera-decoration { filter: none; }');
+    expect(homePageSource).toContain('.button-hover,');
+    expect(homePageSource).toContain('transform: scale(0.975)');
+    expect(homePageSource).toContain('animation: none');
   });
 });

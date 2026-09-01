@@ -132,7 +132,7 @@
             <text class="camera-title">序序相机</text>
             <text class="camera-subtitle">拍照识别 · 轻松记录</text>
           </view>
-          <image class="camera-decoration" src="/static/icons/camera.jpg" mode="aspectFit" />
+          <image class="camera-decoration" src="/static/icons/camera.png" mode="aspectFit" />
           <text class="camera-arrow">›</text>
         </button>
       </view>
@@ -2072,7 +2072,7 @@ onUnmounted(stopFastingTicker);
 </style>
 <style scoped>
 /* Final visual tokens. Keep all home surfaces in one restrained palette. */
-.page { background: #f2f6f3; color: #29453c; }
+.page { background: #f7faf8; color: #29453c; }
 .chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
 .bg-leaf { width: 320rpx; height: 320rpx; opacity: 0.035; }
 .header { margin-bottom: 24rpx; }
@@ -2110,6 +2110,9 @@ onUnmounted(stopFastingTicker);
 .camera-subtitle { color: #82988d; font-size: 20rpx; }
 .camera-decoration { width: 174rpx; height: 112rpx; opacity: 0.92; }
 .camera-arrow { color: #7da38e; font-size: 38rpx; }
+.meal-icon-wrap { background: transparent; border: 0; box-shadow: none; }
+.meal-icon { width: 74rpx; height: 74rpx; opacity: 1; background: transparent; }
+.camera-decoration { mix-blend-mode: normal; opacity: 1; background: transparent; }
 .record-card { padding: 24rpx 26rpx; }
 .record-content { min-height: 112rpx; }
 .mini-chart { width: 128rpx; height: 112rpx; border: 0; border-radius: 0; background: transparent; }
@@ -2380,4 +2383,134 @@ onUnmounted(stopFastingTicker);
 .weight-progress-label { position: absolute; top: 46rpx; left: 50%; transform: translateX(-50%); color: #688476; font-size: 19rpx; white-space: nowrap; }
 .weight-add { display: flex; width: 52rpx; height: 52rpx; align-items: center; justify-content: center; padding: 0; border: 1rpx solid #d9e9df; border-radius: 50%; color: #47745f; background: #edf6f0; font-size: 32rpx; line-height: 52rpx; }
 .weight-add::after { border: 0; }
+.meal-icon-wrap { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+.meal-icon { width: 74rpx; height: 74rpx; opacity: 1; background: transparent; }
+.camera-decoration { mix-blend-mode: normal; opacity: 1; background: transparent; }
+
+/* Unified home controls: quiet surfaces, consistent feedback, and toned meal artwork. */
+.avatar-wrapper,
+.meal-item,
+.xuxu-camera-card,
+.weight-add,
+.grid-item,
+.edit-card,
+.sheet-close,
+.tone-choice,
+.mood-choice,
+.wellness-save,
+.error-state button {
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+button::after {
+  border: 0;
+}
+
+.button-hover,
+.avatar-wrapper:active,
+.meal-item:active,
+.xuxu-camera-card:active,
+.grid-item:active,
+.edit-card:active,
+.weight-add:active,
+.sheet-close:active,
+.tone-choice:active,
+.mood-choice:active,
+.wellness-save:active,
+.error-state button:active {
+  transform: scale(0.975);
+  opacity: 0.9;
+}
+
+.meal-item {
+  min-width: 118rpx;
+  min-height: 112rpx;
+  padding: 7rpx 4rpx 5rpx;
+  border-radius: 18rpx;
+}
+
+.meal-item:active {
+  background: #eef4f0;
+}
+
+.meal-item:active .meal-icon-wrap {
+  transform: none;
+  box-shadow: none;
+}
+
+.meal-icon-wrap,
+.meal-item:nth-child(2) .meal-icon-wrap,
+.meal-item:nth-child(3) .meal-icon-wrap,
+.meal-item:nth-child(4) .meal-icon-wrap {
+  animation: none;
+}
+
+.meal-icon {
+  width: 76rpx;
+  height: 76rpx;
+}
+
+.meal-name {
+  color: #536f62;
+  font-weight: 650;
+}
+
+.xuxu-camera-card,
+.grid-item,
+.edit-card {
+  border-color: #dce7e0;
+  background: #fdfefc;
+  box-shadow: 0 8rpx 20rpx rgba(42, 72, 58, 0.045);
+}
+
+.xuxu-camera-card {
+  background: #f2f7f3;
+}
+
+.xuxu-camera-card:active,
+.grid-item:active,
+.edit-card:active {
+  border-color: #cbdcd1;
+  background: #edf4ef;
+  box-shadow: 0 4rpx 12rpx rgba(42, 72, 58, 0.035);
+}
+
+.camera-decoration { filter: none; }
+
+.weight-add,
+.sheet-close {
+  border: 1rpx solid #d7e5dc;
+  color: #557767;
+  background: #edf5f0;
+  box-shadow: none;
+}
+
+.tone-choice,
+.mood-choice {
+  border-color: #dfe8e2;
+  color: #71847a;
+  background: #fbfcfb;
+  box-shadow: none;
+}
+
+.tone-choice.selected,
+.mood-choice.selected {
+  border-color: #a9cbb7;
+  color: #416d58;
+  background: #eaf3ed;
+}
+
+.wellness-save,
+.mood-save,
+.error-state button {
+  border: 1rpx solid #a9cdb7;
+  color: #315f49;
+  background: #e7f2eb;
+  box-shadow: none;
+}
 </style>

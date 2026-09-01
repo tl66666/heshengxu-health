@@ -249,7 +249,7 @@
     <!-- 拍照识别入口 -->
     <button class="photo-entry" @tap="openRecognition">
       <view class="camera-mark">
-        <image src="/static/icons/camera.jpg" mode="aspectFit" />
+        <image src="/static/icons/camera.png" mode="aspectFit" />
       </view>
       <view class="photo-copy">
         <text>拍照识别食物</text>
@@ -290,10 +290,10 @@ const totalPages = ref(1);
 const pageSize = 20;
 const mealType = ref<MealType>('lunch');
 const mealOptions: Array<{ value: MealType; label: string; icon: string }> = [
-  { value: 'breakfast', label: '早餐', icon: '/static/icons/breakfast.jpg' },
-  { value: 'lunch', label: '午餐', icon: '/static/icons/lunch.jpg' },
-  { value: 'dinner', label: '晚餐', icon: '/static/icons/dinner.jpg' },
-  { value: 'snack', label: '加餐', icon: '/static/icons/snack.jpg' },
+  { value: 'breakfast', label: '早餐', icon: '/static/icons/breakfast.png' },
+  { value: 'lunch', label: '午餐', icon: '/static/icons/lunch.png' },
+  { value: 'dinner', label: '晚餐', icon: '/static/icons/dinner.png' },
+  { value: 'snack', label: '加餐', icon: '/static/icons/snack.png' },
 ];
 const selectedHealthLight = ref<number | undefined>(undefined);
 type CartItem = { food: FoodItem; grams: number; quantity: number; calories: number };
@@ -317,10 +317,10 @@ const remainingAfterSelection = computed(() =>
 const mealIcon = computed(
   () =>
     ({
-      breakfast: '/static/icons/breakfast.jpg',
-      lunch: '/static/icons/lunch.jpg',
-      dinner: '/static/icons/dinner.jpg',
-      snack: '/static/icons/snack.jpg',
+      breakfast: '/static/icons/breakfast.png',
+      lunch: '/static/icons/lunch.png',
+      dinner: '/static/icons/dinner.png',
+      snack: '/static/icons/snack.png',
     })[mealType.value],
 );
 const mealLabel = computed(() => mealOptions.find((item) => item.value === mealType.value)?.label || '午餐');
@@ -763,11 +763,11 @@ onLoad(async (options) => {
   padding: 20rpx 2rpx 24rpx;
 }
 
-.meal-switch { display:grid; grid-template-columns:repeat(4,1fr); gap:8rpx; margin:0 0 24rpx; padding:6rpx; border:1rpx solid #dfeae1; border-radius:24rpx; background:#f0f6f1; }
-.meal-switch-item { display:flex; align-items:center; justify-content:center; gap:8rpx; min-width:0; height:68rpx; border-radius:18rpx; color:#789180; font-size:23rpx; font-weight:600; transition:all .18s ease; }
+.meal-switch { display:grid; grid-template-columns:repeat(4,1fr); gap:4rpx; margin:0 0 24rpx; padding:8rpx; border:1rpx solid #dfeae1; border-radius:24rpx; background:#f0f6f1; }
+.meal-switch-item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3rpx; min-width:0; height:92rpx; border-radius:18rpx; color:#789180; font-size:21rpx; font-weight:600; transition:all .18s ease; }
 .meal-switch-item.active { color:#2d6943; background:#fffdf8; box-shadow:0 4rpx 14rpx rgba(74,104,87,.10); }
-.meal-switch-icon { width:34rpx; height:34rpx; opacity:.74; }
-.meal-switch-item.active .meal-switch-icon { opacity:1; }
+.meal-switch-icon { width:52rpx; height:52rpx; opacity:1; flex:none; }
+.meal-switch-item.active .meal-switch-icon { transform:translateY(-1rpx) scale(1.03); }
 .food-icon image { width:66rpx; height:66rpx; opacity:1; }
 
 .eyebrow {
@@ -1683,7 +1683,7 @@ onLoad(async (options) => {
 .subtitle { color:#8a9890; }
 .search-box { border:1rpx solid #dce6de; border-radius:16rpx; background:#fff; box-shadow:0 6rpx 18rpx rgba(40,72,50,.05); }
 .meal-switch { border-color:#e1e9e3; border-radius:18rpx; background:#edf3ee; }
-.meal-switch-item { height:64rpx; border-radius:14rpx; font-size:22rpx; }
+.meal-switch-item { height:92rpx; border-radius:14rpx; font-size:21rpx; }
 .meal-switch-item.active { color:#245f3b; box-shadow:0 5rpx 12rpx rgba(47,91,58,.10); }
 .budget-strip { border:1rpx solid #e1e9e3; border-radius:18rpx; background:#fff; box-shadow:0 6rpx 18rpx rgba(40,72,50,.04); }
 .category-tabs { top:12rpx; height:calc(100vh - 390rpx); border:1rpx solid #e2ebe4; background:#edf3ee; box-shadow:0 4rpx 14rpx rgba(40,72,50,.04); }
