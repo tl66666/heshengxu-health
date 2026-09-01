@@ -149,8 +149,8 @@ onShow(refresh);
   min-height: 100vh;
   overflow: hidden;
   padding: 30rpx 28rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 34rpx);
-  color: #5d4f53;
-  background: #fff7f1;
+  color: #365343;
+  background: #ffffff;
 }
 .leaf {
   position: absolute;
@@ -173,20 +173,20 @@ onShow(refresh);
 }
 .top-eyebrow {
   display: block;
-  color: #b17b72;
+  color: #6f9f7a;
   font-size: 19rpx;
   letter-spacing: 1rpx;
 }
 .top-title {
   display: block;
   margin-top: 5rpx;
-  color: #5b4d52;
+  color: #365343;
   font-size: 41rpx;
   font-weight: 700;
 }
 .history {
   padding: 10rpx 0 8rpx 18rpx;
-  color: #ae7a75;
+  color: #5f8d68;
   font-size: 21rpx;
 }
 .api-plan {
@@ -195,27 +195,27 @@ onShow(refresh);
   justify-content: space-between;
   margin-top: 18rpx;
   padding: 18rpx 20rpx;
-  border: 1rpx solid #e7ddd6;
+  border: 1rpx solid #e1e9dd;
   border-radius: 16rpx;
-  background: #fbf4ea;
+  background: #f5f8f3;
 }
 .api-title {
   display: block;
-  color: #715b5d;
+  color: #4f6756;
   font-size: 24rpx;
   font-weight: 700;
 }
 .api-note {
   display: block;
   margin-top: 4rpx;
-  color: #a58f8d;
+  color: #8ba092;
   font-size: 19rpx;
 }
 .api-plan button {
   padding: 10rpx 16rpx;
   border-radius: 999rpx;
-  color: #a86770;
+  color: #5f8d68;
   font-size: 20rpx;
-  background: #fff0f1;
+  background: #edf5e8;
 }
 </style>

@@ -21,7 +21,7 @@
       v-for="plan in sortedPlans"
       :key="plan.id"
       class="plan-card"
-      :style="{ '--tint': plan.tint }"
+      :style="{ '--tint': planTint(plan) }"
     >
       <view class="plan-head">
         <image :src="plan.icon" mode="aspectFit" />
@@ -114,6 +114,19 @@ const visibleTasks = (plan: HabitPlan) =>
 const sortedPlans = computed(() =>
   [...props.plans].sort((a, b) => planStats(a).progress - planStats(b).progress),
 );
+const planTint = (plan: HabitPlan) => {
+  const palette: Record<string, string> = {
+    weight: '#e7f0ea',
+    food: '#f1eee5',
+    drink: '#e6f0f2',
+    study: '#eef2ed',
+    exercise: '#edf1e8',
+    sleep: '#e9eef2',
+    mood: '#e7f0ea',
+    custom: '#f1eee5',
+  };
+  return palette[plan.category] || '#f1f5ef';
+};
 const weekDays = computed(() => {
   const labels = ['日', '一', '二', '三', '四', '五', '六'];
   const list = [];
@@ -141,18 +154,18 @@ const weekDays = computed(() => {
 }
 .section-title {
   display: block;
-  color: #5d4f53;
+  color: #365343;
   font-size: 30rpx;
   font-weight: 700;
 }
 .section-note {
   display: block;
   margin-top: 5rpx;
-  color: #9b888d;
+  color: #84988c;
   font-size: 20rpx;
 }
 .count {
-  color: #b66d80;
+  color: #5f8d68;
   font-size: 22rpx;
 }
 .filters {
@@ -164,33 +177,33 @@ const weekDays = computed(() => {
   display: inline-block;
   margin-right: 8rpx;
   padding: 8rpx 15rpx;
-  border: 1rpx solid #eadbd5;
+  border: 1rpx solid #dfe9df;
   border-radius: 999rpx;
-  color: #9b878c;
+  color: #84988c;
   font-size: 19rpx;
-  background: #fffdfb;
+  background: #ffffff;
 }
 .filters button.active {
-  border-color: #cf9aa0;
-  color: #ad6675;
-  background: #fff0f1;
+  border-color: #9fc8a4;
+  color: #4f8a61;
+  background: #edf5e8;
 }
 .empty-inline {
   padding: 30rpx;
-  border: 1rpx dashed #ead8d2;
+  border: 1rpx dashed #dfe9df;
   border-radius: 18rpx;
-  color: #9d8c90;
+  color: #84988c;
   text-align: center;
   font-size: 22rpx;
-  background: #fffdf8;
+  background: #ffffff;
 }
 .plan-card {
   margin-bottom: 18rpx;
   padding: 20rpx;
-  border: 1rpx solid #efe2dc;
+  border: 1rpx solid #e2ebe1;
   border-radius: 20rpx;
-  background: linear-gradient(135deg, var(--tint), #fffdfb 72%);
-  box-shadow: 0 8rpx 24rpx rgba(139, 102, 89, 0.05);
+  background: linear-gradient(135deg, var(--tint), #ffffff 72%);
+  box-shadow: 0 8rpx 24rpx rgba(54, 83, 67, 0.06);
 }
 .plan-head {
   display: flex;
@@ -202,7 +215,7 @@ const weekDays = computed(() => {
   height: 148rpx;
   flex: none;
   border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.86);
 }
 .plan-head-copy {
   min-width: 0;
@@ -210,7 +223,7 @@ const weekDays = computed(() => {
 }
 .plan-title {
   display: block;
-  color: #5b4d52;
+  color: #365343;
   font-size: 27rpx;
   font-weight: 700;
 }
@@ -218,7 +231,7 @@ const weekDays = computed(() => {
   display: block;
   margin-top: 5rpx;
   overflow: hidden;
-  color: #927f84;
+  color: #84988c;
   font-size: 20rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -228,7 +241,7 @@ const weekDays = computed(() => {
   align-items: center;
   gap: 8rpx;
   margin-top: 12rpx;
-  color: #b07d72;
+  color: #6f9f7a;
   font-size: 17rpx;
 }
 .progress-track {
@@ -241,12 +254,12 @@ const weekDays = computed(() => {
 .progress-fill {
   height: 100%;
   border-radius: 8rpx;
-  background: #c98b86;
+  background: #79ad82;
   transition: width 0.25s ease;
 }
 .plan-frequency {
   flex: none;
-  color: #b07d72;
+  color: #6f9f7a;
   font-size: 18rpx;
 }
 .plan-head-actions {
@@ -264,14 +277,14 @@ const weekDays = computed(() => {
 }
 .task-list {
   margin-top: 14rpx;
-  border-top: 1rpx solid rgba(214, 188, 181, 0.35);
+  border-top: 1rpx solid rgba(197, 218, 199, 0.6);
 }
 .task-row {
   display: flex;
   align-items: center;
   gap: 14rpx;
   min-height: 80rpx;
-  border-bottom: 1rpx solid rgba(214, 188, 181, 0.3);
+  border-bottom: 1rpx solid rgba(197, 218, 199, 0.55);
 }
 .task-row:last-child {
   border-bottom: 0;
@@ -283,15 +296,15 @@ const weekDays = computed(() => {
   width: 42rpx;
   height: 42rpx;
   flex: none;
-  border: 2rpx solid #c59a94;
+  border: 2rpx solid #a9c7ab;
   border-radius: 50%;
   color: #fff;
   font-size: 26rpx;
-  background: #fffdfb;
+  background: #ffffff;
 }
 .check.checked {
-  border-color: #b66d80;
-  background: #b66d80;
+  border-color: #6f9f7a;
+  background: #6f9f7a;
 }
 .task-copy {
   min-width: 0;
@@ -299,7 +312,7 @@ const weekDays = computed(() => {
 }
 .filtered-empty {
   padding: 18rpx 0 6rpx;
-  color: #a18e92;
+  color: #84988c;
   text-align: center;
   font-size: 19rpx;
 }
@@ -308,20 +321,20 @@ const weekDays = computed(() => {
   display: block;
 }
 .task-title {
-  color: #63545a;
+  color: #4f6756;
   font-size: 24rpx;
   font-weight: 600;
 }
 .task-note {
   margin-top: 4rpx;
   overflow: hidden;
-  color: #9b898e;
+  color: #8ba092;
   font-size: 19rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .done .task-title {
-  color: #9d858b;
+  color: #91a297;
   text-decoration: line-through;
 }
 .week-dots {
@@ -336,13 +349,13 @@ const weekDays = computed(() => {
   width: 34rpx;
   height: 34rpx;
   border-radius: 50%;
-  color: #ae9698;
+  color: #8ba092;
   font-size: 17rpx;
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(237, 245, 232, 0.72);
 }
 .week-dots text.active {
   color: #fff;
-  background: #b66d80;
+  background: #6f9f7a;
 }
 .celebrate {
   display: flex;
@@ -351,9 +364,9 @@ const weekDays = computed(() => {
   margin-top: 12rpx;
   padding: 10rpx 12rpx;
   border-radius: 12rpx;
-  color: #a86a76;
+  color: #5f8d68;
   font-size: 19rpx;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(237, 245, 232, 0.72);
 }
 .celebrate image {
   width: 42rpx;

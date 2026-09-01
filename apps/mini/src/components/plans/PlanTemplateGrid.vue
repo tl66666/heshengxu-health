@@ -45,18 +45,18 @@ defineEmits<{ select: [template: PlanTemplate]; custom: [] }>();
 }
 .section-title {
   display: block;
-  color: #5d4f53;
+  color: #365343;
   font-size: 30rpx;
   font-weight: 700;
 }
 .section-note {
   display: block;
   margin-top: 5rpx;
-  color: #9b888d;
+  color: #84988c;
   font-size: 20rpx;
 }
 .count {
-  color: #b66d80;
+  color: #5f8d68;
   font-size: 20rpx;
 }
 .template-scroll {
@@ -72,10 +72,10 @@ defineEmits<{ select: [template: PlanTemplate]; custom: [] }>();
   min-height: 230rpx;
   margin: 0 7rpx;
   padding: 16rpx;
-  border: 1rpx solid #efe2dc;
+  border: 1rpx solid #e2ebe1;
   border-radius: 18rpx;
   text-align: left;
-  background: linear-gradient(155deg, var(--tint), #fffdfb 78%);
+  background: linear-gradient(155deg, var(--tint), #ffffff 78%);
 }
 .template:first-child {
   margin-left: 16rpx;
@@ -90,28 +90,28 @@ defineEmits<{ select: [template: PlanTemplate]; custom: [] }>();
 }
 .template-title {
   display: block;
-  color: #62535a;
+  color: #4f6756;
   font-size: 24rpx;
   font-weight: 700;
 }
 .template-note {
   display: block;
   margin-top: 5rpx;
-  color: #9b898e;
+  color: #8ba092;
   font-size: 18rpx;
 }
 .add-label {
   display: block;
   margin-top: auto;
   padding-top: 13rpx;
-  color: #b66d80;
+  color: #5f8d68;
   font-size: 19rpx;
 }
 .custom {
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: #fffdf8;
+  background: #ffffff;
 }
 .custom image {
   width: 136rpx;

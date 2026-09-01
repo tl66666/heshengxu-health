@@ -24,17 +24,17 @@ const frequencies = ['每天', '每周 3 天', '每周 5 天'];
 function submit() { if (!title.value.trim()) return; emit('create', { title: title.value.trim(), subtitle: subtitle.value.trim(), category: category.value, frequency: frequency.value }); title.value = ''; subtitle.value = ''; }
 </script>
 <style scoped>
-.scrim { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end; background:rgba(73,55,58,.28); }
-.sheet { width:100%; padding:26rpx 28rpx calc(26rpx + env(safe-area-inset-bottom)); border-radius:26rpx 26rpx 0 0; background:#fffdf9; box-shadow:0 -12rpx 36rpx rgba(75,54,53,.16); }
+.scrim { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end; background:rgba(39,67,50,.22); }
+.sheet { width:100%; padding:26rpx 28rpx calc(26rpx + env(safe-area-inset-bottom)); border-radius:26rpx 26rpx 0 0; background:#ffffff; box-shadow:0 -12rpx 36rpx rgba(54,83,67,.16); }
 .sheet-head { display:flex; align-items:flex-start; justify-content:space-between; }
-.sheet-title { display:block; color:#5d4f53; font-size:32rpx; font-weight:700; }
-.sheet-note { display:block; margin-top:6rpx; color:#9d898e; font-size:20rpx; }
-.close { width:48rpx; height:48rpx; color:#a98d91; font-size:40rpx; line-height:44rpx; }
-.label { display:block; margin:20rpx 0 9rpx; color:#765f66; font-size:21rpx; }
-.input { width:100%; height:78rpx; padding:0 18rpx; border:1rpx solid #eadbd5; border-radius:13rpx; color:#5d4f53; font-size:24rpx; background:#fff; }
+.sheet-title { display:block; color:#365343; font-size:32rpx; font-weight:700; }
+.sheet-note { display:block; margin-top:6rpx; color:#84988c; font-size:20rpx; }
+.close { width:48rpx; height:48rpx; color:#78907f; font-size:40rpx; line-height:44rpx; }
+.label { display:block; margin:20rpx 0 9rpx; color:#4f6756; font-size:21rpx; }
+.input { width:100%; height:78rpx; padding:0 18rpx; border:1rpx solid #dfe9df; border-radius:13rpx; color:#365343; font-size:24rpx; background:#fff; }
 .categories,.frequencies { display:flex; flex-wrap:wrap; gap:10rpx; }
-.categories button,.frequencies button { padding:12rpx 17rpx; border:1rpx solid #eadbd5; border-radius:999rpx; color:#8d777c; font-size:20rpx; background:#fff; }
-.categories button.selected,.frequencies button.selected { border-color:#c38b83; color:#a96272; background:#fff0f1; }
-.submit { width:100%; height:82rpx; margin-top:26rpx; border-radius:14rpx; color:#fff; font-size:26rpx; background:#b66d80; }
+.categories button,.frequencies button { padding:12rpx 17rpx; border:1rpx solid #dfe9df; border-radius:999rpx; color:#78907f; font-size:20rpx; background:#fff; }
+.categories button.selected,.frequencies button.selected { border-color:#9fc8a4; color:#4f8a61; background:#edf5e8; }
+.submit { width:100%; height:82rpx; margin-top:26rpx; border-radius:14rpx; color:#fff; font-size:26rpx; background:#6f9f7a; box-shadow:0 8rpx 18rpx rgba(111,159,122,.2); }
 .submit[disabled] { opacity:.45; }
 </style>
