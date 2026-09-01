@@ -48,7 +48,7 @@
       /></view>
       <view class="budget-right"
         ><text>还可吃</text
-        ><text class="budget-remaining">{{ budget.remainingKcal }} 千卡</text></view
+        ><text class="budget-remaining">{{ remainingAfterSelection }} 千卡</text></view
       >
     </view>
 
@@ -104,7 +104,7 @@
     </view>
 
     <!-- 分类筛选：进入页面即展示，搜索时继续作为筛选条件 -->
-    <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-x>
+    <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-y>
       <view class="category-list">
         <view
           v-for="cat in allCategories"
@@ -1663,4 +1663,28 @@ onLoad(async (options) => {
 .food-add text { display:block; line-height:58rpx; }
 .food-add::after, .stepper-btn::after, .cart-done::after, .cart-quantity button::after { border:0; }
 .cart-done { display:flex; align-items:center; justify-content:center; line-height:72rpx; }
+
+/* Refined catalog surface: quiet canvas, crisp hierarchy, no decorative gradients. */
+.page { background:#f4f6f3; }
+.intro { padding-top:28rpx; padding-bottom:18rpx; }
+.title { font-size:36rpx; letter-spacing:0; }
+.subtitle { color:#8a9890; }
+.search-box { border:1rpx solid #dce6de; border-radius:16rpx; background:#fff; box-shadow:0 6rpx 18rpx rgba(40,72,50,.05); }
+.meal-switch { border-color:#e1e9e3; border-radius:18rpx; background:#edf3ee; }
+.meal-switch-item { height:64rpx; border-radius:14rpx; font-size:22rpx; }
+.meal-switch-item.active { color:#245f3b; box-shadow:0 5rpx 12rpx rgba(47,91,58,.10); }
+.budget-strip { border:1rpx solid #e1e9e3; border-radius:18rpx; background:#fff; box-shadow:0 6rpx 18rpx rgba(40,72,50,.04); }
+.category-tabs { top:12rpx; height:calc(100vh - 390rpx); border:1rpx solid #e2ebe4; background:#edf3ee; box-shadow:0 4rpx 14rpx rgba(40,72,50,.04); }
+.category-tab { min-height:66rpx; color:#7d9183; font-size:21rpx; }
+.category-tab.active { border-left:5rpx solid #2f7b4e; background:#fff; color:#2f7048; }
+.food-card { min-height:122rpx; border:1rpx solid #e4ebe5; border-radius:16rpx; background:#fff; box-shadow:0 5rpx 14rpx rgba(40,72,50,.045); }
+.food-name { font-size:25rpx; color:#315f42; }
+.food-calories { font-size:20rpx; color:#8b9b90; }
+.food-add, .food-stepper { flex-shrink:0; }
+.pagination { padding-top:22rpx; }
+.page-button { display:flex; align-items:center; justify-content:center; height:58rpx; min-width:116rpx; border:1rpx solid #dbe7de; border-radius:16rpx; background:#fff; line-height:58rpx; }
+.page-button:active { background:#edf5ee; }
+.page-progress { color:#668374; font-size:22rpx; }
+.cart-bar { border-top:1rpx solid #dfe9e1; background:rgba(255,255,255,.98); box-shadow:0 -8rpx 24rpx rgba(40,72,50,.08); }
+.cart-done { height:64rpx; border-radius:18rpx; background:#2f7b4e; font-size:23rpx; }
 </style>
