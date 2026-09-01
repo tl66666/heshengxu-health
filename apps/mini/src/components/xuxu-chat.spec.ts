@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { createRuleReply, createUserMessage, quickQuestions, replySource } from './xuxu-chat.js';
+import {
+  classifyXuxuError,
+  createRuleReply,
+  createUserMessage,
+  quickQuestions,
+  replySource,
+} from './xuxu-chat.js';
 
 describe('Xuxu chat contracts', () => {
   it('provides demo-led quick questions', () => {
-    expect(quickQuestions.map((item) => item.id)).toEqual(['sleep', 'diet', 'activity', 'medical']);
+    expect(quickQuestions.map((item) => item.id)).toEqual(['sleep', 'diet', 'activity', 'water']);
+    expect(quickQuestions.some((item) => /症状/.test(item.label))).toBe(false);
   });
 
   it('creates a user message and a bounded rule reply', () => {
@@ -20,5 +27,12 @@ describe('Xuxu chat contracts', () => {
   it('maps everyday questions to a visible knowledge source', () => {
     expect(replySource('外卖怎么吃更健康？')).toBe('日常饮食结构');
     expect(replySource('我想问问压力')).toBeUndefined();
+  });
+
+  it('distinguishes connection, authentication, and provider errors', () => {
+    expect(classifyXuxuError(new Error('NETWORK_TIMEOUT'))).toBe('network');
+    expect(classifyXuxuError(new Error('UNAUTHORIZED [req]: login required'))).toBe('auth');
+    expect(classifyXuxuError(new Error('SERVICE_UNAVAILABLE [req]: try later'))).toBe('service');
+    expect(classifyXuxuError(new Error('unexpected'))).toBe('unknown');
   });
 });

@@ -9,8 +9,18 @@ export const quickQuestions = [
   { id: 'sleep', label: '最近睡不好怎么办？' },
   { id: 'diet', label: '外卖怎么吃更健康？' },
   { id: 'activity', label: '久坐怎么缓解？' },
-  { id: 'medical', label: '我有不舒服的症状' },
+  { id: 'water', label: '今天喝水够不够？' },
 ] as const;
+
+export type XuxuErrorKind = 'network' | 'auth' | 'service' | 'unknown';
+
+export function classifyXuxuError(error: unknown): XuxuErrorKind {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/NETWORK_TIMEOUT|NETWORK_ERROR|timeout|network/i.test(message)) return 'network';
+  if (/UNAUTHORIZED|AUTH|401|login/i.test(message)) return 'auth';
+  if (/SERVICE_UNAVAILABLE|503|provider|model/i.test(message)) return 'service';
+  return 'unknown';
+}
 
 export function createUserMessage(text: string): ChatMessage {
   return { id: `user-${Date.now()}`, role: 'user', text: text.trim() };
