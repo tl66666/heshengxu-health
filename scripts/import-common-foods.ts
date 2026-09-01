@@ -149,6 +149,16 @@ async function main() {
       data: { isActive: false },
     });
   }
+
+  // One legacy seed item was created under the old protein bucket even though
+  // tofu belongs to the soy category. Keep that correction deterministic too.
+  const canonicalSoyId = categoryMap.get(3);
+  if (canonicalSoyId) {
+    await prisma.foodItem.updateMany({
+      where: { id: 'seed-protein-嫩豆腐' },
+      data: { categoryId: canonicalSoyId },
+    });
+  }
   console.log(`✅ ${categories.length} 个分类\n`);
   
   // 2. 解析和筛选食物
