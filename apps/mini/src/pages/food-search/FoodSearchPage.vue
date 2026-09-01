@@ -153,7 +153,7 @@
       <view
         v-for="food in foods"
         :key="food.id"
-        class="food-card"
+        :class="['food-card', { 'food-card--added': flyingFoodId === food.id }]"
         hover-class="food-card-active"
         @tap="choose(food)"
       >
@@ -210,7 +210,7 @@
 
     <view v-if="selectedFoods.length" class="cart-bar">
       <view class="cart-bar-summary" @tap="cartOpen = !cartOpen">
-        <view class="cart-badge"
+        <view :class="['cart-badge', { 'cart-badge--pulse': cartPulse }]"
           ><image :src="mealIcon" mode="aspectFit" /><text>{{ selectedCountTotal }}</text></view
         >
         <view class="cart-bar-copy"
@@ -290,16 +290,18 @@ const totalPages = ref(1);
 const pageSize = 20;
 const mealType = ref<MealType>('lunch');
 const mealOptions: Array<{ value: MealType; label: string; icon: string }> = [
-  { value: 'breakfast', label: '早餐', icon: '/static/icons/svg/meal-breakfast.svg' },
-  { value: 'lunch', label: '午餐', icon: '/static/icons/svg/meal-lunch.svg' },
-  { value: 'dinner', label: '晚餐', icon: '/static/icons/svg/meal-dinner.svg' },
-  { value: 'snack', label: '加餐', icon: '/static/icons/svg/meal-snack.svg' },
+  { value: 'breakfast', label: '早餐', icon: '/static/icons/breakfast.jpg' },
+  { value: 'lunch', label: '午餐', icon: '/static/icons/lunch.jpg' },
+  { value: 'dinner', label: '晚餐', icon: '/static/icons/dinner.jpg' },
+  { value: 'snack', label: '加餐', icon: '/static/icons/snack.jpg' },
 ];
 const selectedHealthLight = ref<number | undefined>(undefined);
 type CartItem = { food: FoodItem; grams: number; quantity: number; calories: number };
 const selectedFoods = ref<CartItem[]>([]);
 const cartOpen = ref(false);
 const saving = ref(false);
+const flyingFoodId = ref<string | null>(null);
+const cartPulse = ref(false);
 const todayEntries = ref<MealEntry[]>([]);
 const dailyTarget = ref(1800);
 const budget = computed(() => calorieBudget(dailyTarget.value, sumCalories(todayEntries.value)));
@@ -315,10 +317,10 @@ const remainingAfterSelection = computed(() =>
 const mealIcon = computed(
   () =>
     ({
-      breakfast: '/static/icons/svg/meal-breakfast.svg',
-      lunch: '/static/icons/svg/meal-lunch.svg',
-      dinner: '/static/icons/svg/meal-dinner.svg',
-      snack: '/static/icons/svg/meal-snack.svg',
+      breakfast: '/static/icons/breakfast.jpg',
+      lunch: '/static/icons/lunch.jpg',
+      dinner: '/static/icons/dinner.jpg',
+      snack: '/static/icons/snack.jpg',
     })[mealType.value],
 );
 const mealLabel = computed(() => mealOptions.find((item) => item.value === mealType.value)?.label || '午餐');
@@ -609,6 +611,9 @@ function toggleCart(food: FoodItem) {
     quantity: 1,
     calories: calculateFoodNutrition(food, grams).energyKcal,
   });
+  flyingFoodId.value = food.id;
+  cartPulse.value = true;
+  setTimeout(() => { flyingFoodId.value = null; cartPulse.value = false; }, 520);
 }
 
 function changeQuantity(foodId: string, delta: number) {
@@ -1663,6 +1668,13 @@ onLoad(async (options) => {
 .food-add text { display:block; line-height:58rpx; }
 .food-add::after, .stepper-btn::after, .cart-done::after, .cart-quantity button::after { border:0; }
 .cart-done { display:flex; align-items:center; justify-content:center; line-height:72rpx; }
+
+/* Keep the camera entry above the fixed cart bar and give selection a quiet tactile response. */
+.photo-entry { z-index:30; bottom:calc(178rpx + env(safe-area-inset-bottom)); }
+.food-card--added { animation: foodAdded .52s cubic-bezier(.22,.8,.32,1); }
+.cart-badge--pulse { animation: cartPulse .52s cubic-bezier(.22,.8,.32,1); }
+@keyframes foodAdded { 0% { transform:scale(1); } 35% { transform:translateY(-8rpx) scale(1.015); } 100% { transform:scale(1); } }
+@keyframes cartPulse { 0% { transform:scale(1); } 40% { transform:scale(1.12); } 100% { transform:scale(1); } }
 
 /* Refined catalog surface: quiet canvas, crisp hierarchy, no decorative gradients. */
 .page { background:#f4f6f3; }
