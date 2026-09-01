@@ -8,6 +8,18 @@
       <text class="subtitle">支持中文、拼音搜索，9000+ 种食物任你选</text>
     </view>
 
+    <view class="meal-switch" aria-label="选择餐次">
+      <view
+        v-for="item in mealOptions"
+        :key="item.value"
+        :class="['meal-switch-item', { active: mealType === item.value }]"
+        @tap="switchMealType(item.value)"
+      >
+        <image class="meal-switch-icon" :src="item.icon" mode="aspectFit" />
+        <text>{{ item.label }}</text>
+      </view>
+    </view>
+
     <!-- 搜索框 -->
     <view class="search-box">
       <image class="search-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
@@ -202,7 +214,7 @@
           ><image :src="mealIcon" mode="aspectFit" /><text>{{ selectedCountTotal }}</text></view
         >
         <view class="cart-bar-copy"
-          ><text>已选 {{ selectedCountTotal }} 份 · 本餐 {{ selectedCalories }} 千卡</text
+          ><text>{{ mealLabel }} · 已选 {{ selectedCountTotal }} 份 · 本餐 {{ selectedCalories }} 千卡</text
           ><text>今日还可吃 {{ remainingAfterSelection }} 千卡</text></view
         >
         <image
@@ -277,6 +289,12 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = 20;
 const mealType = ref<MealType>('lunch');
+const mealOptions: Array<{ value: MealType; label: string; icon: string }> = [
+  { value: 'breakfast', label: '早餐', icon: '/static/icons/svg/meal-breakfast.svg' },
+  { value: 'lunch', label: '午餐', icon: '/static/icons/svg/meal-lunch.svg' },
+  { value: 'dinner', label: '晚餐', icon: '/static/icons/svg/meal-dinner.svg' },
+  { value: 'snack', label: '加餐', icon: '/static/icons/svg/meal-snack.svg' },
+];
 const selectedHealthLight = ref<number | undefined>(undefined);
 type CartItem = { food: FoodItem; grams: number; quantity: number; calories: number };
 const selectedFoods = ref<CartItem[]>([]);
@@ -303,6 +321,7 @@ const mealIcon = computed(
       snack: '/static/icons/svg/meal-snack.svg',
     })[mealType.value],
 );
+const mealLabel = computed(() => mealOptions.find((item) => item.value === mealType.value)?.label || '午餐');
 
 // 搜索历史（localStorage）
 const searchHistory = ref<string[]>([]);
@@ -569,6 +588,10 @@ function choose(food: FoodItem) {
   uni.$emit('food-selected', food);
 }
 
+function switchMealType(value: MealType) {
+  mealType.value = value;
+}
+
 function selectedCount(foodId: string) {
   return selectedFoods.value.find((item) => item.food.id === foodId)?.quantity || 0;
 }
@@ -734,6 +757,13 @@ onLoad(async (options) => {
 .intro {
   padding: 20rpx 2rpx 24rpx;
 }
+
+.meal-switch { display:grid; grid-template-columns:repeat(4,1fr); gap:8rpx; margin:0 0 24rpx; padding:6rpx; border:1rpx solid #dfeae1; border-radius:24rpx; background:#f0f6f1; }
+.meal-switch-item { display:flex; align-items:center; justify-content:center; gap:8rpx; min-width:0; height:68rpx; border-radius:18rpx; color:#789180; font-size:23rpx; font-weight:600; transition:all .18s ease; }
+.meal-switch-item.active { color:#2d6943; background:#fffdf8; box-shadow:0 4rpx 14rpx rgba(74,104,87,.10); }
+.meal-switch-icon { width:34rpx; height:34rpx; opacity:.74; }
+.meal-switch-item.active .meal-switch-icon { opacity:1; }
+.food-icon image { width:66rpx; height:66rpx; opacity:1; }
 
 .eyebrow {
   display: block;

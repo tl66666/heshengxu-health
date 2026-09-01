@@ -20,4 +20,11 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('FoodSummaryPage');
     expect(foodSearchPageSource).not.toMatch(/[🔥📚🟢🍽️🔍]/u);
   });
+
+  it('provides an explicit meal switch for the active recording context', () => {
+    expect(foodSearchPageSource).toContain('class="meal-switch"');
+    expect(foodSearchPageSource).toContain('switchMealType');
+    expect(foodSearchPageSource).toContain('meal-lunch.svg');
+    expect(foodSearchPageSource).toContain('{{ mealLabel }}');
+  });
 });
