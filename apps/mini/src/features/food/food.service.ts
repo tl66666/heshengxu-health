@@ -1,6 +1,7 @@
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { calculateFoodNutrition, type FoodItem, type MealType } from './food.types.js';
 import type { MealEntry } from './food.summary.js';
+import { GENERATED_LOCAL_FOOD_CATALOG } from './local-food-catalog.generated.js';
 
 export interface SearchFoodsOptions {
   query?: string;
@@ -359,6 +360,17 @@ LOCAL_FOOD_CATALOG.push(
     { energyKcal: 32, proteinG: 1, fatG: 0.2, carbohydrateG: 7.1 },
     ['一小碗', 150],
   ),
+);
+
+// Keep offline mode useful without shipping the full source SQL. The generated
+// set is exported from the same curated database rows used by the API.
+const localNames = new Set(LOCAL_FOOD_CATALOG.map((food) => food.name));
+LOCAL_FOOD_CATALOG.push(
+  ...GENERATED_LOCAL_FOOD_CATALOG.filter((food) => {
+    if (!food.nutrition || localNames.has(food.name)) return false;
+    localNames.add(food.name);
+    return true;
+  }),
 );
 
 function localSearch(options: SearchFoodsOptions = {}): SearchFoodsResult {

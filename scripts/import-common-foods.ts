@@ -93,8 +93,13 @@ function parseValueRow(line: string): any[] {
 }
 
 // 检查是否是常见食物
+function normalizeFoodName(name: string): string {
+  return name.normalize('NFKC').replace(/\s+/gu, '').trim();
+}
+
 function isCommonFood(name: string): boolean {
-  return COMMON_FOODS.some(keyword => name.includes(keyword));
+  const normalized = normalizeFoodName(name);
+  return COMMON_FOODS.some((keyword) => normalizeFoodName(keyword) === normalized);
 }
 
 async function main() {
@@ -187,6 +192,18 @@ async function main() {
   }
   
   console.log(`✅ 筛选出 ${selectedFoods.length} 条常见食物\n`);
+
+  // Rebuild the curated public catalog. Older importers created rows without a
+  // reliable marker, so hide all public rows, then restore deterministic seed
+  // records and the exact-name rows selected from food.sql below.
+  await prisma.foodItem.updateMany({
+    where: { isActive: true },
+    data: { isActive: false },
+  });
+  await prisma.foodItem.updateMany({
+    where: { id: { startsWith: 'seed-' } },
+    data: { isActive: true, catalogRank: 30 },
+  });
   
   // 4. 导入食物
   console.log('💾 导入到数据库...');
@@ -206,13 +223,7 @@ async function main() {
       
       const categoryId = categoryMap.get(Number(category_id));
       const cleanName = String(name);
-      const catalogRank = COMMON_FOODS.includes(cleanName)
-        ? 30
-        : !/[A-Za-z0-9（）()\s]/u.test(cleanName)
-          ? 20
-          : !/\s/u.test(cleanName)
-            ? 10
-            : 0;
+      const catalogRank = isCommonFood(cleanName) ? 30 : 0;
 
       // Keep the importer safe to re-run after an interrupted batch. The
       // source table has no stable unique key in our schema, so name + pinyin
@@ -222,6 +233,15 @@ async function main() {
         select: { id: true },
       });
       if (existing) {
+        await prisma.foodItem.update({
+          where: { id: existing.id },
+          data: {
+            isActive: true,
+            categoryId: categoryId || null,
+            healthLight: Number(health_light) || 0,
+            catalogRank,
+          },
+        });
         imported++;
         continue;
       }

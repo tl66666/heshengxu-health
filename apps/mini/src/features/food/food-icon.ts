@@ -28,6 +28,8 @@ const FOOD_CATEGORY_ICONS: Record<string, string> = {
   seasoning: '/static/icons/svg/food-vegetable.svg',
 };
 
-export function getFoodCategoryIcon(categorySlug?: string | null) {
+export function getFoodCategoryIcon(categorySlug?: string | null, foodName?: string | null) {
+  if (foodName === '鸡蛋' || foodName === '水煮蛋') return '/static/icons/breakfast.png';
+  if (foodName === '米饭' || foodName === '白米饭') return '/static/icons/lunch.png';
   return (categorySlug && FOOD_CATEGORY_ICONS[categorySlug]) || '/static/icons/svg/meal.svg';
 }

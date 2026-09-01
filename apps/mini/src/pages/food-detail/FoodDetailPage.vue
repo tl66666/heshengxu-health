@@ -19,7 +19,7 @@
       <!-- 顶部信息卡片 -->
       <view class="food-header card">
         <view class="food-icon-large">
-          <image :src="getFoodCategoryIcon(food.category?.slug)" mode="aspectFit" />
+          <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
         </view>
         <text class="food-name">{{ food.name }}</text>
         <view v-if="food.category" class="food-category">{{ food.category.name }}</view>

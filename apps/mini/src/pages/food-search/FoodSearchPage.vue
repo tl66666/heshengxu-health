@@ -159,7 +159,7 @@
       >
         <view class="food-main">
           <view class="food-icon">
-            <image :src="getFoodCategoryIcon(food.category?.slug)" mode="aspectFit" />
+            <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
           </view>
           <view class="food-info">
             <text class="food-name">{{ food.name }}</text>

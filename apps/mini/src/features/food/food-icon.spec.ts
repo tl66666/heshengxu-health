@@ -4,6 +4,8 @@ import { getFoodCategoryIcon } from './food-icon.js';
 describe('food category icons', () => {
   it('uses a dedicated icon for known categories and a neutral fallback', () => {
     expect(getFoodCategoryIcon('egg')).toBe('/static/icons/svg/food-egg.svg');
+    expect(getFoodCategoryIcon('egg', '鸡蛋')).toBe('/static/icons/breakfast.png');
+    expect(getFoodCategoryIcon('staple', '米饭')).toBe('/static/icons/lunch.png');
     expect(getFoodCategoryIcon('vegetable')).toBe('/static/icons/svg/food-vegetable.svg');
     expect(getFoodCategoryIcon('unknown')).toBe('/static/icons/svg/meal.svg');
   });

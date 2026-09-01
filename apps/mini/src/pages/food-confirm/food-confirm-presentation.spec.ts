@@ -8,7 +8,7 @@ describe('food confirmation presentation', () => {
     expect(foodConfirmPageSource).toContain('class="save"');
     expect(foodConfirmPageSource).not.toContain('class="back"');
     expect(foodConfirmPageSource).not.toContain('>‹</button>');
-    expect(foodConfirmPageSource).toContain('getFoodCategoryIcon(food.category?.slug)');
+    expect(foodConfirmPageSource).toContain('getFoodCategoryIcon(food.category?.slug, food.name)');
     expect(foodConfirmPageSource).not.toMatch(/[🍚🥚🥦🍎🍽️]/u);
   });
 });

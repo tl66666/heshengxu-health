@@ -97,7 +97,7 @@
             <image
               v-else
               class="food-img food-img--icon"
-              :src="getFoodCategoryIcon(categorySlugForFood(food.name))"
+              :src="getFoodCategoryIcon(categorySlugForFood(food.name), food.name)"
               mode="aspectFit"
             />
           </view>

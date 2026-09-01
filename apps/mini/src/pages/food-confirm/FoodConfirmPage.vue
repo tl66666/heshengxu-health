@@ -7,7 +7,7 @@
     <template v-else>
       <view class="food-hero">
         <view class="food-mark">
-          <image :src="getFoodCategoryIcon(food.category?.slug)" mode="aspectFit" />
+          <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
         </view>
         <view class="food-copy">
           <text class="food-name">{{ food.name }}</text>
