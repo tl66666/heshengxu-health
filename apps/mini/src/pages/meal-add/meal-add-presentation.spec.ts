@@ -7,4 +7,11 @@ describe('meal add presentation', () => {
     expect(mealAddPageSource).not.toContain('getEmoji');
     expect(mealAddPageSource).not.toMatch(/[🍚🥚🍠🍳🥛🍞🍗🍎🍽️🔍📋⚡📷]/u);
   });
+
+  it('exposes quantity controls in both the food list and selected drawer', () => {
+    expect(mealAddPageSource).toContain('quantity-stepper');
+    expect(mealAddPageSource).toContain('changeQuantity(food.id, -1)');
+    expect(mealAddPageSource).toContain('changeQuantity(food.id, 1)');
+    expect(mealAddPageSource).toContain('selectedCountTotal');
+  });
 });

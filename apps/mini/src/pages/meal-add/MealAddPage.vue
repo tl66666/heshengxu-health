@@ -158,9 +158,9 @@
         ><view class="drawer-copy"
           ><text>{{ food.name }}</text
           ><text>{{ food.grams }}g · {{ food.caloriesForGram }} 千卡</text></view
-        ><view class="quantity"
-          ><button @tap="changeQuantity(food.id, -1)">−</button><text>{{ food.quantity }}</text
-          ><button @tap="changeQuantity(food.id, 1)">＋</button></view
+        ><view class="quantity-stepper" @tap.stop
+          ><button class="stepper-button" @tap="changeQuantity(food.id, -1)">−</button><text class="stepper-value">{{ food.quantity }}</text
+          ><button class="stepper-button stepper-button--plus" @tap="changeQuantity(food.id, 1)">＋</button></view
         ></view
       >
     </view>
@@ -1142,4 +1142,15 @@ async function loadTodayEntries() {
   text-align: center;
   font-size: 20rpx;
 }
+
+/* Final control pass: compact, centered controls with a clear selected state. */
+.food-action { display:flex; align-items:center; justify-content:flex-end; min-width:176rpx; }
+.quantity-stepper { display:flex; align-items:center; justify-content:center; gap:8rpx; width:168rpx; height:64rpx; box-sizing:border-box; padding:6rpx; border:1rpx solid #d6e6d9; border-radius:20rpx; background:#f5faf6; }
+.stepper-button { display:flex; align-items:center; justify-content:center; width:48rpx; height:48rpx; margin:0; padding:0; border:0; border-radius:14rpx; line-height:48rpx; background:#e3f0e5; color:#47775a; font-size:30rpx; font-weight:600; }
+.stepper-button--plus { background:#3d8b5c; color:#fff; }
+.stepper-value { display:flex; align-items:center; justify-content:center; min-width:30rpx; height:48rpx; color:#294a36; font-size:26rpx; font-weight:700; line-height:48rpx; }
+.stepper-button::after, .add-btn::after, .bar-done::after, .quantity button::after { border:0; }
+.add-btn { display:flex; align-items:center; justify-content:center; width:64rpx; height:64rpx; margin:0; padding:0; border:1rpx solid #cfe1d0; border-radius:50%; background:#f3f8ef; line-height:64rpx; }
+.add-icon { display:block; color:#4f8a61; font-size:34rpx; line-height:64rpx; }
+.bar-done { display:flex; align-items:center; justify-content:center; height:64rpx; padding:0 24rpx; border:0; border-radius:20rpx; line-height:64rpx; }
 </style>
