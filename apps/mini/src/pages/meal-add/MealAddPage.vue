@@ -132,11 +132,11 @@
       <view class="cart-summary" @tap="cartOpen = !cartOpen">
         <view class="cart-icon-wrap"
           ><image class="meal-icon" :src="mealIcon" mode="aspectFit" /><text class="cart-count">{{
-            selectedFoods.length
+            selectedCountTotal
           }}</text></view
         >
         <view class="cart-copy"
-          ><text class="meal-name">{{ mealLabel }} · 已选 {{ selectedFoods.length }} 份</text
+          ><text class="meal-name">{{ mealLabel }} · 已选 {{ selectedCountTotal }} 份</text
           ><text class="cart-kcal"
             >本餐 {{ selectedCalories }} 千卡 · 今日还可吃 {{ remainingAfterSelection }} 千卡</text
           ></view
@@ -208,6 +208,9 @@ const remainingAfterSelection = computed(() =>
 const saving = ref(false);
 const selectedCalories = computed(() =>
   selectedFoods.value.reduce((sum, food) => sum + food.caloriesForGram, 0),
+);
+const selectedCountTotal = computed(() =>
+  selectedFoods.value.reduce((sum, food) => sum + food.quantity, 0),
 );
 const mealIcon = computed(
   () =>
