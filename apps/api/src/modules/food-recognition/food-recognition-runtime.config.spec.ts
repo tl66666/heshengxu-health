@@ -26,7 +26,7 @@ describe('food recognition runtime configuration', () => {
   it('rejects Hunyuan recognition without server-only credentials', () => {
     expect(() =>
       resolveFoodRecognitionRuntimeConfig({ FOOD_RECOGNITION_VISION_PROVIDER: 'hunyuan' }),
-    ).toThrow('TENCENTCLOUD_SECRET_ID, TENCENTCLOUD_SECRET_KEY');
+    ).toThrow('CLOUDBASE_ENV_ID, TENCENTCLOUD_SECRET_ID, TENCENTCLOUD_SECRET_KEY');
   });
 
   it('fails API startup when CloudBase is selected without server-only credentials', async () => {

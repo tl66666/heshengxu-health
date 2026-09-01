@@ -67,6 +67,20 @@
                 </view>
                 <text class="estimate-text">估算 {{ candidate.estimatedGrams }}g</text>
               </view>
+              <view v-if="candidate.estimatedEnergyKcal != null" class="nutrition-row">
+                <text class="nutrition-pill energy"
+                  >{{ Math.round(candidate.estimatedEnergyKcal) }} kcal</text
+                >
+                <text v-if="candidate.estimatedProteinG != null" class="nutrition-pill protein"
+                  >蛋白质 {{ formatOptional(candidate.estimatedProteinG) }}g</text
+                >
+                <text v-if="candidate.estimatedFatG != null" class="nutrition-pill fat"
+                  >脂肪 {{ formatOptional(candidate.estimatedFatG) }}g</text
+                >
+                <text v-if="candidate.estimatedCarbohydrateG != null" class="nutrition-pill carb"
+                  >碳水 {{ formatOptional(candidate.estimatedCarbohydrateG) }}g</text
+                >
+              </view>
             </view>
             <view v-if="candidate.id === candidateId" class="check-icon">
               <text>✓</text>
@@ -158,6 +172,10 @@ const meals: Array<{ value: MealType; label: string }> = [
 function select(candidate: RecognitionCandidate) {
   candidateId.value = candidate.id;
   grams.value = String(candidate.estimatedGrams);
+}
+
+function formatOptional(value?: number) {
+  return value == null ? '--' : value.toFixed(1);
 }
 
 async function load(jobId: string) {
@@ -504,6 +522,39 @@ onLoad((options) => {
   font-size: 22rpx;
   font-weight: 600;
   color: #68796d;
+}
+
+.nutrition-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.nutrition-pill {
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.nutrition-pill.energy {
+  color: #a76536;
+  background: #fff1e5;
+}
+
+.nutrition-pill.protein {
+  color: #4f6f87;
+  background: #eaf3f9;
+}
+
+.nutrition-pill.fat {
+  color: #8b6e43;
+  background: #f8f0df;
+}
+
+.nutrition-pill.carb {
+  color: #6a5c8c;
+  background: #f1ecfb;
 }
 
 .check-icon {

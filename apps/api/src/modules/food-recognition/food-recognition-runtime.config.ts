@@ -27,11 +27,20 @@ export function resolveFoodRecognitionRuntimeConfig(
     );
   }
   if (visionProvider === 'hunyuan') {
-    assertRequired(
-      environment,
-      ['TENCENTCLOUD_SECRET_ID', 'TENCENTCLOUD_SECRET_KEY'],
-      'Hunyuan food recognition',
-    );
+    const hasSdkCredentials = [
+      environment.CLOUDBASE_ENV_ID,
+      environment.TENCENTCLOUD_SECRET_ID,
+      environment.TENCENTCLOUD_SECRET_KEY,
+    ].every((value) => Boolean(value?.trim()));
+    const hasGatewayCredentials = [
+      environment.CLOUDBASE_AI_BASE_URL,
+      environment.CLOUDBASE_AI_API_KEY,
+    ].every((value) => Boolean(value?.trim()));
+    if (!hasSdkCredentials && !hasGatewayCredentials) {
+      throw new Error(
+        'CloudBase AI food recognition requires CLOUDBASE_ENV_ID, TENCENTCLOUD_SECRET_ID, TENCENTCLOUD_SECRET_KEY or CLOUDBASE_AI_BASE_URL, CLOUDBASE_AI_API_KEY',
+      );
+    }
   }
 
   return { storageProvider, visionProvider };

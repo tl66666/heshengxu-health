@@ -95,6 +95,12 @@ const document = {
         'Returns only the current users recognition job and editable candidates.',
       ),
     },
+    '/food-recognition/analyze': {
+      post: protectedOperation(
+        'Analyze a food image',
+        'Sends an authorized image to the configured server-side vision provider and returns editable nutrition candidates without creating a meal entry.',
+      ),
+    },
     '/food-recognition/confirm': {
       post: protectedOperation(
         'Confirm food recognition candidate',
@@ -110,6 +116,12 @@ const document = {
     '/meal-entries': {
       get: protectedOperation('读取当日食物', '读取指定日期的餐食营养快照'),
       post: protectedOperation('记录食物', '由服务端根据食品目录计算并保存营养快照'),
+    },
+    '/xuxu/chat': {
+      post: protectedOperation(
+        'Chat with Xuxu',
+        'Uses the configured CloudBase model with health-safety boundaries; no diagnosis or prescription instructions are provided.',
+      ),
     },
   },
 };
