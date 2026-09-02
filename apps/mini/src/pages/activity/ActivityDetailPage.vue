@@ -226,6 +226,11 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
   margin: 0;
   box-sizing: border-box;
   transform: translateX(-50%);
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 .hero-visual {
   height: 56.25vw;
