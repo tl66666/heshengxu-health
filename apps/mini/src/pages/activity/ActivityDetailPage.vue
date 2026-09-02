@@ -221,21 +221,22 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
 /* Keep the photographic hero exactly inside the device viewport on mini-program builds. */
 .hero {
   position: relative;
-  left: 50%;
-  width: 100vw;
+  left: auto;
+  width: 100%;
   margin: 0;
   box-sizing: border-box;
-  transform: translateX(-50%);
+  transform: none;
   min-height: 0 !important;
   padding: 0 !important;
   border: 0 !important;
-  border-radius: 0 !important;
+  border-radius: 22rpx !important;
   box-shadow: none !important;
+  overflow: hidden !important;
 }
 .hero-visual {
-  height: 56.25vw;
-  min-height: 380rpx;
-  max-height: 520rpx;
+  height: calc(56.25vw - 27rpx);
+  min-height: 360rpx;
+  max-height: 490rpx;
 }
 .hero-overlay-copy {
   left: 8%;
@@ -255,5 +256,12 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
 }
 .empty image {
   display: none;
+}
+.hero-summary {
+  box-sizing: border-box;
+  padding-right: 38rpx;
+}
+.summary-stamp {
+  flex: none;
 }
 </style>
