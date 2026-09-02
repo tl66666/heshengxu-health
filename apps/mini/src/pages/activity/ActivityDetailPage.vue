@@ -224,6 +224,7 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
   left: 50%;
   width: 100vw;
   margin: 0;
+  box-sizing: border-box;
   transform: translateX(-50%);
 }
 .hero-visual {
