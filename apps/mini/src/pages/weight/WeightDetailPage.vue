@@ -6,7 +6,7 @@
       <image
         class="hero-art"
         src="/static/illustrations/weight-weighing-scene.png"
-        mode="widthFix"
+        mode="aspectFill"
       />
       <view class="hero-wash" />
       <view class="hero-copy">
@@ -107,7 +107,7 @@
           <text v-if="hasTrendData" class="trend-count">{{ chartData.length }} 次记录</text>
         </view>
       </view>
-      <view v-if="hasTrendData" class="chart-shell">
+      <view v-if="hasTrendComparison" class="chart-shell">
         <view class="chart-scale">
           <text v-for="label in chartScaleLabels" :key="label">{{ label }}</text>
         </view>
@@ -138,7 +138,7 @@
           <text v-for="point in chartLabels" :key="point.id">{{ point.label }}</text>
         </view>
       </view>
-      <view v-if="hasTrendData" class="trend-summary">
+      <view v-if="hasTrendComparison" class="trend-summary">
         <view class="trend-summary-item">
           <text class="trend-summary-label">区间平均</text>
           <text class="trend-summary-value">{{ averageWeight.toFixed(1) }} kg</text>
@@ -233,7 +233,7 @@
           <text class="history-time">{{ formatTime(record.recordedAt) }}</text>
         </view>
         <view class="history-note"
-          ><text>{{ record.note || '晨起空腹' }}</text></view
+          ><text>{{ record.note && record.note !== '晨起空腹' ? record.note : recordTimingLabel(record.recordedAt) }}</text></view
         >
         <view class="history-weight"
           ><text>{{ record.weight.toFixed(1) }}</text
@@ -325,7 +325,7 @@
 
     <view class="bottom-space" />
     <button class="record-button" hover-class="record-button-hover" @tap="openNewRecord">
-      <text class="plus">+</text><text>记录今天体重</text>
+      <text>记录今天体重</text>
     </button>
 
     <view v-if="showDialog" class="dialog-mask" @tap="closeDialog">
@@ -361,7 +361,7 @@
           <picker mode="date" :value="recordedDate" @change="recordedDate = $event.detail.value">
             <view class="date-picker-value">
               <text>{{ recordedDate || '选择日期' }}</text>
-              <text class="picker-chevron">›</text>
+              <image class="picker-chevron" src="/static/icons/svg/forward.svg" mode="aspectFit" />
             </view>
           </picker>
         </view>
@@ -797,6 +797,14 @@ function formatTime(value: string) {
 function formatDateTime(value: string) {
   return `${formatDate(value)} ${formatTime(value)}`;
 }
+function recordTimingLabel(value: string) {
+  const hour = new Date(value).getHours();
+  if (hour < 5) return '夜间记录';
+  if (hour < 9) return '清晨记录';
+  if (hour < 12) return '上午记录';
+  if (hour < 18) return '午后记录';
+  return '晚间记录';
+}
 function selectTrendPoint(id: string) {
   selectedTrendId.value = id;
 }
@@ -817,6 +825,10 @@ function closeDialog() {
   recordedDate.value = '';
 }
 function openNewRecord() {
+  if (activeView.value !== 'records') {
+    activeView.value = 'records';
+    return;
+  }
   editingRecordId.value = null;
   inputWeight.value = '';
   inputNote.value = '';
@@ -839,13 +851,16 @@ function saveWeight() {
   const previous = editingRecordId.value
     ? records.value.find((record) => record.id === editingRecordId.value)
     : undefined;
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  const previousTime = previous ? new Date(previous.recordedAt).toTimeString().slice(0, 8) : undefined;
   const payload = {
     weight: Number(value.toFixed(1)),
     recordedAt: recordedDate.value
       ? new Date(
-          `${recordedDate.value}T${previous ? new Date(previous.recordedAt).toTimeString().slice(0, 8) : '08:00:00'}`,
+          `${recordedDate.value}T${previousTime || (recordedDate.value === localDate() ? currentTime : '08:00:00')}`,
         ).toISOString()
-      : new Date().toISOString(),
+      : now.toISOString(),
     note: inputNote.value || undefined,
   };
   const comparison = records.value.find((record) => record.id !== editingRecordId.value);
@@ -918,7 +933,6 @@ function openPlanSetup() {
 onLoad((options) => {
   if (options?.view === 'records') activeView.value = 'records';
   if (options?.view === 'data') activeView.value = 'data';
-  if (options?.action === 'new') setTimeout(openNewRecord, 120);
 });
 onShow(loadWeightData);
 </script>
@@ -2192,6 +2206,33 @@ onShow(loadWeightData);
   line-height: 76rpx;
 }
 </style>
+
+<style scoped>
+.dialog-mask { align-items:flex-end; padding:0 18rpx calc(18rpx + env(safe-area-inset-bottom)); box-sizing:border-box; background:rgba(57,55,50,.24); backdrop-filter:blur(2px); }
+.dialog { width:100%; max-height:84vh; margin:0; padding:18rpx 24rpx calc(22rpx + env(safe-area-inset-bottom)); border:1rpx solid rgba(235,226,214,.9); border-radius:30rpx; background:#fffdf9; box-shadow:0 -12rpx 36rpx rgba(88,75,64,.14); box-sizing:border-box; }
+.dialog-handle { width:68rpx; height:7rpx; margin:0 auto 20rpx; border-radius:99rpx; background:#e3d9ce; }
+.dialog-head { align-items:flex-start; }
+.dialog-title { color:#5a5553; font-size:32rpx; line-height:1.25; }
+.dialog-subtitle { display:block; margin-top:7rpx; color:#a69a91; font-size:19rpx; }
+.dialog-close { display:flex; align-items:center; justify-content:center; width:48rpx; height:48rpx; padding:0; border:1rpx solid #eee5da; border-radius:50%; color:#a39388; background:#fbf5ed; font-size:28rpx; line-height:1; }
+.dialog-close::after { border:0; }
+.dialog-hint { margin:17rpx 0 6rpx; padding:11rpx 13rpx; border:1rpx solid #e8eee3; border-radius:15rpx; color:#849482; background:#f7faf4; font-size:19rpx; }
+.field-block { margin-top:18rpx; }
+.field-label { margin:0 0 9rpx; color:#6c6560; font-size:20rpx; font-weight:700; }
+.weight-input-wrap { display:flex; align-items:center; height:78rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; background:#fffaf3; box-sizing:border-box; }
+.weight-input { flex:1; width:auto; height:76rpx; padding:0; border:0; color:#514c49; background:transparent; font-size:34rpx; font-weight:700; }
+.input-unit { color:#a38b75; font-size:22rpx; font-weight:700; }
+.date-picker-value { display:flex; align-items:center; justify-content:space-between; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:23rpx; box-sizing:border-box; }
+.picker-chevron { width:28rpx; height:28rpx; opacity:.45; }
+.note-input { width:100%; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:22rpx; box-sizing:border-box; }
+.save-button { display:flex; align-items:center; justify-content:center; width:100%; height:78rpx; margin-top:23rpx; border:1rpx solid #d2e2d5; border-radius:18rpx; color:#557563; background:#edf6ef; box-shadow:0 8rpx 18rpx rgba(104,141,111,.1); font-size:24rpx; font-weight:700; line-height:1; }
+.save-button::after { border:0; }
+.delete-record-button { display:flex; align-items:center; justify-content:center; width:100%; height:58rpx; margin-top:6rpx; color:#aa8279; background:transparent; font-size:19rpx; line-height:1; }
+.delete-record-button::after { border:0; }
+.success-sheet { width:100%; padding:34rpx 26rpx calc(28rpx + env(safe-area-inset-bottom)); border-radius:30rpx 30rpx 0 0; background:#fffdf9; box-sizing:border-box; }
+.success-done { display:flex; align-items:center; justify-content:center; width:100%; height:76rpx; margin-top:25rpx; border:1rpx solid #d2e2d5; border-radius:18rpx; color:#557563; background:#edf6ef; font-size:23rpx; line-height:1; }
+.success-done::after { border:0; }
+</style>
 <style scoped>
 .plan-timeline {
   display: flex;
@@ -2287,4 +2328,172 @@ onShow(loadWeightData);
   font-size: 23rpx;
   line-height: 76rpx;
 }
+</style>
+
+<style scoped>
+.weight-page {
+  padding: 0 28rpx 180rpx !important;
+  background: #f5f2eb !important;
+}
+.hero-wrap {
+  min-height: 310rpx !important;
+  margin: 18rpx 0 24rpx !important;
+  border: 1rpx solid #dce7df !important;
+  border-radius: 20rpx !important;
+  background: #edf3ee !important;
+  box-shadow: 0 12rpx 28rpx rgba(32, 55, 42, 0.08) !important;
+}
+.hero-art { opacity: 1 !important; mix-blend-mode: normal !important; }
+.hero-wash { background: linear-gradient(90deg, rgba(237, 243, 238, .98) 0%, rgba(237, 243, 238, .8) 52%, rgba(237, 243, 238, .18) 100%) !important; }
+.hero-copy { padding: 34rpx 28rpx !important; }
+.hero-kicker { color: #48675a !important; font-size: 20rpx !important; }
+.hero-number { color: #173f30 !important; font-size: 70rpx !important; }
+.hero-unit { color: #1f6b4c !important; font-size: 24rpx !important; }
+.hero-date { color: #748078 !important; }
+.hero-bubble { border-color: #d7e5da !important; border-radius: 12rpx !important; background: #fffdf9 !important; }
+.bubble-title { color: #748078 !important; }
+.bubble-value { color: #1f6b4c !important; }
+.summary-card,
+.trend-card,
+.history-card { border-radius: 18rpx !important; background: #fffdf9 !important; }
+.summary-heading-title,
+.section-title,
+.history-heading { color: #173f30 !important; }
+.summary-value,
+.trend-number { color: #1f6b4c !important; }
+.range-tab,
+.record-filter { border-radius: 10rpx !important; border-color: #e2e5dc !important; background: #fffdf9 !important; }
+.range-tab.active,
+.record-filter.active { border-color: #9fc3ad !important; color: #173f30 !important; background: #e7f0e9 !important; }
+.record-button,
+.save-button { height: 88rpx !important; border: 0 !important; border-radius: 14rpx !important; background: #173f30 !important; box-shadow: 0 8rpx 18rpx rgba(23, 63, 48, .16) !important; }
+.dialog { border-radius: 28rpx 28rpx 0 0 !important; background: #fffdf9 !important; }
+.weight-input,
+.note-input { border-color: #d8e4da !important; border-radius: 12rpx !important; background: #fbfcf8 !important; }
+</style>
+
+<style scoped>
+/* Hero art redesign: preserve the character while giving the illustration its own visual lane. */
+.hero-wrap {
+  height: calc(100vw - 56rpx) !important;
+  min-height: 0 !important;
+  margin-top: 18rpx !important;
+  border-color: #d7e5db !important;
+  border-radius: 22rpx !important;
+  background: #edf5ef !important;
+  box-shadow: 0 8rpx 22rpx rgba(31, 67, 48, 0.07) !important;
+}
+.hero-art {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  filter: saturate(1.08) contrast(1.04) brightness(1.01) !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+}
+.hero-wash {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  background: linear-gradient(90deg, rgba(248, 251, 247, 0.3) 0%, rgba(248, 251, 247, 0.12) 46%, rgba(248, 251, 247, 0) 78%) !important;
+}
+.hero-copy {
+  top: 28rpx !important;
+  left: 22rpx !important;
+  width: 43% !important;
+  padding: 18rpx 18rpx !important;
+  border: 1rpx solid rgba(255, 255, 255, 0.88) !important;
+  border-radius: 16rpx !important;
+  background: rgba(255, 253, 249, 0.9) !important;
+  box-shadow: 0 8rpx 20rpx rgba(29, 58, 42, 0.08) !important;
+}
+.hero-kicker { margin-bottom: 12rpx !important; color: #4d6c59 !important; font-size: 20rpx !important; }
+.hero-number { color: #173f30 !important; font-size: 72rpx !important; letter-spacing: 0 !important; }
+.hero-unit { color: #1f6b4c !important; font-size: 22rpx !important; }
+.hero-date { margin-top: 10rpx !important; color: #6f7e74 !important; font-size: 19rpx !important; }
+.hero-bubble {
+  z-index: 3 !important;
+  top: 20rpx !important;
+  right: 18rpx !important;
+  padding: 12rpx 16rpx !important;
+  border-color: #d5e4d9 !important;
+  border-radius: 14rpx !important;
+  background: rgba(255, 253, 249, 0.95) !important;
+  box-shadow: 0 6rpx 14rpx rgba(34, 64, 46, 0.08) !important;
+}
+.bubble-title { color: #738178 !important; font-size: 18rpx !important; }
+.bubble-value { color: #1f6b4c !important; font-size: 24rpx !important; font-weight: 750 !important; }
+
+.record-button {
+  width: 198rpx !important;
+  height: 68rpx !important;
+  right: 24rpx !important;
+  bottom: calc(22rpx + env(safe-area-inset-bottom)) !important;
+  border: 1rpx solid #c9dfd0 !important;
+  border-radius: 18rpx !important;
+  color: #1f6b4c !important;
+  background: #ffffff !important;
+  box-shadow: 0 8rpx 20rpx rgba(31, 73, 50, 0.14) !important;
+  font-size: 22rpx !important;
+}
+.record-button .plus {
+  width: 30rpx !important;
+  height: 30rpx !important;
+  border: 1rpx solid #9fc3ad !important;
+  color: #1f6b4c !important;
+  font-size: 23rpx !important;
+}
+
+.weight-page button.save-button,
+.weight-page button.success-done {
+  min-height: 80rpx !important;
+  height: 80rpx !important;
+  border: 1rpx solid rgba(159, 195, 173, 0.66) !important;
+  border-radius: 18rpx !important;
+  color: #2f5f4a !important;
+  background: rgba(237, 247, 240, 0.82) !important;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.92), 0 8rpx 20rpx rgba(54, 104, 78, 0.14) !important;
+  backdrop-filter: blur(14rpx) !important;
+  font-size: 24rpx !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 80rpx !important;
+}
+.weight-page button.save-button:active,
+.weight-page button.success-done:active {
+  background: rgba(214, 235, 221, 0.92) !important;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.8), 0 4rpx 12rpx rgba(54, 104, 78, 0.12) !important;
+  transform: scale(0.985);
+}
+</style>
+
+<style scoped>
+.dialog-mask { align-items:flex-end !important; padding:0 18rpx calc(18rpx + env(safe-area-inset-bottom)) !important; box-sizing:border-box; background:rgba(57,55,50,.24) !important; backdrop-filter:blur(2px); }
+.dialog { width:100% !important; max-height:84vh !important; margin:0 !important; padding:18rpx 24rpx calc(22rpx + env(safe-area-inset-bottom)) !important; border:1rpx solid rgba(235,226,214,.9) !important; border-radius:30rpx !important; background:#fffdf9 !important; box-shadow:0 -12rpx 36rpx rgba(88,75,64,.14) !important; box-sizing:border-box; }
+.dialog-handle { width:68rpx !important; height:7rpx !important; margin:0 auto 20rpx !important; border-radius:99rpx; background:#e3d9ce !important; }
+.dialog-title { color:#5a5553 !important; font-size:32rpx !important; line-height:1.25; }
+.dialog-subtitle { display:block; margin-top:7rpx; color:#a69a91 !important; font-size:19rpx; }
+.dialog-close { display:flex; align-items:center; justify-content:center; width:48rpx !important; height:48rpx !important; padding:0; border:1rpx solid #eee5da !important; border-radius:50%; color:#a39388 !important; background:#fbf5ed !important; font-size:28rpx; line-height:1; }
+.dialog-close::after { border:0; }
+.dialog-hint { margin:17rpx 0 6rpx !important; padding:11rpx 13rpx; border:1rpx solid #e8eee3; border-radius:15rpx; color:#849482; background:#f7faf4; font-size:19rpx; }
+.field-block { margin-top:18rpx; }
+.field-label { margin:0 0 9rpx; color:#6c6560; font-size:20rpx; font-weight:700; }
+.weight-input-wrap { display:flex; align-items:center; height:78rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; background:#fffaf3; box-sizing:border-box; }
+.weight-input { flex:1; width:auto; height:76rpx; padding:0; border:0; color:#514c49; background:transparent; font-size:34rpx; font-weight:700; }
+.input-unit { color:#a38b75; font-size:22rpx; font-weight:700; }
+.date-picker-value { display:flex; align-items:center; justify-content:space-between; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:23rpx; box-sizing:border-box; }
+.picker-chevron { width:28rpx; height:28rpx; opacity:.45; }
+.note-input { width:100%; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:22rpx; box-sizing:border-box; }
+.save-button { display:flex; align-items:center; justify-content:center; width:100%; height:78rpx !important; margin-top:23rpx; border:1rpx solid #d2e2d5 !important; border-radius:18rpx; color:#557563 !important; background:#edf6ef !important; box-shadow:0 8rpx 18rpx rgba(104,141,111,.1) !important; font-size:24rpx; font-weight:700; line-height:1 !important; }
+.save-button::after,.delete-record-button::after,.success-done::after { border:0; }
+.delete-record-button { display:flex; align-items:center; justify-content:center; width:100%; height:58rpx; margin-top:6rpx; color:#aa8279; background:transparent; font-size:19rpx; line-height:1; }
+.success-sheet { width:100%; padding:34rpx 26rpx calc(28rpx + env(safe-area-inset-bottom)); border-radius:30rpx 30rpx 0 0; background:#fffdf9; box-sizing:border-box; }
+.success-done { display:flex; align-items:center; justify-content:center; width:100%; height:76rpx; margin-top:25rpx; border:1rpx solid #d2e2d5; border-radius:18rpx; color:#557563; background:#edf6ef; font-size:23rpx; line-height:1; }
 </style>

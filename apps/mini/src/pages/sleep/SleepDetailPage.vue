@@ -1,7 +1,7 @@
 <template>
   <view class="page sleep-page">
     <view class="nav"
-      ><button class="back" @tap="goBack">‹</button
+      ><button class="back" aria-label="返回" @tap="goBack"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button
       ><view
         ><text class="title">睡眠记录</text><text class="date">{{ dateLabel }}</text></view
       ><view class="nav-space"
@@ -184,7 +184,7 @@ onShow(() => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: calc(112rpx + env(safe-area-inset-top)) 28rpx calc(40rpx + env(safe-area-inset-bottom));
+  padding:calc(112rpx + env(safe-area-inset-top)) 28rpx calc(40rpx + env(safe-area-inset-bottom));
   background: #f7fbf7;
   color: #45564f;
 }
@@ -651,14 +651,16 @@ onShow(() => {
 </style>
 <style scoped>
 .art-stage {
-  height: auto;
+  height: 640rpx;
   display: block;
   line-height: 0;
 }
 .art-stage image {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 .section-heading {
   display: flex;
@@ -683,6 +685,9 @@ onShow(() => {
   gap: 8rpx;
 }
 .history-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 62rpx;
   height: 42rpx;
   padding: 0 10rpx;
@@ -691,7 +696,7 @@ onShow(() => {
   color: #6f8878;
   background: #f8fbf6;
   font-size: 17rpx;
-  line-height: 42rpx;
+  line-height: 1;
 }
 .delete-action {
   border-color: #ead9d3;
@@ -699,10 +704,53 @@ onShow(() => {
   background: #fffaf8;
 }
 </style>
+
 <style scoped>
-button {
-  box-sizing: border-box;
-  line-height: 1;
-  white-space: nowrap;
+/* Sleep uses the illustration as a full-width scene; the form remains softly framed below it. */
+.sleep-page {
+  padding-right: 24rpx !important;
+  padding-left: 24rpx !important;
+  background: #fffdf9 !important;
+}
+.sleep-page .hero {
+  width: calc(100% + 48rpx) !important;
+  margin-right: -24rpx !important;
+  margin-left: -24rpx !important;
+  border: 0 !important;
+  border-radius: 0 0 28rpx 28rpx !important;
+  background: #f8f5ec !important;
+  box-shadow: 0 8rpx 22rpx rgba(101, 91, 73, 0.06) !important;
+}
+.sleep-page .art-stage {
+  width: 100% !important;
+  height: 100vw !important;
+  min-height: 0 !important;
+  background: #f8f5ec !important;
+}
+.sleep-page .art-stage image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.sleep-page .hero-copy {
+  padding: 22rpx 32rpx 26rpx !important;
+  background: #fffdf9 !important;
+}
+.sleep-page .section {
+  margin-top: 18rpx !important;
+  border-radius: 22rpx !important;
+  background: #ffffff !important;
+  box-shadow: 0 7rpx 18rpx rgba(93, 83, 72, 0.035) !important;
+}
+.sleep-page .time-cell,
+.sleep-page .quality,
+.sleep-page .dream {
+  border-radius: 18rpx !important;
+  background: #fbfcf8 !important;
+}
+.sleep-page .history-row {
+  border-radius: 18rpx !important;
+  background: #ffffff !important;
 }
 </style>

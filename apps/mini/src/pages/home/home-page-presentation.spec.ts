@@ -10,24 +10,24 @@ describe('home card presentation contracts', () => {
   });
 
   it('uses the shared router for the water card entry', () => {
-    expect(homePageSource).toContain("navigateTo('/pages/water/WaterPage')");
-    expect(homePageSource).not.toContain('const goToWater = () => {\n  uni.navigateTo({');
+    expect(homePageSource).toContain('<button class="grid-item card water-card"');
+    expect(homePageSource).toContain('@tap="goToWater"');
+    expect(homePageSource).toContain("navigateTo('/pages/water/WaterPage', {");
   });
 
   it('does not render invented calorie or fasting values', () => {
     expect(homePageSource).not.toContain('<text class="number">1500</text>');
     expect(homePageSource).not.toContain('<text class="fasting-time">01:04:08</text>');
     expect(homePageSource).toContain('{{ mealCount }}');
-    expect(homePageSource).toContain('{{ recordingCompleted }}/{{ recordingTotal }}');
+    expect(homePageSource).toContain('const recordingCompleted = computed');
+    expect(homePageSource).toContain('const recordingTotal = computed');
   });
 
   it('keeps meals separate from the single运动 entry and removes weight-card scene art', () => {
     expect(homePageSource).toContain('v-for="action in foodRecordActions"');
     expect(homePageSource).not.toContain('<text class="meal-name">运动</text>');
     expect(homePageSource).toContain('<text class="grid-title">运动</text>');
-    expect(homePageSource).toContain(
-      '@tap="openRecordAction(\'/pages/records/RecordsPage?type=activity\')"',
-    );
+    expect(homePageSource).toContain('@tap="go(\'/pages/activity/ActivityDetailPage\')"');
     expect(homePageSource).not.toContain('weight-weighing-scene.png');
     expect(homePageSource).toContain('meal-icon-wrap');
     expect(homePageSource).toContain('/static/icons/camera.png');

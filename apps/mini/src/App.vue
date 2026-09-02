@@ -103,66 +103,167 @@ button::after {
 }
 </style>
 
-<style>
-/* Detail pages keep their navigation visible while the record content scrolls. */
-.activity-page .nav,
-.sleep-page .nav,
-.mood-page .nav,
-.fasting-page .nav {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 50 !important;
-  box-sizing: border-box !important;
-  margin-bottom: 18rpx !important;
-  border-bottom: 1rpx solid rgba(221, 231, 222, 0.82) !important;
-  background: rgba(248, 250, 244, 0.96) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  backdrop-filter: blur(16px) !important;
-}
-.activity-page .nav {
-  margin-top: calc(-96rpx - env(safe-area-inset-top)) !important;
-  padding: calc(96rpx + env(safe-area-inset-top)) 24rpx 14rpx !important;
-}
-.sleep-page .nav,
-.mood-page .nav {
-  margin-top: calc(-112rpx - env(safe-area-inset-top)) !important;
-  padding: calc(112rpx + env(safe-area-inset-top)) 28rpx 14rpx !important;
-}
-.fasting-page .nav {
-  margin-top: calc(-104rpx - env(safe-area-inset-top)) !important;
-  padding: calc(104rpx + env(safe-area-inset-top)) 32rpx 14rpx !important;
-}
-.sleep-page .hero {
-  width: 100% !important;
-  margin-right: 0 !important;
-  margin-left: 0 !important;
-}
 
-/* Custom-header detail pages use one compact safe-area row, then begin content below it. */
-.activity-page,
-.sleep-page,
-.mood-page,
-.fasting-page {
-  padding-top: 0 !important;
+<style>
+/* Final cascade: these tokens intentionally load last so legacy page rules cannot reintroduce
+   the dark green/white/cream split that made the visual system feel disconnected. */
+page, body { background: #faf7f1 !important; color: #5c5558 !important; }
+.home-page, .food-search-page, .food-summary-page, .food-recognition-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.home-page .header { background: #eef5ef !important; border-bottom-color: #e3ebe3 !important; }
+.home-page .card, .home-page .grid-item, .home-page .fasting-card, .home-page .period-card, .home-page .medication-card, .home-page .record-card, .home-page .calorie-card, .home-page .weight-card,
+.food-search-page .meal-switch, .food-search-page .budget-strip, .food-search-page .search-box, .food-search-page .food-card, .food-search-page .cart-panel, .food-summary-page .summary-card, .food-summary-page .meal-card, .food-recognition-page .card {
+  border: 1rpx solid #ebe4dc !important; border-left: 1rpx solid #ebe4dc !important; border-radius: 20rpx !important; background: #fffdf9 !important; box-shadow: 0 8rpx 20rpx rgba(92,78,70,.05) !important;
 }
-.activity-page .nav,
-.sleep-page .nav,
-.mood-page .nav,
-.fasting-page .nav {
-  left: calc((100% - 100vw) / 2) !important;
-  width: 100vw !important;
-  margin-top: 0 !important;
-  margin-right: 0 !important;
-  margin-left: 0 !important;
-  padding-top: calc(env(safe-area-inset-top) + 12rpx) !important;
-  padding-bottom: 12rpx !important;
-}
-.activity-page .nav { padding-right: 24rpx !important; padding-left: 24rpx !important; }
-.sleep-page .nav,
-.mood-page .nav { padding-right: 28rpx !important; padding-left: 28rpx !important; }
-.fasting-page .nav { padding-right: 32rpx !important; padding-left: 32rpx !important; }
+.home-page .card-title, .home-page .grid-title, .food-search-page .title, .food-search-page .food-name { color: #625960 !important; }
+.home-page .weight-col .num, .home-page .grid-num, .home-page .big-number .number, .home-page .value { color: #628b7e !important; }
+.home-page .xuxu-camera-card { border: 1rpx solid #dfe8df !important; border-radius: 20rpx !important; background: linear-gradient(110deg,#f1f7f0 0%,#f8f4e9 100%) !important; box-shadow: inset 0 1rpx 0 rgba(255,255,255,.94),0 8rpx 18rpx rgba(109,99,84,.06) !important; }
+.home-page .xuxu-camera-card .camera-title { color: #5d6962 !important; }
+.home-page .xuxu-camera-card .camera-subtitle { color: #a09388 !important; }
+.home-page .xuxu-camera-card .camera-decoration { width: 178rpx !important; height: 116rpx !important; }
+.food-search-page .meal-switch { background: #f1f6ef !important; box-shadow: none !important; }
+.food-search-page .meal-switch-item.active { color: #5d8172 !important; background: #fffdf9 !important; }
+.food-search-page .category-tabs { border-color: #e7e6dc !important; background: #f2f5ee !important; box-shadow: none !important; }
+.food-search-page .category-tab.active { border-left-color: #9ab9a6 !important; color: #5f8275 !important; background: #fffdf9 !important; }
+.food-search-page .food-card { display: flex !important; align-items: center !important; min-height: 126rpx !important; }
+.food-search-page .food-main { display: flex !important; align-items: center !important; min-width: 0 !important; }
+.food-search-page .food-icon { border-color: #e4e8de !important; background: #f5f7f0 !important; }
+.food-search-page .food-icon image { width: 74rpx !important; height: 74rpx !important; object-fit: contain !important; }
+.food-search-page .food-add, .food-search-page .cart-done, .food-recognition-page .recognize-btn { color: #5b756b !important; border-color: #cfe0d5 !important; background: #eaf4ec !important; }
+.food-recognition-page .preview-img { width: 100% !important; height: 460rpx !important; object-fit: contain !important; background: #f5f1e9 !important; }
+.food-summary-page .ring { background: conic-gradient(#91b9a6 var(--progress),#eee9e1 0) !important; }
+.food-summary-page .ring-inner { background: #fffdf9 !important; }
+.food-summary-page .remaining, .food-summary-page .ring-inner text:first-child { color: #628b7e !important; }
+.period-setup-page .primary-button { opacity: 1 !important; color: #5b756b !important; background: #eaf4ec !important; border-color: #cfe0d5 !important; }
+.chat-shell { background: #faf7f1 !important; color: #5c5558 !important; }
+.chat-head, .quick { background: rgba(255,253,249,.96) !important; border-color: #ebe4dc !important; }
+.chat-name, .empty-title { color: #5c5558 !important; }
+.send.enabled { background: #e8f3e9 !important; border-color: #d1e2d4 !important; }
+.food-detail-page, .food-detail-catalog-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.food-detail-page .calorie-summary, .food-detail-page .meal-section,
+.food-detail-catalog-page .card { border-color: #ebe4dc !important; border-radius: 20rpx !important; background: #fffdf9 !important; box-shadow: 0 8rpx 20rpx rgba(92,78,70,.05) !important; }
+.food-detail-catalog-page .content { padding-top: 18rpx !important; }
+.food-detail-catalog-page .food-icon-large { border-color: #e4e8de !important; background: #f5f7f0 !important; }
+.food-detail-catalog-page .food-icon-large image { width: 96rpx !important; height: 96rpx !important; object-fit: contain !important; }
+
 </style>
 
+<style>
+/* 2026-09 visual consolidation: one bright cream canvas, one quiet sage accent. */
+page,
+body { background: #faf7f1 !important; color: #5c5558 !important; }
+
+.nav-bar-wrapper {
+  background: rgba(255, 253, 249, .96) !important;
+  border-bottom-color: #ebe4dc !important;
+}
+.nav-bar-wrapper .status-bar { background: #faf7f1 !important; }
+.nav-bar-wrapper .nav-bar { height: 72rpx !important; padding: 0 24rpx !important; }
+.nav-bar-wrapper .icon-action {
+  width: 52rpx !important; height: 52rpx !important;
+  border-color: #dfe8df !important; background: #fffdf9 !important; box-shadow: 0 3rpx 10rpx rgba(92, 78, 70, .06) !important;
+}
+.nav-bar-wrapper .title { color: #5c5558 !important; font-size: 30rpx !important; }
+
+/* Homepage: sage belongs to the header only; content rests on warm ivory. */
+.home-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.home-page .header {
+  background: #eef5ef !important;
+  border-bottom: 1rpx solid #e3ebe3 !important;
+}
+.home-page .card,
+.home-page .grid-item,
+.home-page .fasting-card,
+.home-page .period-card,
+.home-page .medication-card,
+.home-page .record-card,
+.home-page .calorie-card,
+.home-page .weight-card {
+  border: 1rpx solid #ebe4dc !important;
+  border-left: 1rpx solid #ebe4dc !important;
+  border-radius: 22rpx !important;
+  background: rgba(255, 253, 249, .94) !important;
+  box-shadow: 0 8rpx 22rpx rgba(92, 78, 70, .055) !important;
+}
+.home-page .card-title,
+.home-page .grid-title { color: #625960 !important; }
+.home-page .weight-col .num,
+.home-page .grid-num,
+.home-page .big-number .number,
+.home-page .value { color: #628b7e !important; }
+.home-page .weight-col .label,
+.home-page .hint-text,
+.home-page .meal-summary,
+.home-page .stat-label,
+.home-page .grid-unit,
+.home-page .grid-hint,
+.home-page .camera-subtitle { color: #9a908c !important; }
+.home-page .xuxu-camera-card {
+  min-height: 142rpx !important;
+  border: 1rpx solid #dfe8df !important;
+  border-radius: 20rpx !important;
+  background: linear-gradient(110deg, #f1f7f0 0%, #f8f4e9 100%) !important;
+  box-shadow: inset 0 1rpx 0 rgba(255,255,255,.94), 0 8rpx 18rpx rgba(109, 99, 84, .06) !important;
+}
+.home-page .xuxu-camera-card .camera-title { color: #5d6962 !important; }
+.home-page .xuxu-camera-card .camera-subtitle { color: #a09388 !important; }
+.home-page .xuxu-camera-card .camera-decoration { width: 178rpx !important; height: 116rpx !important; }
+.home-page .mode-tag { background: #f5eee1 !important; color: #9a7f55 !important; }
+.home-page .meal-progress-segment.filled { background: #91b9a6 !important; }
+
+/* Food catalogue/detail pages use the same canvas and image-safe rows. */
+.food-search-page,
+.food-summary-page,
+.food-recognition-page {
+  background: #faf7f1 !important;
+  color: #5c5558 !important;
+}
+.food-search-page .intro { padding-top: 24rpx !important; }
+.food-search-page .meal-switch,
+.food-search-page .budget-strip,
+.food-search-page .search-box,
+.food-search-page .food-card,
+.food-search-page .cart-panel {
+  border-color: #ebe4dc !important;
+  border-radius: 18rpx !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 7rpx 18rpx rgba(92, 78, 70, .045) !important;
+}
+.food-search-page .meal-switch { background: #f1f6ef !important; box-shadow: none !important; }
+.food-search-page .meal-switch-item.active { color: #5d8172 !important; background: #fffdf9 !important; }
+.food-search-page .category-tabs { border-color: #e7e6dc !important; background: #f2f5ee !important; box-shadow: none !important; }
+.food-search-page .category-tab.active { border-left-color: #9ab9a6 !important; color: #5f8275 !important; background: #fffdf9 !important; }
+.food-search-page .food-icon { border-color: #e4e8de !important; background: #f5f7f0 !important; }
+.food-search-page .food-icon image { width: 74rpx !important; height: 74rpx !important; object-fit: contain !important; }
+.food-search-page .food-card { display: flex !important; align-items: center !important; min-height: 126rpx !important; }
+.food-search-page .food-main { display: flex !important; align-items: center !important; min-width: 0 !important; }
+.food-search-page .food-add { color: #688c7c !important; border-color: #cfe0d5 !important; background: #eef6f0 !important; }
+.food-search-page .cart-done { color: #5b756b !important; border: 1rpx solid #cfe0d5 !important; background: #eaf4ec !important; }
+.food-summary-page .summary-card,
+.food-summary-page .meal-card { border-color: #ebe4dc !important; background: #fffdf9 !important; box-shadow: 0 8rpx 20rpx rgba(92,78,70,.05) !important; }
+.food-summary-page .ring { background: conic-gradient(#91b9a6 var(--progress), #eee9e1 0) !important; }
+.food-summary-page .ring-inner { background: #fffdf9 !important; }
+.food-summary-page .remaining,
+.food-summary-page .ring-inner text:first-child { color: #628b7e !important; }
+.food-recognition-page .card { border-color: #ebe4dc !important; border-radius: 22rpx !important; background: #fffdf9 !important; box-shadow: 0 8rpx 20rpx rgba(92,78,70,.05) !important; }
+.food-recognition-page .preview-img { width: 100% !important; height: 460rpx !important; object-fit: contain !important; background: #f5f1e9 !important; }
+.food-recognition-page .recognize-btn { color: #5b756b !important; background: #eaf4ec !important; border: 1rpx solid #cfe0d5 !important; }
+
+/* Chat keeps the API status visible and uses the same cream/sage language. */
+.chat-shell { background: #faf7f1 !important; color: #5c5558 !important; }
+.chat-head, .quick { background: rgba(255,253,249,.96) !important; border-color: #ebe4dc !important; }
+.chat-name, .empty-title { color: #5c5558 !important; }
+.chat-status, .head-mark, .empty-copy, .quick-label { color: #9a908c !important; }
+.profile-title { color: #63776e !important; }
+.profile-tag, .quick button { color: #6d8e7f !important; border-color: #dfe8df !important; background: #f4f8f1 !important; }
+.message-text { color: #5c5558 !important; border-color: #e7e1da !important; background: #fffdf9 !important; }
+.message.user .message-text { color: #60757a !important; border-color: #dfebeb !important; background: #f1f7f6 !important; }
+.composer input { color: #5c5558 !important; border-color: #e7e1da !important; background: #fffdf9 !important; }
+.send.enabled { background: #e8f3e9 !important; border-color: #d1e2d4 !important; box-shadow: 0 6rpx 14rpx rgba(93,130,101,.1) !important; }
+
+/* The setup action must remain tappable so validation can explain what is missing. */
+.period-setup-page .primary-button { opacity: 1 !important; color: #5b756b !important; background: #eaf4ec !important; border-color: #cfe0d5 !important; }
+.period-setup-page .primary-button[disabled] { opacity: .72 !important; }
+</style>
 
 <style>
 /* Final homepage polish: no decorative rails and clearer, lighter surfaces. */
@@ -521,9 +622,10 @@ body {
   width: 84rpx !important;
   height: 84rpx !important;
   margin-top: -30rpx !important;
-  border: 4rpx solid #c78a3b !important;
+  padding: 4rpx !important;
+  border: 1rpx solid #dce9df !important;
   background: #fffdf9 !important;
-  box-shadow: 0 8rpx 18rpx rgba(199, 138, 59, 0.2) !important;
+  box-shadow: 0 8rpx 18rpx rgba(76, 109, 87, 0.1) !important;
 }
 
 .tab--xuxu {
@@ -758,7 +860,6 @@ body {
 .activity-page .section,
 .sleep-page .section,
 .fasting-page .plan-card,
-.water-page .card,
 .period-page .calendar-card,
 .medication-page .section {
   border-color: #e2e5dc !important;
@@ -792,21 +893,6 @@ body {
 .activity-page .activity-choice.selected,
 .activity-page .duration-choice.selected,
 .sleep-page .quality.selected { border-color: #9fc3ad !important; color: #173f30 !important; background: #e7f0e9 !important; }
-
-.water-page .goal-card,
-.water-page .quick-btn,
-.water-page .record-item {
-  border-color: #e2e5dc !important;
-  border-radius: 16rpx !important;
-  background: #fffdf9 !important;
-  box-shadow: 0 8rpx 22rpx rgba(32, 55, 42, 0.07) !important;
-}
-.water-page .stat-value,
-.water-page .amount-num { color: #173f30 !important; }
-.water-page .record-btn { border: 0 !important; border-radius: 14rpx !important; background: #173f30 !important; box-shadow: 0 8rpx 18rpx rgba(23, 63, 48, .16) !important; }
-.water-page .header-text,
-.water-page .history-title { color: #173f30 !important; }
-.water-page .date-btn { border-radius: 10rpx !important; color: #1f6b4c !important; background: #e7f0e9 !important; }
 
 .period-page .date-strip { background: #f2eee6 !important; }
 .period-page .date-pill { border-color: #e2e5dc !important; border-radius: 14rpx !important; color: #748078 !important; background: #fffdf9 !important; }
@@ -1167,5 +1253,419 @@ button.action-btn.primary:active {
   background: #edf6f0 !important;
   box-shadow: 0 5rpx 12rpx rgba(70, 130, 96, 0.1) !important;
   font-weight: 650 !important;
+}
+</style>
+
+<style>
+/* Detail pages share one open editorial layout: full-bleed navigation, calm bands,
+   and separators instead of stacked floating cards. */
+.activity-page.page,
+.sleep-page.page,
+.mood-page.page,
+.fasting-page.page {
+  padding-top: 0 !important;
+  background: #fffaf5 !important;
+  overflow: visible !important;
+}
+.fasting-page .leaf { max-width: 100vw !important; }
+.activity-page .nav,
+.sleep-page .nav,
+.mood-page .nav,
+.fasting-page .nav {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  left: calc((100% - 100vw) / 2) !important;
+  width: 100vw !important;
+  min-height: 76rpx !important;
+  margin: 0 0 12rpx !important;
+  padding: calc(env(safe-area-inset-top) + 10rpx) 32rpx 10rpx !important;
+  box-sizing: border-box !important;
+  border-bottom: 1rpx solid rgba(224, 214, 208, .76) !important;
+  background: rgba(255, 253, 250, .9) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  backdrop-filter: blur(18px) !important;
+}
+.activity-page .nav .title,
+.sleep-page .nav .title,
+.mood-page .nav .title,
+.fasting-page .nav-title {
+  color: #5c5358 !important;
+  font-size: 29rpx !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+}
+.activity-page .nav .date,
+.sleep-page .nav .date,
+.mood-page .nav .date,
+.fasting-page .nav-date {
+  color: #9c918f !important;
+  font-size: 18rpx !important;
+}
+.activity-page .nav .back,
+.sleep-page .nav .back,
+.mood-page .nav .back,
+.fasting-page .nav .icon-button {
+  width: 52rpx !important;
+  height: 52rpx !important;
+  border: 1rpx solid #e6d9d2 !important;
+  border-radius: 50% !important;
+  color: #7c8f92 !important;
+  background: rgba(255, 255, 255, .8) !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
+}
+.activity-page .hero,
+.sleep-page .hero,
+.mood-page .intro {
+  width: calc(100% + 64rpx) !important;
+  margin: 0 0 0 -32rpx !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.activity-page .hero { width: calc(100% + 48rpx) !important; margin-left: -24rpx !important; }
+.sleep-page .hero,
+.mood-page .intro { width: calc(100% + 56rpx) !important; margin-left: -28rpx !important; }
+.activity-page .hero-visual,
+.sleep-page .art-stage,
+.mood-page .art-stage {
+  border-radius: 0 !important;
+}
+.activity-page .section,
+.sleep-page .section,
+.mood-page .section {
+  margin-top: 28rpx !important;
+  padding: 24rpx 0 26rpx !important;
+  border: 0 !important;
+  border-top: 1rpx solid #e6ddd7 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.activity-page .section:first-of-type,
+.sleep-page .section:first-of-type,
+.mood-page .section:first-of-type { border-top: 0 !important; }
+.activity-page .history-section,
+.sleep-page .history,
+.mood-page .history { margin-top: 24rpx !important; }
+.activity-page .history-row,
+.sleep-page .history-row,
+.mood-page .history-row {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.fasting-page .calendar {
+  width: calc(100% + 56rpx) !important;
+  margin: 0 0 22rpx -28rpx !important;
+  padding: 0 28rpx 10rpx !important;
+  box-sizing: border-box !important;
+  border-bottom: 1rpx solid #e1e5df !important;
+  background: rgba(255, 253, 250, .68) !important;
+}
+.fasting-page .plan-card {
+  margin: 0 !important;
+  padding: 26rpx 0 28rpx !important;
+  border: 0 !important;
+  border-top: 1rpx solid #e1e5df !important;
+  border-bottom: 1rpx solid #e1e5df !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.fasting-page .settings-card,
+.fasting-page .tips-card,
+.fasting-page .schedule-card,
+.fasting-page .history-card {
+  border: 0 !important;
+  border-top: 1rpx solid #e1e5df !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.period-page .hero-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: linear-gradient(180deg, #fff3ee 0%, #fffaf5 100%) !important;
+  box-shadow: none !important;
+}
+.period-page .calendar-card,
+.period-page .symptom-card,
+.period-page .cycle-editor {
+  border: 0 !important;
+  border-top: 1rpx solid #eaded8 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.period-page .calendar-card,
+.period-page .symptom-card,
+.period-page .cycle-editor { margin-right: 28rpx !important; margin-left: 28rpx !important; }
+.medication-page .page-head { padding-top: 18rpx !important; }
+.medication-page .companion-banner { border-radius: 20rpx !important; box-shadow: 0 12rpx 26rpx rgba(126, 104, 94, .07) !important; }
+.medication-page .summary-line {
+  margin-right: 0 !important; margin-left: 0 !important;
+  padding-right: 0 !important; padding-left: 0 !important;
+  border: 0 !important; border-top: 1rpx solid #e6ddd7 !important; border-bottom: 1rpx solid #e6ddd7 !important;
+  border-radius: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+.medication-page .timeline { gap: 0 !important; }
+.medication-page .med-row {
+  border: 0 !important; border-bottom: 1rpx solid #e6ddd7 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important;
+}
+@media (min-width: 700px) {
+  .activity-page .nav,
+  .sleep-page .nav,
+  .mood-page .nav,
+  .fasting-page .nav { width: 100vw !important; margin-left: 0 !important; padding-right: 48rpx !important; padding-left: 48rpx !important; }
+  .activity-page .hero,
+  .sleep-page .hero,
+  .mood-page .intro { width: calc(100% + 96rpx) !important; margin-left: -48rpx !important; padding-right: 0 !important; padding-left: 0 !important; }
+  .fasting-page .calendar { width: calc(100% + 96rpx) !important; margin-left: -48rpx !important; padding-right: 48rpx !important; padding-left: 48rpx !important; }
+}
+</style>
+
+<style>
+/* Final home camera treatment: one quiet watercolor surface, never the legacy dark tile. */
+.home-page .xuxu-camera-card {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 164rpx !important;
+  margin-top: 22rpx !important;
+  padding: 22rpx 22rpx 22rpx 28rpx !important;
+  border: 1rpx solid #d6e5df !important;
+  border-radius: 22rpx !important;
+  background: #fff8ef !important;
+  box-shadow: 0 10rpx 24rpx rgba(125, 103, 82, .07), inset 0 1rpx 0 rgba(255,255,255,.88) !important;
+  overflow: hidden !important;
+}
+.home-page .xuxu-camera-card .camera-copy { flex: 1; min-width: 0; }
+.home-page .xuxu-camera-card .camera-title {
+  color: #625960 !important;
+  font-size: 31rpx !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+.home-page .xuxu-camera-card .camera-subtitle {
+  margin-top: 8rpx !important;
+  color: #9b8d88 !important;
+  font-size: 20rpx !important;
+}
+.home-page .xuxu-camera-card .camera-decoration {
+  flex: none !important;
+  width: 188rpx !important;
+  height: 124rpx !important;
+  margin: 0 0 0 12rpx !important;
+  opacity: 1 !important;
+  mix-blend-mode: multiply !important;
+}
+.home-page .xuxu-camera-card:active {
+  background: #fff3e6 !important;
+  box-shadow: 0 6rpx 16rpx rgba(125, 103, 82, .06), inset 0 1rpx 0 rgba(255,255,255,.88) !important;
+}
+.sleep-page .nav .back image,
+.mood-page .nav .back image,
+.fasting-page .nav .back image {
+  display: block !important;
+  width: 26rpx !important;
+  height: 26rpx !important;
+  opacity: .72 !important;
+}
+</style>
+
+<style>
+/* Final cascade loaded after every page style. */
+/* Mini-program image components need a concrete box; auto height can collapse them. */
+.page.sleep-page.page .art-stage,
+.page.mood-page.page .art-stage { height: 640rpx !important; min-height: 640rpx !important; }
+.page.sleep-page.page .art-stage image,
+.page.mood-page.page .art-stage image { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center center !important; opacity: 1 !important; }
+.page.activity-page.page .hero-visual { height: 430rpx !important; min-height: 0 !important; }
+.page.activity-page.page .hero-image { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center center !important; opacity: 1 !important; }
+/* Every visible action has a stable box and centered label/icon baseline. */
+.page.sleep-page.page .back,
+.page.sleep-page.page .quality,
+.page.sleep-page.page .save,
+.page.activity-page.page .back,
+.page.activity-page.page .activity-choice,
+.page.activity-page.page .duration-choice,
+.page.activity-page.page .save-button,
+.page.mood-page.page .back,
+.page.mood-page.page .mood-choice,
+.page.mood-page.page .save,
+.period-page .month-button,
+.period-page .ghost-button,
+.period-page .small-action,
+.period-page .primary-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+.page.sleep-page.page .back image,
+.page.activity-page.page .back image,
+.page.mood-page.page .back image,
+.period-page .month-button image { width: 28rpx !important; height: 28rpx !important; margin: 0 !important; }
+/* Detail-page geometry: one safe-area offset, equal gutters, and no negative-width heroes. */
+.page.sleep-page.page,
+.page.activity-page.page,
+.page.mood-page.page { padding-top: 0 !important; padding-right: 24rpx !important; padding-left: 24rpx !important; overflow-x: hidden !important; background: #faf7f1 !important; }
+.page.sleep-page.page .nav,
+.page.activity-page.page .nav,
+.page.mood-page.page .nav {
+  position: sticky !important; top: 0 !important; z-index: 100 !important; width: calc(100% + 48rpx) !important; min-height: 0 !important;
+  margin: 0 0 16rpx -24rpx !important; padding: calc(44rpx + env(safe-area-inset-top)) 24rpx 12rpx !important;
+  box-sizing: border-box !important; border-bottom: 1rpx solid #ebe4dc !important; background: rgba(255,253,249,.96) !important;
+  -webkit-backdrop-filter: blur(18px) !important; backdrop-filter: blur(18px) !important;
+}
+.page.sleep-page.page .nav .title,
+.page.activity-page.page .nav .title,
+.page.mood-page.page .nav .title { color: #5c5558 !important; font-size: 29rpx !important; line-height: 1.2 !important; }
+.page.sleep-page.page .nav .date,
+.page.activity-page.page .nav .date,
+.page.mood-page.page .nav .date { color: #9a908c !important; font-size: 18rpx !important; }
+.page.sleep-page.page .hero,
+.page.activity-page.page .hero,
+.page.mood-page.page .intro { width: 100% !important; margin-right: 0 !important; margin-left: 0 !important; border-radius: 22rpx !important; transform: none !important; box-sizing: border-box !important; }
+.page.sleep-page.page .section,
+.page.activity-page.page .section,
+.page.mood-page.page .section { width: 100% !important; margin-right: 0 !important; margin-left: 0 !important; box-sizing: border-box !important; }
+.page.sleep-page.page .save,
+.page.activity-page.page .save-button,
+.page.mood-page.page .save { width: 100% !important; margin-right: 0 !important; margin-left: 0 !important; }
+page, body { background: #faf7f1 !important; color: #5c5558 !important; }
+.home-page, .food-search-page, .food-summary-page, .food-recognition-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.home-page .header { background: #eef5ef !important; border-bottom-color: #e3ebe3 !important; }
+.home-page .card, .home-page .grid-item, .home-page .fasting-card, .home-page .period-card, .home-page .medication-card, .home-page .record-card, .home-page .calorie-card, .home-page .weight-card,
+.food-search-page .meal-switch, .food-search-page .budget-strip, .food-search-page .search-box, .food-search-page .food-card, .food-search-page .cart-panel, .food-summary-page .summary-card, .food-summary-page .meal-card, .food-recognition-page .card {
+  border: 1rpx solid #ebe4dc !important; border-left: 1rpx solid #ebe4dc !important; border-radius: 20rpx !important; background: #fffdf9 !important; box-shadow: 0 8rpx 20rpx rgba(92,78,70,.05) !important;
+}
+.home-page .card-title, .home-page .grid-title, .food-search-page .title, .food-search-page .food-name { color: #625960 !important; }
+.home-page .weight-col .num, .home-page .grid-num, .home-page .big-number .number, .home-page .value { color: #628b7e !important; }
+.home-page .xuxu-camera-card { border: 1rpx solid #dfe8df !important; border-radius: 20rpx !important; background: linear-gradient(110deg,#f1f7f0 0%,#f8f4e9 100%) !important; box-shadow: inset 0 1rpx 0 rgba(255,255,255,.94),0 8rpx 18rpx rgba(109,99,84,.06) !important; }
+.home-page .xuxu-camera-card .camera-title { color: #5d6962 !important; }
+.home-page .xuxu-camera-card .camera-subtitle { color: #a09388 !important; }
+.home-page .xuxu-camera-card .camera-decoration { width: 178rpx !important; height: 116rpx !important; }
+.food-search-page .meal-switch { background: #f1f6ef !important; box-shadow: none !important; }
+.food-search-page .meal-switch-item.active { color: #5d8172 !important; background: #fffdf9 !important; }
+.food-search-page .category-tabs { border-color: #e7e6dc !important; background: #f2f5ee !important; box-shadow: none !important; }
+.food-search-page .category-tab.active { border-left-color: #9ab9a6 !important; color: #5f8275 !important; background: #fffdf9 !important; }
+.food-search-page .food-card { display: flex !important; align-items: center !important; min-height: 126rpx !important; }
+.food-search-page .food-main { display: flex !important; align-items: center !important; min-width: 0 !important; }
+.food-search-page .food-icon { border-color: #e4e8de !important; background: #f5f7f0 !important; }
+.food-search-page .food-icon image { width: 74rpx !important; height: 74rpx !important; object-fit: contain !important; }
+.food-search-page .food-add, .food-search-page .cart-done, .food-recognition-page .recognize-btn { color: #5b756b !important; border-color: #cfe0d5 !important; background: #eaf4ec !important; }
+.food-recognition-page .preview-img { width: 100% !important; height: 460rpx !important; object-fit: contain !important; background: #f5f1e9 !important; }
+.food-summary-page .ring { background: conic-gradient(#91b9a6 var(--progress),#eee9e1 0) !important; }
+.food-summary-page .ring-inner { background: #fffdf9 !important; }
+.food-summary-page .remaining, .food-summary-page .ring-inner text:first-child { color: #628b7e !important; }
+.period-setup-page .primary-button { opacity: 1 !important; color: #5b756b !important; background: #eaf4ec !important; border-color: #cfe0d5 !important; }
+.chat-shell { background: #faf7f1 !important; color: #5c5558 !important; }
+.chat-head, .quick { background: rgba(255,253,249,.96) !important; border-color: #ebe4dc !important; }
+.chat-name, .empty-title { color: #5c5558 !important; }
+.send.enabled { background: #e8f3e9 !important; border-color: #d1e2d4 !important; }
+.food-detail-page, .food-detail-catalog-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.food-detail-page .calorie-summary, .food-detail-page .meal-section,
+.food-detail-catalog-page .card { border-color: #ebe4dc !important; border-radius: 20rpx !important; background: #fffdf9 !important; box-shadow: 0 8rpx 20rpx rgba(92,78,70,.05) !important; }
+.food-detail-catalog-page .content { padding-top: 18rpx !important; }
+.food-detail-catalog-page .food-icon-large { border-color: #e4e8de !important; background: #f5f7f0 !important; }
+.food-detail-catalog-page .food-icon-large image { width: 96rpx !important; height: 96rpx !important; object-fit: contain !important; }
+
+/* Shared control geometry. Every label/icon sits in the same flex-centered box
+   so the WeChat renderer does not apply inconsistent line-height baselines. */
+button.back,
+button.nav-back,
+button.nav-date,
+button.icon-button,
+button.icon-action,
+button.close-button,
+button.close,
+button.save,
+button.save-button,
+button.primary-button,
+button.record-button,
+button.primary,
+button.secondary,
+button.checkin,
+button.reminder,
+button.mode-card,
+button.activity-choice,
+button.duration-choice,
+button.quality,
+button.mood-choice,
+button.history-action,
+button.day-arrow,
+button.date-arrow,
+button.cart-arrow,
+button.photo-arrow,
+button.month-button,
+button.ghost-button,
+button.small-action,
+button.text-action,
+button.empty-action,
+button.retry,
+button.retry-btn,
+button.manual-btn,
+button.food-add,
+button.cart-done,
+button.page-button,
+button.meal-add,
+button.add-more,
+button.action-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+button.back image,
+button.nav-back image,
+button.icon-button image,
+button.icon-action image,
+button.day-arrow image,
+button.date-arrow image,
+button.cart-arrow image,
+button.photo-arrow image,
+button.month-button image {
+  display: block !important;
+  flex: none !important;
+  margin: 0 !important;
+}
+.activity-page .intensity-choice {
+  align-items: center !important;
+  text-align: center !important;
+}
+</style>
+
+<style>
+/* Bright canvas shared by every health detail page. Feature colors stay on their artwork and controls. */
+page,
+body {
+  background: #fffdf9 !important;
+}
+
+.page,
+.food-detail-page,
+.bootstrap-page,
+.onboarding-container,
+.chat-shell {
+  background-color: #fffdf9 !important;
+}
+
+.page .card,
+.page .section,
+.page .plan-card,
+.page .record-section,
+.page .history-section,
+.page .summary-card,
+.page .meal-card,
+.page .settings-sheet {
+  background-color: #ffffff !important;
+  border-color: #e9e9e3 !important;
+  box-shadow: 0 7rpx 18rpx rgba(93, 83, 72, 0.035) !important;
 }
 </style>

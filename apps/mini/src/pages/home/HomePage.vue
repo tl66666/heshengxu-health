@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page home-page">
     <!-- 背景装饰 -->
     <image
       class="bg-leaf"
@@ -34,42 +34,39 @@
       <view v-if="isCardVisible('weight-plan')" class="weight-card card" @tap="goToWeightProgress">
         <view class="card-top">
           <text class="card-title">体重管理方案</text>
-          <text class="week-badge">{{ planWeekLabel }}</text>
+          <view class="weight-card-actions">
+            <text class="week-badge">{{ planWeekLabel }}</text>
+            <button class="weight-visibility" aria-label="显示或隐藏体重" @tap.stop="toggleWeightVisibility">
+              <image src="/static/icons/svg/eye.svg" mode="aspectFit" />
+            </button>
+          </view>
         </view>
 
         <view class="weight-visual">
-          <svg class="semicircle-svg" viewBox="0 0 160 85" preserveAspectRatio="xMidYMid meet">
-            <path
-              class="track"
-              d="M 10,80 A 70,70 0 0,1 150,80"
-              fill="none"
-              stroke="#e8f7ed"
-              stroke-width="8"
-              stroke-linecap="round"
+          <view class="weight-arc-stage">
+            <view class="weight-arc-ring" :style="{ background: weightArcBackground }" />
+            <view
+              v-if="weightPlanHasTarget"
+              class="weight-arc-node"
+              :style="{ left: `${weightArcNode.x}%`, top: `${weightArcNode.y}%` }"
             />
-            <path
-              class="progress"
-              d="M 10,80 A 70,70 0 0,1 150,80"
-              fill="none"
-              stroke="#7fcc8f"
-              stroke-width="8"
-              stroke-linecap="round"
-              :stroke-dasharray="`${Math.min(progress, 100) * 2.2} 220`"
-              stroke-dashoffset="0"
-            />
-          </svg>
-          <text class="weight-progress-label">已完成 {{ progress.toFixed(0) }}%</text>
+          </view>
+          <view class="weight-progress-copy">
+            <text class="weight-progress-value">{{ weightProgressAmount }}</text>
+            <text class="weight-progress-label">{{ weightPlanHasTarget ? '已减去（kg）' : '设置目标后开始记录' }}</text>
+            <text class="weight-gap-label">{{ weightPlanHasTarget ? weightGapLabel : '记录目标后，这里会显示你的进度' }}</text>
+          </view>
           <view class="weight-row">
             <view class="weight-col">
-              <text class="num">{{ startWeight }}</text>
+              <text class="num">{{ weightValuesHidden ? '••' : startWeight }}</text>
               <text class="label">初始</text>
             </view>
             <view class="weight-col main">
-              <text class="num">{{ currentWeight }}</text>
+              <text class="num">{{ weightValuesHidden ? '••' : currentWeight }}</text>
               <text class="label">当前</text>
             </view>
             <view class="weight-col">
-              <text class="num">{{ targetWeight }}</text>
+              <text class="num">{{ weightValuesHidden ? '••' : targetWeight }}</text>
               <text class="label">目标</text>
             </view>
           </view>
@@ -92,15 +89,14 @@
           <text class="meal-summary">{{ mealSummaryText }}</text>
         </view>
 
-        <view class="calorie-stats">
-          <view class="stat">
-            <text class="stat-num">{{ balancedMealCount }}</text>
-            <text class="stat-label">结构完整</text>
-          </view>
-          <view class="stat">
-            <text class="stat-num">{{ mealCount - balancedMealCount }}</text>
-            <text class="stat-label">待补充</text>
-          </view>
+        <view class="camera-slot">
+          <button class="xuxu-camera-card" hover-class="button-hover" @tap.stop="goToXuxuCamera">
+            <view class="camera-copy">
+              <text class="camera-title">序序相机</text>
+              <text class="camera-subtitle">拍照识别 · 轻松记录</text>
+            </view>
+            <image class="camera-decoration" src="/static/icons/camera.png" mode="aspectFit" />
+          </button>
         </view>
 
         <view class="meal-progress" aria-label="今日饮食记录进度">
@@ -126,15 +122,6 @@
           </button>
         </view>
 
-        <!-- 序序相机 -->
-        <button class="xuxu-camera-card card" hover-class="button-hover" @tap="goToXuxuCamera">
-          <view class="camera-copy">
-            <text class="camera-title">序序相机</text>
-            <text class="camera-subtitle">拍照识别 · 轻松记录</text>
-          </view>
-          <image class="camera-decoration" src="/static/icons/camera.png" mode="aspectFit" />
-          <text class="camera-arrow">›</text>
-        </button>
       </view>
 
       <!-- 3. 体重记录卡片 -->
@@ -146,7 +133,7 @@
               {{ formatTime(latestWeightRecord.recordedAt) }} 更新
             </text>
           </view>
-          <button class="weight-add" aria-label="记录体重" @tap.stop="openWeightRecorder">＋</button>
+          <button class="weight-add" aria-label="记录体重" @tap.stop="openHomeWeightSheet">记录</button>
         </view>
         <view class="record-content">
           <view class="big-value">
@@ -299,6 +286,26 @@
       </button>
     </template>
 
+    <view v-if="weightSheet" class="weight-record-scrim" @tap="closeHomeWeightSheet">
+      <view class="weight-record-sheet" @tap.stop>
+        <view class="sheet-handle" />
+        <view class="weight-record-head">
+          <view>
+            <text class="weight-record-title">记录今天的体重</text>
+            <text class="weight-record-subtitle">留下真实的一次变化，序序会帮你看趋势</text>
+          </view>
+          <button class="sheet-close" aria-label="关闭" @tap="closeHomeWeightSheet">×</button>
+        </view>
+        <view class="weight-record-time"><text>{{ homeWeightDateLabel }}</text><text>{{ homeWeightTimeLabel }}</text></view>
+        <view class="home-weight-input-wrap"><input v-model="homeWeightDraft" type="digit" placeholder="例如 59.0" /><text>kg</text></view>
+        <picker mode="date" :value="homeWeightDate" @change="homeWeightDate = $event.detail.value">
+          <view class="home-weight-date"><text>记录日期</text><text>{{ homeWeightDate }}</text><image src="/static/icons/svg/forward.svg" mode="aspectFit" /></view>
+        </picker>
+        <input v-model="homeWeightNote" class="home-weight-note" type="text" placeholder="可以写下此刻的状态（选填）" />
+        <button class="home-weight-save" @tap="saveHomeWeight">保存体重记录</button>
+      </view>
+    </view>
+
     <view v-if="wellnessSheet" class="wellness-scrim" @tap="closeWellnessSheet">
       <view class="wellness-sheet" @tap.stop>
         <view class="sheet-handle" />
@@ -329,7 +336,18 @@
       <button @tap="load">重新加载</button>
     </view>
 
-    <MiniTabBar v-if="!wellnessSheet" active="home" />
+    <view v-else-if="!today" class="home-empty-state">
+      <image
+        class="home-empty-art"
+        src="/static/illustrations/onboarding-guide-vertical.png"
+        mode="aspectFit"
+      />
+      <text class="home-empty-title">先完成健康档案</text>
+      <text class="home-empty-copy">填写身高、体重和目标后，首页会开始记录你的真实变化。</text>
+      <button class="home-empty-action" @tap="goToOnboarding">开始建档</button>
+    </view>
+
+    <MiniTabBar v-if="!wellnessSheet && !weightSheet" active="home" />
   </view>
 </template>
 
@@ -338,7 +356,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { onHide, onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
-import { listLocalWeightRecords } from '../../features/weight/weight-records.local.js';
+import { createLocalWeightRecord, listLocalWeightRecords } from '../../features/weight/weight-records.local.js';
 import { deriveDailyExperience } from '../../features/health-loop/daily-experience.js';
 import { requestRecordTypeFocus } from '../../features/health-records/records-focus.js';
 import { foodRecordActions, mealRecordIcons } from './home-actions.js';
@@ -348,6 +366,12 @@ import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remaini
 import { loadWellnessJournal, saveMood, saveSleep, type MoodTone, type WellnessJournal } from '../../features/wellness/wellness-journal.js';
 
 const { today, loading, error } = healthLoopState;
+
+function localDate(now = new Date()) {
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+}
 
 const greeting = computed(() => {
   const hour = new Date().getHours();
@@ -363,6 +387,7 @@ const displayName = computed(() => today.value?.displayName || '朋友');
 const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
 const cardVisibility = ref(loadHomeCardVisibility());
+const weightValuesHidden = ref(false);
 const isCardVisible = (id: HomeCardId) => cardVisibility.value[id] !== false;
 const periodStatusText = computed(() =>
   menstruationCycle.value?.lastPeriodStart
@@ -387,6 +412,10 @@ const medicationPlanText = computed(() =>
 
 const wellnessJournal = ref<WellnessJournal>(loadWellnessJournal());
 const wellnessSheet = ref<'sleep' | 'mood' | null>(null);
+const weightSheet = ref(false);
+const homeWeightDraft = ref('');
+const homeWeightNote = ref('');
+const homeWeightDate = ref(localDate());
 const sleepDurationDraft = ref('');
 const sleepQualityDraft = ref<'poor' | 'fair' | 'good'>('good');
 const dreamDraft = ref('');
@@ -397,6 +426,11 @@ const moodOptions: Array<{ value: MoodTone; label: string }> = [{ value: 'calm',
 const sleepCardValue = computed(() => wellnessJournal.value.sleep ? (wellnessJournal.value.sleep.durationMinutes / 60).toFixed(1) : today.value?.todayRecords?.sleep ? formatSleepHours(today.value.todayRecords.sleep) : '--');
 const sleepCardUnit = computed(() => sleepCardValue.value === '--' ? '待记录' : '小时');
 const moodCardValue = computed(() => wellnessJournal.value.mood ? moodOptions.find((item) => item.value === wellnessJournal.value.mood?.tone)?.label || '已记录' : '记录今天');
+const homeWeightDateLabel = computed(() => homeWeightDate.value === localDate() ? '今天' : homeWeightDate.value.replaceAll('-', '.'));
+const homeWeightTimeLabel = computed(() => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+});
 
 const fastingPlan = ref<FastingPlan>(loadFastingPlan());
 const fastingNow = ref(new Date());
@@ -462,6 +496,15 @@ const miniWeightPoints = computed(() => {
   const min = Math.min(...values) - 0.3;
   const max = Math.max(...values) + 0.3;
   const span = Math.max(0.1, max - min);
+  if (data.length === 1) {
+    const item = data[0];
+    if (!item) return [];
+    const y = 48 - ((item.valueKg - min) / span) * 36;
+    return [
+      { id: `${item.id}-guide`, x: 8, y },
+      { id: item.id, x: 112, y },
+    ];
+  }
   return data.map((item, index) => ({
     id: item.id,
     x: data.length === 1 ? 60 : (index / (data.length - 1)) * 120,
@@ -493,6 +536,43 @@ const planWeekLabel = computed(() =>
 const targetWeight = computed(
   () => today.value?.activePlan?.healthTarget?.targetWeightKg?.toFixed(1) || '--',
 );
+const weightPlanHasTarget = computed(() => {
+  const target = today.value?.activePlan?.healthTarget?.targetWeightKg;
+  return Number.isFinite(target) && Number(target) > 0;
+});
+const weightGapLabel = computed(() => {
+  if (!weightPlanHasTarget.value) return '记录目标后，这里会显示你的进度';
+  const current = Number(currentWeight.value);
+  const target = Number(targetWeight.value);
+  if (!Number.isFinite(current) || !Number.isFinite(target)) return '等待一次体重记录';
+  const gap = Math.abs(current - target);
+  return gap < 0.05 ? '已到达目标附近' : `距离目标 ${gap.toFixed(1)} kg`;
+});
+const weightProgressAmount = computed(() => {
+  if (!weightPlanHasTarget.value) return '--';
+  const start = Number(startWeight.value);
+  const current = Number(currentWeight.value);
+  if (!Number.isFinite(start) || !Number.isFinite(current)) return '--';
+  const direction = today.value?.activePlan?.healthTarget?.direction;
+  const amount = direction === 'gain' ? current - start : start - current;
+  return amount > 0 ? amount.toFixed(1) : '0.0';
+});
+const weightArcNode = computed(() => {
+  const progressRatio = Math.max(0, Math.min(1, progress.value / 100));
+  const angle = Math.PI * progressRatio;
+  return {
+    // Match the node to the ring's actual circle instead of interpolating a straight line.
+    x: 2.5 + 95 * ((1 - Math.cos(angle)) / 2),
+    y: 104 - 98.8 * Math.sin(angle),
+  };
+});
+const weightArcBackground = computed(() => {
+  const angle = Math.max(0, Math.min(100, progress.value)) * 1.8;
+  return `conic-gradient(from 270deg, #48c88d 0deg ${angle}deg, #dfe5e1 ${angle}deg 180deg, transparent 180deg 360deg)`;
+});
+function toggleWeightVisibility() {
+  weightValuesHidden.value = !weightValuesHidden.value;
+}
 
 const todayWaterTotal = computed(() => {
   try {
@@ -516,15 +596,10 @@ const todayActivityMinutes = computed(
 
 const mealRecords = computed(() => today.value?.todayRecords?.meals || []);
 const mealCount = computed(() => mealRecords.value.length);
-const balancedMealCount = computed(
-  () =>
-    mealRecords.value.filter((meal) => meal.hasStaple && meal.hasProtein && meal.hasVegetable)
-      .length,
-);
 const mealSummaryText = computed(() =>
   mealCount.value === 0
     ? '还没有记录，先记下今天的一餐'
-    : `${balancedMealCount.value}/${mealCount.value} 餐结构完整`,
+    : `今天已记录 ${mealCount.value} 餐`,
 );
 const recordingCompleted = computed(() => today.value?.recordingProgress.completed || 0);
 const recordingTotal = computed(() => today.value?.recordingProgress.total || 0);
@@ -541,7 +616,10 @@ const progress = computed(() => {
   const target = today.value.activePlan.healthTarget.targetWeightKg;
   if (start == null || target == null || start === target) return 0;
 
-  const prog = ((start - current) / (start - target)) * 100;
+  const direction = today.value.activePlan.healthTarget.direction;
+  const prog = direction === 'gain'
+    ? ((current - start) / (target - start)) * 100
+    : ((start - current) / (start - target)) * 100;
   return Math.max(0, Math.min(100, prog));
 });
 
@@ -558,7 +636,38 @@ const go = (url: string) => {
 
 const goToWeightProgress = () => navigateTo('/pages/weight/WeightDetailPage?view=progress');
 const goToWeightRecords = () => navigateTo('/pages/weight/WeightDetailPage?view=records');
-const openWeightRecorder = () => navigateTo('/pages/weight/WeightDetailPage?view=records&action=new');
+const goToOnboarding = () => {
+  uni.reLaunch({ url: '/pages/onboarding/OnboardingPage' });
+};
+function openHomeWeightSheet() {
+  homeWeightDraft.value = '';
+  homeWeightNote.value = '';
+  homeWeightDate.value = localDate();
+  weightSheet.value = true;
+}
+function closeHomeWeightSheet() {
+  weightSheet.value = false;
+}
+function saveHomeWeight() {
+  const value = Number(homeWeightDraft.value);
+  if (!Number.isFinite(value) || value < 20 || value > 300) {
+    uni.showToast({ title: '请输入 20–300 kg 之间的体重', icon: 'none' });
+    return;
+  }
+  const now = new Date();
+  const time = homeWeightDate.value === localDate()
+    ? `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`
+    : '08:00:00';
+  createLocalWeightRecord({
+    weight: Number(value.toFixed(1)),
+    recordedAt: new Date(`${homeWeightDate.value}T${time}`).toISOString(),
+    note: homeWeightNote.value.trim() || undefined,
+  });
+  weightHistory.value = listLocalWeightRecords().map((record) => ({ id: record.id, valueKg: record.weight, recordedAt: record.recordedAt }));
+  weightSheet.value = false;
+  healthLoopState.loadToday(localDate(), { force: true });
+  uni.showToast({ title: '体重已记录', icon: 'success' });
+}
 
 const goToFoodDetail = () => {
   // The summary page reads the user's saved meal entries. The legacy food
@@ -1480,6 +1589,53 @@ onUnmounted(stopFastingTicker);
   color: #5a9572;
   font-size: 24rpx;
   font-weight: 700;
+}
+
+.home-empty-state {
+  display: flex;
+  min-height: 62vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 44rpx 48rpx 120rpx;
+  text-align: center;
+}
+
+.home-empty-art {
+  width: 300rpx;
+  height: 260rpx;
+  margin-bottom: 18rpx;
+  opacity: 0.92;
+}
+
+.home-empty-title {
+  color: #4f6258;
+  font-size: 34rpx;
+  font-weight: 750;
+}
+
+.home-empty-copy {
+  max-width: 520rpx;
+  margin-top: 12rpx;
+  color: #8b9790;
+  font-size: 23rpx;
+  line-height: 1.6;
+}
+
+.home-empty-action {
+  display: flex;
+  width: 260rpx;
+  height: 76rpx;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28rpx;
+  border: 1rpx solid #cfe0d5;
+  border-radius: 20rpx;
+  background: #eaf4ec;
+  color: #5b756b;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1;
 }
 </style>
 <style scoped>
@@ -2513,4 +2669,687 @@ button::after {
   background: #e7f2eb;
   box-shadow: none;
 }
+</style>
+
+<style scoped>
+/* Homepage detail pass: establish one focal hierarchy and clearer data rhythm. */
+.page {
+  padding: 0 32rpx calc(var(--hz-tabbar-height) + 42rpx) !important;
+  background: #f5f2eb !important;
+}
+
+.header {
+  padding: 54rpx 0 26rpx !important;
+}
+
+.date-chip {
+  padding: 6rpx 14rpx !important;
+  border: 1rpx solid #d8e6dc !important;
+  border-radius: 10rpx !important;
+  background: #e7f0e9 !important;
+  color: #1f6b4c !important;
+  font-size: 20rpx !important;
+}
+
+.greeting {
+  color: #173f30 !important;
+  font-size: 38rpx !important;
+  font-weight: 700 !important;
+}
+
+.avatar-wrapper {
+  width: 76rpx !important;
+  height: 76rpx !important;
+  padding: 5rpx !important;
+  border: 1rpx solid #d8e6dc !important;
+  border-radius: 50% !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 8rpx 18rpx rgba(32, 55, 42, 0.1) !important;
+}
+
+.card {
+  margin-bottom: 22rpx !important;
+  border: 1rpx solid #e2e5dc !important;
+  border-radius: 18rpx !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 10rpx 28rpx rgba(32, 55, 42, 0.08) !important;
+}
+
+.weight-card {
+  padding: 28rpx 28rpx 24rpx !important;
+  border-top: 6rpx solid #1f6b4c !important;
+}
+
+.weight-card .card-title,
+.calorie-card .card-title,
+.record-card .card-title {
+  color: #173f30 !important;
+  font-size: 28rpx !important;
+  font-weight: 700 !important;
+}
+
+.weight-visual {
+  padding-top: 4rpx;
+}
+
+.semicircle-svg {
+  height: 168rpx !important;
+}
+
+.semicircle-svg .track {
+  stroke: #e7eee9 !important;
+}
+
+.semicircle-svg .progress {
+  stroke: #1f6b4c !important;
+}
+
+.weight-progress-label {
+  top: 68rpx !important;
+  color: #748078 !important;
+  font-size: 19rpx !important;
+}
+
+.weight-col .num,
+.weight-col.main .num {
+  color: #1f6b4c !important;
+  font-size: 34rpx !important;
+  font-weight: 700 !important;
+}
+
+.weight-col.main .num {
+  font-size: 42rpx !important;
+}
+
+.weight-col .label {
+  color: #748078 !important;
+  font-size: 19rpx !important;
+}
+
+.calorie-card {
+  padding: 28rpx !important;
+}
+
+.calorie-main {
+  padding: 20rpx 0 18rpx !important;
+  text-align: center;
+}
+
+.hint-text {
+  color: #748078 !important;
+  font-size: 20rpx !important;
+}
+
+.big-number .number {
+  color: #173f30 !important;
+  font-size: 76rpx !important;
+  font-weight: 700 !important;
+}
+
+.big-number .unit {
+  color: #1f6b4c !important;
+  font-size: 24rpx !important;
+}
+
+.meal-summary {
+  color: #748078 !important;
+  font-size: 20rpx !important;
+}
+
+.calorie-stats {
+  gap: 18rpx !important;
+  padding: 14rpx 0 !important;
+}
+
+.stat {
+  min-width: 0 !important;
+  padding: 16rpx 14rpx !important;
+  border: 1rpx solid #e2e5dc !important;
+  border-radius: 12rpx !important;
+  background: #f8faf6 !important;
+}
+
+.stat-num {
+  color: #1f6b4c !important;
+  font-size: 30rpx !important;
+  font-weight: 700 !important;
+}
+
+.stat-label {
+  color: #748078 !important;
+  font-size: 18rpx !important;
+}
+
+.meal-progress {
+  gap: 8rpx !important;
+  margin: 16rpx 0 12rpx !important;
+}
+
+.meal-progress-segment {
+  height: 8rpx !important;
+  border-radius: 4rpx !important;
+  background: #e7eee9 !important;
+}
+
+.meal-progress-segment.filled {
+  background: #1f6b4c !important;
+}
+
+.meals {
+  justify-content: space-between !important;
+  padding: 12rpx 4rpx 8rpx !important;
+}
+
+.meal-item {
+  min-width: 112rpx !important;
+  min-height: 122rpx !important;
+  border-radius: 14rpx !important;
+}
+
+.meal-item:active {
+  background: #edf3ee !important;
+}
+
+.meal-icon {
+  width: 82rpx !important;
+  height: 82rpx !important;
+}
+
+.meal-name {
+  margin-top: 4rpx;
+  color: #48675a !important;
+  font-size: 20rpx !important;
+  font-weight: 600 !important;
+}
+
+.xuxu-camera-card {
+  min-height: 150rpx !important;
+  margin-top: 22rpx !important;
+  padding: 24rpx 24rpx 24rpx 28rpx !important;
+  border: 1rpx solid #d6e5da !important;
+  border-radius: 16rpx !important;
+  background: #edf3ee !important;
+  box-shadow: none !important;
+}
+
+.camera-title {
+  color: #173f30 !important;
+  font-size: 30rpx !important;
+  font-weight: 700 !important;
+}
+
+.camera-subtitle {
+  color: #748078 !important;
+  font-size: 19rpx !important;
+}
+
+.camera-decoration {
+  width: 188rpx !important;
+  height: 118rpx !important;
+  opacity: 1 !important;
+}
+
+.record-card {
+  padding: 26rpx 28rpx !important;
+}
+
+.record-content {
+  min-height: 124rpx !important;
+}
+
+.big-value .value {
+  color: #1f6b4c !important;
+  font-size: 56rpx !important;
+  font-weight: 700 !important;
+}
+
+.mini-chart {
+  width: 148rpx !important;
+  height: 124rpx !important;
+}
+
+.grid-cards {
+  gap: 18rpx !important;
+  margin-bottom: 22rpx !important;
+}
+
+.grid-item {
+  min-height: 166rpx !important;
+  padding: 24rpx !important;
+  border: 1rpx solid #e2e5dc !important;
+  border-radius: 16rpx !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 8rpx 22rpx rgba(32, 55, 42, 0.07) !important;
+}
+
+.grid-title {
+  color: #173f30 !important;
+  font-size: 24rpx !important;
+}
+
+.grid-num {
+  color: #1f6b4c !important;
+  font-size: 46rpx !important;
+}
+
+.grid-unit,
+.grid-hint {
+  color: #748078 !important;
+  font-size: 18rpx !important;
+}
+
+.grid-icon {
+  width: 104rpx !important;
+  height: 104rpx !important;
+  right: 8rpx !important;
+  bottom: 6rpx !important;
+  opacity: 0.86 !important;
+  mix-blend-mode: normal !important;
+}
+
+.fasting-card,
+.period-card,
+.medication-card {
+  min-height: 164rpx !important;
+  padding: 24rpx 28rpx !important;
+  border: 1rpx solid #e2e5dc !important;
+  border-left-width: 6rpx !important;
+  border-radius: 16rpx !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 8rpx 22rpx rgba(32, 55, 42, 0.07) !important;
+}
+
+.fasting-icon-img,
+.period-icon-img,
+.medication-icon-img {
+  width: 116rpx !important;
+  height: 116rpx !important;
+  right: 22rpx !important;
+  bottom: 18rpx !important;
+  opacity: 0.78 !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Final homepage composition pass. */
+.page {
+  padding-right: 28rpx !important;
+  padding-left: 28rpx !important;
+}
+
+.header {
+  margin: 0 -28rpx 24rpx !important;
+  padding: 48rpx 28rpx 28rpx !important;
+  border-bottom: 1rpx solid #e1e8df;
+  border-radius: 0 0 28rpx 28rpx;
+  background: #edf3ee !important;
+}
+
+.header-left { gap: 12rpx !important; }
+
+.greeting {
+  font-size: 40rpx !important;
+  line-height: 1.2 !important;
+}
+
+.avatar-wrapper {
+  width: 82rpx !important;
+  height: 82rpx !important;
+  border-color: #cddfd2 !important;
+}
+
+.weight-card {
+  border-top: 0 !important;
+  border-left: 8rpx solid #1f6b4c !important;
+  background: #fffdf9 !important;
+}
+
+.weight-card .card-top {
+  padding-bottom: 18rpx;
+  border-bottom: 1rpx solid #e7eee9;
+}
+
+.weight-card .week-badge {
+  padding: 6rpx 10rpx;
+  border-radius: 8rpx;
+  background: #e7f0e9;
+  color: #1f6b4c !important;
+  font-size: 18rpx;
+}
+
+.weight-visual { padding-bottom: 6rpx; }
+
+.weight-card .weight-row {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #e7eee9;
+}
+
+.calorie-card {
+  border-left: 8rpx solid #c78a3b !important;
+}
+
+.calorie-card .mode-tag {
+  background: #f8f0df !important;
+  color: #9a6b2f !important;
+}
+
+.calorie-card .big-number .number { color: #173f30 !important; }
+
+.calorie-card .meal-progress-segment.filled { background: #c78a3b !important; }
+
+.calorie-card .stat-num { color: #9a6b2f !important; }
+
+.xuxu-camera-card {
+  border: 0 !important;
+  background: #173f30 !important;
+  box-shadow: 0 12rpx 26rpx rgba(23, 63, 48, 0.18) !important;
+}
+
+.xuxu-camera-card .camera-title { color: #fffdf9 !important; }
+
+.xuxu-camera-card .camera-subtitle { color: #c8ddd0 !important; }
+
+.xuxu-camera-card .camera-arrow { color: #dceadf !important; }
+
+.record-card {
+  border-left: 6rpx solid #6a98ac !important;
+}
+
+.grid-item:nth-child(1) { background: #f0f6f1 !important; }
+.grid-item:nth-child(2) { background: #eef3f6 !important; }
+.grid-item:nth-child(3) { background: #f2f5ef !important; }
+.grid-item:nth-child(4) { background: #f7f1ea !important; }
+
+.fasting-card { border-left-color: #6a98ac !important; }
+.period-card { border-left-color: #c77986 !important; }
+.medication-card { border-left-color: #7b9f7d !important; }
+
+.edit-card {
+  border: 1rpx dashed #c8d9cb !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+</style>
+
+<style scoped>
+/* Homepage clarity pass: clean surfaces, stronger contrast, and a lighter camera entry. */
+.page { background: #f7f8f4 !important; }
+.header { background: #eef5f0 !important; border-bottom-color: #e0e9e2 !important; }
+
+.card,
+.weight-card,
+.calorie-card,
+.record-card,
+.grid-item,
+.fasting-card,
+.period-card,
+.medication-card {
+  border: 1rpx solid #e3e9e3 !important;
+  border-left: 1rpx solid #e3e9e3 !important;
+  background: #ffffff !important;
+  box-shadow: 0 6rpx 18rpx rgba(28, 55, 40, 0.055) !important;
+}
+
+.card-title,
+.grid-title,
+.camera-title,
+.fasting-time,
+.period-days,
+.medication-item { color: #173f30 !important; }
+
+.weight-col .label,
+.stat-label,
+.hint-text,
+.meal-summary,
+.value-unit,
+.grid-unit,
+.grid-hint,
+.fasting-label,
+.fasting-summary,
+.period-hint,
+.medication-hint,
+.time-text,
+.camera-subtitle { color: #63736a !important; }
+
+.grid-item:nth-child(1),
+.grid-item:nth-child(2),
+.grid-item:nth-child(3),
+.grid-item:nth-child(4) { background: #ffffff !important; }
+
+.grid-icon,
+.fasting-icon-img,
+.period-icon-img,
+.medication-icon-img,
+.chart-icon { opacity: 1 !important; }
+
+.xuxu-camera-card {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 132rpx !important;
+  margin-top: 20rpx !important;
+  padding: 20rpx 18rpx 20rpx 24rpx !important;
+  border: 1rpx solid #cfe1d4 !important;
+  border-radius: 18rpx !important;
+  background: #eaf4ed !important;
+  box-shadow: none !important;
+}
+
+.xuxu-camera-card .camera-copy { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.xuxu-camera-card .camera-title { font-size: 28rpx !important; font-weight: 750 !important; color: #173f30 !important; }
+.xuxu-camera-card .camera-subtitle { display: block; margin-top: 8rpx; color: #4f7761 !important; font-size: 19rpx !important; }
+.xuxu-camera-card .camera-decoration { flex: none; width: 148rpx !important; height: 96rpx !important; margin: 0 4rpx 0 8rpx; opacity: 1 !important; }
+.xuxu-camera-card .camera-arrow { display: none !important; }
+
+.weight-add {
+  width: auto !important;
+  min-width: 76rpx !important;
+  height: 48rpx !important;
+  padding: 0 16rpx !important;
+  border: 1rpx solid #cfe1d4 !important;
+  border-radius: 24rpx !important;
+  color: #1f6b4c !important;
+  background: #f0f7f2 !important;
+  font-size: 20rpx !important;
+  line-height: 46rpx !important;
+}
+.weight-add::after { border: 0 !important; }
+
+.edit-card { border-color: #d8e5db !important; background: #ffffff !important; }
+</style>
+
+<style scoped>
+/* Keep the camera entry as a warm, tactile feature surface instead of a dark tile. */
+.home-page .xuxu-camera-card {
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  min-height: 168rpx !important;
+  margin-top: 24rpx !important;
+  padding: 24rpx 22rpx 24rpx 30rpx !important;
+  border: 1rpx solid #eadfd5 !important;
+  border-radius: 24rpx !important;
+  background: linear-gradient(110deg, #fffaf3 0%, #fff3e7 100%) !important;
+  box-shadow: 0 16rpx 30rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255,255,255,.95) !important;
+  overflow: hidden !important;
+}
+.home-page .xuxu-camera-card::after {
+  content: '';
+  position: absolute;
+  right: -54rpx;
+  bottom: -90rpx;
+  width: 220rpx;
+  height: 220rpx;
+  border: 1rpx solid rgba(129, 175, 177, .18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18rpx rgba(129,175,177,.06), 0 0 0 36rpx rgba(129,175,177,.035);
+  pointer-events: none;
+}
+.home-page .xuxu-camera-card .camera-copy { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.home-page .xuxu-camera-card .camera-title { color: #62585c !important; font-size: 32rpx !important; font-weight: 700 !important; }
+.home-page .xuxu-camera-card .camera-subtitle { margin-top: 10rpx !important; color: #9b8d88 !important; font-size: 20rpx !important; }
+.home-page .xuxu-camera-card .camera-decoration {
+  position: relative;
+  z-index: 1;
+  flex: none !important;
+  width: 206rpx !important;
+  height: 136rpx !important;
+  margin: 0 -4rpx 0 12rpx !important;
+  opacity: 1 !important;
+  mix-blend-mode: multiply !important;
+}
+.home-page .xuxu-camera-card .camera-arrow { display: none !important; }
+.home-page .xuxu-camera-card:active {
+  background: #fff0df !important;
+  box-shadow: 0 8rpx 18rpx rgba(126,104,94,.06), inset 0 1rpx 0 rgba(255,255,255,.92) !important;
+}
+</style>
+
+<style scoped>
+/* Final hierarchy pass: soften repeated surfaces and keep nested data visually open. */
+.home-page .card {
+  border-color: rgba(226, 226, 218, .88) !important;
+  border-radius: 20rpx !important;
+  box-shadow: 0 7rpx 18rpx rgba(73, 76, 64, .045) !important;
+}
+.home-page .calorie-card .stat {
+  padding: 12rpx 10rpx !important;
+  border: 0 !important;
+  border-top: 1rpx solid #eee9e3 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.home-page .calorie-card .meals {
+  margin-top: 10rpx;
+  padding-top: 14rpx !important;
+  border-top: 1rpx solid #eee9e3;
+}
+.home-page .calorie-card .meal-item { background: transparent !important; }
+.home-page .calorie-card .meal-icon-wrap { background: transparent !important; box-shadow: none !important; }
+.home-page .grid-cards { gap: 14rpx !important; }
+.home-page .grid-item {
+  border-color: rgba(226, 226, 218, .88) !important;
+  box-shadow: 0 6rpx 16rpx rgba(73, 76, 64, .04) !important;
+}
+.home-page .fasting-card,
+.home-page .period-card,
+.home-page .medication-card {
+  border-left-width: 1rpx !important;
+  border-left-color: rgba(226, 226, 218, .88) !important;
+}
+.home-page .xuxu-camera-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (min-width: 700px) {
+  .home-page .card { border-radius: 24rpx !important; }
+}
+</style>
+
+<style scoped>
+/* The camera now occupies the former meal-quality slot inside the food card. */
+.home-page .camera-slot {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #eee9e3;
+}
+.home-page .calorie-card .xuxu-camera-card {
+  width: 100%;
+  min-height: 128rpx !important;
+  margin: 0 !important;
+  padding: 16rpx 18rpx 16rpx 22rpx !important;
+  border: 1rpx solid #eadfd5 !important;
+  border-radius: 18rpx !important;
+  background: linear-gradient(108deg, #fffaf3 0%, #fff2e5 100%) !important;
+  box-shadow: 0 8rpx 18rpx rgba(126,104,94,.055), inset 0 1rpx 0 rgba(255,255,255,.9) !important;
+}
+.home-page .calorie-card .xuxu-camera-card::after { right: -72rpx; bottom: -118rpx; opacity: .72; }
+.home-page .calorie-card .camera-title { color: #62585c !important; font-size: 29rpx !important; }
+.home-page .calorie-card .camera-subtitle { color: #9b8d88 !important; font-size: 19rpx !important; }
+.home-page .calorie-card .camera-decoration { width: 164rpx !important; height: 104rpx !important; margin-left: 8rpx !important; }
+</style>
+
+<style scoped>
+/* Palette lock: warm ivory page, quiet cream surfaces, and one restrained mint accent. */
+.home-page { background: #fffdf9 !important; color: #4f4d4c !important; }
+.home-page .header { background: #f7fcf8 !important; border-bottom-color: #e5eee7 !important; }
+.home-page .card,
+.home-page .weight-card,
+.home-page .calorie-card,
+.home-page .record-card,
+.home-page .grid-item,
+.home-page .fasting-card,
+.home-page .period-card,
+.home-page .medication-card {
+  background: #ffffff !important;
+  border-color: #e9e9e3 !important;
+  box-shadow: 0 7rpx 18rpx rgba(93, 83, 72, .035) !important;
+}
+.home-page .card-title,
+.home-page .grid-title,
+.home-page .camera-title { color: #4f4d4c !important; }
+.home-page .weight-col .num,
+.home-page .grid-num,
+.home-page .big-number .number,
+.home-page .value { color: #4e7f70 !important; }
+.home-page .xuxu-camera-card,
+.home-page .calorie-card .xuxu-camera-card {
+  background: linear-gradient(108deg, #f7faf5 0%, #f2f8f4 100%) !important;
+  border-color: #dce9df !important;
+}
+.home-page .xuxu-camera-card .camera-title,
+.home-page .calorie-card .camera-title { color: #5c6862 !important; }
+.home-page .xuxu-camera-card .camera-subtitle,
+.home-page .calorie-card .camera-subtitle { color: #929b96 !important; }
+.home-page .calorie-card .camera-slot { border-top-color: #eee9e3 !important; }
+.home-page .calorie-card .meal-progress-segment.filled { background: #8eb9a8 !important; }
+.home-page .mode-tag { background: #f4eee2 !important; color: #997b50 !important; }
+@media (min-width: 700px) {
+  .home-page { background: #faf7f1 !important; }
+}
+</style>
+
+<style scoped>
+.weight-card { padding: 24rpx 26rpx 22rpx !important; border-radius: 26rpx !important; }
+.weight-card .card-top { margin-bottom: 6rpx !important; }
+.weight-card-actions { display:flex; align-items:center; gap:12rpx; }
+.weight-visibility { display:flex; align-items:center; justify-content:center; width:58rpx; height:42rpx; padding:0; border:1rpx solid #e5dfd2; border-radius:14rpx; color:#9c8f82; background:#fffaf3; line-height:1; }
+.weight-visibility::after { border:0; }
+.weight-visibility image { width:25rpx; height:25rpx; opacity:.8; }
+.weight-visual { min-height:270rpx; padding-top:0; }
+.weight-arc-stage { position:relative; width:520rpx; max-width:100%; height:250rpx; margin:0 auto; overflow:hidden; }
+.weight-arc-ring { position:absolute; top:0; left:0; width:100%; height:520rpx; border-radius:50%; background:#dfe5e1; }
+.weight-arc-ring::after { content:''; position:absolute; inset:26rpx; border-radius:50%; background:#ffffff; }
+.weight-arc-node { position:absolute; z-index:2; width:34rpx; height:34rpx; margin-left:-17rpx; margin-top:-17rpx; border:6rpx solid #ffffff; border-radius:50%; background:#48c88d; box-shadow:0 0 0 3rpx rgba(255,255,255,.72), 0 5rpx 14rpx rgba(55,161,111,.24); }
+.weight-progress-copy { position:absolute; top:82rpx; left:0; right:0; display:flex; align-items:center; flex-direction:column; pointer-events:none; }
+.weight-progress-value { color:#4f5552; font-size:46rpx; font-weight:800; line-height:1.05; }
+.weight-progress-label { position:static !important; transform:none !important; margin-top:10rpx; color:#69736f !important; font-size:26rpx !important; font-weight:600; }
+.weight-gap-label { display:block; margin-top:8rpx; color:#7b8580; font-size:22rpx; font-weight:500; }
+.weight-row { margin-top:-4rpx !important; }
+.weight-col .num { color:#5e8f7b !important; font-size:32rpx !important; font-weight:700; }
+.weight-col.main .num { color:#4f7e70 !important; font-size:38rpx !important; font-weight:800; }
+.weight-col .label { color:#7d8983 !important; font-size:22rpx !important; }
+@media (max-width: 360px) {
+  .weight-arc-stage { height:210rpx; }
+  .weight-progress-copy { top:68rpx; }
+}
+</style>
+
+<style scoped>
+.weight-record-scrim { position:fixed; inset:0; z-index:60; display:flex; align-items:flex-end; background:rgba(50,47,43,.24); backdrop-filter:blur(3px); }
+.weight-record-sheet { width:100%; max-height:82vh; overflow:auto; padding:16rpx 26rpx calc(24rpx + env(safe-area-inset-bottom)); border-radius:30rpx 30rpx 0 0; border:1rpx solid #ebe1d6; background:#fffdf9; box-shadow:0 -14rpx 38rpx rgba(86,72,62,.14); box-sizing:border-box; }
+.weight-record-head { display:flex; align-items:flex-start; justify-content:space-between; }
+.weight-record-title { display:block; color:#585250; font-size:31rpx; font-weight:800; line-height:1.25; }
+.weight-record-subtitle { display:block; margin-top:7rpx; color:#a19891; font-size:19rpx; line-height:1.4; }
+.weight-record-time { display:flex; align-items:center; justify-content:center; gap:14rpx; margin:20rpx -26rpx 0; padding:14rpx 0; border-top:1rpx solid #eee7df; border-bottom:1rpx solid #eee7df; color:#7f8c84; font-size:20rpx; }
+.weight-record-time text:last-child { color:#668b78; font-size:27rpx; font-weight:700; }
+.home-weight-input-wrap { display:flex; align-items:center; height:94rpx; margin-top:22rpx; padding:0 22rpx; border:1rpx solid #dce8df; border-radius:18rpx; background:#f9fcf8; }
+.home-weight-input-wrap input { flex:1; height:92rpx; padding:0; color:#4e6659; background:transparent; font-size:44rpx; font-weight:800; }
+.home-weight-input-wrap text { color:#7c9b87; font-size:22rpx; font-weight:700; }
+.home-weight-date { display:flex; align-items:center; gap:12rpx; height:70rpx; margin-top:16rpx; padding:0 4rpx; border-bottom:1rpx solid #eee7df; color:#9a918b; font-size:20rpx; }
+.home-weight-date text:nth-child(2) { margin-left:auto; color:#645d59; font-size:22rpx; }
+.home-weight-date image { width:26rpx; height:26rpx; opacity:.42; }
+.home-weight-note { width:100%; height:70rpx; margin-top:14rpx; padding:0 4rpx; border-bottom:1rpx solid #eee7df; color:#645d59; background:transparent; font-size:21rpx; box-sizing:border-box; }
+.home-weight-save { display:flex; align-items:center; justify-content:center; width:100%; height:78rpx; margin-top:24rpx; border:1rpx solid #cfe1d5; border-radius:18rpx; color:#557565; background:#edf6ef; box-shadow:0 8rpx 18rpx rgba(91,132,104,.1); font-size:24rpx; font-weight:700; line-height:1; }
+.home-weight-save::after { border:0; }
 </style>
