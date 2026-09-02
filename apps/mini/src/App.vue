@@ -132,6 +132,35 @@ button::after {
   margin-top: calc(-104rpx - env(safe-area-inset-top)) !important;
   padding: calc(104rpx + env(safe-area-inset-top)) 32rpx 14rpx !important;
 }
+.sleep-page .hero {
+  width: 100% !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Custom-header detail pages use one compact safe-area row, then begin content below it. */
+.activity-page,
+.sleep-page,
+.mood-page,
+.fasting-page {
+  padding-top: 0 !important;
+}
+.activity-page .nav,
+.sleep-page .nav,
+.mood-page .nav,
+.fasting-page .nav {
+  left: calc((100% - 100vw) / 2) !important;
+  width: 100vw !important;
+  margin-top: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  padding-top: calc(env(safe-area-inset-top) + 12rpx) !important;
+  padding-bottom: 12rpx !important;
+}
+.activity-page .nav { padding-right: 24rpx !important; padding-left: 24rpx !important; }
+.sleep-page .nav,
+.mood-page .nav { padding-right: 28rpx !important; padding-left: 28rpx !important; }
+.fasting-page .nav { padding-right: 32rpx !important; padding-left: 32rpx !important; }
 </style>
 
 
@@ -1001,6 +1030,57 @@ button.action-btn.primary:active {
   box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9), 0 8rpx 20rpx rgba(84, 143, 161, 0.15) !important;
 }
 .water-page .confirm-btn:active { background: rgba(207, 235, 241, 0.94) !important; }
+.water-page .setup-btn,
+.water-page .reset-btn {
+  border: 1rpx solid rgba(151, 193, 203, 0.58) !important;
+  border-radius: 14rpx !important;
+  color: #3f7180 !important;
+  background: rgba(230, 246, 249, 0.72) !important;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.88), 0 5rpx 14rpx rgba(84, 143, 161, 0.1) !important;
+  font-size: 21rpx !important;
+  font-weight: 600 !important;
+}
+.water-page .setup-btn:active,
+.water-page .reset-btn:active { background: rgba(207, 235, 241, 0.9) !important; }
+.water-page .drink-option {
+  min-height: 142rpx !important;
+  justify-content: center !important;
+  padding: 14rpx 8rpx !important;
+  border: 1rpx solid #dce9eb !important;
+  border-radius: 16rpx !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+.water-page .drink-option.active {
+  border-color: #a8cfd5 !important;
+  background: rgba(230, 246, 249, 0.82) !important;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9), 0 5rpx 12rpx rgba(84, 143, 161, 0.1) !important;
+}
+.water-page .drink-option .drink-image,
+.water-page .drink-option .drink-emoji {
+  display: flex !important;
+  width: 48rpx !important;
+  height: 48rpx !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+}
+.water-page .drink-option .drink-emoji { font-size: 34rpx !important; line-height: 48rpx !important; }
+.water-page .drink-option .drink-name { display: block !important; width: 100% !important; margin-top: 8rpx !important; color: #59717a !important; font-size: 20rpx !important; font-weight: 600 !important; line-height: 1.25 !important; text-align: center !important; }
+.water-page .drink-option.active .drink-name { color: #3f7180 !important; }
+.water-page .confirm-btn { display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important; line-height: 1 !important; }
+.water-page .stat-label,
+.water-page .info-desc,
+.water-page .btn-text,
+.water-page .record-time,
+.water-page .history-count { color: #6b7f86 !important; }
+.water-page .stat-value,
+.water-page .stat-value.primary,
+.water-page .amount-num { color: #3f7180 !important; }
+.water-page .date-text,
+.water-page .header-text,
+.water-page .history-title,
+.water-page .dialog-title { color: #365c68 !important; }
 .weight-page .record-button,
 .error-state button {
   border: 1rpx solid rgba(159, 195, 173, 0.62) !important;

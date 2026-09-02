@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page sleep-page">
     <view class="nav"
       ><button class="back" @tap="goBack">‹</button
       ><view
@@ -8,7 +8,7 @@
     /></view>
     <view class="hero"
       ><view class="art-stage"
-        ><image src="/static/illustrations/xuxu-sleep-reminder-crop.png" mode="widthFix" /></view
+        ><image src="/static/illustrations/program-sleep.png" mode="widthFix" /></view
       ><view class="hero-copy"
         ><text>把昨晚的安稳，留给今天</text><text>序序会帮你把作息和梦境轻轻收好</text></view
       ></view
@@ -437,6 +437,39 @@ onShow(() => {
   font-size: 19rpx;
   text-align: center;
 }
+</style>
+
+<style scoped>
+/* Full-bleed illustration: match the source ratio so the artwork reads as one scene. */
+.sleep-page .hero {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  border-color: #dfe8e1 !important;
+  border-radius: 20rpx !important;
+  background: #f5f8f3 !important;
+}
+.sleep-page .art-stage {
+  height: calc(100vw - 114rpx) !important;
+  min-height: 0 !important;
+  background: #f5f8f3 !important;
+}
+.sleep-page .art-stage image {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  filter: saturate(1.05) contrast(1.03) brightness(1.01) !important;
+}
+.sleep-page .hero-copy {
+  padding: 22rpx 24rpx 24rpx !important;
+  border-top: 1rpx solid #e7eee8 !important;
+  background: #fffefa !important;
+}
+.sleep-page .hero-copy text:first-child { color: #234836 !important; font-size: 28rpx !important; }
+.sleep-page .hero-copy text:last-child { color: #708077 !important; font-size: 19rpx !important; }
 </style>
 <style scoped>
 .page {

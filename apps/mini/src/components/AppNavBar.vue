@@ -58,8 +58,13 @@ function close() {
 
 <style scoped>
 .nav-bar-wrapper {
-  position: relative;
-  background: #f5faf7;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(248, 250, 244, 0.96);
+  border-bottom: 1rpx solid rgba(222, 232, 223, 0.82);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 .status-bar {
@@ -71,7 +76,7 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 88rpx;
+  height: 76rpx;
   padding: 0 24rpx;
   background: transparent;
 }
@@ -80,8 +85,8 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64rpx;
-  height: 64rpx;
+  width: 56rpx;
+  height: 56rpx;
   padding: 0;
   border: 2rpx solid #ead4d2;
   border-radius: 50%;
@@ -114,7 +119,7 @@ function close() {
 }
 
 .placeholder {
-  width: 64rpx;
-  height: 64rpx;
+  width: 56rpx;
+  height: 56rpx;
 }
 </style>

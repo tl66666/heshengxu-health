@@ -13,7 +13,7 @@
 
     <view class="hero">
       <view class="hero-visual">
-        <image class="hero-image" src="/static/illustrations/hero.jpg" mode="aspectFill" />
+        <image class="hero-image" src="/static/illustrations/hero.jpg" mode="widthFix" />
         <view class="hero-overlay-copy">
           <text class="hero-kicker">今天也为自己动一动</text>
           <view class="hero-total">
@@ -234,12 +234,15 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
   overflow: hidden !important;
 }
 .hero-visual {
-  height: 460rpx;
+  height: auto;
   min-height: 0;
   max-height: none;
+  line-height: 0;
 }
 .hero-image {
+  height: auto;
   object-position: 60% center;
+  object-fit: initial;
 }
 .hero-overlay-copy {
   left: 8%;
