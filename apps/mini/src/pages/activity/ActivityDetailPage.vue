@@ -223,7 +223,7 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
   position: relative;
   left: auto;
   width: 100%;
-  margin: 0;
+  margin: 0 !important;
   box-sizing: border-box;
   transform: none;
   min-height: 0 !important;
