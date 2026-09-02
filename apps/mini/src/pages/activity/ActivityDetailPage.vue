@@ -234,9 +234,12 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
   overflow: hidden !important;
 }
 .hero-visual {
-  height: calc(56.25vw - 27rpx);
-  min-height: 360rpx;
-  max-height: 490rpx;
+  height: 460rpx;
+  min-height: 0;
+  max-height: none;
+}
+.hero-image {
+  object-position: 60% center;
 }
 .hero-overlay-copy {
   left: 8%;
@@ -259,9 +262,12 @@ button{box-sizing:border-box;line-height:1;white-space:nowrap}
 }
 .hero-summary {
   box-sizing: border-box;
-  padding-right: 38rpx;
+  min-height: 96rpx;
+  padding: 16rpx 30rpx 18rpx 24rpx;
 }
 .summary-stamp {
   flex: none;
+  width: 90rpx;
+  height: 90rpx;
 }
 </style>
