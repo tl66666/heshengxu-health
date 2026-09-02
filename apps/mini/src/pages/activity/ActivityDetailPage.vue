@@ -49,7 +49,7 @@
           :class="['activity-choice', { selected: activityType === item.value }]"
           @tap="activityType = item.value"
         >
-          <view class="choice-mark"><image src="/static/icons/svg/activity.svg" mode="aspectFit" /></view>
+          <view class="choice-mark"><image :src="item.icon" mode="aspectFit" /></view>
           <text>{{ item.label }}</text>
           <image v-if="activityType === item.value" class="choice-check" src="/static/icons/svg/check.svg" mode="aspectFit" />
         </button>
@@ -105,7 +105,7 @@
       </view>
       <view v-if="history.length" class="history-list">
         <view v-for="item in history" :key="item.id" class="history-row">
-          <view class="history-icon"><image src="/static/icons/svg/activity.svg" mode="aspectFit" /></view>
+          <view class="history-icon"><image :src="activityIcon(item.activityType)" mode="aspectFit" /></view>
           <view class="history-copy">
             <text class="history-title">{{ activityLabel(item.activityType) }}</text>
             <text class="history-meta">{{ item.durationMinutes }} 分钟 · {{ formatTime(item.recordedAt) }}<text v-if="item.intensity"> · {{ intensityLabel(item.intensity) }}</text></text>
@@ -114,7 +114,6 @@
         </view>
       </view>
       <view v-else class="empty">
-        <image src="/static/illustrations/hero.jpg" mode="aspectFill" />
         <text>还没有今天的活动记录</text>
         <text>记录一次轻松活动，序序会帮你把这份坚持留存下来。</text>
       </view>
@@ -132,12 +131,12 @@ const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOStr
 const dateLabel = `${now.getMonth() + 1} 月 ${now.getDate()} 日`;
 
 const activityOptions = [
-  { value: 'walking', label: '散步' },
-  { value: 'stretching', label: '拉伸' },
-  { value: 'yoga', label: '瑜伽' },
-  { value: 'running', label: '跑步' },
-  { value: 'cycling', label: '骑行' },
-  { value: 'strength', label: '力量训练' },
+  { value: 'walking', label: '散步', icon: '/static/icons/svg/activity-walk.svg' },
+  { value: 'stretching', label: '拉伸', icon: '/static/icons/svg/activity-stretch.svg' },
+  { value: 'yoga', label: '瑜伽', icon: '/static/icons/svg/activity-yoga.svg' },
+  { value: 'running', label: '跑步', icon: '/static/icons/svg/activity-run.svg' },
+  { value: 'cycling', label: '骑行', icon: '/static/icons/svg/activity-cycle.svg' },
+  { value: 'strength', label: '力量训练', icon: '/static/icons/svg/activity-strength.svg' },
 ] as const;
 const durationOptions = [10, 20, 30, 45, 60];
 const intensityOptions = [
@@ -194,6 +193,9 @@ async function save() {
 function activityLabel(value: string) {
   return activityOptions.find((item) => item.value === value)?.label || value;
 }
+function activityIcon(value: string) {
+  return activityOptions.find((item) => item.value === value)?.icon || '/static/icons/svg/activity-walk.svg';
+}
 function intensityLabel(value: string) {
   return intensityOptions.find((item) => item.value === value)?.label || value;
 }
@@ -213,4 +215,39 @@ onShow(load);
 .section{margin-top:18rpx;padding:24rpx 22rpx;border:1rpx solid #e5ede3;border-radius:20rpx;background:rgba(255,255,255,.94);box-shadow:0 8rpx 22rpx rgba(68,94,73,.05)}.section-head{margin-bottom:20rpx}.section-title{display:block;color:#425b4b;font-size:26rpx;font-weight:750}.section-subtitle{display:block;margin-top:6rpx;color:#97a79c;font-size:19rpx}.field-label{display:block;margin-bottom:10rpx;color:#607968;font-size:20rpx;font-weight:700}.activity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10rpx}.activity-choice{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5rpx;height:104rpx;border:1rpx solid #e0eade;border-radius:15rpx;color:#668071;background:#fbfdf9;font-size:19rpx}.activity-choice.selected{border-color:#9fc3a4;background:#f0f8ee;color:#4b7958;box-shadow:0 5rpx 12rpx rgba(105,151,108,.1)}.choice-mark{display:flex;align-items:center;justify-content:center;width:40rpx;height:40rpx;border-radius:13rpx;background:#eef6e9}.choice-mark image{width:29rpx;height:29rpx;opacity:.68}.choice-check{position:absolute;top:9rpx;right:9rpx;width:22rpx;height:22rpx;opacity:.8}.field-label-row{display:flex;align-items:center;justify-content:space-between;margin-top:22rpx}.field-label-row .field-label{margin-bottom:10rpx}.unit{color:#9aa99e;font-size:18rpx}.duration-wrap{display:flex;align-items:center;height:74rpx;padding:0 18rpx;border:1rpx solid #dfe9df;border-radius:15rpx;background:#fbfdf9}.duration-input{flex:1;height:72rpx;padding:0;border:0;background:transparent;color:#3f5748;font-size:30rpx;font-weight:700}.duration-wrap>text{color:#78917f;font-size:20rpx}.duration-options{display:flex;gap:8rpx;margin-top:10rpx}.duration-choice{flex:1;height:48rpx;border:1rpx solid #e5ede4;border-radius:12rpx;color:#789080;background:#fcfefa;font-size:17rpx;line-height:48rpx}.duration-choice.selected{border-color:#b1ceb1;color:#547b5e;background:#eef7ec}.intensity-label{margin-top:22rpx}.intensity-options{display:flex;gap:8rpx}.intensity-choice{display:flex;align-items:flex-start;justify-content:center;flex:1;flex-direction:column;height:68rpx;padding:0 12rpx;border:1rpx solid #e2ebe1;border-radius:14rpx;color:#778b7f;background:#fcfefa;text-align:left}.intensity-choice text:first-child{font-size:19rpx;font-weight:700}.intensity-choice text:last-child{margin-top:4rpx;color:#a0ada3;font-size:15rpx}.intensity-choice.selected{border-color:#b4cdb4;background:#f1f8ee}.intensity-choice.selected text:first-child{color:#567e61}.note-input{width:100%;min-height:110rpx;box-sizing:border-box;margin-top:18rpx;padding:14rpx 16rpx;border:1rpx solid #e1eae1;border-radius:14rpx;color:#4d6253;background:#fbfdf9;font-size:20rpx;line-height:1.5}.note-count{display:block;margin-top:6rpx;color:#a4b0a7;font-size:16rpx;text-align:right}.save-button{display:flex;align-items:center;justify-content:center;width:100%;height:78rpx;margin-top:18rpx;border-radius:18rpx;color:#fffdf8;background:#739d7b;box-shadow:0 8rpx 18rpx rgba(92,137,101,.17);font-size:24rpx;font-weight:700;line-height:1}.save-button[disabled]{opacity:.62}.error{display:block;margin-top:10rpx;color:#b36f61;font-size:19rpx}
 .history-section{margin-top:28rpx}.history-head{display:flex;align-items:flex-end;justify-content:space-between;padding:0 2rpx 12rpx;border-bottom:1rpx solid #e2eae0}.history-subtitle{display:block;margin-top:5rpx;color:#9aa99e;font-size:17rpx}.history-count{color:#90a099;font-size:18rpx}.history-list{border-bottom:1rpx solid #e2eae0}.history-row{display:flex;align-items:flex-start;gap:12rpx;padding:17rpx 2rpx;border-bottom:1rpx solid #e8eee6}.history-row:last-child{border-bottom:0}.history-icon{display:flex;align-items:center;justify-content:center;width:46rpx;height:46rpx;flex:none;border-radius:15rpx;background:#eef6e9}.history-icon image{width:30rpx;height:30rpx;opacity:.72}.history-copy{flex:1;min-width:0}.history-title{display:block;color:#516a59;font-size:21rpx;font-weight:700}.history-meta{display:block;margin-top:5rpx;color:#94a399;font-size:17rpx}.history-note{display:block;margin-top:6rpx;color:#718379;font-size:18rpx;line-height:1.4;word-break:break-all}.empty{display:flex;align-items:center;flex-direction:column;padding:22rpx 0;color:#94a299;text-align:center;font-size:19rpx}.empty image{width:190rpx;height:90rpx;margin-bottom:10rpx;opacity:.55}.empty text:last-child{margin-top:6rpx;color:#a4afa8;font-size:17rpx}
 button{box-sizing:border-box;line-height:1;white-space:nowrap}
+</style>
+
+<style scoped>
+/* Keep the photographic hero exactly inside the device viewport on mini-program builds. */
+.hero {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin: 0;
+  transform: translateX(-50%);
+}
+.hero-visual {
+  height: 56.25vw;
+  min-height: 380rpx;
+  max-height: 520rpx;
+}
+.hero-overlay-copy {
+  left: 8%;
+  width: 40%;
+}
+.choice-mark {
+  width: 44rpx;
+  height: 44rpx;
+}
+.choice-mark image {
+  width: 34rpx;
+  height: 34rpx;
+  opacity: 0.9;
+}
+.empty {
+  padding: 28rpx 0;
+}
+.empty image {
+  display: none;
+}
 </style>
