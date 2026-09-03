@@ -1,6 +1,6 @@
 <template>
-  <view class="page">
-    <AppNavBar :title="food?.name || '食物详情'" />
+  <view class="page food-detail-catalog-page">
+    <AppNavBar :title="food?.name || '食物详情'" route="/pages/food-detail/FoodDetailPage" />
 
     <!-- 加载状态 -->
     <view v-if="loading" class="state">

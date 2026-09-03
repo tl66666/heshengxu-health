@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page water-goal-page">
     <AppNavBar title="喝水量推荐" route="/pages/water-goal/WaterGoalPage" />
 
     <view class="intro">
@@ -427,6 +427,85 @@ onLoad(() => {
   border: none;
 }
 </style>
+
+<style scoped>
+/* Open settings flow: the recommendation remains the only framed result. */
+.water-goal-page {
+  min-height: 100vh;
+  padding-bottom: 152rpx;
+  background: #fffaf5 !important;
+  color: #5f5659;
+  overflow-x: hidden;
+}
+.water-goal-page .intro { padding: 28rpx 28rpx 30rpx; }
+.water-goal-page .eyebrow { color: #8ba59a; font-size: 20rpx; letter-spacing: 1rpx; }
+.water-goal-page .title { color: #5b5358; font-size: 39rpx; font-weight: 650; }
+.water-goal-page .subtitle { color: #a19796; }
+.water-goal-page .form-section {
+  margin: 0 28rpx;
+  border-top: 1rpx solid #e9dfda;
+  border-bottom: 1rpx solid #e9dfda;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+.water-goal-page .form-item { min-height: 94rpx; padding: 22rpx 0; border-bottom: 1rpx solid #eee5e0 !important; background: transparent !important; }
+.water-goal-page .form-item:last-child { border-bottom: 0; }
+.water-goal-page .form-item:active { background: rgba(239, 247, 246, .62); }
+.water-goal-page .form-label { color: #655d61; font-size: 25rpx; }
+.water-goal-page .form-value { color: #78918f; font-size: 24rpx; font-weight: 600; }
+.water-goal-page .form-hint { color: #aaa09e; }
+.water-goal-page .form-arrow { width: 22rpx; height: 22rpx; opacity: .42; }
+.water-goal-page .result-card {
+  margin: 30rpx 28rpx 0;
+  min-height: 286rpx;
+  border: 1rpx solid rgba(255,255,255,.92) !important;
+  border-radius: 28rpx !important;
+  background: linear-gradient(145deg, rgba(242, 250, 248, .98), rgba(255, 245, 237, .98)) !important;
+  box-shadow: 0 16rpx 34rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255,255,255,.96) !important;
+}
+.water-goal-page .result-title { color: #625a61; }
+.water-goal-page .result-value { color: #668d96; font-size: 92rpx; }
+.water-goal-page .result-unit,
+.water-goal-page .result-hint { color: #9d9290; }
+.water-goal-page .tips-card {
+  margin: 28rpx 28rpx 0;
+  padding: 26rpx 0 0;
+  border: 0 !important;
+  border-top: 1rpx solid #e9dfda;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.water-goal-page .tips-title { color: #625a61; }
+.water-goal-page .tips-list { gap: 10rpx; }
+.water-goal-page .tip-item { color: #9b918f; font-size: 21rpx; }
+.water-goal-page .bottom-actions {
+  padding: 14rpx 28rpx;
+  padding-bottom: calc(14rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 253, 250, .92);
+  border-top: 1rpx solid rgba(235, 221, 214, .82);
+  box-shadow: 0 -8rpx 22rpx rgba(126,104,94,.06);
+}
+.water-goal-page .action-btn {
+  min-height: 86rpx;
+  border-radius: 22rpx;
+  background: #78b8c7;
+  box-shadow: 0 12rpx 26rpx rgba(94,157,176,.2), inset 0 2rpx 0 rgba(255,255,255,.38);
+  color: #fffdfb;
+  font-size: 29rpx;
+  line-height: 86rpx;
+}
+@media (min-width: 700px) {
+  .water-goal-page .intro,
+  .water-goal-page .form-section,
+  .water-goal-page .result-card,
+  .water-goal-page .tips-card { margin-right: 48rpx; margin-left: 48rpx; }
+  .water-goal-page .intro { padding-right: 48rpx; padding-left: 48rpx; }
+  .water-goal-page .bottom-actions { padding-right: 48rpx; padding-left: 48rpx; }
+}
+</style>
 <style scoped>
 .page {
   background:
@@ -459,6 +538,24 @@ onLoad(() => {
 .bottom-actions { padding: 14rpx 28rpx; padding-bottom: calc(14rpx + env(safe-area-inset-bottom)); background: rgba(255,253,251,.9); border-top: 1rpx solid rgba(235,221,214,.8); box-shadow: 0 -8rpx 22rpx rgba(126,104,94,.06); }
 .action-btn { min-height: 88rpx; border-radius: 24rpx; background: linear-gradient(135deg, #79b8c7 0%, #609eaf 100%); box-shadow: 0 14rpx 28rpx rgba(94,157,176,.22), inset 0 2rpx 0 rgba(255,255,255,.38); color: #fffdfb; font-size: 30rpx; letter-spacing: 0; }
 .action-btn > text:not(.action-label) { display: none; }
+</style>
+
+<style scoped>
+/* Final open-layout override; kept last so legacy page rules cannot re-stack cards. */
+.water-goal-page { background: #fffaf5 !important; padding-bottom: 152rpx !important; overflow-x: hidden !important; }
+.water-goal-page .intro { padding: 28rpx 28rpx 30rpx !important; }
+.water-goal-page .form-section { margin: 0 28rpx !important; border-top: 1rpx solid #e9dfda !important; border-bottom: 1rpx solid #e9dfda !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+.water-goal-page .form-item { min-height: 94rpx !important; padding: 22rpx 0 !important; border-bottom: 1rpx solid #eee5e0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+.water-goal-page .form-item:last-child { border-bottom: 0 !important; }
+.water-goal-page .result-card { margin: 30rpx 28rpx 0 !important; border: 1rpx solid rgba(255,255,255,.92) !important; border-radius: 28rpx !important; background: linear-gradient(145deg, rgba(242,250,248,.98), rgba(255,245,237,.98)) !important; box-shadow: 0 16rpx 34rpx rgba(126,104,94,.08), inset 0 1rpx 0 rgba(255,255,255,.96) !important; }
+.water-goal-page .tips-card { margin: 28rpx 28rpx 0 !important; padding: 26rpx 0 0 !important; border: 0 !important; border-top: 1rpx solid #e9dfda !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+.water-goal-page .bottom-actions { padding: 14rpx 28rpx !important; padding-bottom: calc(14rpx + env(safe-area-inset-bottom)) !important; background: rgba(255,253,250,.92) !important; border-top: 1rpx solid rgba(235,221,214,.82) !important; box-shadow: 0 -8rpx 22rpx rgba(126,104,94,.06) !important; }
+.water-goal-page .action-btn { min-height: 86rpx !important; border-radius: 22rpx !important; background: #78b8c7 !important; box-shadow: 0 12rpx 26rpx rgba(94,157,176,.2), inset 0 2rpx 0 rgba(255,255,255,.38) !important; font-size: 29rpx !important; line-height: 86rpx !important; }
+@media (min-width: 700px) {
+  .water-goal-page .intro { padding-right: 48rpx !important; padding-left: 48rpx !important; }
+  .water-goal-page .form-section, .water-goal-page .result-card, .water-goal-page .tips-card { margin-right: 48rpx !important; margin-left: 48rpx !important; }
+  .water-goal-page .bottom-actions { padding-right: 48rpx !important; padding-left: 48rpx !important; }
+}
 </style>
 <style scoped>
 .page { background: #fff8f2; color: #554b4f; }

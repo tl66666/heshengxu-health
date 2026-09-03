@@ -1,10 +1,10 @@
 <template>
-  <view class="page">
+  <view class="page food-summary-page">
     <AppNavBar title="今日饮食" route="/pages/food-summary/FoodSummaryPage" />
     <view class="date-row"
-      ><button class="day-arrow" @tap="shiftDate(-1)">‹</button
+      ><button class="day-arrow" aria-label="前一天" @tap="shiftDate(-1)"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button
       ><text class="date-title">{{ dateTitle }}</text
-      ><button class="day-arrow" @tap="shiftDate(1)">›</button></view
+      ><button class="day-arrow" aria-label="后一天" @tap="shiftDate(1)"><image src="/static/icons/svg/forward.svg" mode="aspectFit" /></button></view
     >
 
     <view class="summary-card">
@@ -54,9 +54,9 @@
           ><text>{{ entry.foodNameSnapshot }}</text
           ><text>{{ entry.grams }}g</text></view
         ><text class="entry-kcal">{{ entry.energyKcal }} 千卡</text></view
-      ><button class="meal-add" @tap="addMeal(meal.type)">＋ 添加食物</button></view
+      ><button class="meal-add" @tap="addMeal(meal.type)">添加食物</button></view
     >
-    <button v-if="entries.length" class="add-more" @tap="addMeal()">＋ 记录下一餐</button>
+    <button v-if="entries.length" class="add-more" @tap="addMeal()">记录下一餐</button>
   </view>
 </template>
 
@@ -168,6 +168,13 @@ onLoad((options) => {
   font-size: 40rpx;
   line-height: 52rpx;
   background: #fffdf8;
+}
+.day-arrow image {
+  display: block;
+  width: 26rpx;
+  height: 26rpx;
+  margin: 0 auto;
+  opacity: .72;
 }
 .day-arrow::after {
   border: 0;
@@ -388,5 +395,97 @@ onLoad((options) => {
 }
 .empty button::after {
   border: 0;
+}
+</style>
+
+<style scoped>
+/* Open food log: one primary summary, then a quiet chronological stream. */
+.food-summary-page {
+  min-height: 100vh;
+  padding: 0 0 56rpx;
+  background: #fffaf5 !important;
+  color: #5f5659;
+  overflow-x: hidden;
+}
+.food-summary-page .date-row {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20rpx 28rpx 24rpx;
+  border-bottom: 1rpx solid rgba(231, 220, 214, .78) !important;
+  background: rgba(255, 253, 250, .78) !important;
+}
+.food-summary-page .date-title { color: #62585c; font-size: 30rpx; font-weight: 650; }
+.food-summary-page .day-arrow {
+  width: 52rpx;
+  height: 52rpx;
+  border: 1rpx solid #e6d9d2;
+  background: rgba(255, 255, 255, .74);
+  box-shadow: none;
+}
+.food-summary-page .day-arrow image { width: 23rpx; height: 23rpx; opacity: .62; }
+.food-summary-page .summary-card {
+  margin: 28rpx 28rpx 0;
+  padding: 30rpx 26rpx 24rpx;
+  border: 1rpx solid rgba(255, 255, 255, .92) !important;
+  border-radius: 26rpx !important;
+  background: linear-gradient(145deg, rgba(247, 252, 249, .98), rgba(255, 246, 238, .98)) !important;
+  box-shadow: 0 16rpx 34rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255,255,255,.96) !important;
+}
+.food-summary-page .summary-caption { color: #94888a; }
+.food-summary-page .remaining { color: #5d7f87; font-size: 68rpx; }
+.food-summary-page .unit { color: #8f9e9d; }
+.food-summary-page .ring { width: 168rpx; height: 168rpx; background: conic-gradient(#82b9b0 var(--progress), #e8efeb 0); }
+.food-summary-page .ring-inner { width: 136rpx; height: 136rpx; background: #fffdf9; }
+.food-summary-page .ring-inner text:first-child { color: #5d7f87; }
+.food-summary-page .budget-meta { color: #988f8f; }
+.food-summary-page .macro-row { border-color: rgba(231, 220, 214, .82); }
+.food-summary-page .macro-row text:first-child { color: #9e9291; }
+.food-summary-page .macro-row text:last-child { color: #6b9690; }
+.food-summary-page .section-head { margin: 38rpx 28rpx 12rpx; padding-bottom: 14rpx; border-bottom: 1rpx solid #e9dfda; }
+.food-summary-page .section-head text:first-child { color: #5c5358; font-size: 28rpx; }
+.food-summary-page .section-head text:last-child { color: #a49a98; }
+.food-summary-page .meal-card {
+  margin: 0 28rpx;
+  padding: 0;
+  border: 0 !important;
+  border-bottom: 1rpx solid #e9dfda !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.food-summary-page .meal-head { padding: 20rpx 0 14rpx; border-bottom: 0; }
+.food-summary-page .meal-title-wrap { gap: 12rpx; }
+.food-summary-page .meal-title-wrap image { width: 38rpx; height: 38rpx; }
+.food-summary-page .meal-title-wrap text { color: #62585c; font-size: 26rpx; }
+.food-summary-page .meal-total { color: #829c96; font-size: 20rpx; }
+.food-summary-page .entry-row { padding: 14rpx 0; border-bottom: 1rpx solid rgba(237, 228, 223, .82); }
+.food-summary-page .entry-icon { width: 54rpx; height: 54rpx; border-radius: 16rpx; background: #f5eee8; }
+.food-summary-page .entry-copy text:first-child { color: #62585c; }
+.food-summary-page .entry-copy text:last-child { color: #a49a98; }
+.food-summary-page .entry-kcal { color: #76958f; }
+.food-summary-page .meal-add,
+.food-summary-page .add-more {
+  width: auto;
+  margin: 12rpx 0 18rpx;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #789a93;
+  font-size: 20rpx;
+  line-height: 1.4;
+  background: transparent;
+  text-align: left;
+}
+.food-summary-page .meal-add::after,
+.food-summary-page .add-more::after { border: 0; }
+.food-summary-page .add-more { display: block; margin: 22rpx 28rpx 0; padding: 16rpx 0; border-top: 1rpx solid #e9dfda; color: #6d8f89; text-align: center; }
+.food-summary-page .empty { padding: 76rpx 28rpx; color: #9b918f; }
+.food-summary-page .empty button { border: 1rpx solid #dfd2cb; color: #6f8d88; background: rgba(255, 255, 255, .72); box-shadow: none; }
+@media (min-width: 700px) {
+  .food-summary-page .date-row { padding-right: 48rpx; padding-left: 48rpx; }
+  .food-summary-page .summary-card,
+  .food-summary-page .section-head,
+  .food-summary-page .meal-card { margin-right: 48rpx; margin-left: 48rpx; }
+  .food-summary-page .add-more { margin-right: 48rpx; margin-left: 48rpx; }
 }
 </style>

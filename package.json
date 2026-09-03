@@ -24,5 +24,22 @@
     "typescript-eslint": "^8.67.0",
     "vite": "6.2.6",
     "vitest": "4.1.11"
-  }
+  },
+  "description": "面向微信小程序优先、可扩展到 App 的 AI 健康管理平台。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tl66666/heshengxu-health.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tl66666/heshengxu-health/issues"
+  },
+  "homepage": "https://github.com/tl66666/heshengxu-health#readme"
 }

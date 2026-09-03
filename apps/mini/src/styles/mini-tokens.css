@@ -1,40 +1,46 @@
 page {
-  --hz-bg: #f5faf7;
-  --hz-surface: #fffdf9;
-  --hz-soft: #edf7f0;
-  --hz-warm: #fffaf0;
-  --hz-ink: #46564f;
-  --hz-muted: #8d9d95;
-  --hz-green: #6fbb8e;
-  --hz-green-soft: #edf7f0;
-  --hz-rule: #dfeae3;
-  --hz-rule-light: #eaf1ec;
+  /* 和生序令牌 v3 —— 与 visual-system.css 保持同源，这里保留旧别名以兼容历史引用 */
+  --hz-bg: #fffdf9;
+  --hz-surface: #ffffff;
+  --hz-surface-glass: rgba(255, 255, 255, 0.72);
+  --hz-surface-soft: #f3f7f3;
+  --hz-soft: #e7f0e9;
+  --hz-warm: #f8f0df;
+  --hz-mint: #edf3ee;
+  --hz-ink: #21372c;
+  --hz-ink-soft: #45604f;
+  --hz-muted: #7d9085;
+  --hz-green-deep: #173f30;
+  --hz-green: #2f6b4d;
+  --hz-green-soft: #e7f0e9;
+  --hz-green-glass: rgba(231, 240, 233, 0.72);
+  --hz-sky: #e9f1f4;
+  --hz-sky-soft: #e9f1f4;
+  --hz-sky-ink: #5f8292;
+  --hz-blush: #f9edef;
+  --hz-blush-soft: #f9edef;
+  --hz-blush-ink: #a96c73;
+  --hz-amber: #f8f0df;
+  --hz-amber-soft: #f8f0df;
+  --hz-amber-ink: #9a6b2f;
+  --hz-rule: #e5ece6;
+  --hz-rule-light: #edf3ee;
+  --hz-rule-glass: rgba(229, 236, 230, 0.9);
   --hz-danger: #b85e43;
   --hz-danger-soft: #fff1ed;
-  --hz-tabbar-height: 124rpx;
-}
-page {
-  /* 卡片与投影：借鉴成熟健康产品的轻卡片层级 */
-  --hz-radius-card: 22rpx;
-  --hz-radius-tile: 16rpx;
-  --hz-shadow-card: 0 8rpx 24rpx rgba(31, 74, 48, 0.07);
-  --hz-shadow-float: 0 12rpx 32rpx rgba(24, 52, 37, 0.14);
-  /* 功能色砖块底色（记录四项、工具入口） */
-  --hz-mint: #eef4ee;
-  --hz-amber: #fff4d9;
-  --hz-amber-ink: #9a8050;
-  --hz-sky: #edf4fb;
-  --hz-sky-ink: #6986a3;
-  --hz-blush: #fff0f3;
-  --hz-blush-ink: #b36d80;
+  --hz-blur: blur(18px) saturate(1.5);
+  --hz-radius-card: 24rpx;
+  --hz-radius-tile: 18rpx;
+  --hz-radius-control: 18rpx;
+  --hz-shadow-card: 0 10rpx 30rpx rgba(29, 55, 41, 0.07);
+  --hz-shadow-float: 0 18rpx 44rpx rgba(24, 52, 37, 0.14);
+  --hz-highlight: inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+  --hz-primary-soft: #e7f0e9;
+  --hz-primary-soft-active: #d8e8dc;
+  --hz-primary-border: #9fc3ad;
+  --hz-primary-ink: #2f6b4d;
+  --hz-gutter: 28rpx;
   /* 自定义 TabBar 占用空间（含离底间距），页面据此预留底部安全距离 */
   --hz-tabbar-offset: 0rpx;
   --hz-tabbar-height: 108rpx;
-}
-page {
-  /* 柔和主按钮体系：与水彩插画同氛围，坚决不用实心深绿 */
-  --hz-primary-soft: #eaf6ee;
-  --hz-primary-soft-active: #d8eddf;
-  --hz-primary-border: #a9d3b5;
-  --hz-primary-ink: #5f9a75;
 }

@@ -215,7 +215,7 @@
       <view v-else class="empty-line">保存后，记录会出现在这里。</view>
     </template>
 
-    <MiniTabBar active="records" />
+    
   </view>
 </template>
 
@@ -227,7 +227,6 @@ import type {
   MealType,
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
-import MiniTabBar from '../../components/MiniTabBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { createHealthRecordsStore } from '../../features/health-records/health-records.store.js';
 import { consumeRecordTypeFocus } from '../../features/health-records/records-focus.js';
@@ -475,7 +474,7 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
+  padding: calc(env(safe-area-inset-top) + 44rpx) 32rpx calc(env(safe-area-inset-bottom) + 44rpx);
   background: #f6faf7;
   color: #244735;
 }

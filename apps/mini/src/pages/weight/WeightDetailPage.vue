@@ -1,5 +1,5 @@
 <template>
-  <view class="weight-page">
+  <view class="page weight-page">
     <AppNavBar title="我的体重" route="weight" />
 
     <view class="hero-wrap">

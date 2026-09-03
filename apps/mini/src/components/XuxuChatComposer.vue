@@ -26,7 +26,9 @@
 
     <scroll-view class="messages" scroll-y :scroll-into-view="lastMessageId">
       <view v-if="!messages.length && !typing" class="empty-chat">
-        <image class="empty-illustration" src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
+        <view class="empty-medallion">
+          <image class="empty-illustration" src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFill" />
+        </view>
         <text class="empty-kicker">今天也和序序说说吧</text>
         <text class="empty-title">从一个小问题开始，照顾好自己</text>
         <text class="empty-copy">饮食、睡眠、喝水和活动，都可以慢慢记录。</text>
@@ -92,7 +94,9 @@ async function send(value: string) {
   } catch (error) {
     console.error('序序聊天失败:', error);
     // API 不可用时仍给出明确、可执行的陪伴建议，不让输入停在“无响应”。
-    messages.value.push(createOfflineReply(text));
+    const fallback = createOfflineReply(text);
+    // Keep the fallback visible, but mark it as retryable so a transient API failure is recoverable.
+    messages.value.push({ ...fallback, id: `assistant-error-${Date.now()}` });
     connectionState.value = 'retry';
   } finally {
     typing.value = false;
@@ -105,16 +109,356 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
 </script>
 
 <style scoped>
-.chat-shell{display:flex;flex:1 1 auto;width:100%;min-width:0;min-height:0;overflow:hidden;flex-direction:column;padding:20rpx 0 12rpx;box-sizing:border-box;background:#fffdf5;color:#294438}
-.chat-head{display:flex;align-items:center;gap:16rpx;min-height:84rpx;padding:0 28rpx 18rpx;border-bottom:1rpx solid rgba(215,228,218,.72)}
-.avatar-frame{display:flex;align-items:center;justify-content:center;width:76rpx;height:76rpx;flex:none;overflow:hidden;border:1rpx solid #e7d992;border-radius:24rpx;background:#fffdf5;box-shadow:0 8rpx 22rpx rgba(99,122,87,.12)}
-.chat-avatar{width:76rpx;height:76rpx;border-radius:22rpx;mix-blend-mode:multiply}
-.chat-head-copy{flex:1;min-width:0}.chat-title-row{display:flex;align-items:center;gap:12rpx}.chat-name{color:#203d31;font-size:32rpx;font-weight:800;letter-spacing:1rpx}.chat-status{display:block;margin-top:7rpx;color:#829589;font-size:21rpx}.head-mark{align-self:flex-start;padding-top:8rpx;color:#9bad9f;font-size:19rpx;letter-spacing:2rpx}
-.status-chip{display:flex;align-items:center;gap:6rpx;padding:5rpx 12rpx;border:1rpx solid #d8eadc;border-radius:99rpx;color:#5c8869;background:#f4fbf3;font-size:18rpx;font-weight:700}.status-dot{width:10rpx;height:10rpx;border-radius:50%;background:#6eb47b;box-shadow:0 0 0 4rpx rgba(110,180,123,.14)}.status-thinking{color:#8f7a49;border-color:#f0e3bb;background:#fffaf0}.status-thinking .status-dot{background:#d7ad56}.status-retry{color:#9c6c5d;border-color:#f0dcd4;background:#fff7f4}.status-retry .status-dot{background:#d58c73}
-.chat-profile{margin:14rpx 28rpx 0;padding:16rpx 18rpx 15rpx;border:1rpx solid #e6eee6;border-radius:22rpx;background:rgba(255,255,255,.82);box-shadow:0 8rpx 24rpx rgba(92,119,98,.06)}.profile-head{display:flex;align-items:center;justify-content:space-between}.profile-title{display:block;color:#547464;font-size:23rpx;font-weight:700}.profile-subtitle{display:block;margin-top:4rpx;color:#9aaba0;font-size:18rpx}.profile-toggle{padding:4rpx 8rpx;color:#6b9277;background:transparent;font-size:20rpx}.profile-tags{display:flex;flex-wrap:wrap;gap:10rpx;margin-top:13rpx}.profile-tag{padding:7rpx 13rpx;border:1rpx solid #e1ebe1;border-radius:14rpx;color:#688273;background:#fbfefa;font-size:20rpx}
-.messages{flex:1;width:100%;height:0;min-height:0;box-sizing:border-box;padding:22rpx 28rpx 18rpx}.empty-chat{display:flex;align-items:center;flex-direction:column;padding:34rpx 14rpx 28rpx;text-align:center}.empty-illustration{display:block;width:300rpx;height:220rpx;margin:0 auto 8rpx;mix-blend-mode:multiply}.empty-kicker{margin-top:2rpx;color:#7d9b83;font-size:21rpx;font-weight:700}.empty-title{margin-top:9rpx;color:#294d3b;font-size:28rpx;font-weight:800}.empty-copy{max-width:520rpx;margin-top:9rpx;color:#91a296;font-size:21rpx;line-height:1.55}
-.message{display:flex;align-items:flex-start;gap:13rpx;margin:18rpx 0}.message.assistant{padding-right:26rpx}.message.user{justify-content:flex-end;padding-left:26rpx}.message-avatar{width:48rpx;height:48rpx;flex:none;border:1rpx solid #e6d88c;border-radius:15rpx;background:#fffdf5;mix-blend-mode:multiply}.message-body{max-width:calc(100% - 62rpx);min-width:0}.message-label{display:block;margin:0 0 5rpx 6rpx;color:#91a293;font-size:18rpx;font-weight:700}.message-text{display:block;max-width:100%;word-break:break-word;padding:15rpx 18rpx;border:1rpx solid #e0eee2;border-radius:8rpx 22rpx 22rpx 22rpx;color:#315141;background:rgba(249,255,249,.95);box-shadow:0 5rpx 16rpx rgba(76,110,83,.07);font-size:24rpx;line-height:1.62}.message.user .message-text{border-color:#dcebf1;border-radius:22rpx 8rpx 22rpx 22rpx;color:#3b5f70;background:#f2f9fc;box-shadow:0 5rpx 16rpx rgba(75,119,138,.06)}.source-card{display:flex;align-items:center;gap:6rpx;margin-top:9rpx;padding:9rpx 12rpx;border:1rpx solid #e7ece6;border-radius:13rpx;color:#819587;background:rgba(255,255,255,.8);font-size:18rpx}.source-card image{width:24rpx;height:24rpx;opacity:.7}.retry-message{margin:8rpx 0 0 4rpx;padding:4rpx 12rpx;border:1rpx solid #ead5cc;border-radius:12rpx;color:#a06f60;background:#fffdfb;font-size:19rpx;line-height:32rpx}
-.typing{display:flex;align-items:center;gap:5rpx;height:52rpx;padding:0 18rpx;border:1rpx solid #e0eee2;border-radius:8rpx 22rpx 22rpx 22rpx;background:#f9fff9}.typing text{width:9rpx;height:9rpx;border-radius:50%;background:#9cc2a4;animation:breathe 1.1s ease-in-out infinite}.typing text:nth-child(2){animation-delay:.14s}.typing text:nth-child(3){animation-delay:.28s}@keyframes breathe{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:1;transform:translateY(-3rpx)}}
-.quick{display:flex;flex:none;width:100%;box-sizing:border-box;padding:13rpx 28rpx 10rpx;border-top:1rpx solid rgba(220,233,222,.72);background:rgba(255,255,255,.7);white-space:nowrap}.quick-label{display:inline-flex;align-items:center;height:52rpx;margin-right:10rpx;color:#93a298;font-size:19rpx;white-space:nowrap}.quick button{display:inline-block;height:52rpx;margin-right:10rpx;padding:0 17rpx;border:1rpx solid #deebe0;border-radius:17rpx;color:#5b8067;background:#fcfffb;box-shadow:0 4rpx 12rpx rgba(81,113,86,.05);font-size:21rpx;line-height:50rpx}
-.composer{display:flex;align-items:center;gap:11rpx;flex:none;padding:8rpx 28rpx 0}.icon-button{display:flex;align-items:center;justify-content:center;width:52rpx;height:68rpx;flex:none;border-radius:18rpx;background:transparent}.icon-button image{width:32rpx;height:32rpx;opacity:.72}.composer input{flex:1;min-width:0;height:70rpx;padding:0 22rpx;border:1rpx solid #e4eee5;border-radius:22rpx;color:#284b37;background:rgba(255,255,255,.94);box-shadow:inset 0 1rpx 0 rgba(255,255,255,.9),0 6rpx 16rpx rgba(70,101,76,.06);font-size:24rpx}.send{display:flex;align-items:center;justify-content:center;width:68rpx;height:68rpx;flex:none;border-radius:22rpx;background:#e4eee5}.send.enabled{border:1rpx solid #c3dfc8;background:#e9f6eb;box-shadow:0 8rpx 18rpx rgba(77,133,87,.13)}.send image{width:31rpx;height:31rpx}.disclaimer{display:block;padding:10rpx 28rpx 2rpx;color:#9aa99f;text-align:center;font-size:17rpx}
+/* ============================================================
+ * 序序聊天 · 晨雾玻璃 v3
+ * 去贴图感：插画 mix-blend 溶入画布；气泡用不对称圆角 + 玻璃材质；
+ * 全页共享全局氛围画布（根容器透明）。
+ * ============================================================ */
+.chat-shell {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 0;
+  background: transparent;
+  color: var(--hz-ink);
+}
+
+/* ---------- 头部 ---------- */
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  min-height: 96rpx;
+  margin: 0 28rpx;
+  padding: calc(env(safe-area-inset-top) + 16rpx) 4rpx 18rpx;
+  border-bottom: 1rpx solid var(--hz-rule-glass);
+}
+.avatar-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  flex: none;
+  padding: 4rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.6);
+  border-radius: 50%;
+  background: linear-gradient(160deg, #ffffff 0%, #eef5ef 100%);
+  box-shadow: 0 10rpx 22rpx rgba(47, 107, 77, 0.14), inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+}
+.chat-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.chat-head-copy {
+  flex: 1;
+  min-width: 0;
+}
+.chat-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.chat-name {
+  color: var(--hz-ink);
+  font-size: 34rpx;
+  font-weight: 800;
+}
+.chat-status {
+  display: block;
+  margin-top: 6rpx;
+  color: var(--hz-muted);
+  font-size: 20rpx;
+}
+.head-mark { display: none; }
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 7rpx;
+  padding: 7rpx 14rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.5);
+  border-radius: 999rpx;
+  color: var(--hz-green);
+  background: var(--hz-green-soft);
+  font-size: 17rpx;
+  font-weight: 700;
+}
+.status-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: var(--hz-green-bright);
+  box-shadow: 0 0 0 4rpx rgba(72, 163, 119, 0.16);
+}
+.status-thinking { color: #9a6b2f; border-color: rgba(199, 138, 59, 0.4); background: var(--hz-amber-soft); }
+.status-thinking .status-dot { background: #d2a15b; box-shadow: 0 0 0 4rpx rgba(210, 161, 91, 0.16); }
+.status-retry { color: #a96c73; border-color: rgba(199, 121, 134, 0.4); background: var(--hz-blush-soft); }
+.status-retry .status-dot { background: #d48b73; box-shadow: 0 0 0 4rpx rgba(212, 139, 115, 0.16); }
+
+/* ---------- 健康画像：轻量玻璃条 ---------- */
+.chat-profile {
+  margin: 16rpx 28rpx 0;
+  padding: 18rpx 20rpx 17rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: var(--hz-radius-control);
+  background: var(--hz-surface-glass);
+  box-shadow: var(--hz-highlight), var(--hz-shadow-card);
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+}
+.profile-head { display: flex; align-items: center; justify-content: space-between; }
+.profile-title { display: block; color: var(--hz-ink-soft); font-size: 23rpx; font-weight: 700; }
+.profile-subtitle { display: block; margin-top: 4rpx; color: var(--hz-faint); font-size: 18rpx; }
+.profile-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72rpx;
+  height: 42rpx;
+  padding: 0 12rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.45);
+  border-radius: 999rpx;
+  color: var(--hz-green);
+  background: var(--hz-green-soft);
+  font-size: 18rpx;
+  line-height: 1;
+}
+.profile-toggle::after { border: 0; }
+.profile-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 14rpx; }
+.profile-tag {
+  padding: 7rpx 14rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.4);
+  border-radius: 999rpx;
+  color: var(--hz-green);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 19rpx;
+}
+
+/* ---------- 消息区 ---------- */
+.messages {
+  flex: 1;
+  width: 100%;
+  height: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 24rpx 28rpx 18rpx;
+}
+.empty-chat {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 30rpx 12rpx 30rpx;
+  text-align: center;
+}
+/* 吉祥物徽章：圆形裁切 + 玻璃描边圈 + 外圈柔光，像 App 的头像章而不是贴图 */
+.empty-medallion {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 248rpx;
+  height: 248rpx;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(125, 178, 148, 0.18),
+    rgba(255, 255, 255, 0.5) 72%,
+    transparent
+  );
+}
+.empty-medallion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #ffffff 0%, #f2f7ef 100%);
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95),
+    0 16rpx 36rpx rgba(47, 107, 77, 0.14),
+    0 0 0 1rpx rgba(159, 195, 173, 0.45);
+}
+.empty-illustration {
+  position: relative;
+  display: block;
+  width: 218rpx;
+  height: 218rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: scale(1.06);
+}
+.empty-kicker { margin-top: 0; color: var(--hz-green); font-size: 20rpx; font-weight: 700; }
+.empty-title { margin-top: 10rpx; color: var(--hz-ink); font-size: 30rpx; font-weight: 800; line-height: 1.35; }
+.empty-copy { max-width: 520rpx; margin-top: 10rpx; color: var(--hz-muted); font-size: 21rpx; line-height: 1.65; }
+
+/* ---------- 气泡 ---------- */
+.message { display: flex; align-items: flex-start; gap: 14rpx; margin: 20rpx 0; }
+.message.assistant { padding-right: 40rpx; }
+.message.user { justify-content: flex-end; padding-left: 40rpx; }
+.message-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  flex: none;
+  margin-top: 4rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: linear-gradient(160deg, #ffffff 0%, #eef5ef 100%);
+  box-shadow: 0 6rpx 14rpx rgba(47, 107, 77, 0.12);
+}
+.message-body { max-width: calc(100% - 70rpx); min-width: 0; }
+.message-label { display: none; }
+/* 序序：白色玻璃气泡，左上角收口 */
+.message-text {
+  display: block;
+  max-width: 100%;
+  word-break: break-word;
+  padding: 18rpx 22rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 6rpx 26rpx 26rpx 26rpx;
+  color: var(--hz-ink);
+  background: var(--hz-surface-glass);
+  box-shadow: var(--hz-highlight), 0 8rpx 22rpx rgba(29, 55, 41, 0.07);
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+/* 用户：晨绿渐变气泡，右上角收口 */
+.message.user .message-text {
+  border: 1rpx solid rgba(125, 178, 148, 0.55);
+  border-radius: 26rpx 6rpx 26rpx 26rpx;
+  color: #234c39;
+  background: linear-gradient(135deg, rgba(199, 228, 211, 0.95) 0%, rgba(170, 210, 187, 0.9) 100%);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.75), 0 8rpx 20rpx rgba(47, 107, 77, 0.12);
+}
+.source-card {
+  display: flex;
+  align-items: center;
+  gap: 7rpx;
+  margin-top: 10rpx;
+  padding: 9rpx 13rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 12rpx;
+  color: var(--hz-muted);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 18rpx;
+}
+.source-card image { width: 24rpx; height: 24rpx; opacity: 0.7; }
+.retry-message {
+  margin: 9rpx 0 0 5rpx;
+  padding: 6rpx 14rpx;
+  border: 1rpx solid rgba(199, 121, 134, 0.45);
+  border-radius: 999rpx;
+  color: #a96c73;
+  background: var(--hz-blush-soft);
+  font-size: 18rpx;
+  line-height: 30rpx;
+}
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  height: 56rpx;
+  padding: 0 20rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 6rpx 26rpx 26rpx 26rpx;
+  background: var(--hz-surface-glass);
+}
+.typing text { width: 9rpx; height: 9rpx; border-radius: 50%; background: var(--hz-green-bright); animation: breathe 1.1s ease-in-out infinite; }
+.typing text:nth-child(2) { animation-delay: 0.14s; }
+.typing text:nth-child(3) { animation-delay: 0.28s; }
+@keyframes breathe { 0%, 100% { opacity: 0.35; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3rpx); } }
+
+/* ---------- 快捷问题 ---------- */
+.quick {
+  display: flex;
+  flex: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14rpx 28rpx 10rpx;
+  border-top: 1rpx solid var(--hz-rule-glass);
+  background: rgba(255, 253, 249, 0.72);
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+  white-space: nowrap;
+}
+.quick-label {
+  display: inline-flex;
+  align-items: center;
+  height: 54rpx;
+  margin-right: 10rpx;
+  color: var(--hz-faint);
+  font-size: 19rpx;
+  white-space: nowrap;
+}
+.quick button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 54rpx;
+  margin-right: 10rpx;
+  padding: 0 18rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.5);
+  border-radius: 999rpx;
+  color: var(--hz-green);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4rpx 12rpx rgba(47, 107, 77, 0.06);
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+/* ---------- 输入区 ---------- */
+.composer { display: flex; align-items: center; gap: 12rpx; flex: none; padding: 10rpx 28rpx 0; }
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  flex: none;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05);
+}
+.icon-button::after { border: 0; }
+.icon-button image { width: 32rpx; height: 32rpx; opacity: 0.62; }
+.composer input {
+  flex: 1;
+  min-width: 0;
+  height: 76rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 999rpx;
+  color: var(--hz-ink);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.96), 0 6rpx 16rpx rgba(29, 55, 41, 0.05);
+  font-size: 24rpx;
+}
+.composer input::placeholder { color: var(--hz-faint); }
+.send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  flex: none;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+}
+.send::after { border: 0; }
+.send.enabled {
+  border-color: rgba(125, 178, 148, 0.6);
+  background: linear-gradient(135deg, #6cae8c 0%, #4c9573 100%);
+  box-shadow: 0 10rpx 22rpx rgba(47, 107, 77, 0.3), inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+}
+.send image { width: 32rpx; height: 32rpx; opacity: 0.62; }
+.send.enabled image { opacity: 0.95; }
+.disclaimer { display: block; padding: 10rpx 28rpx 4rpx; color: var(--hz-faint); text-align: center; font-size: 17rpx; }
 </style>

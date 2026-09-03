@@ -18,7 +18,7 @@ export function syncHabitPlansForGoals(goals: HealthGoal[]) {
   }
 }
 
-export function syncPrimaryHealthPlan(primaryGoal: HealthGoal) {
+export function syncPrimaryHealthPlan(primaryGoal: HealthGoal, targetWeightKg?: number) {
   const desired =
     primaryGoal === 'sleep'
       ? { kind: 'sleep' as const }
@@ -38,13 +38,22 @@ export function syncPrimaryHealthPlan(primaryGoal: HealthGoal) {
   if (!desired) return clearLocalPlan();
 
   const current = loadLocalPlan();
+  const targetMatches =
+    targetWeightKg === undefined || current?.healthTarget.targetWeightKg === targetWeightKg;
   if (
     current?.kind === desired.kind &&
-    (desired.kind === 'sleep' || current.healthTarget.direction === desired.direction)
+    (desired.kind === 'sleep' || current.healthTarget.direction === desired.direction) &&
+    targetMatches
   ) {
     return current;
   }
-  return saveLocalPlan({ ...desired, startDate: localDate() });
+  return saveLocalPlan({
+    ...desired,
+    startDate: localDate(),
+    ...(desired.kind === 'weight' && Number.isFinite(targetWeightKg) && targetWeightKg! > 0
+      ? { targetWeightKg }
+      : {}),
+  });
 }
 
 function localDate() {

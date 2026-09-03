@@ -59,6 +59,10 @@
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "本周回顾" }
     },
     {
+      "path": "pages/community/CommunityPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "社区" }
+    },
+    {
       "path": "pages/me/MePage",
       "style": { "navigationBarTitleText": "我的" }
     },
@@ -129,13 +133,14 @@
       { "pagePath": "pages/home/HomePage", "text": "首页" },
       { "pagePath": "pages/records/RecordsPage", "text": "记录" },
       { "pagePath": "pages/xuxu/XuxuPage", "text": "序序" },
+      { "pagePath": "pages/community/CommunityPage", "text": "社区" },
       { "pagePath": "pages/plan/PlanPage", "text": "计划" },
       { "pagePath": "pages/me/MePage", "text": "我的" }
     ]
   },
   "globalStyle": {
     "navigationBarTextStyle": "black",
-    "navigationBarBackgroundColor": "#F7FBF8",
-    "backgroundColor": "#F7FBF8"
+    "navigationBarBackgroundColor": "#FFFDF9",
+    "backgroundColor": "#FFFDF9"
   }
 }

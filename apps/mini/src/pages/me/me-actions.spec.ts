@@ -20,7 +20,7 @@ describe('my page primary actions', () => {
         label: '健康记录',
         detail: '查看体重、饮食、活动和睡眠记录',
         route: '/pages/records/RecordsPage',
-        mode: 'tab',
+        mode: 'navigate',
       },
     ]);
   });

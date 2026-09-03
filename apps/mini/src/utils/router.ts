@@ -6,8 +6,8 @@
 // tabBar 页面列表
 const TAB_BAR_PAGES = [
   '/pages/home/HomePage',
-  '/pages/records/RecordsPage',
   '/pages/xuxu/XuxuPage',
+  '/pages/community/CommunityPage',
   '/pages/plan/PlanPage',
   '/pages/me/MePage',
 ];
@@ -178,7 +178,14 @@ export function navigateToHome() {
  * 跳转到记录页
  */
 export function navigateToRecords() {
-  switchTab('/pages/records/RecordsPage');
+  navigateTo('/pages/records/RecordsPage');
+}
+
+/**
+ * 跳转到社区页
+ */
+export function navigateToCommunity() {
+  switchTab('/pages/community/CommunityPage');
 }
 
 /**

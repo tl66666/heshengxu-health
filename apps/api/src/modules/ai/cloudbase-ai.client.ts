@@ -147,7 +147,8 @@ export class CloudBaseAiClient {
   ) {
     const baseUrl = config.baseUrl ?? this.baseUrl;
     const apiKey = config.apiKey ?? this.apiKey;
-    if (!this.isConfigured()) throw new CloudBaseAiError('CloudBase AI 未配置');
+    const requestAuth = config.auth ?? this.auth;
+    if (!requestAuth) throw new CloudBaseAiError('CloudBase AI 未配置');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 30_000);
     try {

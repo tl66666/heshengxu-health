@@ -46,7 +46,7 @@ function requestWithUni<T>({
     };
     const timeoutId = setTimeout(() => {
       finish(() => reject(new Error('NETWORK_TIMEOUT')));
-    }, 1600);
+    }, 30_000);
     uni.request({
       url,
       method: method as never,

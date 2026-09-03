@@ -1,7 +1,7 @@
 <template>
-  <view class="page">
+  <view class="page mood-page">
     <view class="nav"
-      ><button class="back" @tap="goBack">‹</button
+      ><button class="back" aria-label="返回" @tap="goBack"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button
       ><view
         ><text class="title">心情记录</text><text class="date">{{ dateLabel }}</text></view
       ><view class="nav-space"
@@ -140,7 +140,7 @@ onShow(() => {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: calc(112rpx + env(safe-area-inset-top)) 28rpx calc(40rpx + env(safe-area-inset-bottom));
+  padding:calc(112rpx + env(safe-area-inset-top)) 28rpx calc(40rpx + env(safe-area-inset-bottom));
   background: #f7fafb;
   color: #465568;
 }
@@ -542,14 +542,16 @@ onShow(() => {
 </style>
 <style scoped>
 .art-stage {
-  height: auto;
+  height: 640rpx;
   display: block;
   line-height: 0;
 }
 .art-stage image {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 .section-heading {
   display: flex;
@@ -574,6 +576,9 @@ onShow(() => {
   gap: 8rpx;
 }
 .history-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 62rpx;
   height: 42rpx;
   padding: 0 10rpx;
@@ -582,18 +587,11 @@ onShow(() => {
   color: #708178;
   background: #fafbf7;
   font-size: 17rpx;
-  line-height: 42rpx;
+  line-height: 1;
 }
 .delete-action {
   border-color: #eadbd5;
   color: #b47d72;
   background: #fffaf8;
-}
-</style>
-<style scoped>
-button {
-  box-sizing: border-box;
-  line-height: 1;
-  white-space: nowrap;
 }
 </style>

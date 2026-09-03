@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page medication-page">
     <AppNavBar title="用药记录" route="/pages/medication/MedicationManagePage" />
     <view class="page-head"><view><text class="kicker">今天 · {{ todayLabel }}</text><text class="title">按医嘱，慢慢来</text></view><button class="head-add" aria-label="添加用药" @tap="openForm"><image src="/static/icons/watercolor/medication.png" mode="aspectFit" /><text>添加</text></button></view>
     <view class="companion-banner">
@@ -97,5 +97,33 @@ onShow(load);
 .med-icon { width: 68rpx; height: 68rpx; flex: none; margin-right: 14rpx; border-radius: 18rpx; background: rgba(239,247,244,.72); mix-blend-mode: multiply; }
 .med-copy { padding-right: 4rpx; }.med-name { color: #5f5860; font-size: 27rpx; }.med-meta { color: #92878b; }.med-note { color: #a89b9d; }.more-button { width: 50rpx; color: #a3979a; font-size: 22rpx; }
 .empty-state { margin-top: 18rpx; padding: 72rpx 28rpx 54rpx; border: 1rpx solid rgba(255,255,255,.9); border-radius: 24rpx; background: rgba(255,253,251,.72); box-shadow: 0 14rpx 30rpx rgba(126,104,94,.07); }.empty-state image { width: 198rpx; height: 156rpx; opacity: .92; }.empty-title { color: #665d64; }.empty-copy { color: #9e9294; }.empty-action { padding: 16rpx 24rpx; border: 1rpx solid #d6e3df; border-radius: 20rpx; color: #6e8b88; background: #edf6f3; }
-.form-scrim { background: rgba(78,61,64,.25); backdrop-filter: blur(4rpx); }.form-panel { padding: 30rpx 28rpx calc(34rpx + env(safe-area-inset-bottom)); border: 1rpx solid rgba(255,255,255,.94); border-radius: 30rpx 30rpx 0 0; background: rgba(255,253,251,.96); box-shadow: 0 -18rpx 40rpx rgba(104,76,80,.16); }.close-button { color: #8e7f84; background: #f5eeeb; }.field { height: 78rpx; padding: 0 18rpx; border-color: #eaded9; border-radius: 16rpx; background: #fffaf7; color: #625a60; }.frequency { min-height: 58rpx; border-color: #eaded9; border-radius: 16rpx; background: #fffaf7; color: #9a8d91; }.frequency.active { border-color: #abcfc8; color: #668c87; background: #edf6f3; }.primary-button { height: 84rpx; border-radius: 24rpx; background: linear-gradient(135deg, #7fb6b4, #609da7); box-shadow: 0 12rpx 24rpx rgba(94,157,176,.2); line-height: 84rpx; }.safety-note { border-left-color: #d7aaa0; background: #fff4ef; color: #9d8e8c; }.safety-note text:first-child { color: #b2776d; }
+.form-scrim { background: rgba(78,61,64,.25); backdrop-filter: blur(4rpx); }.form-panel { padding: 30rpx 28rpx calc(34rpx + env(safe-area-inset-bottom)); border: 1rpx solid rgba(255,255,255,.94); border-radius: 30rpx 30rpx 0 0; background: rgba(255,253,251,.96); box-shadow: 0 -18rpx 40rpx rgba(104,76,80,.16); }.close-button { color: #8e7f84; background: #f5eeeb; }.field { height: 78rpx; padding: 0 18rpx; border-color: #eaded9; border-radius: 16rpx; background: #fffaf7; color: #625a60; }.frequency { min-height: 58rpx; border-color: #eaded9; border-radius: 16rpx; background: #fffaf7; color: #9a8d91; font-size: 19rpx; }.frequency.active { border-color: #abcfc8; color: #668c87; background: #edf6f3; }.primary-button { height: 84rpx; border-radius: 24rpx; background: linear-gradient(135deg, #7fb6b4, #609da7); box-shadow: 0 12rpx 24rpx rgba(94,157,176,.2); line-height: 84rpx; }.safety-note { border-left-color: #d7aaa0; background: #fff4ef; color: #9d8e8c; }.safety-note text:first-child { color: #b2776d; }
+</style>
+
+<style scoped>
+/* Medication is a timetable, so rows stay open and the artwork carries the warmth. */
+.medication-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.medication-page .page-head { padding-top: 26rpx !important; }
+.medication-page .kicker { color: #9b918e; }
+.medication-page .title { color: #5c5558; }
+.medication-page .head-add { border-color: #dce9e1; color: #6f9187; background: #f3f8f4; box-shadow: none; }
+.medication-page .companion-banner { border-color: rgba(255,255,255,.92); border-radius: 24rpx; background: #fff8ef; box-shadow: 0 14rpx 30rpx rgba(126,104,94,.07); }
+.medication-page .summary-line { margin-top: 22rpx; border: 0; border-top: 1rpx solid #ebe3dc; border-bottom: 1rpx solid #ebe3dc; border-radius: 0; background: transparent; box-shadow: none; }
+.medication-page .summary-number { color: #6d918b; }
+.medication-page .progress-track { background: #ece6df; }
+.medication-page .progress-fill { background: #8eb9ad; }
+.medication-page .text-action { border: 0; color: #6f9187; background: transparent; }
+.medication-page .timeline { gap: 0; border-top: 1rpx solid #ebe3dc; }
+.medication-page .med-row { min-height: 126rpx; padding: 18rpx 0; border: 0; border-bottom: 1rpx solid #ebe3dc; border-radius: 0; background: transparent; box-shadow: none; }
+.medication-page .med-row.done { background: transparent; }
+.medication-page .check-button { border-color: #b9d2c8; background: #fffdf9; }
+.medication-page .check-button.checked { border-color: #83b4ad; background: #83b4ad; }
+.medication-page .med-icon { border-radius: 18rpx; background: #f1f7f3; }
+.medication-page .med-name { color: #5c6862; }
+.medication-page .med-meta, .medication-page .med-note { color: #9b918e; }
+.medication-page .more-button { color: #8e9d96; }
+.medication-page .empty-state { margin-top: 22rpx; border: 0; border-top: 1rpx solid #ebe3dc; border-radius: 0; background: transparent; box-shadow: none; }
+.medication-page .empty-action { border-color: #dce9e1; color: #6f9187; background: #f3f8f4; }
+.medication-page .safety-note { border-left-color: #b8d1c7; background: #f1f7f3; color: #8c9892; }
+.medication-page .safety-note text:first-child { color: #6f9187; }
 </style>

@@ -2,6 +2,7 @@ const tabPrefixes = [
   '/pages/home/',
   '/pages/records/',
   '/pages/xuxu/',
+  '/pages/community/',
   '/pages/plan/',
   '/pages/me/',
 ];

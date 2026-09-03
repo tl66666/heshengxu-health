@@ -1,9 +1,9 @@
 <template>
-  <view class="page">
+  <view class="page fasting-page">
     <image class="leaf" src="/static/illustrations/leaf-corner-decoration.png" mode="aspectFit" />
 
     <view class="nav">
-      <button class="icon-button back" aria-label="返回" @tap="goBack"><text>‹</text></button>
+      <button class="icon-button back" aria-label="返回" @tap="goBack"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button>
       <view class="nav-title">
         <text>轻断食</text>
         <text class="nav-date">{{ todayLabel }} · 当前计划</text>

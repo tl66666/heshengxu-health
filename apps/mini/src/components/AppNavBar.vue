@@ -31,7 +31,15 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ close: []; back: [] }>();
 
-const statusBarHeight = ref(0);
+function readStatusBarHeight() {
+  try {
+    return Number(uni.getSystemInfoSync().statusBarHeight || 0);
+  } catch {
+    return 0;
+  }
+}
+
+const statusBarHeight = ref(readStatusBarHeight());
 
 onMounted(() => {
   // 获取系统状态栏高度
@@ -61,15 +69,17 @@ function close() {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(248, 250, 244, 0.96);
-  border-bottom: 1rpx solid rgba(222, 232, 223, 0.82);
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  background: rgba(255, 253, 249, 0.95);
+  border-bottom: 1rpx solid rgba(232, 223, 216, 0.86);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 
 .status-bar {
   width: 100%;
-  background: #f5faf7;
+  background: #fbfaf6;
 }
 
 .nav-bar {
@@ -88,9 +98,9 @@ function close() {
   width: 56rpx;
   height: 56rpx;
   padding: 0;
-  border: 2rpx solid #ead4d2;
+  border: 1rpx solid #dfe8df;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 2rpx 8rpx rgba(119, 91, 79, 0.08);
   transition: all 0.2s ease;
 }
@@ -111,7 +121,7 @@ function close() {
 
 .title {
   flex: 1;
-  color: #564d51;
+  color: #5b5357;
   font-size: 32rpx;
   font-weight: 700;
   text-align: center;
@@ -122,4 +132,5 @@ function close() {
   width: 56rpx;
   height: 56rpx;
 }
+
 </style>

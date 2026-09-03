@@ -5,8 +5,15 @@ import {
   onboardingProgress,
   toggleOnboardingGoal,
 } from './onboarding-flow.js';
+import { onboardingState, resetOnboarding } from '../../stores/onboarding.js';
 
 describe('onboarding flow', () => {
+  it('starts with editable baseline measurements so BMI is visible immediately', () => {
+    resetOnboarding();
+    expect(onboardingState.form.heightCm).toBe('168');
+    expect(onboardingState.form.weightKg).toBe('60');
+    expect(onboardingState.bmi.value).toBe(21.3);
+  });
   it.skip('falls back between onboarding illustrations instead of stretching the avatar (v1 only)', () => {
     expect(onboardingPageSource).toContain(
       "heroImage.value = '/static/illustrations/onboarding-hero-vertical.png'",

@@ -3,15 +3,41 @@
     <view class="page-header"><text>我的</text><text>健康管理</text></view>
 
     <button class="profile-summary" @tap="openProfile">
-      <view class="initial-avatar"
-        ><text>{{ initial }}</text></view
-      >
-      <view class="profile-copy"
-        ><text>{{ displayName }}</text
-        ><text>{{ profileText }}</text></view
-      >
+      <view class="avatar-ring" @tap.stop="changeAvatar">
+        <image class="avatar-img" :src="userAvatar" mode="aspectFill" />
+        <view class="avatar-badge">
+          <image class="avatar-badge-icon" src="/static/icons/svg/camera.svg" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="profile-copy">
+        <view class="name-row" @tap.stop="editName">
+          <text class="profile-name">{{ displayName }}</text>
+          <image class="name-edit-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        </view>
+        <text class="profile-sub">{{ profileText }}</text>
+      </view>
       <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
     </button>
+
+    <view class="section">
+      <text class="section-title">账号资料</text>
+      <view class="card">
+        <button class="row" @tap="changeAvatar">
+          <view class="row-copy"
+            ><text>更换头像</text
+            ><text>从相册选择或拍一张，作为你的头像</text></view
+          >
+          <image class="arrow" src="/static/icons/svg/camera.svg" mode="aspectFit" />
+        </button>
+        <button class="row row--last" @tap="editName">
+          <view class="row-copy"
+            ><text>修改昵称</text
+            ><text>首页问候语将显示这个称呼</text></view
+          >
+          <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        </button>
+      </view>
+    </view>
 
     <view class="section">
       <text class="section-title">健康管理</text>
@@ -44,7 +70,7 @@
         <button class="row" @tap="resetDemo">
           <view class="row-copy"
             ><text class="reset-title">重置本机数据</text
-            ><text>清除本机保存的建档与计划，重新开始建档</text></view
+            ><text>清除本机保存的全部健康记录，登录状态会保留</text></view
           >
           <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
@@ -67,6 +93,11 @@ import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
 import { loadLocalProfile, resetLocalDemoData } from '../../features/health-loop/local-demo.js';
+import {
+  loadUserProfile,
+  pickAndSaveAvatar,
+  saveUserProfile,
+} from '../../features/user-profile/user-profile.js';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { goalLabels, type HealthGoal } from '../../features/health-profile/health-profile.types.js';
 import { resetOnboarding } from '../../stores/onboarding.js';
@@ -74,10 +105,46 @@ import { mePrimaryActions } from './me-actions.js';
 
 const date = localDate();
 const localProfile = ref(loadLocalProfile());
+const userProfile = ref(loadUserProfile());
 const displayName = computed(
-  () => healthLoopState.today.value?.displayName || localProfile.value?.displayName || '健康管理者',
+  () =>
+    userProfile.value.displayName ||
+    healthLoopState.today.value?.displayName ||
+    localProfile.value?.displayName ||
+    '健康管理者',
 );
-const initial = computed(() => displayName.value.trim().slice(0, 1) || '我');
+const userAvatar = computed(
+  () => userProfile.value.avatarPath || '/static/illustrations/default-user-avatar.png',
+);
+
+async function changeAvatar() {
+  try {
+    const avatarPath = await pickAndSaveAvatar();
+    userProfile.value = saveUserProfile({ avatarPath });
+    uni.showToast({ title: '头像已更新', icon: 'success' });
+  } catch {
+    /* 用户取消选择，不提示 */
+  }
+}
+
+function editName() {
+  uni.showModal({
+    title: '修改昵称',
+    editable: true,
+    placeholderText: '输入新的昵称（最长 12 字）',
+    content: userProfile.value.displayName || '',
+    success: ({ confirm, content }) => {
+      if (!confirm) return;
+      const name = (content || '').trim().slice(0, 12);
+      if (!name) {
+        uni.showToast({ title: '昵称不能为空', icon: 'none' });
+        return;
+      }
+      userProfile.value = saveUserProfile({ displayName: name });
+      uni.showToast({ title: '昵称已更新', icon: 'success' });
+    },
+  });
+}
 const profileText = computed(() => {
   const goals = (localProfile.value?.goals || []).filter(
     (goal): goal is HealthGoal => goal in goalLabels,
@@ -105,7 +172,7 @@ function manageData() {
 function resetDemo() {
   uni.showModal({
     title: '重置本机数据',
-    content: '将清除本机保存的建档与计划数据，并重新进入建档流程。仅影响当前设备。',
+    content: '将清除本机保存的建档、计划、体重、饮食、喝水、睡眠、经期和用药记录，并重新进入建档流程。登录状态会保留，仅影响当前设备。',
     confirmText: '重置',
     success: (result) => {
       if (!result.confirm) return;
@@ -121,6 +188,7 @@ function localDate() {
 }
 onShow(() => {
   localProfile.value = loadLocalProfile();
+  userProfile.value = loadUserProfile();
   healthLoopState.loadToday(date, { force: true });
 });
 </script>
@@ -131,9 +199,9 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: 44rpx 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
-  background: #f7fbf8;
-  color: #1d3d2a;
+  padding: calc(env(safe-area-inset-top) + 44rpx) 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
+  background: transparent;
+  color: var(--hz-ink);
 }
 .page-header {
   display: flex;
@@ -159,47 +227,83 @@ onShow(() => {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 26rpx 24rpx;
+  padding: 28rpx 26rpx;
+  border: 1rpx solid var(--hz-rule-glass);
   border-radius: var(--hz-radius-card);
   text-align: left;
-  background: #fff;
-  box-shadow: var(--hz-shadow-card);
+  background: var(--hz-surface-glass);
+  box-shadow: var(--hz-highlight), var(--hz-shadow-card);
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
 }
-.initial-avatar {
+.avatar-ring {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 92rpx;
-  height: 92rpx;
+  width: 108rpx;
+  height: 108rpx;
   flex: none;
-  border: 2rpx solid #d9e7d8;
+  padding: 5rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.6);
   border-radius: 50%;
-  color: #52745c;
-  background: #edf5ea;
-  font-size: 36rpx;
-  font-weight: 700;
+  background: linear-gradient(160deg, #ffffff 0%, #eef5ef 100%);
+  box-shadow: 0 10rpx 22rpx rgba(29, 55, 41, 0.12), inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.avatar-badge {
+  position: absolute;
+  right: -2rpx;
+  bottom: -2rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #ffffff;
+  border-radius: 50%;
+  background: var(--hz-green);
+  box-shadow: 0 4rpx 10rpx rgba(47, 107, 77, 0.3);
+}
+.avatar-badge-icon {
+  width: 22rpx;
+  height: 22rpx;
 }
 .profile-copy {
   min-width: 0;
   flex: 1;
-  margin-left: 18rpx;
+  margin-left: 20rpx;
 }
-.profile-copy text,
-.row-copy text {
-  display: block;
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  min-width: 0;
 }
-.profile-copy text:first-child {
+.profile-name {
   overflow: hidden;
-  color: #284d36;
-  font-size: 30rpx;
-  font-weight: 700;
+  color: var(--hz-ink);
+  font-size: 32rpx;
+  font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.profile-copy text:last-child {
-  margin-top: 7rpx;
+.name-edit-icon {
+  width: 24rpx;
+  height: 24rpx;
+  flex: none;
+  opacity: 0.45;
+}
+.profile-sub {
+  display: block;
+  margin-top: 8rpx;
   overflow: hidden;
-  color: #748b7d;
+  color: var(--hz-muted);
   font-size: 21rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -217,15 +321,18 @@ onShow(() => {
 .section-title {
   display: block;
   margin: 0 4rpx 12rpx;
-  color: #63806d;
+  color: var(--hz-muted);
   font-size: 22rpx;
   font-weight: 700;
 }
 .card {
   overflow: hidden;
+  border: 1rpx solid var(--hz-rule-glass);
   border-radius: var(--hz-radius-card);
-  background: #fff;
-  box-shadow: var(--hz-shadow-card);
+  background: var(--hz-surface-glass);
+  box-shadow: var(--hz-highlight), var(--hz-shadow-card);
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
 }
 .row {
   display: flex;

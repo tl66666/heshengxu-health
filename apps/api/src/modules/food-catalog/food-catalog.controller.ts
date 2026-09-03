@@ -16,12 +16,12 @@ export class FoodCatalogController {
    */
   @Get('search')
   async search(
+    @Res() response: Response,
     @Query('q') q?: string,
     @Query('categoryId') categoryId?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
     @Query('healthLight') healthLight?: string,
-    @Res() response?: Response,
   ) {
     const result = await this.foods.search({
       query: q,
@@ -66,7 +66,7 @@ export class FoodCatalogController {
    * GET /foods/popular?limit=10
    */
   @Get('popular/list')
-  async getPopular(@Query('limit') limit?: string, @Res() response?: Response) {
+  async getPopular(@Res() response: Response, @Query('limit') limit?: string) {
     const result = await this.foods.getPopularFoods(limit ? parseInt(limit) : 10);
     return response.send(envelope(result, response));
   }
@@ -76,7 +76,7 @@ export class FoodCatalogController {
    * GET /foods/recommended?limit=10
    */
   @Get('recommended/list')
-  async getRecommended(@Query('limit') limit?: string, @Res() response?: Response) {
+  async getRecommended(@Res() response: Response, @Query('limit') limit?: string) {
     const result = await this.foods.getRecommendedFoods(limit ? parseInt(limit) : 10);
     return response.send(envelope(result, response));
   }

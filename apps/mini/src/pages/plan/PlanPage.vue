@@ -149,8 +149,8 @@ onShow(refresh);
   min-height: 100vh;
   overflow: hidden;
   padding: 30rpx 28rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 34rpx);
-  color: #365343;
-  background: #ffffff;
+  color: var(--hz-ink);
+  background: transparent;
 }
 .leaf {
   position: absolute;

@@ -1,143 +1,458 @@
 /*
- * Heshengxu visual system v2.1
- * One calm canvas, one primary action, and a restrained glass surface.
- * The opaque fallbacks are intentional: older Android WebViews may not
- * support backdrop-filter, but the hierarchy must remain identical.
+ * 和生序 · 全局视觉系统 v3「晨雾玻璃」
+ * ------------------------------------------------------------
+ * 氛围基调：清晨薄雾中的暖色画布 —— 柔和的天光渐变、磨砂玻璃
+ * 表面、精准的一层阴影。参考薄荷健康的温暖手绘气质 + Apple 的
+ * 材质层级（玻璃只做"空气感"，不抢内容）。
+ *
+ * 规则：
+ *  1. 玻璃 = 一层 rgba 白 + 1px 内高光 + 单层阴影 + blur(≤20px)。
+ *     不叠加多层渐变、不叠厚描边；旧安卓用实色降级（写在前面的
+ *     background 兜底声明）。
+ *  2. 全部色彩走本文件的令牌；页面不得自带"另一种灰"。
+ *  3. 每屏只有一个最强视觉焦点；卡片圆角统一 24rpx、控件 18rpx。
+ *  4. 本文件必须最后加载（App.vue 末尾 import），覆盖历史散落样式。
+ * ------------------------------------------------------------
  */
+
 page {
-  --hz-bg: #fffdf9;
-  --hz-surface: #ffffff;
-  --hz-surface-glass: rgba(255, 255, 255, 0.84);
-  --hz-surface-soft: #f5f8f3;
-  --hz-ink: #1e2d25;
-  --hz-muted: #748078;
+  /* ---- 画布与空气 ---- */
+  --hz-bg: #fffdf9;                 /* 主画布：暖象牙 */
+  --hz-bg-tint: #f4f8f4;            /* 页面顶部的一口"新鲜空气" */
+  --hz-surface: #ffffff;            /* 实色表面（表单/列表） */
+  --hz-surface-glass: rgba(255, 255, 255, 0.82);
+  --hz-surface-glass-strong: rgba(255, 255, 255, 0.88);
+  --hz-surface-soft: #f3f7f3;       /* 分组底、空状态 */
+
+  /* ---- 墨色层级 ---- */
+  --hz-ink: #21372c;                /* 标题、关键数字 */
+  --hz-ink-soft: #45604f;           /* 次级正文 */
+  --hz-muted: #7d9085;              /* 说明、时间 */
+  --hz-faint: #a8b6ad;              /* 最弱提示 */
+
+  /* ---- 主色：晨雾绿 ---- */
   --hz-green-deep: #173f30;
   --hz-green: #2f6b4d;
+  --hz-green-bright: #48a377;
   --hz-green-soft: #e7f0e9;
+  --hz-green-glass: rgba(231, 240, 233, 0.72);
+
+  /* ---- 功能色（低饱和，同一明度带） ---- */
+  --hz-sky: #6a98ac;
   --hz-sky-soft: #e9f1f4;
-  --hz-warm-soft: #f8f0df;
-  --hz-rule: #e2e8e1;
-  --hz-radius-card: 22rpx;
-  --hz-radius-control: 16rpx;
-  --hz-shadow-card: 0 10rpx 28rpx rgba(32, 55, 42, 0.07);
-  --hz-shadow-float: 0 18rpx 42rpx rgba(24, 52, 37, 0.14);
+  --hz-blush: #c77986;
+  --hz-blush-soft: #f9edef;
+  --hz-amber: #c78a3b;
+  --hz-amber-soft: #f8f0df;
+
+  /* ---- 材质 ---- */
+  --hz-rule: #e5ece6;
+  --hz-rule-glass: rgba(229, 236, 230, 0.9);
+  --hz-blur: blur(18px) saturate(1.5);
+  --hz-radius-card: 24rpx;
+  --hz-radius-control: 18rpx;
+  --hz-shadow-card: 0 10rpx 30rpx rgba(29, 55, 41, 0.07);
+  --hz-shadow-float: 0 18rpx 44rpx rgba(24, 52, 37, 0.14);
+  --hz-highlight: inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+
+  /* ---- 布局 ---- */
+  --hz-tabbar-height: 108rpx;
+  --hz-gutter: 28rpx;
+
+  background: var(--hz-bg);
+  color: var(--hz-ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  font-size: 28rpx;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* 晨雾画布：三团柔光（右上晨绿 / 左侧天蓝 / 底部暖阳）铺底，
+   玻璃卡片经由 backdrop-filter 把它磨砂透出 —— 全部页面共享的氛围层 */
 page,
 body {
-  background: var(--hz-bg) !important;
+  background:
+    radial-gradient(900rpx 620rpx at 88% -60rpx, rgba(125, 178, 148, 0.16), transparent 68%),
+    radial-gradient(820rpx 600rpx at -8% 24%, rgba(140, 176, 196, 0.12), transparent 70%),
+    radial-gradient(1000rpx 700rpx at 50% 108%, rgba(246, 224, 194, 0.15), transparent 72%),
+    var(--hz-bg) !important;
   color: var(--hz-ink) !important;
 }
 
-/* Shared mobile gutters. Narrow devices keep the same rhythm without overflow. */
+/* 页面画布统一：呼吸感 gutter + 窄屏降级 + 安全区。
+   根容器透明 —— 氛围画布由 page 元素承担，玻璃卡片才能透出柔光 */
 .page {
   box-sizing: border-box !important;
   min-width: 0 !important;
-  overflow-x: hidden !important;
+  overflow-x: hidden; /* 旧内核回退 */
+  overflow-x: clip !important; /* 不创建滚动容器，sticky 顶栏才能常驻 */
+  color: var(--hz-ink) !important;
+  background: transparent !important;
 }
 
-@media (max-width: 360px) {
-  .page { padding-right: 24rpx !important; padding-left: 24rpx !important; }
+.home-page,
+.records-page,
+.food-search-page,
+.food-summary-page,
+.food-recognition-page,
+.food-detail-page,
+.food-detail-catalog-page,
+.bootstrap-page,
+.onboarding-container,
+.weight-page,
+.activity-page,
+.sleep-page,
+.mood-page,
+.fasting-page,
+.water-page,
+.period-page,
+.period-setup-page,
+.medication-page {
+  background: transparent !important;
 }
 
-@media (min-width: 700px) {
-  .page { padding-right: 48rpx !important; padding-left: 48rpx !important; }
-}
-
-/* Native-feeling navigation with a single translucent layer. */
-.nav-bar-wrapper {
-  background: rgba(255, 255, 255, 0.82) !important;
-  border-bottom: 1rpx solid rgba(226, 232, 225, 0.9) !important;
-  box-shadow: 0 4rpx 16rpx rgba(32, 55, 42, 0.04) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-  backdrop-filter: blur(18px) !important;
-}
-
-.nav-bar-wrapper .status-bar { background: rgba(255, 253, 249, 0.9) !important; }
-.nav-bar-wrapper .icon-action {
-  border-color: #dbe7dc !important;
-  background: rgba(255, 255, 255, 0.76) !important;
-  box-shadow: 0 4rpx 12rpx rgba(32, 55, 42, 0.06) !important;
-}
-.nav-bar-wrapper .title { color: var(--hz-ink) !important; font-size: 30rpx !important; font-weight: 650 !important; }
-
-/* Bottom navigation stays bright and quiet; only the active item gets tint. */
-.mini-tabbar {
-  background: rgba(255, 255, 255, 0.86) !important;
-  border-top: 1rpx solid rgba(226, 232, 225, 0.94) !important;
-  box-shadow: 0 -8rpx 24rpx rgba(32, 55, 42, 0.07) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-  backdrop-filter: blur(18px) !important;
-}
-.mini-tabbar .tab { color: #829188 !important; border-radius: 18rpx !important; }
-.mini-tabbar .tab.active:not(.tab--xuxu) {
-  color: var(--hz-green) !important;
-  background: rgba(231, 240, 233, 0.76) !important;
-}
-.mini-tabbar .tab-icon { width: 42rpx !important; height: 42rpx !important; }
-
-/* Shared surfaces. Specific feature colors should remain on artwork and metrics. */
-.page > .card,
-.page > .hero,
-.page > .summary-card,
-.page > .meal-card,
-.page > .plan-card,
-.page > .review,
-.page > .content-card {
-  border-color: var(--hz-rule) !important;
+/* =========================================================
+ * 玻璃卡片基元：所有 .card / .hero / 面板共用的材质
+ * ========================================================= */
+.page .card,
+.page .weight-card,
+.page .calorie-card,
+.page .record-card,
+.page .grid-item,
+.page .fasting-card,
+.page .period-card,
+.page .medication-card,
+.page .summary-card,
+.page .meal-card,
+.page .plan-card,
+.page .section.card,
+.page .history-card,
+.page .trend-card {
+  border: 1rpx solid var(--hz-rule-glass) !important;
   border-radius: var(--hz-radius-card) !important;
-  background: var(--hz-surface) !important;
-  box-shadow: var(--hz-shadow-card) !important;
+  background: #ffffff !important; /* 旧安卓 backdrop-filter 降级 */
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: var(--hz-highlight), var(--hz-shadow-card) !important;
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
 }
 
-/* Inputs and action controls share one rounded geometry across iOS and Android. */
+/* =========================================================
+ * 主按钮：晨雾绿玻璃，白高光顶部，按下轻微下潜
+ * ========================================================= */
 button.primary-action,
 button.primary-button,
 button.save,
 button.save-button,
 button.submit,
 button.record-button,
-button.recognize-btn {
-  min-height: 78rpx !important;
-  border: 1rpx solid rgba(159, 195, 173, 0.7) !important;
+button.recognize-btn,
+button.confirm-btn,
+button.wellness-save,
+button.mood-save,
+button.home-weight-save {
+  min-height: 80rpx !important;
+  border: 1rpx solid rgba(159, 195, 173, 0.55) !important;
   border-radius: var(--hz-radius-control) !important;
   color: #2f5f4a !important;
-  background: rgba(237, 247, 240, 0.9) !important;
-  box-shadow: 0 8rpx 18rpx rgba(47, 107, 77, 0.1) !important;
+  background: rgba(237, 247, 240, 0.82) !important;
+  box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(47, 107, 77, 0.12) !important;
+  font-size: 25rpx !important;
+  font-weight: 650 !important;
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+  transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
-
 button.primary-action:active,
 button.primary-button:active,
 button.save:active,
 button.save-button:active,
 button.submit:active,
 button.record-button:active,
-button.recognize-btn:active {
-  transform: scale(0.985) !important;
-  background: rgba(216, 232, 220, 0.98) !important;
+button.recognize-btn:active,
+button.confirm-btn:active,
+button.wellness-save:active,
+button.mood-save:active,
+button.home-weight-save:active {
+  background: rgba(216, 232, 220, 0.94) !important;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.75), 0 5rpx 14rpx rgba(47, 107, 77, 0.1) !important;
+  transform: scale(0.985);
 }
 
+/* 语义变体：只换色相，材质不变（喝水·蓝 / 经期·绯） */
+.water-page .record-btn,
+.water-page .confirm-btn,
+.water-page .setup-btn,
+.water-page .reset-btn {
+  border-color: rgba(151, 193, 203, 0.55) !important;
+  color: #3f7180 !important;
+  background: rgba(230, 246, 249, 0.82) !important;
+  box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(84, 143, 161, 0.13) !important;
+}
+.period-page .primary-button,
+.period-page .save-button,
+.period-setup-page .primary-button {
+  border-color: rgba(214, 171, 185, 0.55) !important;
+  color: #765565 !important;
+  background: rgba(252, 240, 244, 0.85) !important;
+  box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(177, 105, 126, 0.13) !important;
+}
+
+/* =========================================================
+ * 输入控件：统一的磨砂凹面
+ * ========================================================= */
 input,
 textarea,
 .input,
 .text-input,
+.note-input,
+.weight-input,
+.duration-input,
+.dream,
+.dream-input,
 .field,
-.duration-wrap,
-.input-wrap {
-  border-color: #dfe8df !important;
+.input-wrap,
+.duration-field {
+  border: 1rpx solid var(--hz-rule-glass) !important;
   border-radius: var(--hz-radius-control) !important;
   color: var(--hz-ink) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 0.86) !important;
 }
 
-/* Images never collapse on the mini-program renderer. */
-image { max-width: 100%; }
-.hero image,
-.banner image,
-.companion-banner image { max-width: 100%; }
+/* 选中态控件（chips/choices）：同一种柔光语言 */
+.tone-choice,
+.mood-choice,
+.quality,
+.activity-choice,
+.duration-choice,
+.type-tab,
+.choice,
+.mode-card,
+.record-filter,
+.range-tab,
+.view-tab {
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: var(--hz-radius-control) !important;
+  color: var(--hz-ink-soft) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 3rpx 10rpx rgba(44, 78, 57, 0.04) !important;
+}
+.tone-choice.selected,
+.mood-choice.selected,
+.quality.selected,
+.activity-choice.selected,
+.duration-choice.selected,
+.type-tab.active,
+.choice.selected,
+.mode-card.active,
+.record-filter.active,
+.range-tab.active,
+.view-tab.active {
+  border-color: rgba(125, 178, 148, 0.6) !important;
+  color: var(--hz-green) !important;
+  background: var(--hz-green-glass) !important;
+  box-shadow: var(--hz-highlight), 0 6rpx 16rpx rgba(70, 130, 96, 0.12) !important;
+  font-weight: 650 !important;
+}
 
-/* WXSS does not support the universal selector. Keep motion controls scoped
- * to project-owned elements so the generated app.wxss remains valid. */
+/* =========================================================
+ * 顶栏：磨砂玻璃浮层（内容从其下滑过）
+ * ========================================================= */
+.nav-bar-wrapper,
+.page.sleep-page.page .nav,
+.page.activity-page.page .nav,
+.page.mood-page.page .nav,
+.page.fasting-page .nav {
+  background: rgba(255, 253, 249, 0.86) !important;
+  border-bottom: 1rpx solid rgba(229, 236, 230, 0.9) !important;
+  box-shadow: 0 4rpx 18rpx rgba(29, 55, 41, 0.04) !important;
+  -webkit-backdrop-filter: var(--hz-blur) !important;
+  backdrop-filter: var(--hz-blur) !important;
+}
+.nav-bar-wrapper .title {
+  color: var(--hz-ink) !important;
+  font-size: 30rpx !important;
+  font-weight: 650 !important;
+}
+.nav-bar-wrapper .icon-action {
+  border-color: var(--hz-rule-glass) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05) !important;
+}
+
+/* =========================================================
+ * 底部导航：整块磨砂玻璃
+ * ========================================================= */
+.mini-tabbar {
+  border-top: 1rpx solid rgba(255, 255, 255, 0.65) !important;
+  background: rgba(255, 253, 249, 0.88) !important;
+  box-shadow: 0 -10rpx 30rpx rgba(29, 55, 41, 0.08), inset 0 1rpx 0 rgba(255, 255, 255, 0.9) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.5) !important;
+  backdrop-filter: blur(18px) saturate(1.5) !important;
+}
+.mini-tabbar .tab { color: #8b9a90 !important; }
+.mini-tabbar .tab.active:not(.tab--xuxu) {
+  color: var(--hz-green) !important;
+  font-weight: 650 !important;
+  background: transparent !important;
+}
+
+/* =========================================================
+ * 弹层与浮出面板：更实的磨砂
+ * ========================================================= */
+.wellness-sheet,
+.weight-record-sheet,
+.dialog,
+.dialog-content,
+.settings-sheet,
+.wellness-scrim {
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+}
+.wellness-sheet,
+.weight-record-sheet,
+.dialog,
+.dialog-content,
+.settings-sheet {
+  border: 1rpx solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 30rpx 30rpx 0 0 !important;
+  background: rgba(255, 253, 249, 0.94) !important;
+  box-shadow: 0 -14rpx 44rpx rgba(24, 52, 37, 0.16) !important;
+}
+
+/* =========================================================
+ * 排版层级：让数字与标题真正"立"起来
+ * ========================================================= */
+.page .card-title,
+.page .grid-title,
+.page .section-title {
+  color: var(--hz-ink) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+.page .weight-col .num,
+.page .grid-num,
+.page .big-number .number,
+.page .value,
+.page .hero-number,
+.page .metric-value,
+.page .stat-value {
+  color: var(--hz-green) !important;
+  font-weight: 700 !important;
+}
+.page .weight-col .label,
+.page .stat-label,
+.page .hint-text,
+.page .value-unit,
+.page .grid-unit,
+.page .grid-hint,
+.page .meal-summary,
+.page .fasting-summary,
+.page .period-hint,
+.page .medication-hint,
+.page .time-text,
+.page .section-subtitle,
+.page .caption,
+.page .date {
+  color: var(--hz-muted) !important;
+}
+
+/* 水彩插画：以原始色彩融入玻璃表面 */
+.page .grid-icon,
+.page .fasting-icon-img,
+.page .period-icon-img,
+.page .medication-icon-img,
+.page .chart-icon,
+.page .hero-art,
+.page .art-stage image,
+.page .empty-illustration {
+  opacity: 1 !important;
+  mix-blend-mode: multiply !important;
+}
+
+/* 序序相机入口：与画布同源的青瓷玻璃条，插画收进白色玻璃圆角砖。
+   插画必须在右侧有限可视区内，不得铺满或撑高卡片。 */
+.page .xuxu-camera-card,
+.home-page .xuxu-camera-card {
+  position: relative;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 132rpx !important;
+  max-height: 168rpx !important;
+  padding: 16rpx 20rpx 16rpx 26rpx !important;
+  overflow: hidden !important;
+  border: 1rpx solid rgba(159, 195, 173, 0.55) !important;
+  border-radius: var(--hz-radius-card) !important;
+  background: linear-gradient(120deg, rgba(231, 240, 233, 0.92) 0%, rgba(233, 241, 244, 0.78) 100%) !important;
+  box-shadow: var(--hz-highlight), 0 12rpx 26rpx rgba(47, 107, 77, 0.1) !important;
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+}
+.page .xuxu-camera-card .camera-copy,
+.home-page .xuxu-camera-card .camera-copy {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+.page .xuxu-camera-card .camera-title,
+.home-page .xuxu-camera-card .camera-title {
+  color: var(--hz-green-deep) !important;
+  font-weight: 700 !important;
+}
+.page .xuxu-camera-card .camera-subtitle,
+.home-page .xuxu-camera-card .camera-subtitle {
+  color: var(--hz-muted) !important;
+}
+.page .xuxu-camera-card .camera-decoration,
+.home-page .xuxu-camera-card .camera-decoration {
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 190rpx !important;
+  height: 132rpx !important;
+  margin: 0 0 0 10rpx !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  mix-blend-mode: multiply !important;
+}
+.page .xuxu-camera-card:active,
+.home-page .xuxu-camera-card:active {
+  background: linear-gradient(120deg, rgba(216, 232, 220, 0.95) 0%, rgba(223, 236, 240, 0.85) 100%) !important;
+  transform: scale(0.988);
+}
+
+/* 功能色标签（mode-tag 等）：低饱和胶囊 */
+.mode-tag,
+.week-badge,
+.status-chip {
+  border-radius: 999rpx !important;
+  background: var(--hz-green-soft) !important;
+  color: var(--hz-green) !important;
+  font-weight: 600 !important;
+}
+.mode-tag.blue { background: var(--hz-sky-soft) !important; color: #567f90 !important; }
+
+/* =========================================================
+ * 自适应：窄屏（安卓小屏/iPhone SE）与宽屏
+ * ========================================================= */
+@media (max-width: 360px) {
+  page {
+    --hz-gutter: 24rpx;
+  }
+  .page { padding-right: 24rpx !important; padding-left: 24rpx !important; }
+}
+@media (min-width: 700px) {
+  .page { padding-right: 48rpx !important; padding-left: 48rpx !important; }
+}
+
+/* 图片不塌陷 */
+image { max-width: 100%; }
+
+/* WXSS 不支持通配选择器：动效降级只作用于项目自有元素 */
 @media (prefers-reduced-motion: reduce) {
   page .page,
   page .page::before,
@@ -147,4 +462,229 @@ image { max-width: 100%; }
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* =========================================================
+ * 详情页统一（体重/运动/睡眠/心情/轻断食/生理期/用药/食物）
+ * 表面全部收进玻璃语言：卡、hero、日历、时间线、统计砖、行卡。
+ * 功能色只留在插画与关键数值上。
+ * ========================================================= */
+
+/* ---- hero 区：插画通栏 + 文案玻璃芯片 ---- */
+.page .hero-art,
+.page .art-stage image,
+.page .hero-visual image,
+.page .hero-image {
+  mix-blend-mode: multiply !important;
+  opacity: 1 !important;
+}
+.page .hero-wash {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 253, 249, 0.55) 0%,
+    rgba(255, 253, 249, 0.2) 45%,
+    rgba(255, 253, 249, 0) 78%
+  ) !important;
+}
+.weight-page .hero-copy {
+  padding: 18rpx 20rpx !important;
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: var(--hz-radius-control) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: var(--hz-highlight), 0 8rpx 22rpx rgba(29, 55, 41, 0.08) !important;
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+}
+
+/* ---- 统计砖：三格数据用软玻璃 ---- */
+.page .stat,
+.water-page .goal-card .stat,
+.page .stats-row .stat {
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: var(--hz-radius-control) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: var(--hz-highlight), 0 5rpx 14rpx rgba(29, 55, 41, 0.04) !important;
+}
+
+/* ---- 历史行：整条玻璃带 + 发丝分隔 ---- */
+.page .history-row,
+.page .history-item,
+.page .record-item {
+  border-bottom: 1rpx solid var(--hz-rule-glass) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.page .history-row:last-child,
+.page .history-item:last-child,
+.page .record-item:last-child {
+  border-bottom: 0 !important;
+}
+
+/* ---- 小圆钮：月切换 / 日期箭头 / 幽灵按钮 ---- */
+.page .month-button,
+.page .day-arrow,
+.page .date-arrow,
+.page .ghost-button,
+.page .small-action,
+.page .text-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: 50% !important;
+  color: var(--hz-green) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05) !important;
+}
+
+/* ---- 打勾圈：完成态用品牌绿渐变 ---- */
+.page .check {
+  border: 1rpx solid rgba(159, 195, 173, 0.7) !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+.page .check.checked {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #6cae8c 0%, #4c9573 100%) !important;
+  box-shadow: 0 6rpx 14rpx rgba(47, 107, 77, 0.28) !important;
+}
+
+/* ---- 进度条：晨绿渐变 ---- */
+.page .progress-track {
+  background: var(--hz-rule-light) !important;
+  border-radius: 999rpx !important;
+}
+.page .progress-fill {
+  background: linear-gradient(90deg, #7db294 0%, var(--hz-green-bright) 100%) !important;
+  border-radius: 999rpx !important;
+}
+
+/* ---- 日期胶囊（生理期等）：选中晨绿 ---- */
+.page .date-pill,
+.page .range-tab,
+.page .view-tab {
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: 999rpx !important;
+  color: var(--hz-ink-soft) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+}
+.page .date-pill.active {
+  border-color: rgba(125, 178, 148, 0.6) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #6cae8c 0%, #4c9573 100%) !important;
+  box-shadow: 0 8rpx 18rpx rgba(47, 107, 77, 0.25) !important;
+}
+
+/* ---- 详情页专属表面补全（类名为各详情页实际使用的） ---- */
+.page .section,
+.fasting-page .calendar,
+.fasting-page .settings-card,
+.fasting-page .tips-card,
+.fasting-page .schedule-card,
+.medication-page .companion-banner,
+.medication-page .summary-line,
+.medication-page .med-row,
+.period-page .calendar-card,
+.period-page .symptom-card,
+.period-page .cycle-editor,
+.records-page .welcome-strip,
+.records-page .food-entry,
+.records-page .form-section,
+.water-page .quick-section,
+.water-page .history-section,
+.water-page .card {
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: var(--hz-radius-card) !important;
+  background: #ffffff !important; /* 旧安卓降级 */
+  background: var(--hz-surface-glass) !important;
+  box-shadow: var(--hz-highlight), var(--hz-shadow-card) !important;
+  -webkit-backdrop-filter: var(--hz-blur);
+  backdrop-filter: var(--hz-blur);
+}
+
+/* 用药时间线：行间发丝线，完成态淡化 */
+.medication-page .med-row { border-bottom: 1rpx solid var(--hz-rule-glass) !important; }
+.medication-page .med-row:last-child { border-bottom: 0 !important; }
+
+/* section 内边距统一（部分页 scoped 没给 padding） */
+.page .section { padding: 26rpx 26rpx 28rpx !important; }
+
+/* =========================================================
+ * 详情页固定顶栏（参考微信原生/薄荷健康）：
+ * 吸顶常驻 + 状态栏安全区 + 返回箭头始终可见 + 毛玻璃底
+ * ========================================================= */
+.page .nav {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 200 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16rpx;
+  min-height: 88rpx !important;
+  margin: 0 calc(var(--hz-gutter) * -1) 20rpx !important;
+  padding: calc(env(safe-area-inset-top) + 20rpx) 28rpx 16rpx !important;
+  border-bottom: 1rpx solid rgba(229, 236, 230, 0.9) !important;
+  background: rgba(255, 253, 249, 0.88) !important;
+  box-shadow: 0 6rpx 18rpx rgba(29, 55, 41, 0.04) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.5) !important;
+  backdrop-filter: blur(18px) saturate(1.5) !important;
+}
+.page .nav .title {
+  display: block !important;
+  text-align: center !important;
+  color: var(--hz-ink) !important;
+  font-size: 32rpx !important;
+  font-weight: 700 !important;
+}
+.page .nav .date {
+  display: block !important;
+  margin-top: 4rpx !important;
+  text-align: center !important;
+  color: var(--hz-muted) !important;
+  font-size: 18rpx !important;
+}
+/* 返回箭头：圆形玻璃钮，覆盖各页 scoped 的旧样式，保证始终可点可见 */
+.page .nav .back,
+.page .nav .icon-button.back {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 64rpx !important;
+  height: 64rpx !important;
+  flex: none !important;
+  padding: 0 !important;
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: 50% !important;
+  color: var(--hz-green) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.06), inset 0 1rpx 0 rgba(255, 255, 255, 0.9) !important;
+  font-size: inherit !important;
+  line-height: 1 !important;
+}
+.page .nav .back image {
+  width: 30rpx !important;
+  height: 30rpx !important;
+}
+.page .nav .nav-space { width: 64rpx !important; height: 64rpx !important; flex: none !important; }
+
+/* ---- 章节标题：品牌绿装饰条，建立扫描层级（不只是卡片堆叠） ---- */
+.page .section-title {
+  position: relative !important;
+  padding-left: 24rpx !important;
+  color: var(--hz-ink) !important;
+  font-size: 27rpx !important;
+  font-weight: 750 !important;
+  letter-spacing: 0 !important;
+}
+.page .section-title::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 2rpx !important;
+  top: 50% !important;
+  width: 8rpx !important;
+  height: 26rpx !important;
+  border-radius: 4rpx !important;
+  background: linear-gradient(180deg, #8fc6a6 0%, var(--hz-green) 100%) !important;
+  transform: translateY(-50%) !important;
 }

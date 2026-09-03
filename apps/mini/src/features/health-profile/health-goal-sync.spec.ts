@@ -31,6 +31,15 @@ describe('health goal synchronization', () => {
     expect(syncPrimaryHealthPlan('sleep')?.kind).toBe('sleep');
   });
 
+  it('persists a target weight when onboarding finishes with a weight goal', () => {
+    expect(syncPrimaryHealthPlan('weight_management', 56)?.healthTarget.targetWeightKg).toBe(56);
+  });
+
+  it('updates an existing matching plan when the target changes', () => {
+    syncPrimaryHealthPlan('weight_management', 56);
+    expect(syncPrimaryHealthPlan('weight_management', 54)?.healthTarget.targetWeightKg).toBe(54);
+  });
+
   it('keeps an existing matching target instead of erasing user settings', () => {
     saveLocalPlan({
       kind: 'weight',

@@ -1,6 +1,7 @@
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { calculateFoodNutrition, type FoodItem, type MealType } from './food.types.js';
 import type { MealEntry } from './food.summary.js';
+import type { UserFood } from './user-foods.types.js';
 import { GENERATED_LOCAL_FOOD_CATALOG } from './local-food-catalog.generated.js';
 
 export interface SearchFoodsOptions {
@@ -567,6 +568,25 @@ export function deleteMealEntry(recordId: string) {
   return createMiniApiClient()
     .delete(`/meal-entries/${encodeURIComponent(recordId)}`)
     .catch(() => removeLocalMealEntry(recordId));
+}
+
+export function userFoodToSearchItem(food: UserFood): FoodItem {
+  return {
+    id: food.id,
+    name: food.name,
+    brand: null,
+    category: { id: 'user-food', name: '我的食物', slug: 'user-food' },
+    nutrition: {
+      basisGrams: 100,
+      energyKcal: food.energyKcal,
+      proteinG: food.proteinG,
+      fatG: food.fatG,
+      carbohydrateG: food.carbohydrateG,
+      dietaryFiberG: null,
+      sodiumMg: null,
+    },
+    servings: [{ id: 'default', label: food.defaultServingLabel, grams: food.defaultServingGrams }],
+  };
 }
 
 const LOCAL_MEAL_PREFIX = 'heban.local.meal-entries.';

@@ -241,6 +241,22 @@
               </button>
             </view>
 
+            <view v-if="targetWeightVisible" class="target-weight-block">
+              <view class="target-weight-heading">
+                <view>
+                  <text class="target-weight-title">体重目标</text>
+                  <text class="target-weight-note">给自己一个温和、可追踪的方向</text>
+                </view>
+                <text class="target-weight-unit">kg</text>
+              </view>
+              <view class="target-weight-input-wrap">
+                <input v-model="form.targetWeightKg" class="target-weight-input" type="digit" placeholder="例如 56" />
+                <text class="target-weight-suffix">kg</text>
+              </view>
+              <text class="target-weight-hint">会和你的当前体重一起保存到体重管理方案，之后可以随时调整。</text>
+              <text v-if="!targetWeightValid" class="target-weight-error">请输入 30–250 kg 之间的目标体重</text>
+            </view>
+
             <!-- 档案预览 -->
             <view class="profile-preview">
               <text class="preview-title">档案预览</text>
@@ -259,6 +275,10 @@
               <view class="preview-row">
                 <text class="preview-label">健康目标</text>
                 <text class="preview-value">{{ selectedGoalsText }}</text>
+              </view>
+              <view v-if="targetWeightVisible" class="preview-row">
+                <text class="preview-label">体重目标</text>
+                <text class="preview-value">{{ form.targetWeightKg || '待填写' }} kg</text>
               </view>
             </view>
 
@@ -335,6 +355,15 @@ const age = computed(() => {
 
 const sexLabel = computed(() => sexOptions.find((s) => s.value === form.sex)?.label || '');
 
+const weightGoals = new Set(['weight_management', 'weight_maintenance', 'muscle_gain']);
+const targetWeightVisible = computed(() => form.goals.some((goal) => weightGoals.has(goal)));
+const targetWeightValid = computed(() => {
+  if (!targetWeightVisible.value) return true;
+  const target = Number(form.targetWeightKg);
+  const current = Number(form.weightKg);
+  return Number.isFinite(target) && target >= 30 && target <= 250 && Number.isFinite(current);
+});
+
 const bmiLabel = computed(() => {
   if (!bmiCategory.value) return '';
   const labels: Record<string, string> = {
@@ -374,7 +403,7 @@ const canProceed = computed(() => {
   if (step.value === 1) return !!form.sex;
   if (step.value === 2) return bmi.value !== null;
   if (step.value === 3) return !!form.birthDate;
-  if (step.value === 4) return form.goals.length > 0;
+  if (step.value === 4) return form.goals.length > 0 && targetWeightValid.value;
   return true;
 });
 
@@ -429,7 +458,8 @@ async function nextStep() {
         note: '建档初始体重',
       });
     }
-    syncPrimaryHealthPlan(primaryGoal);
+    const targetWeight = targetWeightVisible.value ? Number(form.targetWeightKg) : undefined;
+    syncPrimaryHealthPlan(primaryGoal, targetWeight);
     syncHabitPlansForGoals(form.goals);
 
     onboardingState.step.value = 5;
@@ -950,6 +980,24 @@ function confirmExit() {
 }
 
 /* 档案预览 */
+.target-weight-block {
+  margin: 8rpx 0 34rpx;
+  padding: 24rpx 26rpx 22rpx;
+  border: 1rpx solid #eadfd2;
+  border-radius: 24rpx;
+  background: #fffaf3;
+  box-shadow: 0 10rpx 24rpx rgba(137, 112, 76, 0.06);
+}
+.target-weight-heading { display:flex; align-items:flex-start; justify-content:space-between; }
+.target-weight-title { display:block; color:#64564b; font-size:27rpx; font-weight:700; }
+.target-weight-note { display:block; margin-top:6rpx; color:#a29489; font-size:19rpx; }
+.target-weight-unit { color:#ad9071; font-size:20rpx; letter-spacing:1rpx; }
+.target-weight-input-wrap { display:flex; align-items:center; height:78rpx; margin-top:18rpx; padding:0 20rpx; border:1rpx solid #e8d9c7; border-radius:16rpx; background:#fffdf9; }
+.target-weight-input { flex:1; height:76rpx; padding:0; color:#51463f; background:transparent; font-size:32rpx; font-weight:700; }
+.target-weight-suffix { color:#a98a6a; font-size:22rpx; font-weight:700; }
+.target-weight-hint { display:block; margin-top:12rpx; color:#a29489; font-size:18rpx; line-height:1.5; }
+.target-weight-error { display:block; margin-top:8rpx; color:#bb7a68; font-size:18rpx; }
+
 .profile-preview {
   padding: 32rpx 36rpx;
   border-radius: 24rpx;

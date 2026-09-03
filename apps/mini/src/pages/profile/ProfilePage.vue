@@ -22,7 +22,7 @@
 
       <view class="profile-summary">
         <view class="initial-avatar"
-          ><text>{{ initial }}</text></view
+          ><image src="/static/illustrations/default-user-avatar.png" mode="aspectFill" /></view
         >
         <view class="identity-copy">
           <text class="name">{{ profile.displayName || '健康管理者' }}</text>
@@ -136,7 +136,6 @@ const completion = computed(() => {
   ];
   return Math.round((fields.filter(Boolean).length / fields.length) * 100);
 });
-const initial = computed(() => profile.value?.displayName?.trim().slice(0, 1) || '我');
 const sexLabel = computed(() => (profile.value ? sexLabels[profile.value.sex] : '暂不说明'));
 const profileGoals = computed(() =>
   profile.value?.goals?.length
@@ -220,6 +219,12 @@ onShow(load);
   background: #edf5ea;
   font-size: 34rpx;
   font-weight: 700;
+}
+.initial-avatar image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .identity-copy {
   flex: 1;

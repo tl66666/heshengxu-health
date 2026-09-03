@@ -4,7 +4,7 @@ import { resolveMiniRuntime } from './runtime.js';
 describe('resolveMiniRuntime', () => {
   it('uses the local API and development identity by default', () => {
     expect(resolveMiniRuntime({})).toEqual({
-      apiBaseUrl: 'http://localhost:3000/api/v1',
+      apiBaseUrl: 'http://127.0.0.1:3000/api/v1',
       authorization: 'Bearer dev-mini-user',
     });
   });

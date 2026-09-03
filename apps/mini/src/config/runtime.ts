@@ -13,7 +13,7 @@ export function resolveMiniRuntime(environment: MiniRuntimeEnvironment): MiniRun
   }
 
   return {
-    apiBaseUrl: 'http://localhost:3000/api/v1',
+    apiBaseUrl: 'http://127.0.0.1:3000/api/v1',
     authorization: 'Bearer dev-mini-user',
   };
 }

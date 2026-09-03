@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page period-setup-page">
     <AppNavBar title="生理期" route="/pages/menstruation/MenstruationSetupPage" />
     <view class="setup-header">
       <view class="step-line"><text class="step-dot active">1</text><view class="step-rule" /><text class="step-dot">2</text></view>
@@ -19,7 +19,7 @@
     </view>
 
     <view class="quiet-note"><text>周期会因压力、睡眠和身体状态变化，预测只作为生活记录参考。</text></view>
-    <button class="primary-button" :disabled="!canSubmit" @tap="submit">保存并开始记录</button>
+    <button class="primary-button" @tap="submit">保存并开始记录</button>
   </view>
 </template>
 
@@ -30,15 +30,29 @@ import { saveCycleSettings } from '../../features/menstruation/menstruation.serv
 import { validateCycleSetup } from './menstruation-setup.js';
 
 const today = new Date().toISOString().slice(0, 10);
-const cycleLength = ref('');
-const periodLength = ref('');
+const cycleLength = ref('28');
+const periodLength = ref('5');
 const lastPeriodStart = ref('');
 const lastPeriodEnd = ref('');
 const errors = reactive<Record<string, string>>({});
 const input = computed(() => ({ cycleLength: cycleLength.value, periodLength: periodLength.value, lastPeriodStart: lastPeriodStart.value, lastPeriodEnd: lastPeriodEnd.value }));
 const canSubmit = computed(() => Object.keys(validateCycleSetup(input.value)).length === 0);
-function validate() { const next = validateCycleSetup(input.value); Object.keys(errors).forEach(key => delete errors[key]); Object.assign(errors, next); return !Object.keys(next).length; }
-function submit() { if (!validate()) return; saveCycleSettings({ cycleLength: Number(cycleLength.value), periodLength: Number(periodLength.value), lastPeriodStart: lastPeriodStart.value, lastPeriodEnd: lastPeriodEnd.value || undefined, updatedAt: new Date().toISOString() }); uni.showToast({ title: '已保存', icon: 'success' }); setTimeout(() => uni.redirectTo({ url: '/pages/menstruation/MenstruationDetailPage' }), 220); }
+function validate() {
+  const next = validateCycleSetup(input.value);
+  Object.keys(errors).forEach(key => delete errors[key]);
+  Object.assign(errors, next);
+  if (Object.keys(next).length) {
+    uni.showToast({ title: '请先补全周期信息', icon: 'none' });
+    return false;
+  }
+  return true;
+}
+function submit() {
+  if (!validate()) return;
+  saveCycleSettings({ cycleLength: Number(cycleLength.value), periodLength: Number(periodLength.value), lastPeriodStart: lastPeriodStart.value, lastPeriodEnd: lastPeriodEnd.value || undefined, updatedAt: new Date().toISOString() });
+  uni.showToast({ title: '已保存', icon: 'success', duration: 700 });
+  setTimeout(() => uni.redirectTo({ url: '/pages/menstruation/MenstruationDetailPage' }), 500);
+}
 </script>
 
 <style scoped>
@@ -71,4 +85,20 @@ function submit() { if (!validate()) return; saveCycleSettings({ cycleLength: Nu
 .primary-button { width: 100%; height: 82rpx; margin-top: 26rpx; border-radius: 40rpx; color: #fff; background: #e28da2; box-shadow: 0 10rpx 20rpx rgba(214, 123, 143, .2); font-size: 27rpx; line-height: 82rpx; }
 .primary-button[disabled] { opacity: .42; }
 @media (min-width: 700px) { .page { max-width: 760px; margin: 0 auto; } }
+</style>
+
+<style scoped>
+.period-setup-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.period-setup-page .step-dot.active { border-color: #83b4ad; background: #83b4ad; }
+.period-setup-page .step-rule { background: #dce8e0; }
+.period-setup-page .kicker { color: #76968c; }
+.period-setup-page .title { color: #5c5558; }
+.period-setup-page .subtitle { color: #9b918e; }
+.period-setup-page .paper { border-color: rgba(255,255,255,.92); border-radius: 24rpx; background: rgba(255,253,249,.9); box-shadow: 0 14rpx 30rpx rgba(126,104,94,.07); }
+.period-setup-page .field-full { border-top-color: #eee5df; }
+.period-setup-page .input-line { border-bottom-color: #d7e4dd; }
+.period-setup-page .date-line { border-color: #e6ddd6; background: #fffdf9; }
+.period-setup-page .chevron { color: #7d9b91; }
+.period-setup-page .quiet-note { color: #9b918e; }
+.period-setup-page .primary-button { border-radius: 24rpx; background: #83b4ad !important; box-shadow: 0 10rpx 20rpx rgba(93,145,137,.16) !important; }
 </style>

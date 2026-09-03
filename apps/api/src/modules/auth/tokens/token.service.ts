@@ -1,6 +1,6 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../../common/database/prisma.service.js';
+import { PrismaService } from '../../../common/database/prisma.service.js';
 
 type AccessPayload = { sub: string; sid: string; exp: number; typ: 'access' };
 

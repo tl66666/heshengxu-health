@@ -1,6 +1,6 @@
 <template>
   <view class="food-detail-page">
-    <AppNavBar title="饮食记录" />
+    <AppNavBar title="饮食记录" route="/pages/food/FoodDetailPage" />
     
     <!-- 今日热量统计 -->
     <view class="calorie-summary">

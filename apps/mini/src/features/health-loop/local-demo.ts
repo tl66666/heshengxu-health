@@ -83,6 +83,40 @@ export function clearLocalPlan() {
 export function resetLocalDemoData() {
   uni.removeStorageSync(PROFILE_KEY);
   uni.removeStorageSync(PLAN_KEY);
+  const exactKeys = [
+    'heban.health.records.v1',
+    'heban-weight-records',
+    'heban.local.fasting.v1',
+    'heban.local.wellness-journal.v1',
+    'heban.local.wellness-journal.v2',
+    'heban_medication_reminders',
+    'heban_medication_checkins',
+    'heban_menstruation_cycle',
+    'heban_menstruation_daily',
+    'water_daily_goal',
+    'water_daily_goal_custom',
+    'water_user_info',
+    'searchHistory',
+    'pendingFoodSelection',
+    'heban.food.daily-target-kcal',
+    'heban_home_card_visibility',
+  ];
+  exactKeys.forEach((key) => uni.removeStorageSync(key));
+
+  // Clear date-scoped records and per-user guest plans without touching the heban.auth.* namespace.
+  try {
+    const keys = uni.getStorageInfoSync?.().keys || [];
+    keys
+      .filter((key) =>
+        /^water_\d{4}_\d{1,2}_\d{1,2}$/.test(key) ||
+        key.startsWith('heshengxu.daily-home.') ||
+        key.startsWith('heban.local.meal-entries.') ||
+        key.startsWith('heban.local.habit-plans.'),
+      )
+      .forEach((key) => uni.removeStorageSync(key));
+  } catch {
+    // Older runtimes may not expose storage metadata; exact keys above still clear core data.
+  }
 }
 
 export function completeLocalTask(taskId: string) {

@@ -13,10 +13,20 @@
         <text class="date-chip">{{ dateLabel }}</text>
         <text class="greeting">{{ greeting }}，{{ displayName }}</text>
       </view>
-      <button class="avatar-wrapper" @tap="toXuxu">
-        <image class="avatar" src="/static/illustrations/default-user-avatar.png" mode="aspectFill" />
-        <text class="avatar-hint">和序序聊聊</text>
-      </button>
+      <view class="header-right">
+        <view
+          v-if="bubbleTip"
+          :key="bubbleTip"
+          class="xuxu-bubble hz-rise"
+          aria-label="序序的健康小贴士"
+          @tap="toXuxu"
+        >
+          <text class="bubble-text">{{ bubbleTip }}</text>
+        </view>
+        <button class="avatar-wrapper" aria-label="和序序聊聊" @tap="toXuxu">
+          <image class="avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
+        </button>
+      </view>
     </view>
 
     <view v-if="loading" class="loading-state">
@@ -50,11 +60,11 @@
               class="weight-arc-node"
               :style="{ left: `${weightArcNode.x}%`, top: `${weightArcNode.y}%` }"
             />
-          </view>
-          <view class="weight-progress-copy">
-            <text class="weight-progress-value">{{ weightProgressAmount }}</text>
-            <text class="weight-progress-label">{{ weightPlanHasTarget ? '已减去（kg）' : '设置目标后开始记录' }}</text>
-            <text class="weight-gap-label">{{ weightPlanHasTarget ? weightGapLabel : '记录目标后，这里会显示你的进度' }}</text>
+            <view class="weight-progress-copy">
+              <text class="weight-progress-value">{{ weightProgressAmount }}</text>
+              <text class="weight-progress-label">{{ weightPlanHasTarget ? '已减去（kg）' : '设置目标后开始记录' }}</text>
+              <text class="weight-gap-label">{{ weightPlanHasTarget ? weightGapLabel : '记录目标后，这里会显示你的进度' }}</text>
+            </view>
           </view>
           <view class="weight-row">
             <view class="weight-col">
@@ -364,6 +374,26 @@ import { loadHomeCardVisibility, type HomeCardId } from './home-card-settings.js
 import { navigateTo, navigateToXuxu } from '../../utils/router.js';
 import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remainingSeconds, type FastingPlan } from '../../features/fasting/fasting-store.js';
 import { loadWellnessJournal, saveMood, saveSleep, type MoodTone, type WellnessJournal } from '../../features/wellness/wellness-journal.js';
+import { loadUserProfile } from '../../features/user-profile/user-profile.js';
+
+// 序序小贴士：右上角气泡随机轮换的健康常识
+const healthTips = [
+  '饭后走一走，血糖更平稳',
+  '睡前三小时，放下手机',
+  '喝水小口多次，更解渴',
+  '久坐 1 小时，起身伸展 2 分钟',
+  '晒晒太阳，补充维生素 D',
+  '细嚼慢咽，饱腹感更准时',
+  '深呼吸 4 秒，给情绪降温',
+  '今晚试试 23 点前入睡',
+  '来一把深色蔬菜吧',
+  '晨起一杯温水，唤醒肠胃',
+] as const;
+const bubbleTip = ref('');
+function rotateBubble() {
+  const pool = healthTips.filter((tip) => tip !== bubbleTip.value);
+  bubbleTip.value = pool[Math.floor(Math.random() * pool.length)];
+}
 
 const { today, loading, error } = healthLoopState;
 
@@ -383,7 +413,7 @@ const dateLabel = computed(() => {
   return `${now.getMonth() + 1} 月 ${now.getDate()} 日 · 今天`;
 });
 
-const displayName = computed(() => today.value?.displayName || '朋友');
+const displayName = computed(() => loadUserProfile().displayName || today.value?.displayName || '新朋友');
 const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
 const cardVisibility = ref(loadHomeCardVisibility());
@@ -568,7 +598,7 @@ const weightArcNode = computed(() => {
 });
 const weightArcBackground = computed(() => {
   const angle = Math.max(0, Math.min(100, progress.value)) * 1.8;
-  return `conic-gradient(from 270deg, #48c88d 0deg ${angle}deg, #dfe5e1 ${angle}deg 180deg, transparent 180deg 360deg)`;
+  return `conic-gradient(from 270deg, #4f9d77 0deg ${angle}deg, #a8cdb8 ${Math.max(angle - 26, 0)}deg ${angle}deg, #e3ebe4 ${angle}deg 180deg, transparent 180deg 360deg)`;
 });
 function toggleWeightVisibility() {
   weightValuesHidden.value = !weightValuesHidden.value;
@@ -808,837 +838,440 @@ onShow(() => {
   loadPersonalSignals();
   startFastingTicker();
   wellnessJournal.value = loadWellnessJournal();
+  rotateBubble(); // 每次回到首页，序序随机说一句
 });
 onHide(stopFastingTicker);
 onUnmounted(stopFastingTicker);
 </script>
 
 <style scoped>
-/* 页面 - 治愈系背景 */
+/* ============================================================
+ * 首页 · 晨雾玻璃 v3
+ * 材质（卡片玻璃/按钮/插画混合模式）由全局 visual-system.css 提供；
+ * 这里只负责首页特有的布局与首屏信息层级。
+ * ============================================================ */
 .page {
   position: relative;
   min-height: 100vh;
-  padding: 28rpx 24rpx 160rpx;
-  background: linear-gradient(180deg, #f8fdf9 0%, #f5f8f6 100%);
-  overflow: hidden;
+  padding: 0 var(--hz-gutter) calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 42rpx);
+  background: transparent;
+  color: var(--hz-ink);
 }
 
-/* 背景装饰 */
+/* 角落叶影：极淡水彩氛围 */
 .bg-leaf {
   position: fixed;
   top: 0;
   right: 0;
   width: 360rpx;
   height: 360rpx;
-  opacity: 0.08;
+  opacity: 0.05;
   pointer-events: none;
   z-index: 0;
+  mix-blend-mode: multiply;
 }
 
-/* 顶部 */
-.header {
+/* ---------- 右上角：序序 + 健康小贴士气泡 ---------- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  flex: none;
+}
+.xuxu-bubble {
   position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 20rpx;
+  max-width: 236rpx;
+  padding: 13rpx 17rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.45);
+  border-radius: 18rpx 4rpx 18rpx 18rpx;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8rpx 20rpx rgba(29, 55, 41, 0.09), inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
 }
-
-.header-left {
-  flex: 1;
-}
-
-.date-chip {
-  display: inline-block;
-  padding: 6rpx 14rpx;
-  margin-bottom: 8rpx;
-  border-radius: 999rpx;
-  background: rgba(127, 204, 143, 0.12);
-  color: #5a9572;
-  font-size: 20rpx;
-  font-weight: 600;
-}
-
-.greeting {
-  display: block;
-  color: #2d6943;
-  font-size: 32rpx;
-  font-weight: 800;
-}
-
-.avatar-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-  padding: 0;
-  background: transparent;
-  border: 0;
-}
-
-.avatar {
-  width: 64rpx;
-  height: 64rpx;
-  border: 3rpx solid #7fcc8f;
-  border-radius: 50%;
-}
-
-.avatar-hint {
-  color: #76907d;
-  font-size: 18rpx;
-  font-weight: 600;
-}
-
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 200rpx 40rpx;
-  text-align: center;
-  min-height: 60vh;
-}
-
-.loading text {
-  color: #2d6943;
-  font-size: 32rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
-
-/* 通用卡片样式 */
-.card {
-  margin-bottom: 32rpx;
-  padding: 24rpx 28rpx;
-  border-radius: 32rpx;
+.xuxu-bubble::after {
+  content: '';
+  position: absolute;
+  right: -7rpx;
+  bottom: 15rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-right: 1rpx solid rgba(159, 195, 173, 0.45);
+  border-top: 1rpx solid rgba(159, 195, 173, 0.45);
+  border-radius: 0 4rpx 0 0;
   background: #ffffff;
-  box-shadow: 0 8rpx 24rpx rgba(127, 204, 143, 0.07);
-  border: 1rpx solid rgba(127, 204, 143, 0.08);
-  backdrop-filter: blur(20rpx);
+  transform: rotate(45deg);
+}
+.bubble-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--hz-ink-soft);
+  font-size: 19rpx;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.card-top {
+/* ---------- 首屏：体重管理方案（唯一核心数据块） ---------- */
+.weight-card {
+  padding: 28rpx 28rpx 24rpx;
+}
+.weight-card-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16rpx;
-}
-
-.card-title {
-  color: #2d6943;
-  font-size: 26rpx;
-  font-weight: 800;
-}
-
-/* 1. 体重卡片 */
-.weight-card {
-  position: relative;
-  overflow: hidden;
-  padding: 20rpx 24rpx 16rpx;
+  gap: 12rpx;
 }
 .week-badge {
-  color: #76907d;
-  font-size: 20rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  background: var(--hz-green-soft);
+  color: var(--hz-green);
+  font-size: 18rpx;
+  font-weight: 650;
+}
+.weight-visibility {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58rpx;
+  height: 42rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.7);
+}
+.weight-visibility image {
+  width: 25rpx;
+  height: 25rpx;
+  opacity: 0.72;
+}
+
+/* 半圆进度：安静的晨绿 */
+.weight-visual {
+  min-height: 270rpx;
+  padding-top: 0;
+}
+.weight-arc-stage {
+  position: relative;
+  width: 520rpx;
+  max-width: 100%;
+  height: 250rpx;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.weight-arc-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 520rpx;
+  border-radius: 50%;
+  background: #dfe5e1;
+}
+/* 内圆挖空：把实心圆变成等宽圆环，只露出上半段弧 */
+.weight-arc-ring::after {
+  content: '';
+  position: absolute;
+  inset: 26rpx;
+  border-radius: 50%;
+  background: #ffffff;
+}
+.weight-arc-node {
+  position: absolute;
+  z-index: 2;
+  width: 34rpx;
+  height: 34rpx;
+  margin-left: -17rpx;
+  margin-top: -17rpx;
+  border: 6rpx solid #ffffff;
+  border-radius: 50%;
+  background: var(--hz-green-bright);
+  box-shadow: 0 0 0 3rpx rgba(255, 255, 255, 0.72), 0 5rpx 14rpx rgba(72, 163, 119, 0.28);
+}
+.weight-progress-copy {
+  position: absolute;
+  top: 46%;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  transform: translateY(-42%);
+  pointer-events: none;
+}
+.weight-progress-value {
+  color: var(--hz-ink);
+  font-size: 44rpx;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.weight-progress-label {
+  margin-top: 8rpx;
+  color: var(--hz-muted);
+  font-size: 22rpx;
   font-weight: 600;
 }
-
-.weight-visual {
-  position: relative;
+.weight-gap-label {
+  margin-top: 8rpx;
+  color: var(--hz-faint);
+  font-size: 21rpx;
+  font-weight: 500;
 }
-
-.semicircle-svg {
-  width: 160rpx;
-  height: 85rpx;
-  margin: 0 auto;
-  display: block;
-}
-
 .weight-row {
   display: flex;
   justify-content: space-around;
   margin-top: 12rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid var(--hz-rule-glass);
 }
-
 .weight-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4rpx;
 }
-
 .weight-col .num {
-  color: #5a9572;
+  color: var(--hz-muted);
   font-size: 30rpx;
-  font-weight: 900;
-  line-height: 1;
+  font-weight: 700;
 }
-
 .weight-col.main .num {
-  color: #2d6943;
-  font-size: 36rpx;
+  color: var(--hz-green);
+  font-size: 38rpx;
+  font-weight: 800;
 }
-
 .weight-col .label {
-  color: #9ba8a0;
-  font-size: 18rpx;
+  color: var(--hz-faint);
+  font-size: 20rpx;
 }
 
-/* 2. 饮食热量卡片 - 紧凑 */
+/* ---------- 饮食记录卡片 ---------- */
 .calorie-card {
-  padding: 20rpx 24rpx;
+  padding: 28rpx;
 }
-
-.mode-tag {
-  padding: 4rpx 12rpx;
-  border-radius: 999rpx;
-  background: rgba(127, 204, 143, 0.12);
-  color: #5a9572;
-  font-size: 18rpx;
-  font-weight: 700;
-}
-
-.mode-tag.blue {
-  background: rgba(100, 149, 237, 0.12);
-  color: #5a8fd6;
-}
-
 .calorie-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16rpx 0;
+  padding: 14rpx 0 10rpx;
+  text-align: center;
 }
-
 .hint-text {
-  color: #76907d;
+  color: var(--hz-muted);
   font-size: 20rpx;
-  margin-bottom: 8rpx;
 }
-
-.big-number {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
-}
-
 .big-number .number {
-  color: #2d6943;
-  font-size: 64rpx;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.big-number .unit {
-  color: #5a9572;
-  font-size: 24rpx;
+  color: var(--hz-ink);
+  font-size: 72rpx;
   font-weight: 700;
-  margin-bottom: 6rpx;
 }
-
+.big-number .unit {
+  color: var(--hz-green);
+  font-size: 24rpx;
+}
 .meal-summary {
-  margin-top: 10rpx;
-  color: #9a8b84;
+  color: var(--hz-muted);
   font-size: 20rpx;
 }
-
-.calorie-stats {
-  display: flex;
-  justify-content: center;
-  gap: 24rpx;
-  padding: 14rpx 0;
+.camera-slot {
+  margin-top: 12rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid var(--hz-rule-glass);
 }
-
-.stat {
+.xuxu-camera-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 12rpx;
-  background: rgba(232, 247, 237, 0.4);
+  min-height: 128rpx;
+  padding: 16rpx 18rpx 16rpx 26rpx;
 }
-
-.stat-num {
-  color: #2d6943;
-  font-size: 28rpx;
-  font-weight: 900;
+.xuxu-camera-card .camera-copy {
+  flex: 1;
+  min-width: 0;
 }
-
-.stat-label {
-  color: #9ba8a0;
-  font-size: 18rpx;
+.camera-title {
+  color: #62585c;
+  font-size: 29rpx;
+  font-weight: 700;
 }
-
+.camera-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  color: #9b8d88;
+  font-size: 19rpx;
+}
+.camera-decoration {
+  flex: none;
+  width: 190rpx;
+  height: 132rpx;
+  margin-left: 10rpx;
+  mix-blend-mode: multiply;
+}
+.camera-decoration image,
+image.camera-decoration {
+  max-width: 190rpx;
+  max-height: 132rpx;
+}
 .meal-progress {
   display: flex;
-  justify-content: center;
-  gap: 10rpx;
-  margin: 14rpx 18rpx 8rpx;
+  gap: 8rpx;
+  margin: 16rpx 6rpx 12rpx;
 }
-
 .meal-progress-segment {
   flex: 1;
   height: 8rpx;
-  border-radius: 999rpx;
-  background: #e8eee8;
-  transition: background 0.2s ease;
+  border-radius: 4rpx;
+  background: var(--hz-rule-light);
 }
-
 .meal-progress-segment.filled {
-  background: linear-gradient(90deg, #9ccfb0, #78b9a7);
+  background: linear-gradient(90deg, #7db294 0%, var(--hz-green-bright) 100%);
 }
-
 .meals {
   display: flex;
-  justify-content: space-around;
-  padding: 14rpx 0;
+  justify-content: space-between;
+  padding: 10rpx 4rpx 6rpx;
 }
-
 .meal-item {
   display: flex;
+  min-width: 112rpx;
+  min-height: 120rpx;
   flex-direction: column;
   align-items: center;
-  gap: 10rpx;
-  min-width: 112rpx;
-  padding: 0;
-  background: transparent;
-  border: 0;
+  justify-content: flex-start;
+  padding: 8rpx 4rpx 6rpx;
+  border-radius: 18rpx;
 }
-
-.meal-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.meal-item:active {
+  background: var(--hz-surface-soft);
+}
+.meal-icon {
   width: 76rpx;
   height: 76rpx;
-  border-radius: 50%;
-  background: rgba(255, 240, 243, 0.7);
-  box-shadow:
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.95),
-    0 6rpx 14rpx rgba(182, 109, 128, 0.08);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
 }
-
-.meal-icon {
-  width: 64rpx;
-  height: 64rpx;
+/* 四餐插画保持原色亮度：不叠加旧版的统一透明处理 */
+.meal-item:nth-child(1) .meal-icon,
+.meal-item:nth-child(2) .meal-icon,
+.meal-item:nth-child(3) .meal-icon,
+.meal-item:nth-child(4) .meal-icon {
+  opacity: 1;
+  animation: none;
 }
-
-.meal-item:active .meal-icon-wrap {
-  transform: translateY(2rpx) scale(0.96);
-  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
-}
-
+.camera-decoration { filter: none; }
 .meal-name {
-  color: #4a6b56;
+  margin-top: 6rpx;
+  color: var(--hz-ink-soft);
   font-size: 20rpx;
   font-weight: 600;
 }
 
-.meal-item:nth-child(2) .meal-icon-wrap {
-  animation: meal-breathe 4.8s ease-in-out 0.4s infinite;
+/* ---------- 体重记录卡片 ---------- */
+.record-card {
+  padding: 26rpx 28rpx;
 }
-
-.meal-item:nth-child(3) .meal-icon-wrap {
-  animation: meal-breathe 4.8s ease-in-out 0.8s infinite;
-}
-
-.meal-item:nth-child(4) .meal-icon-wrap {
-  animation: meal-breathe 4.8s ease-in-out 1.2s infinite;
-}
-
-@keyframes meal-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3rpx);
-  }
-}
-
-/* 序序相机卡片 */
-.xuxu-camera-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 148rpx;
-  gap: 16rpx;
-  padding: 24rpx 24rpx 24rpx 28rpx;
-  margin-top: 24rpx;
-  background: linear-gradient(135deg, rgba(255, 248, 236, 0.96) 0%, rgba(238, 248, 246, 0.94) 100%);
-  border: 1rpx solid rgba(255, 255, 255, 0.92);
-  box-shadow:
-    0 12rpx 28rpx rgba(147, 126, 108, 0.1),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.xuxu-camera-card:active {
-  transform: scale(0.98);
-  box-shadow:
-    0 6rpx 14rpx rgba(147, 126, 108, 0.08),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
-}
-
-.camera-copy {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10rpx;
-}
-
-.camera-decoration {
-  width: 188rpx;
-  height: 122rpx;
-  margin-right: -10rpx;
-  mix-blend-mode: multiply;
-  flex-shrink: 0;
-  opacity: 0.9;
-}
-
-.camera-title {
-  color: #526d68;
-  font-size: 30rpx;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
-.camera-subtitle {
-  color: #9a8b84;
-  font-size: 21rpx;
-  line-height: 1.3;
-}
-
-.camera-arrow {
-  position: relative;
-  z-index: 2;
-  margin-left: -8rpx;
-  color: #9ab4ae;
-  font-size: 42rpx;
-  font-weight: 300;
-  line-height: 1;
-}
-
-/* 3. 体重记录卡片 */
-.title-group {
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-}
-
-.time-text {
-  color: #9ba8a0;
-  font-size: 18rpx;
-}
-
 .record-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 124rpx;
 }
-
-.big-value {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
+.big-value .value {
+  color: var(--hz-green);
+  font-size: 56rpx;
+  font-weight: 700;
 }
-
-.value {
-  color: #2d6943;
-  font-size: 52rpx;
-  font-weight: 900;
-  line-height: 1;
-}
-
 .value-unit {
-  color: #76907d;
-  font-size: 22rpx;
-  font-weight: 600;
+  color: var(--hz-muted);
 }
-
-.mini-chart {
-  width: 140rpx;
-  height: 60rpx;
+.time-text {
+  color: var(--hz-faint);
+}
+.weight-add {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12rpx;
-  background: rgba(232, 247, 237, 0.3);
+  min-width: 76rpx;
+  height: 48rpx;
+  padding: 0 16rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.55);
+  border-radius: 999rpx;
+  color: var(--hz-green);
+  background: rgba(237, 247, 240, 0.82);
+  font-size: 20rpx;
+  font-weight: 650;
 }
-
-.chart-icon {
-  width: 112rpx;
-  height: 112rpx;
-  opacity: 1;
-  border-radius: 0;
-  mix-blend-mode: multiply;
-}
-.mini-trend-svg {
-  width: 132rpx;
-  height: 58rpx;
-  overflow: visible;
+.mini-chart {
+  width: 148rpx;
+  height: 110rpx;
 }
 .mini-trend-line {
   fill: none;
-  stroke: #74b58b;
-  stroke-width: 3;
+  stroke: var(--hz-green-bright);
+  stroke-width: 2;
   stroke-linecap: round;
-  stroke-linejoin: round;
 }
 .mini-trend-point {
-  fill: #fffdfb;
-  stroke: #74b58b;
-  stroke-width: 2.2;
+  fill: #fff;
+  stroke: var(--hz-green-bright);
+  stroke-width: 2;
+}
+.chart-icon {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 0;
 }
 
-/* 4. 健康追踪网格 */
-.grid-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
-  margin-bottom: 32rpx;
-}
-
-.grid-item {
-  position: relative;
-  padding: 24rpx;
-  min-height: 150rpx;
-  text-align: left;
-  border: 0;
-  overflow: hidden;
-  transition: transform 0.12s ease;
-}
-
-.grid-item:active {
-  transform: scale(0.97);
-}
-
-.grid-top {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 16rpx;
-}
-
-.grid-title {
-  color: #2d6943;
-  font-size: 26rpx;
-  font-weight: 700;
-}
-
-.grid-data {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
-  margin-bottom: 12rpx;
-  position: relative;
-  z-index: 2;
-}
-
-.grid-num {
-  color: #2d6943;
-  font-size: 48rpx;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.grid-unit {
-  color: #76907d;
-  font-size: 22rpx;
-  font-weight: 600;
-}
-
-.grid-hint {
-  color: #9aaca0;
-  font-size: 22rpx;
-  font-weight: 600;
-}
-
-.grid-art {
-  position: absolute;
-  bottom: -8rpx;
-  right: -8rpx;
-  width: 120rpx;
-  height: 120rpx;
-  opacity: 0.7;
-  pointer-events: none;
-  z-index: 1;
-  mix-blend-mode: multiply;
-}
-
-.grid-icon {
-  position: absolute;
-  bottom: 8rpx;
-  right: 8rpx;
-  width: 100rpx;
-  height: 100rpx;
-  opacity: 0.75;
-  pointer-events: none;
-  z-index: 1;
-  mix-blend-mode: multiply;
-  border-radius: 50%;
-}
-
-.grid-icon-img {
-  position: absolute;
-  bottom: 8rpx;
-  right: 8rpx;
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.6;
-  border-radius: 12rpx;
-}
-
-/* 5. 轻断食卡片 */
-.fasting-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.fasting-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10rpx;
-}
-
-.fasting-label {
-  color: #9ba8a0;
-  font-size: 20rpx;
-}
-
-.fasting-time {
-  color: #2d6943;
-  font-size: 44rpx;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.fasting-summary {
-  max-width: 70%;
-  color: #84978b;
-  font-size: 21rpx;
-  line-height: 1.45;
-}
-
-.fasting-icon {
-  position: absolute;
-  bottom: 12rpx;
-  right: 12rpx;
-  font-size: 64rpx;
-  opacity: 0.5;
-}
-
-.fasting-icon-img {
-  position: absolute;
-  bottom: 8rpx;
-  right: 8rpx;
-  width: 100rpx;
-  height: 100rpx;
-  opacity: 0.75;
-  border-radius: 50%;
-  mix-blend-mode: multiply;
-}
-
-/* 6. 经期记录卡片 */
-.period-card {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #fff5f8 0%, #ffffff 100%);
-}
-
-.period-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-}
-
-.period-hint {
-  color: #9ba8a0;
-  font-size: 20rpx;
-}
-
-.period-days {
-  color: #e06c9f;
-  font-size: 28rpx;
-  font-weight: 700;
-}
-
-.period-icon-img {
-  position: absolute;
-  bottom: 8rpx;
-  right: 8rpx;
-  width: 100rpx;
-  height: 100rpx;
-  opacity: 0.75;
-  border-radius: 50%;
-  mix-blend-mode: multiply;
-}
-
-/* 7. 用药打卡卡片 */
+/* ---------- 轻断食 / 经期 / 用药：同构行卡 ---------- */
+.fasting-card,
+.period-card,
 .medication-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  min-height: 168rpx;
+  margin-bottom: 18rpx;
+  padding: 24rpx 28rpx;
 }
-
+.fasting-content,
+.period-content,
 .medication-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-}
-
-.medication-hint {
-  color: #9ba8a0;
-  font-size: 20rpx;
-}
-
-.medication-list {
+  position: relative;
+  z-index: 1;
+  max-width: 66%;
   display: flex;
   flex-direction: column;
   gap: 8rpx;
 }
-
-.medication-item {
-  color: #6495ed;
-  font-size: 24rpx;
-  font-weight: 600;
+.fasting-label,
+.period-hint,
+.medication-hint {
+  color: var(--hz-muted);
+  font-size: 20rpx;
 }
-
-.medication-icon-img {
-  position: absolute;
-  bottom: 8rpx;
-  right: 8rpx;
-  width: 100rpx;
-  height: 100rpx;
-  opacity: 0.75;
-  border-radius: 50%;
-  mix-blend-mode: multiply;
-}
-
-/* 8. 编辑卡片 */
-.edit-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10rpx;
-  width: 100%;
-  padding: 32rpx;
-  margin-bottom: 16rpx;
-  border: 3rpx dashed #c8e6d0;
-  border-radius: 24rpx;
-  background: transparent;
-  z-index: 10;
-}
-
-.edit-card:active {
-  border-color: #7fcc8f;
-  background: rgba(232, 247, 237, 0.2);
-}
-
-.edit-icon {
-  font-size: 36rpx;
-  color: #7fcc8f;
-}
-
-.edit-text {
-  color: #5a9572;
-  font-size: 24rpx;
+.fasting-time {
+  color: var(--hz-green);
+  font-size: 40rpx;
   font-weight: 700;
 }
-
-/* 错误状态 */
-.error-state {
-  padding: 80rpx 24rpx;
-  text-align: center;
+.fasting-summary {
+  color: var(--hz-muted);
+  font-size: 20rpx;
 }
-
-.error-state text {
-  display: block;
-  color: #9ba8a0;
-  font-size: 24rpx;
-  margin-bottom: 12rpx;
-}
-
-.error-state button {
-  margin-top: 20rpx;
-  padding: 14rpx 28rpx;
-  border-radius: 999rpx;
-  background: rgba(127, 204, 143, 0.12);
-  color: #5a9572;
-  font-size: 24rpx;
-  font-weight: 700;
-}
-
-.home-empty-state {
-  display: flex;
-  min-height: 62vh;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 44rpx 48rpx 120rpx;
-  text-align: center;
-}
-
-.home-empty-art {
-  width: 300rpx;
-  height: 260rpx;
-  margin-bottom: 18rpx;
-  opacity: 0.92;
-}
-
-.home-empty-title {
-  color: #4f6258;
-  font-size: 34rpx;
-  font-weight: 750;
-}
-
-.home-empty-copy {
-  max-width: 520rpx;
-  margin-top: 12rpx;
-  color: #8b9790;
-  font-size: 23rpx;
-  line-height: 1.6;
-}
-
-.home-empty-action {
-  display: flex;
-  width: 260rpx;
-  height: 76rpx;
-  align-items: center;
-  justify-content: center;
-  margin-top: 28rpx;
-  border: 1rpx solid #cfe0d5;
-  border-radius: 20rpx;
-  background: #eaf4ec;
-  color: #5b756b;
+.period-days {
+  color: var(--hz-blush);
   font-size: 26rpx;
   font-weight: 700;
-  line-height: 1;
 }
-</style>
-<style scoped>
+.medication-item {
+  color: var(--hz-ink-soft);
+  font-size: 23rpx;
+  font-weight: 600;
+}
+.fasting-icon-img,
+.period-icon-img,
+.medication-icon-img {
+  position: absolute;
+  right: 20rpx;
+  bottom: 14rpx;
+  width: 116rpx;
+  height: 116rpx;
+  border-radius: 0;
+}
+
+/* ---------- 加载态 ---------- */
 .loading-state {
   position: relative;
   display: flex;
@@ -1646,21 +1279,21 @@ onUnmounted(stopFastingTicker);
   align-items: flex-end;
   justify-content: center;
   overflow: hidden;
-  margin: 0 -24rpx;
+  margin: 0 calc(var(--hz-gutter) * -1);
   border-radius: 0 0 32rpx 32rpx;
-  background: #eef6ef;
+  background: var(--hz-bg-tint);
 }
 .loading-art {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.82;
+  opacity: 0.85;
 }
 .loading-wash {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(244, 249, 244, 0.12) 26%, rgba(244, 249, 244, 0.94) 86%);
+  background: linear-gradient(180deg, rgba(244, 248, 244, 0.1) 26%, rgba(255, 253, 249, 0.96) 88%);
 }
 .loading-copy {
   position: relative;
@@ -1672,15 +1305,14 @@ onUnmounted(stopFastingTicker);
 }
 .loading-title {
   display: block;
-  color: #315b45;
+  color: var(--hz-ink);
   font-size: 34rpx;
   font-weight: 750;
-  letter-spacing: 0;
 }
 .loading-subtitle {
   display: block;
   margin-top: 12rpx;
-  color: #76917f;
+  color: var(--hz-muted);
   font-size: 21rpx;
 }
 .loading-dots {
@@ -1693,7 +1325,7 @@ onUnmounted(stopFastingTicker);
   width: 12rpx;
   height: 12rpx;
   border-radius: 50%;
-  background: #79aa88;
+  background: var(--hz-green-bright);
   animation: loading-breathe 1.35s ease-in-out infinite;
 }
 .loading-dots view:nth-child(2) { animation-delay: 0.15s; }
@@ -1702,1654 +1334,298 @@ onUnmounted(stopFastingTicker);
   0%, 100% { transform: translateY(0); opacity: 0.42; }
   50% { transform: translateY(-7rpx); opacity: 1; }
 }
-.chart-icon {
-  width: 116rpx;
-  height: 116rpx;
-  opacity: 0.92;
-  mix-blend-mode: multiply;
-}
-</style>
-<style scoped>
-.wellness-scrim { position:fixed; inset:0; z-index:40; display:flex; align-items:flex-end; background:rgba(47,61,56,.46); }
-.wellness-sheet { width:100%; box-sizing:border-box; max-height:82vh; overflow:auto; padding:20rpx 30rpx calc(36rpx + env(safe-area-inset-bottom)); border-radius:34rpx 34rpx 0 0; background:#fffdf8; box-shadow:0 -14rpx 44rpx rgba(67,87,79,.2); }
-.sheet-handle { width:72rpx; height:8rpx; margin:0 auto 24rpx; border-radius:8rpx; background:#d5dfd9; }
-.wellness-head { display:flex; align-items:flex-start; justify-content:space-between; padding-top:2rpx; }.wellness-title { display:block; color:#3f5049; font-size:34rpx; font-weight:700; line-height:1.3; }.wellness-subtitle { display:block; margin-top:8rpx; color:#95a39d; font-size:21rpx; }.sheet-close { width:58rpx; height:58rpx; display:flex; align-items:center; justify-content:center; color:#8e9e98; border:0; background:transparent; font-size:40rpx; }
-.sleep-art { width:100%; height:184rpx; margin:16rpx 0 8rpx; border-radius:20rpx; object-fit:cover; object-position:center 58%; opacity:.96; }
-.field-label { display:block; margin:26rpx 0 12rpx; color:#73827c; font-size:21rpx; }.optional { margin-left:8rpx; color:#aeb8b2; font-size:18rpx; }
-.duration-field { display:flex; align-items:center; padding:0 18rpx; border:1rpx solid #e3ebe6; border-radius:16rpx; background:#fbfdf9; }.duration-field input { flex:1; height:78rpx; color:#41544c; font-size:28rpx; }.duration-field text { color:#94a39c; font-size:20rpx; }
-.tone-row { display:flex; gap:10rpx; }.tone-choice { flex:1; min-height:64rpx; display:flex; align-items:center; justify-content:center; padding:0 8rpx; border:1rpx solid #e2ebe5; border-radius:16rpx; color:#809089; background:#fff; font-size:20rpx; }.tone-choice.selected { color:#5d9b7d; border-color:#8ac8a7; background:#edf8f0; }
-.dream-input { width:100%; min-height:150rpx; box-sizing:border-box; padding:18rpx; border:1rpx solid #e3ebe6; border-radius:16rpx; color:#52645d; background:#fbfdf9; font-size:21rpx; line-height:1.5; }
-.wellness-save { width:100%; min-height:88rpx; display:flex; align-items:center; justify-content:center; margin-top:28rpx; border-radius:24rpx; color:#fff; background:#6bc49a; font-size:25rpx; font-weight:600; box-shadow:0 10rpx 22rpx rgba(95,186,143,.2); }.mood-save { background:#8498d1; box-shadow:0 10rpx 22rpx rgba(119,139,200,.18); }
-.mood-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12rpx; }.mood-choice { min-height:68rpx; display:flex; align-items:center; justify-content:center; gap:8rpx; border:1rpx solid #e2ebe5; border-radius:16rpx; color:#7d8c86; background:#fff; font-size:20rpx; }.mood-choice.selected { color:#6f85c2; border-color:#aebce6; background:#f3f5fe; }.mood-dot { width:14rpx; height:14rpx; border-radius:50%; background:#a9b8e7; }.mood-dot.bright { background:#f4c979; }.mood-dot.tired { background:#b9c3cb; }.mood-dot.low { background:#d99cab; }.mood-dot.anxious { background:#9ecdc1; }
-</style>
-<style scoped>
-/* Unified home surface: a quiet sage canvas with warm white content planes. */
-.page {
-  background: #f2f6f3;
-  color: #29453c;
-}
 
-.bg-leaf {
-  width: 320rpx;
-  height: 320rpx;
-  opacity: 0.035;
-}
-
-.header {
-  margin-bottom: 24rpx;
-}
-
-.date-chip {
-  padding: 6rpx 12rpx;
-  border-radius: 10rpx;
-  background: #e6f0ea;
-  color: #5b7d6f;
-  font-size: 19rpx;
-  letter-spacing: 0;
-}
-
-.greeting {
-  color: #25473a;
-  font-size: 34rpx;
-  letter-spacing: 0;
-}
-
-.avatar {
-  border-color: #d4e4db;
-}
-
-.avatar-hint {
-  color: #718b7f;
-}
-
-.card {
-  margin-bottom: 20rpx;
-  border: 1rpx solid #e0eae3;
-  border-radius: 24rpx;
-  background: #fffefa;
-  box-shadow: 0 10rpx 26rpx rgba(44, 73, 61, 0.055);
-  backdrop-filter: none;
-}
-
-.card-top {
-  margin-bottom: 18rpx;
-}
-
-.card-title {
-  color: #315547;
-  font-size: 27rpx;
-  font-weight: 750;
-  letter-spacing: 0;
-}
-
-.week-badge,
-.time-text {
-  color: #879b91;
-}
-
-.weight-card {
-  padding: 24rpx 26rpx 20rpx;
-  background: #fffefa;
-}
-
-.weight-col .num,
-.weight-col.main .num,
-.big-number .number,
-.value,
-.grid-num,
-.fasting-time {
-  color: #2f6b52;
-}
-
-.weight-col .label,
-.stat-label,
-.hint-text,
-.value-unit,
-.grid-unit,
-.fasting-label,
-.period-hint,
-.medication-hint {
-  color: #8a9d94;
-}
-
-.semicircle-svg .track {
-  stroke: #e4eee7;
-}
-
-.semicircle-svg .progress {
-  stroke: #77ad91;
-}
-
-.calorie-card {
-  padding: 24rpx 26rpx 22rpx;
-}
-
-.mode-tag,
-.mode-tag.blue {
-  background: #e8f1eb;
-  color: #5a806e;
-}
-
-.calorie-main {
-  padding: 14rpx 0 12rpx;
-}
-
-.big-number .number {
-  font-size: 66rpx;
-  letter-spacing: 0;
-}
-
-.big-number .unit {
-  color: #628675;
-}
-
-.meal-summary {
-  color: #8b9b92;
-}
-
-.calorie-stats {
-  gap: 18rpx;
-  padding: 12rpx 0;
-}
-
-.stat {
-  min-width: 150rpx;
-  padding: 12rpx 18rpx;
-  border: 1rpx solid #e6eee8;
-  border-radius: 14rpx;
-  background: #f4f8f5;
-}
-
-.stat-num {
-  color: #3b765d;
-}
-
-.meal-progress {
-  gap: 8rpx;
-  margin: 14rpx 12rpx 8rpx;
-}
-
-.meal-progress-segment {
-  height: 7rpx;
-  background: #e6eee8;
-}
-
-.meal-progress-segment.filled {
-  background: #84b39b;
-}
-
-.meals {
-  padding: 12rpx 0 10rpx;
-}
-
-.meal-item {
-  min-width: 112rpx;
-}
-
-.meal-icon-wrap {
-  width: 78rpx;
-  height: 78rpx;
-  border: 1rpx solid #e0ebe3;
-  border-radius: 22rpx;
-  background: #f4f8f5;
-  box-shadow: 0 6rpx 14rpx rgba(55, 91, 73, 0.06);
-}
-
-.meal-name {
-  color: #557668;
-  font-size: 20rpx;
-}
-
-.xuxu-camera-card {
-  min-height: 142rpx;
-  margin-top: 20rpx;
-  padding: 22rpx 22rpx 22rpx 26rpx;
-  border: 1rpx solid #dce9e0;
-  border-radius: 20rpx;
-  background: #f5f9f5;
-  box-shadow: none;
-}
-
-.camera-title {
-  color: #396b57;
-  font-size: 29rpx;
-}
-
-.camera-subtitle {
-  color: #82988d;
-  font-size: 20rpx;
-}
-
-.camera-decoration {
-  width: 174rpx;
-  height: 112rpx;
-  opacity: 0.92;
-}
-
-.camera-arrow {
-  color: #7da38e;
-  font-size: 38rpx;
-}
-
-.record-card {
-  padding: 24rpx 26rpx;
-}
-
-.mini-chart {
-  width: 142rpx;
-  height: 62rpx;
-  border: 1rpx solid #e5eee8;
-  border-radius: 14rpx;
-  background: #f5f9f5;
-}
-
-.mini-trend-line {
-  stroke: #78ad91;
-}
-
-.mini-trend-point {
-  fill: #fffefa;
-  stroke: #78ad91;
-}
-
-.grid-cards {
-  gap: 16rpx;
-  margin-bottom: 20rpx;
-}
-
-.grid-item {
-  min-height: 148rpx;
-  padding: 22rpx 24rpx;
-  border: 1rpx solid #e0eae3;
-  border-radius: 22rpx;
-  background: #fffefa;
-  box-shadow: 0 8rpx 18rpx rgba(44, 73, 61, 0.045);
-}
-
-.grid-title {
-  color: #3b6655;
-  font-size: 25rpx;
-}
-
-.grid-data {
-  margin-bottom: 8rpx;
-}
-
-.grid-num {
-  font-size: 44rpx;
-}
-
-.grid-icon {
-  width: 92rpx;
-  height: 92rpx;
-  right: 8rpx;
-  bottom: 8rpx;
-  opacity: 0.48;
-  border-radius: 0;
-  mix-blend-mode: multiply;
-}
-
-.fasting-card,
-.period-card,
-.medication-card {
-  min-height: 164rpx;
-  padding: 24rpx 26rpx;
-  border: 1rpx solid #e0eae3;
-  border-left-width: 4rpx;
-  border-radius: 22rpx;
-  background: #fffefa;
-  box-shadow: 0 8rpx 20rpx rgba(44, 73, 61, 0.045);
-}
-
-.fasting-card {
-  border-left-color: #85ae98;
-}
-
-.period-card {
-  border-left-color: #d79a9f;
-}
-
-.medication-card {
-  border-left-color: #76a99a;
-}
-
-.fasting-card .fasting-time {
-  color: #356c55;
-}
-
-.period-days {
-  color: #b66f7d;
-}
-
-.medication-item {
-  color: #477b6c;
-}
-
-.fasting-icon-img,
-.period-icon-img,
-.medication-icon-img {
-  right: 20rpx;
-  bottom: 16rpx;
-  width: 104rpx;
-  height: 104rpx;
-  opacity: 0.46;
-  border-radius: 0;
-  background: transparent;
-  mix-blend-mode: multiply;
-}
-
-.fasting-summary {
-  color: #85988f;
-}
-
-.edit-card {
-  min-height: 82rpx;
-  margin: 4rpx 0 16rpx;
-  padding: 18rpx 22rpx 18rpx 24rpx;
-  border: 1rpx solid #dfe9e2;
-  border-radius: 18rpx;
-  background: rgba(255, 254, 250, 0.76);
-  box-shadow: none;
-}
-
-.edit-text {
-  color: #537c6c;
-  font-size: 23rpx;
-}
-
-.edit-caption {
-  color: #91a199;
-}
-
-.edit-arrow {
-  opacity: 0.5;
-}
-
-.error-state button {
-  background: #e7f1ea;
-  color: #527d69;
-}
-</style>
-<style scoped>
-/* Lower cards use quiet editorial surfaces instead of full-bleed pastel fills. */
-.fasting-card,
-.period-card,
-.medication-card {
-  margin-bottom: 18rpx;
-  border: 1rpx solid #e8eeeb;
-  border-radius: 22rpx;
-  background: #fff;
-  box-shadow: 0 8rpx 22rpx rgba(71, 93, 86, 0.06);
-}
-
-.fasting-card {
-  min-height: 188rpx;
-  padding: 24rpx 26rpx;
-  border-left: 6rpx solid #8bb8a8;
-}
-
-.fasting-card .card-top {
-  margin-bottom: 14rpx;
-}
-
-.fasting-card .fasting-time {
-  color: #3f7164;
-  font-size: 40rpx;
-  letter-spacing: 1rpx;
-}
-
-.fasting-card .fasting-summary {
-  max-width: 64%;
-  color: #8b9893;
-}
-
-.fasting-card .fasting-icon-img {
-  right: 22rpx;
-  bottom: 20rpx;
-  width: 112rpx;
-  height: 112rpx;
-  opacity: 0.55;
-  border-radius: 24rpx;
-  background: transparent;
-}
-
-.period-card,
-.medication-card {
+/* ---------- 空状态 / 错误态 ---------- */
+.home-empty-state,
+.error-state {
   display: flex;
   flex-direction: column;
-  min-height: 154rpx;
-  padding: 22rpx 24rpx;
-}
-
-.period-card {
-  border-left: 6rpx solid #d49a9f;
-  background: #fff;
-}
-
-.medication-card {
-  border-left: 6rpx solid #86b6ac;
-  background: #fff;
-}
-
-.period-card .card-top,
-.medication-card .card-top {
-  margin-bottom: 12rpx;
-}
-
-.period-card .card-title,
-.medication-card .card-title {
-  color: #4a5b56;
-  font-size: 27rpx;
-}
-
-.period-content,
-.medication-content {
-  position: relative;
-  z-index: 1;
-  padding-right: 112rpx;
-}
-
-.period-hint,
-.medication-hint {
-  color: #899792;
-  font-size: 20rpx;
-}
-
-.period-days {
-  margin-top: 8rpx;
-  color: #bd737f;
-  font-size: 26rpx;
-  font-weight: 700;
-}
-
-.medication-item {
-  margin-top: 8rpx;
-  color: #4e8179;
-  font-size: 23rpx;
-  font-weight: 600;
-}
-
-.period-icon-img,
-.medication-icon-img {
-  right: 22rpx;
-  bottom: 22rpx;
-  width: 112rpx;
-  height: 112rpx;
-  opacity: 0.58;
-  border-radius: 0;
-  mix-blend-mode: multiply;
-}
-
-.period-icon-img {
-  background: transparent;
-}
-
-.medication-icon-img {
-  background: transparent;
-}
-
-.edit-card {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: 86rpx;
-  padding: 18rpx 22rpx 18rpx 26rpx;
-  margin: 6rpx 0 16rpx;
-  border: 1rpx solid #e6ece9;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 8rpx 18rpx rgba(71, 93, 86, 0.04);
+  padding: 120rpx var(--hz-gutter) 140rpx;
+  text-align: center;
 }
-
-.edit-card-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5rpx;
+.home-empty-art {
+  width: 300rpx;
+  height: 260rpx;
+  margin-bottom: 18rpx;
+  opacity: 0.92;
 }
-
-.edit-text {
-  color: #547d75;
+.home-empty-title {
+  color: var(--hz-ink);
+  font-size: 34rpx;
+  font-weight: 750;
+}
+.home-empty-copy {
+  max-width: 520rpx;
+  margin-top: 12rpx;
+  color: var(--hz-muted);
   font-size: 23rpx;
+  line-height: 1.6;
+}
+.home-empty-action {
+  display: flex;
+  width: 260rpx;
+  height: 80rpx;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.55);
+  border-radius: var(--hz-radius-control);
+  background: rgba(237, 247, 240, 0.85);
+  color: #2f5f4a;
+  font-size: 26rpx;
   font-weight: 700;
 }
-
-.edit-caption {
-  color: #9aa7a2;
-  font-size: 18rpx;
-}
-
-.edit-arrow {
-  width: 28rpx;
-  height: 28rpx;
-  opacity: 0.55;
-}
-</style>
-<style scoped>
-/* Final visual tokens. Keep all home surfaces in one restrained palette. */
-.page { background: #f7faf8; color: #29453c; }
-.chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
-.bg-leaf { width: 320rpx; height: 320rpx; opacity: 0.035; }
-.header { margin-bottom: 24rpx; }
-.date-chip { padding: 6rpx 12rpx; border-radius: 10rpx; background: #e6f0ea; color: #5b7d6f; font-size: 19rpx; }
-.greeting { color: #25473a; font-size: 34rpx; }
-.avatar { border-color: #d4e4db; }
-.avatar-hint { color: #718b7f; }
-.card { margin-bottom: 20rpx; border: 1rpx solid #e0eae3; border-radius: 24rpx; background: #fffefa; box-shadow: 0 10rpx 26rpx rgba(44, 73, 61, 0.055); backdrop-filter: none; }
-.card-top { margin-bottom: 18rpx; }
-.card-title { color: #315547; font-size: 27rpx; font-weight: 750; }
-.week-badge, .time-text { color: #879b91; }
-.weight-card, .calorie-card, .record-card { background: #fffefa; }
-.weight-card { padding: 24rpx 26rpx 20rpx; }
-.weight-col .num, .weight-col.main .num, .big-number .number, .value, .grid-num, .fasting-time { color: #2f6b52; }
-.weight-col .label, .stat-label, .hint-text, .value-unit, .grid-unit, .fasting-label, .period-hint, .medication-hint { color: #8a9d94; }
-.semicircle-svg .track { stroke: #e4eee7; }
-.semicircle-svg .progress { stroke: #77ad91; }
-.mode-tag, .mode-tag.blue { background: #e8f1eb; color: #5a806e; }
-.calorie-card { padding: 24rpx 26rpx 22rpx; }
-.calorie-main { padding: 14rpx 0 12rpx; }
-.big-number .number { font-size: 66rpx; letter-spacing: 0; }
-.big-number .unit { color: #628675; }
-.meal-summary { color: #8b9b92; }
-.calorie-stats { gap: 18rpx; padding: 12rpx 0; }
-.stat { min-width: 150rpx; padding: 12rpx 18rpx; border: 1rpx solid #e6eee8; border-radius: 14rpx; background: #f4f8f5; }
-.stat-num { color: #3b765d; }
-.meal-progress { gap: 8rpx; margin: 14rpx 12rpx 8rpx; }
-.meal-progress-segment { height: 7rpx; background: #e6eee8; }
-.meal-progress-segment.filled { background: #84b39b; }
-.meals { padding: 12rpx 0 10rpx; }
-.meal-icon-wrap { width: 78rpx; height: 78rpx; border: 1rpx solid #e0ebe3; border-radius: 22rpx; background: #f4f8f5; box-shadow: 0 6rpx 14rpx rgba(55, 91, 73, 0.06); }
-.meal-name { color: #557668; font-size: 20rpx; }
-.xuxu-camera-card { min-height: 142rpx; margin-top: 20rpx; padding: 22rpx 22rpx 22rpx 26rpx; border: 1rpx solid #dce9e0; border-radius: 20rpx; background: #f5f9f5; box-shadow: none; }
-.camera-title { color: #396b57; font-size: 29rpx; }
-.camera-subtitle { color: #82988d; font-size: 20rpx; }
-.camera-decoration { width: 174rpx; height: 112rpx; opacity: 0.92; }
-.camera-arrow { color: #7da38e; font-size: 38rpx; }
-.meal-icon-wrap { background: transparent; border: 0; box-shadow: none; }
-.meal-icon { width: 74rpx; height: 74rpx; opacity: 1; background: transparent; }
-.camera-decoration { mix-blend-mode: normal; opacity: 1; background: transparent; }
-.record-card { padding: 24rpx 26rpx; }
-.record-content { min-height: 112rpx; }
-.mini-chart { width: 128rpx; height: 112rpx; border: 0; border-radius: 0; background: transparent; }
-.mini-trend-line { stroke: #78ad91; }
-.mini-trend-point { fill: #fffefa; stroke: #78ad91; }
-.grid-cards { gap: 16rpx; margin-bottom: 20rpx; }
-.grid-item { min-height: 154rpx; padding: 24rpx; border: 1rpx solid #dce8e0; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
-.grid-title { color: #3b6655; font-size: 26rpx; font-weight: 650; }
-.grid-num { font-size: 46rpx; }
-.grid-icon { width: 108rpx; height: 108rpx; right: 6rpx; bottom: 4rpx; opacity: 0.78; border-radius: 0; mix-blend-mode: multiply; }
-.chart-icon { width: 112rpx; height: 112rpx; opacity: 1; border-radius: 0; mix-blend-mode: multiply; }
-.fasting-card, .period-card, .medication-card { min-height: 170rpx; padding: 25rpx 26rpx; border: 1rpx solid #dce8e0; border-left-width: 4rpx; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
-.fasting-card { border-left-color: #85ae98; }
-.period-card { border-left-color: #d79a9f; }
-.medication-card { border-left-color: #76a99a; }
-.fasting-card .fasting-time { color: #356c55; }
-.period-days { color: #b66f7d; }
-.medication-item { color: #477b6c; }
-.fasting-icon-img, .period-icon-img, .medication-icon-img { right: 18rpx; bottom: 12rpx; width: 120rpx; height: 120rpx; opacity: 0.72; border-radius: 0; background: transparent; mix-blend-mode: multiply; }
-.fasting-summary { color: #85988f; }
-.edit-card { min-height: 82rpx; margin: 4rpx 0 16rpx; padding: 18rpx 22rpx 18rpx 24rpx; border: 1rpx solid #dfe9e2; border-radius: 18rpx; background: rgba(255, 254, 250, 0.76); box-shadow: none; }
-.edit-text { color: #537c6c; font-size: 23rpx; }
-.edit-caption { color: #91a199; }
-.error-state button { background: #e7f1ea; color: #527d69; }
-.chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
-</style>
-<style scoped>
-.chart-icon { width: 116rpx; height: 116rpx; opacity: 0.92; border-radius: 0; mix-blend-mode: multiply; }
-</style>
-<style scoped>
-.page {
-  background: #fff7f1;
-}
-.date-chip {
-  border-radius: 12rpx;
-  background: #fff0f3;
-  color: #b66d80;
-}
-.greeting {
-  color: #5a4c52;
-}
-.card {
-  border: 1rpx solid rgba(255, 255, 255, 0.9);
-  border-radius: 18rpx;
-  background: rgba(255, 253, 251, 0.82);
-  box-shadow:
-    0 12rpx 28rpx rgba(139, 102, 89, 0.07),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(18px);
-}
-.card-title,
-.grid-title {
-  color: #66545a;
-}
-.weight-card,
-.calorie-card,
-.record-card,
-.fasting-card {
-  background: #fffdfb;
-}
-.mode-tag {
-  background: #fff0f3;
-  color: #b66d80;
-}
-.mode-tag.blue {
-  background: #f0effb;
-  color: #7c76b2;
-}
-.period-card {
-  border-color: #efcbd4;
-  background: #fff0f3;
-}
-.period-hint,
-.medication-hint {
-  color: #9f858b;
-}
-.period-days {
-  color: #c26f84;
-}
-.medication-card {
-  border-color: #d9e5ed;
-  background: #f1f6fb;
-}
-.medication-item {
-  color: #6a88a5;
-}
-.edit-card {
-  border-color: #e9cfd1;
-}
-.edit-icon,
-.edit-text {
-  color: #b66d80;
+.error-state text {
+  margin-top: 14rpx;
+  color: var(--hz-muted);
+  font-size: 24rpx;
 }
 .error-state button {
-  background: #fff0f3;
-  color: #b66d80;
-}
-</style>
-<style scoped>
-/* Final surface pass keeps the lower cards quiet after the legacy theme overrides. */
-.fasting-card,
-.period-card,
-.medication-card {
-  border-color: #e8eeeb;
-  border-radius: 22rpx;
-  background: #fff;
-  box-shadow: 0 8rpx 22rpx rgba(71, 93, 86, 0.06);
-}
-.fasting-card {
-  min-height: 188rpx;
-  border-left: 6rpx solid #8bb8a8;
-}
-.fasting-card .fasting-time {
-  color: #3f7164;
-}
-.fasting-card .fasting-summary {
-  color: #8b9893;
-}
-.fasting-card .fasting-icon-img {
-  width: 112rpx;
-  height: 112rpx;
-  right: 22rpx;
-  bottom: 20rpx;
-  border-radius: 0;
-  background: transparent;
-  opacity: 0.55;
-}
-.period-card,
-.medication-card {
-  min-height: 154rpx;
-  padding: 22rpx 24rpx;
-  border-left-width: 6rpx;
-  border-left-style: solid;
-}
-.period-card {
-  border-left-color: #d49a9f;
-}
-.medication-card {
-  border-left-color: #86b6ac;
-}
-.period-card .card-title,
-.medication-card .card-title {
-  color: #4a5b56;
-  font-size: 27rpx;
-}
-.period-content,
-.medication-content {
-  padding-right: 112rpx;
-}
-.period-hint,
-.medication-hint {
-  color: #899792;
-}
-.period-days {
-  margin-top: 8rpx;
-  color: #bd737f;
-  font-size: 26rpx;
-}
-.medication-item {
-  margin-top: 8rpx;
-  color: #4e8179;
-  font-size: 23rpx;
-}
-.period-icon-img,
-.medication-icon-img {
-  width: 112rpx;
-  height: 112rpx;
-  right: 22rpx;
-  bottom: 22rpx;
-  border-radius: 0;
-  opacity: 0.58;
-}
-.period-icon-img {
-  background: transparent;
-}
-.medication-icon-img {
-  background: transparent;
-}
-.edit-card {
-  min-height: 86rpx;
-  margin: 6rpx 0 16rpx;
-  padding: 18rpx 22rpx 18rpx 26rpx;
-  border: 1rpx solid #e6ece9;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 8rpx 18rpx rgba(71, 93, 86, 0.04);
-}
-.edit-card-copy {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 5rpx;
-}
-.edit-text {
-  color: #547d75;
-  font-size: 23rpx;
-}
-.edit-caption {
-  color: #9aa7a2;
-  font-size: 18rpx;
-}
-.edit-arrow {
-  width: 28rpx;
-  height: 28rpx;
-  opacity: 0.55;
-}
-</style>
-<style scoped>
-/* Last rule wins: keep the page coherent after legacy theme blocks. */
-.page { background: #f2f6f3; color: #29453c; }
-.bg-leaf { width: 320rpx; height: 320rpx; opacity: 0.035; }
-.date-chip { border-radius: 10rpx; background: #e6f0ea; color: #5b7d6f; }
-.greeting { color: #25473a; font-size: 34rpx; }
-.avatar { border-color: #d4e4db; }
-.avatar-hint { color: #718b7f; }
-.card { margin-bottom: 20rpx; border: 1rpx solid #e0eae3; border-radius: 24rpx; background: #fffefa; box-shadow: 0 10rpx 26rpx rgba(44, 73, 61, 0.055); backdrop-filter: none; }
-.card-title { color: #315547; font-size: 27rpx; font-weight: 750; }
-.weight-card, .calorie-card, .record-card { background: #fffefa; }
-.weight-card { padding: 24rpx 26rpx 20rpx; }
-.week-badge, .time-text { color: #879b91; }
-.weight-col .num, .weight-col.main .num, .big-number .number, .value, .grid-num, .fasting-time { color: #2f6b52; }
-.weight-col .label, .stat-label, .hint-text, .value-unit, .grid-unit, .fasting-label, .period-hint, .medication-hint { color: #8a9d94; }
-.semicircle-svg .track { stroke: #e4eee7; }
-.semicircle-svg .progress { stroke: #77ad91; }
-.mode-tag, .mode-tag.blue { background: #e8f1eb; color: #5a806e; }
-.calorie-card { padding: 24rpx 26rpx 22rpx; }
-.big-number .number { font-size: 66rpx; letter-spacing: 0; }
-.big-number .unit { color: #628675; }
-.meal-summary { color: #8b9b92; }
-.calorie-stats { gap: 18rpx; padding: 12rpx 0; }
-.stat { min-width: 150rpx; padding: 12rpx 18rpx; border: 1rpx solid #e6eee8; border-radius: 14rpx; background: #f4f8f5; }
-.stat-num { color: #3b765d; }
-.meal-progress { gap: 8rpx; margin: 14rpx 12rpx 8rpx; }
-.meal-progress-segment { height: 7rpx; background: #e6eee8; }
-.meal-progress-segment.filled { background: #84b39b; }
-.meals { padding: 12rpx 0 10rpx; }
-.meal-icon-wrap { width: 78rpx; height: 78rpx; border: 1rpx solid #e0ebe3; border-radius: 22rpx; background: #f4f8f5; box-shadow: 0 6rpx 14rpx rgba(55, 91, 73, 0.06); }
-.meal-name { color: #557668; font-size: 20rpx; }
-.xuxu-camera-card { min-height: 142rpx; margin-top: 20rpx; padding: 22rpx 22rpx 22rpx 26rpx; border: 1rpx solid #dce9e0; border-radius: 20rpx; background: #f5f9f5; box-shadow: none; }
-.camera-title { color: #396b57; font-size: 29rpx; }
-.camera-subtitle { color: #82988d; font-size: 20rpx; }
-.camera-decoration { width: 174rpx; height: 112rpx; opacity: 0.92; }
-.camera-arrow { color: #7da38e; font-size: 38rpx; }
-.record-card { padding: 24rpx 26rpx; }
-.mini-chart { width: 128rpx; height: 112rpx; border: 0; border-radius: 0; background: transparent; }
-.mini-trend-line { stroke: #78ad91; }
-.mini-trend-point { fill: #fffefa; stroke: #78ad91; }
-.grid-cards { gap: 16rpx; margin-bottom: 20rpx; }
-.grid-item { min-height: 154rpx; padding: 24rpx; border: 1rpx solid #dce8e0; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
-.grid-title { color: #3b6655; font-size: 26rpx; font-weight: 650; }
-.grid-num { font-size: 46rpx; }
-.grid-icon { width: 108rpx; height: 108rpx; right: 6rpx; bottom: 4rpx; opacity: 0.78; border-radius: 0; mix-blend-mode: multiply; }
-.chart-icon { width: 112rpx; height: 112rpx; opacity: 1; border-radius: 0; mix-blend-mode: multiply; }
-.fasting-card, .period-card, .medication-card { min-height: 170rpx; padding: 25rpx 26rpx; border: 1rpx solid #dce8e0; border-left-width: 4rpx; border-radius: 22rpx; background: #fffefa; box-shadow: 0 9rpx 20rpx rgba(44, 73, 61, 0.05); }
-.fasting-card { border-left-color: #85ae98; }
-.period-card { border-left-color: #d79a9f; }
-.medication-card { border-left-color: #76a99a; }
-.fasting-card .fasting-time { color: #356c55; }
-.period-days { color: #b66f7d; }
-.medication-item { color: #477b6c; }
-.fasting-icon-img, .period-icon-img, .medication-icon-img { right: 18rpx; bottom: 12rpx; width: 120rpx; height: 120rpx; opacity: 0.72; border-radius: 0; background: transparent; mix-blend-mode: multiply; }
-.fasting-summary { color: #85988f; }
-.edit-card { min-height: 82rpx; margin: 4rpx 0 16rpx; padding: 18rpx 22rpx 18rpx 24rpx; border: 1rpx solid #dfe9e2; border-radius: 18rpx; background: rgba(255, 254, 250, 0.76); box-shadow: none; }
-.edit-text { color: #537c6c; font-size: 23rpx; }
-.edit-caption { color: #91a199; }
-.error-state button { background: #e7f1ea; color: #527d69; }
-.weight-visual { position: relative; }
-.weight-progress-label { position: absolute; top: 46rpx; left: 50%; transform: translateX(-50%); color: #688476; font-size: 19rpx; white-space: nowrap; }
-.weight-add { display: flex; width: 52rpx; height: 52rpx; align-items: center; justify-content: center; padding: 0; border: 1rpx solid #d9e9df; border-radius: 50%; color: #47745f; background: #edf6f0; font-size: 32rpx; line-height: 52rpx; }
-.weight-add::after { border: 0; }
-.meal-icon-wrap { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-.meal-icon { width: 74rpx; height: 74rpx; opacity: 1; background: transparent; }
-.camera-decoration { mix-blend-mode: normal; opacity: 1; background: transparent; }
-
-/* Unified home controls: quiet surfaces, consistent feedback, and toned meal artwork. */
-.avatar-wrapper,
-.meal-item,
-.xuxu-camera-card,
-.weight-add,
-.grid-item,
-.edit-card,
-.sheet-close,
-.tone-choice,
-.mood-choice,
-.wellness-save,
-.error-state button {
-  transition:
-    transform 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
-}
-
-button::after {
-  border: 0;
-}
-
-.button-hover,
-.avatar-wrapper:active,
-.meal-item:active,
-.xuxu-camera-card:active,
-.grid-item:active,
-.edit-card:active,
-.weight-add:active,
-.sheet-close:active,
-.tone-choice:active,
-.mood-choice:active,
-.wellness-save:active,
-.error-state button:active {
-  transform: scale(0.975);
-  opacity: 0.9;
-}
-
-.meal-item {
-  min-width: 118rpx;
-  min-height: 112rpx;
-  padding: 7rpx 4rpx 5rpx;
-  border-radius: 18rpx;
-}
-
-.meal-item:active {
-  background: #eef4f0;
-}
-
-.meal-item:active .meal-icon-wrap {
-  transform: none;
-  box-shadow: none;
-}
-
-.meal-icon-wrap,
-.meal-item:nth-child(2) .meal-icon-wrap,
-.meal-item:nth-child(3) .meal-icon-wrap,
-.meal-item:nth-child(4) .meal-icon-wrap {
-  animation: none;
-}
-
-.meal-icon {
-  width: 76rpx;
-  height: 76rpx;
-}
-
-.meal-name {
-  color: #536f62;
+  margin-top: 18rpx;
+  padding: 14rpx 26rpx;
+  border: 1rpx solid rgba(159, 195, 173, 0.55);
+  border-radius: var(--hz-radius-control);
+  background: rgba(237, 247, 240, 0.85);
+  color: #2f5f4a;
+  font-size: 24rpx;
   font-weight: 650;
 }
 
-.xuxu-camera-card,
-.grid-item,
-.edit-card {
-  border-color: #dce7e0;
-  background: #fdfefc;
-  box-shadow: 0 8rpx 20rpx rgba(42, 72, 58, 0.045);
+/* ---------- 记录体重 / 身心弹层 ---------- */
+.weight-record-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
-
-.xuxu-camera-card {
-  background: #f2f7f3;
+.weight-record-title {
+  display: block;
+  color: var(--hz-ink);
+  font-size: 31rpx;
+  font-weight: 750;
+  line-height: 1.25;
 }
-
-.xuxu-camera-card:active,
-.grid-item:active,
-.edit-card:active {
-  border-color: #cbdcd1;
-  background: #edf4ef;
-  box-shadow: 0 4rpx 12rpx rgba(42, 72, 58, 0.035);
+.weight-record-subtitle {
+  display: block;
+  margin-top: 7rpx;
+  color: var(--hz-faint);
+  font-size: 19rpx;
+  line-height: 1.4;
 }
-
-.camera-decoration { filter: none; }
-
-.weight-add,
 .sheet-close {
-  border: 1rpx solid #d7e5dc;
-  color: #557767;
-  background: #edf5f0;
-  box-shadow: none;
+  display: flex;
+  width: 58rpx;
+  height: 58rpx;
+  align-items: center;
+  justify-content: center;
+  color: var(--hz-muted);
+  font-size: 40rpx;
 }
-
-.tone-choice,
-.mood-choice {
-  border-color: #dfe8e2;
-  color: #71847a;
-  background: #fbfcfb;
-  box-shadow: none;
+.weight-record-time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  margin: 20rpx -30rpx 0;
+  padding: 14rpx 0;
+  border-top: 1rpx solid var(--hz-rule-glass);
+  border-bottom: 1rpx solid var(--hz-rule-glass);
+  color: var(--hz-muted);
+  font-size: 20rpx;
 }
-
-.tone-choice.selected,
-.mood-choice.selected {
-  border-color: #a9cbb7;
-  color: #416d58;
-  background: #eaf3ed;
+.weight-record-time text:last-child {
+  color: var(--hz-green);
+  font-size: 27rpx;
+  font-weight: 700;
 }
-
-.wellness-save,
-.mood-save,
-.error-state button {
-  border: 1rpx solid #a9cdb7;
-  color: #315f49;
-  background: #e7f2eb;
-  box-shadow: none;
+.home-weight-input-wrap {
+  display: flex;
+  align-items: center;
+  height: 94rpx;
+  margin-top: 22rpx;
+  padding: 0 22rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: var(--hz-radius-control);
+  background: rgba(255, 255, 255, 0.86);
 }
-</style>
-
-<style scoped>
-/* Homepage detail pass: establish one focal hierarchy and clearer data rhythm. */
-.page {
-  padding: 0 32rpx calc(var(--hz-tabbar-height) + 42rpx) !important;
-  background: #f5f2eb !important;
+.home-weight-input-wrap input {
+  flex: 1;
+  height: 92rpx;
+  color: var(--hz-ink);
+  font-size: 44rpx;
+  font-weight: 800;
 }
-
-.header {
-  padding: 54rpx 0 26rpx !important;
+.home-weight-input-wrap text {
+  color: var(--hz-muted);
+  font-size: 22rpx;
+  font-weight: 700;
 }
-
-.date-chip {
-  padding: 6rpx 14rpx !important;
-  border: 1rpx solid #d8e6dc !important;
-  border-radius: 10rpx !important;
-  background: #e7f0e9 !important;
-  color: #1f6b4c !important;
-  font-size: 20rpx !important;
-}
-
-.greeting {
-  color: #173f30 !important;
-  font-size: 38rpx !important;
-  font-weight: 700 !important;
-}
-
-.avatar-wrapper {
-  width: 76rpx !important;
-  height: 76rpx !important;
-  padding: 5rpx !important;
-  border: 1rpx solid #d8e6dc !important;
-  border-radius: 50% !important;
-  background: #fffdf9 !important;
-  box-shadow: 0 8rpx 18rpx rgba(32, 55, 42, 0.1) !important;
-}
-
-.card {
-  margin-bottom: 22rpx !important;
-  border: 1rpx solid #e2e5dc !important;
-  border-radius: 18rpx !important;
-  background: #fffdf9 !important;
-  box-shadow: 0 10rpx 28rpx rgba(32, 55, 42, 0.08) !important;
-}
-
-.weight-card {
-  padding: 28rpx 28rpx 24rpx !important;
-  border-top: 6rpx solid #1f6b4c !important;
-}
-
-.weight-card .card-title,
-.calorie-card .card-title,
-.record-card .card-title {
-  color: #173f30 !important;
-  font-size: 28rpx !important;
-  font-weight: 700 !important;
-}
-
-.weight-visual {
-  padding-top: 4rpx;
-}
-
-.semicircle-svg {
-  height: 168rpx !important;
-}
-
-.semicircle-svg .track {
-  stroke: #e7eee9 !important;
-}
-
-.semicircle-svg .progress {
-  stroke: #1f6b4c !important;
-}
-
-.weight-progress-label {
-  top: 68rpx !important;
-  color: #748078 !important;
-  font-size: 19rpx !important;
-}
-
-.weight-col .num,
-.weight-col.main .num {
-  color: #1f6b4c !important;
-  font-size: 34rpx !important;
-  font-weight: 700 !important;
-}
-
-.weight-col.main .num {
-  font-size: 42rpx !important;
-}
-
-.weight-col .label {
-  color: #748078 !important;
-  font-size: 19rpx !important;
-}
-
-.calorie-card {
-  padding: 28rpx !important;
-}
-
-.calorie-main {
-  padding: 20rpx 0 18rpx !important;
-  text-align: center;
-}
-
-.hint-text {
-  color: #748078 !important;
-  font-size: 20rpx !important;
-}
-
-.big-number .number {
-  color: #173f30 !important;
-  font-size: 76rpx !important;
-  font-weight: 700 !important;
-}
-
-.big-number .unit {
-  color: #1f6b4c !important;
-  font-size: 24rpx !important;
-}
-
-.meal-summary {
-  color: #748078 !important;
-  font-size: 20rpx !important;
-}
-
-.calorie-stats {
-  gap: 18rpx !important;
-  padding: 14rpx 0 !important;
-}
-
-.stat {
-  min-width: 0 !important;
-  padding: 16rpx 14rpx !important;
-  border: 1rpx solid #e2e5dc !important;
-  border-radius: 12rpx !important;
-  background: #f8faf6 !important;
-}
-
-.stat-num {
-  color: #1f6b4c !important;
-  font-size: 30rpx !important;
-  font-weight: 700 !important;
-}
-
-.stat-label {
-  color: #748078 !important;
-  font-size: 18rpx !important;
-}
-
-.meal-progress {
-  gap: 8rpx !important;
-  margin: 16rpx 0 12rpx !important;
-}
-
-.meal-progress-segment {
-  height: 8rpx !important;
-  border-radius: 4rpx !important;
-  background: #e7eee9 !important;
-}
-
-.meal-progress-segment.filled {
-  background: #1f6b4c !important;
-}
-
-.meals {
-  justify-content: space-between !important;
-  padding: 12rpx 4rpx 8rpx !important;
-}
-
-.meal-item {
-  min-width: 112rpx !important;
-  min-height: 122rpx !important;
-  border-radius: 14rpx !important;
-}
-
-.meal-item:active {
-  background: #edf3ee !important;
-}
-
-.meal-icon {
-  width: 82rpx !important;
-  height: 82rpx !important;
-}
-
-.meal-name {
-  margin-top: 4rpx;
-  color: #48675a !important;
-  font-size: 20rpx !important;
-  font-weight: 600 !important;
-}
-
-.xuxu-camera-card {
-  min-height: 150rpx !important;
-  margin-top: 22rpx !important;
-  padding: 24rpx 24rpx 24rpx 28rpx !important;
-  border: 1rpx solid #d6e5da !important;
-  border-radius: 16rpx !important;
-  background: #edf3ee !important;
-  box-shadow: none !important;
-}
-
-.camera-title {
-  color: #173f30 !important;
-  font-size: 30rpx !important;
-  font-weight: 700 !important;
-}
-
-.camera-subtitle {
-  color: #748078 !important;
-  font-size: 19rpx !important;
-}
-
-.camera-decoration {
-  width: 188rpx !important;
-  height: 118rpx !important;
-  opacity: 1 !important;
-}
-
-.record-card {
-  padding: 26rpx 28rpx !important;
-}
-
-.record-content {
-  min-height: 124rpx !important;
-}
-
-.big-value .value {
-  color: #1f6b4c !important;
-  font-size: 56rpx !important;
-  font-weight: 700 !important;
-}
-
-.mini-chart {
-  width: 148rpx !important;
-  height: 124rpx !important;
-}
-
-.grid-cards {
-  gap: 18rpx !important;
-  margin-bottom: 22rpx !important;
-}
-
-.grid-item {
-  min-height: 166rpx !important;
-  padding: 24rpx !important;
-  border: 1rpx solid #e2e5dc !important;
-  border-radius: 16rpx !important;
-  background: #fffdf9 !important;
-  box-shadow: 0 8rpx 22rpx rgba(32, 55, 42, 0.07) !important;
-}
-
-.grid-title {
-  color: #173f30 !important;
-  font-size: 24rpx !important;
-}
-
-.grid-num {
-  color: #1f6b4c !important;
-  font-size: 46rpx !important;
-}
-
-.grid-unit,
-.grid-hint {
-  color: #748078 !important;
-  font-size: 18rpx !important;
-}
-
-.grid-icon {
-  width: 104rpx !important;
-  height: 104rpx !important;
-  right: 8rpx !important;
-  bottom: 6rpx !important;
-  opacity: 0.86 !important;
-  mix-blend-mode: normal !important;
-}
-
-.fasting-card,
-.period-card,
-.medication-card {
-  min-height: 164rpx !important;
-  padding: 24rpx 28rpx !important;
-  border: 1rpx solid #e2e5dc !important;
-  border-left-width: 6rpx !important;
-  border-radius: 16rpx !important;
-  background: #fffdf9 !important;
-  box-shadow: 0 8rpx 22rpx rgba(32, 55, 42, 0.07) !important;
-}
-
-.fasting-icon-img,
-.period-icon-img,
-.medication-icon-img {
-  width: 116rpx !important;
-  height: 116rpx !important;
-  right: 22rpx !important;
-  bottom: 18rpx !important;
-  opacity: 0.78 !important;
-  mix-blend-mode: normal !important;
-}
-
-/* Final homepage composition pass. */
-.page {
-  padding-right: 28rpx !important;
-  padding-left: 28rpx !important;
-}
-
-.header {
-  margin: 0 -28rpx 24rpx !important;
-  padding: 48rpx 28rpx 28rpx !important;
-  border-bottom: 1rpx solid #e1e8df;
-  border-radius: 0 0 28rpx 28rpx;
-  background: #edf3ee !important;
-}
-
-.header-left { gap: 12rpx !important; }
-
-.greeting {
-  font-size: 40rpx !important;
-  line-height: 1.2 !important;
-}
-
-.avatar-wrapper {
-  width: 82rpx !important;
-  height: 82rpx !important;
-  border-color: #cddfd2 !important;
-}
-
-.weight-card {
-  border-top: 0 !important;
-  border-left: 8rpx solid #1f6b4c !important;
-  background: #fffdf9 !important;
-}
-
-.weight-card .card-top {
-  padding-bottom: 18rpx;
-  border-bottom: 1rpx solid #e7eee9;
-}
-
-.weight-card .week-badge {
-  padding: 6rpx 10rpx;
-  border-radius: 8rpx;
-  background: #e7f0e9;
-  color: #1f6b4c !important;
-  font-size: 18rpx;
-}
-
-.weight-visual { padding-bottom: 6rpx; }
-
-.weight-card .weight-row {
+.home-weight-date {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  height: 70rpx;
   margin-top: 16rpx;
-  padding-top: 16rpx;
-  border-top: 1rpx solid #e7eee9;
+  padding: 0 4rpx;
+  border-bottom: 1rpx solid var(--hz-rule-glass);
+  color: var(--hz-muted);
+  font-size: 20rpx;
 }
-
-.calorie-card {
-  border-left: 8rpx solid #c78a3b !important;
+.home-weight-date text:nth-child(2) {
+  margin-left: auto;
+  color: var(--hz-ink-soft);
+  font-size: 22rpx;
 }
-
-.calorie-card .mode-tag {
-  background: #f8f0df !important;
-  color: #9a6b2f !important;
+.home-weight-date image {
+  width: 26rpx;
+  height: 26rpx;
+  opacity: 0.42;
 }
-
-.calorie-card .big-number .number { color: #173f30 !important; }
-
-.calorie-card .meal-progress-segment.filled { background: #c78a3b !important; }
-
-.calorie-card .stat-num { color: #9a6b2f !important; }
-
-.xuxu-camera-card {
-  border: 0 !important;
-  background: #173f30 !important;
-  box-shadow: 0 12rpx 26rpx rgba(23, 63, 48, 0.18) !important;
-}
-
-.xuxu-camera-card .camera-title { color: #fffdf9 !important; }
-
-.xuxu-camera-card .camera-subtitle { color: #c8ddd0 !important; }
-
-.xuxu-camera-card .camera-arrow { color: #dceadf !important; }
-
-.record-card {
-  border-left: 6rpx solid #6a98ac !important;
-}
-
-.grid-item:nth-child(1) { background: #f0f6f1 !important; }
-.grid-item:nth-child(2) { background: #eef3f6 !important; }
-.grid-item:nth-child(3) { background: #f2f5ef !important; }
-.grid-item:nth-child(4) { background: #f7f1ea !important; }
-
-.fasting-card { border-left-color: #6a98ac !important; }
-.period-card { border-left-color: #c77986 !important; }
-.medication-card { border-left-color: #7b9f7d !important; }
-
-.edit-card {
-  border: 1rpx dashed #c8d9cb !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-</style>
-
-<style scoped>
-/* Homepage clarity pass: clean surfaces, stronger contrast, and a lighter camera entry. */
-.page { background: #f7f8f4 !important; }
-.header { background: #eef5f0 !important; border-bottom-color: #e0e9e2 !important; }
-
-.card,
-.weight-card,
-.calorie-card,
-.record-card,
-.grid-item,
-.fasting-card,
-.period-card,
-.medication-card {
-  border: 1rpx solid #e3e9e3 !important;
-  border-left: 1rpx solid #e3e9e3 !important;
-  background: #ffffff !important;
-  box-shadow: 0 6rpx 18rpx rgba(28, 55, 40, 0.055) !important;
-}
-
-.card-title,
-.grid-title,
-.camera-title,
-.fasting-time,
-.period-days,
-.medication-item { color: #173f30 !important; }
-
-.weight-col .label,
-.stat-label,
-.hint-text,
-.meal-summary,
-.value-unit,
-.grid-unit,
-.grid-hint,
-.fasting-label,
-.fasting-summary,
-.period-hint,
-.medication-hint,
-.time-text,
-.camera-subtitle { color: #63736a !important; }
-
-.grid-item:nth-child(1),
-.grid-item:nth-child(2),
-.grid-item:nth-child(3),
-.grid-item:nth-child(4) { background: #ffffff !important; }
-
-.grid-icon,
-.fasting-icon-img,
-.period-icon-img,
-.medication-icon-img,
-.chart-icon { opacity: 1 !important; }
-
-.xuxu-camera-card {
-  display: flex !important;
-  align-items: center !important;
-  min-height: 132rpx !important;
-  margin-top: 20rpx !important;
-  padding: 20rpx 18rpx 20rpx 24rpx !important;
-  border: 1rpx solid #cfe1d4 !important;
-  border-radius: 18rpx !important;
-  background: #eaf4ed !important;
-  box-shadow: none !important;
-}
-
-.xuxu-camera-card .camera-copy { position: relative; z-index: 1; flex: 1; min-width: 0; }
-.xuxu-camera-card .camera-title { font-size: 28rpx !important; font-weight: 750 !important; color: #173f30 !important; }
-.xuxu-camera-card .camera-subtitle { display: block; margin-top: 8rpx; color: #4f7761 !important; font-size: 19rpx !important; }
-.xuxu-camera-card .camera-decoration { flex: none; width: 148rpx !important; height: 96rpx !important; margin: 0 4rpx 0 8rpx; opacity: 1 !important; }
-.xuxu-camera-card .camera-arrow { display: none !important; }
-
-.weight-add {
-  width: auto !important;
-  min-width: 76rpx !important;
-  height: 48rpx !important;
-  padding: 0 16rpx !important;
-  border: 1rpx solid #cfe1d4 !important;
-  border-radius: 24rpx !important;
-  color: #1f6b4c !important;
-  background: #f0f7f2 !important;
-  font-size: 20rpx !important;
-  line-height: 46rpx !important;
-}
-.weight-add::after { border: 0 !important; }
-
-.edit-card { border-color: #d8e5db !important; background: #ffffff !important; }
-</style>
-
-<style scoped>
-/* Keep the camera entry as a warm, tactile feature surface instead of a dark tile. */
-.home-page .xuxu-camera-card {
-  position: relative;
-  display: flex !important;
-  align-items: center !important;
-  min-height: 168rpx !important;
-  margin-top: 24rpx !important;
-  padding: 24rpx 22rpx 24rpx 30rpx !important;
-  border: 1rpx solid #eadfd5 !important;
-  border-radius: 24rpx !important;
-  background: linear-gradient(110deg, #fffaf3 0%, #fff3e7 100%) !important;
-  box-shadow: 0 16rpx 30rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255,255,255,.95) !important;
-  overflow: hidden !important;
-}
-.home-page .xuxu-camera-card::after {
-  content: '';
-  position: absolute;
-  right: -54rpx;
-  bottom: -90rpx;
-  width: 220rpx;
-  height: 220rpx;
-  border: 1rpx solid rgba(129, 175, 177, .18);
-  border-radius: 50%;
-  box-shadow: 0 0 0 18rpx rgba(129,175,177,.06), 0 0 0 36rpx rgba(129,175,177,.035);
-  pointer-events: none;
-}
-.home-page .xuxu-camera-card .camera-copy { position: relative; z-index: 1; flex: 1; min-width: 0; }
-.home-page .xuxu-camera-card .camera-title { color: #62585c !important; font-size: 32rpx !important; font-weight: 700 !important; }
-.home-page .xuxu-camera-card .camera-subtitle { margin-top: 10rpx !important; color: #9b8d88 !important; font-size: 20rpx !important; }
-.home-page .xuxu-camera-card .camera-decoration {
-  position: relative;
-  z-index: 1;
-  flex: none !important;
-  width: 206rpx !important;
-  height: 136rpx !important;
-  margin: 0 -4rpx 0 12rpx !important;
-  opacity: 1 !important;
-  mix-blend-mode: multiply !important;
-}
-.home-page .xuxu-camera-card .camera-arrow { display: none !important; }
-.home-page .xuxu-camera-card:active {
-  background: #fff0df !important;
-  box-shadow: 0 8rpx 18rpx rgba(126,104,94,.06), inset 0 1rpx 0 rgba(255,255,255,.92) !important;
-}
-</style>
-
-<style scoped>
-/* Final hierarchy pass: soften repeated surfaces and keep nested data visually open. */
-.home-page .card {
-  border-color: rgba(226, 226, 218, .88) !important;
-  border-radius: 20rpx !important;
-  box-shadow: 0 7rpx 18rpx rgba(73, 76, 64, .045) !important;
-}
-.home-page .calorie-card .stat {
-  padding: 12rpx 10rpx !important;
-  border: 0 !important;
-  border-top: 1rpx solid #eee9e3 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-.home-page .calorie-card .meals {
-  margin-top: 10rpx;
-  padding-top: 14rpx !important;
-  border-top: 1rpx solid #eee9e3;
-}
-.home-page .calorie-card .meal-item { background: transparent !important; }
-.home-page .calorie-card .meal-icon-wrap { background: transparent !important; box-shadow: none !important; }
-.home-page .grid-cards { gap: 14rpx !important; }
-.home-page .grid-item {
-  border-color: rgba(226, 226, 218, .88) !important;
-  box-shadow: 0 6rpx 16rpx rgba(73, 76, 64, .04) !important;
-}
-.home-page .fasting-card,
-.home-page .period-card,
-.home-page .medication-card {
-  border-left-width: 1rpx !important;
-  border-left-color: rgba(226, 226, 218, .88) !important;
-}
-.home-page .xuxu-camera-card {
+.home-weight-note {
   width: 100%;
+  height: 70rpx;
+  margin-top: 14rpx;
+  padding: 0 4rpx;
+  border-bottom: 1rpx solid var(--hz-rule-glass);
+  color: var(--hz-ink-soft);
+  background: transparent;
+  font-size: 21rpx;
   box-sizing: border-box;
 }
-@media (min-width: 700px) {
-  .home-page .card { border-radius: 24rpx !important; }
+.wellness-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: 2rpx;
 }
-</style>
-
-<style scoped>
-/* The camera now occupies the former meal-quality slot inside the food card. */
-.home-page .camera-slot {
-  margin-top: 14rpx;
-  padding-top: 14rpx;
-  border-top: 1rpx solid #eee9e3;
+.wellness-title {
+  display: block;
+  color: var(--hz-ink);
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 1.3;
 }
-.home-page .calorie-card .xuxu-camera-card {
+.wellness-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  color: var(--hz-muted);
+  font-size: 21rpx;
+}
+.sleep-art {
   width: 100%;
-  min-height: 128rpx !important;
-  margin: 0 !important;
-  padding: 16rpx 18rpx 16rpx 22rpx !important;
-  border: 1rpx solid #eadfd5 !important;
-  border-radius: 18rpx !important;
-  background: linear-gradient(108deg, #fffaf3 0%, #fff2e5 100%) !important;
-  box-shadow: 0 8rpx 18rpx rgba(126,104,94,.055), inset 0 1rpx 0 rgba(255,255,255,.9) !important;
+  height: 184rpx;
+  margin: 16rpx 0 8rpx;
+  border-radius: 20rpx;
+  object-fit: cover;
+  object-position: center 58%;
 }
-.home-page .calorie-card .xuxu-camera-card::after { right: -72rpx; bottom: -118rpx; opacity: .72; }
-.home-page .calorie-card .camera-title { color: #62585c !important; font-size: 29rpx !important; }
-.home-page .calorie-card .camera-subtitle { color: #9b8d88 !important; font-size: 19rpx !important; }
-.home-page .calorie-card .camera-decoration { width: 164rpx !important; height: 104rpx !important; margin-left: 8rpx !important; }
-</style>
+.field-label {
+  display: block;
+  margin: 26rpx 0 12rpx;
+  color: var(--hz-ink-soft);
+  font-size: 21rpx;
+}
+.optional {
+  margin-left: 8rpx;
+  color: var(--hz-faint);
+  font-size: 18rpx;
+}
+.duration-field {
+  display: flex;
+  align-items: center;
+  padding: 0 18rpx;
+}
+.duration-field input {
+  flex: 1;
+  height: 78rpx;
+  color: var(--hz-ink);
+  font-size: 28rpx;
+}
+.duration-field text {
+  color: var(--hz-muted);
+  font-size: 20rpx;
+}
+.tone-row {
+  display: flex;
+  gap: 10rpx;
+}
+.tone-choice {
+  flex: 1;
+  min-height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+  font-size: 20rpx;
+}
+.dream-input {
+  width: 100%;
+  min-height: 150rpx;
+  padding: 18rpx;
+  color: var(--hz-ink-soft);
+  font-size: 21rpx;
+  line-height: 1.5;
+}
+.wellness-save {
+  width: 100%;
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28rpx;
+  border-radius: var(--hz-radius-control);
+  font-size: 25rpx;
+}
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+}
+.mood-choice {
+  min-height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: 20rpx;
+}
+.mood-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #a9b8e7;
+}
+.mood-dot.bright { background: #f4c979; }
+.mood-dot.tired { background: #b9c3cb; }
+.mood-dot.low { background: #d99cab; }
+.mood-dot.anxious { background: #9ecdc1; }
 
-<style scoped>
-/* Palette lock: warm ivory page, quiet cream surfaces, and one restrained mint accent. */
-.home-page { background: #fffdf9 !important; color: #4f4d4c !important; }
-.home-page .header { background: #f7fcf8 !important; border-bottom-color: #e5eee7 !important; }
-.home-page .card,
-.home-page .weight-card,
-.home-page .calorie-card,
-.home-page .record-card,
-.home-page .grid-item,
-.home-page .fasting-card,
-.home-page .period-card,
-.home-page .medication-card {
-  background: #ffffff !important;
-  border-color: #e9e9e3 !important;
-  box-shadow: 0 7rpx 18rpx rgba(93, 83, 72, .035) !important;
+/* 交互反馈 */
+.avatar-wrapper,
+.meal-item,
+.weight-add,
+.weight-visibility,
+.edit-card,
+.sheet-close,
+.tone-choice,
+.mood-choice {
+  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
 }
-.home-page .card-title,
-.home-page .grid-title,
-.home-page .camera-title { color: #4f4d4c !important; }
-.home-page .weight-col .num,
-.home-page .grid-num,
-.home-page .big-number .number,
-.home-page .value { color: #4e7f70 !important; }
-.home-page .xuxu-camera-card,
-.home-page .calorie-card .xuxu-camera-card {
-  background: linear-gradient(108deg, #f7faf5 0%, #f2f8f4 100%) !important;
-  border-color: #dce9df !important;
+.button-hover,
+.meal-item:active,
+.avatar-wrapper:active,
+.weight-add:active,
+.sheet-close:active,
+.tone-choice:active,
+.mood-choice:active {
+  transform: scale(0.975);
+  opacity: 0.92;
 }
-.home-page .xuxu-camera-card .camera-title,
-.home-page .calorie-card .camera-title { color: #5c6862 !important; }
-.home-page .xuxu-camera-card .camera-subtitle,
-.home-page .calorie-card .camera-subtitle { color: #929b96 !important; }
-.home-page .calorie-card .camera-slot { border-top-color: #eee9e3 !important; }
-.home-page .calorie-card .meal-progress-segment.filled { background: #8eb9a8 !important; }
-.home-page .mode-tag { background: #f4eee2 !important; color: #997b50 !important; }
-@media (min-width: 700px) {
-  .home-page { background: #faf7f1 !important; }
-}
-</style>
 
-<style scoped>
-.weight-card { padding: 24rpx 26rpx 22rpx !important; border-radius: 26rpx !important; }
-.weight-card .card-top { margin-bottom: 6rpx !important; }
-.weight-card-actions { display:flex; align-items:center; gap:12rpx; }
-.weight-visibility { display:flex; align-items:center; justify-content:center; width:58rpx; height:42rpx; padding:0; border:1rpx solid #e5dfd2; border-radius:14rpx; color:#9c8f82; background:#fffaf3; line-height:1; }
-.weight-visibility::after { border:0; }
-.weight-visibility image { width:25rpx; height:25rpx; opacity:.8; }
-.weight-visual { min-height:270rpx; padding-top:0; }
-.weight-arc-stage { position:relative; width:520rpx; max-width:100%; height:250rpx; margin:0 auto; overflow:hidden; }
-.weight-arc-ring { position:absolute; top:0; left:0; width:100%; height:520rpx; border-radius:50%; background:#dfe5e1; }
-.weight-arc-ring::after { content:''; position:absolute; inset:26rpx; border-radius:50%; background:#ffffff; }
-.weight-arc-node { position:absolute; z-index:2; width:34rpx; height:34rpx; margin-left:-17rpx; margin-top:-17rpx; border:6rpx solid #ffffff; border-radius:50%; background:#48c88d; box-shadow:0 0 0 3rpx rgba(255,255,255,.72), 0 5rpx 14rpx rgba(55,161,111,.24); }
-.weight-progress-copy { position:absolute; top:82rpx; left:0; right:0; display:flex; align-items:center; flex-direction:column; pointer-events:none; }
-.weight-progress-value { color:#4f5552; font-size:46rpx; font-weight:800; line-height:1.05; }
-.weight-progress-label { position:static !important; transform:none !important; margin-top:10rpx; color:#69736f !important; font-size:26rpx !important; font-weight:600; }
-.weight-gap-label { display:block; margin-top:8rpx; color:#7b8580; font-size:22rpx; font-weight:500; }
-.weight-row { margin-top:-4rpx !important; }
-.weight-col .num { color:#5e8f7b !important; font-size:32rpx !important; font-weight:700; }
-.weight-col.main .num { color:#4f7e70 !important; font-size:38rpx !important; font-weight:800; }
-.weight-col .label { color:#7d8983 !important; font-size:22rpx !important; }
+/* 窄屏：小机型保持网格与半圆可读 */
 @media (max-width: 360px) {
-  .weight-arc-stage { height:210rpx; }
-  .weight-progress-copy { top:68rpx; }
+  .xuxu-bubble { max-width: 196rpx; }
+  .weight-arc-stage { height: 210rpx; }
+  .weight-progress-copy { top: 44%; }
 }
-</style>
-
-<style scoped>
-.weight-record-scrim { position:fixed; inset:0; z-index:60; display:flex; align-items:flex-end; background:rgba(50,47,43,.24); backdrop-filter:blur(3px); }
-.weight-record-sheet { width:100%; max-height:82vh; overflow:auto; padding:16rpx 26rpx calc(24rpx + env(safe-area-inset-bottom)); border-radius:30rpx 30rpx 0 0; border:1rpx solid #ebe1d6; background:#fffdf9; box-shadow:0 -14rpx 38rpx rgba(86,72,62,.14); box-sizing:border-box; }
-.weight-record-head { display:flex; align-items:flex-start; justify-content:space-between; }
-.weight-record-title { display:block; color:#585250; font-size:31rpx; font-weight:800; line-height:1.25; }
-.weight-record-subtitle { display:block; margin-top:7rpx; color:#a19891; font-size:19rpx; line-height:1.4; }
-.weight-record-time { display:flex; align-items:center; justify-content:center; gap:14rpx; margin:20rpx -26rpx 0; padding:14rpx 0; border-top:1rpx solid #eee7df; border-bottom:1rpx solid #eee7df; color:#7f8c84; font-size:20rpx; }
-.weight-record-time text:last-child { color:#668b78; font-size:27rpx; font-weight:700; }
-.home-weight-input-wrap { display:flex; align-items:center; height:94rpx; margin-top:22rpx; padding:0 22rpx; border:1rpx solid #dce8df; border-radius:18rpx; background:#f9fcf8; }
-.home-weight-input-wrap input { flex:1; height:92rpx; padding:0; color:#4e6659; background:transparent; font-size:44rpx; font-weight:800; }
-.home-weight-input-wrap text { color:#7c9b87; font-size:22rpx; font-weight:700; }
-.home-weight-date { display:flex; align-items:center; gap:12rpx; height:70rpx; margin-top:16rpx; padding:0 4rpx; border-bottom:1rpx solid #eee7df; color:#9a918b; font-size:20rpx; }
-.home-weight-date text:nth-child(2) { margin-left:auto; color:#645d59; font-size:22rpx; }
-.home-weight-date image { width:26rpx; height:26rpx; opacity:.42; }
-.home-weight-note { width:100%; height:70rpx; margin-top:14rpx; padding:0 4rpx; border-bottom:1rpx solid #eee7df; color:#645d59; background:transparent; font-size:21rpx; box-sizing:border-box; }
-.home-weight-save { display:flex; align-items:center; justify-content:center; width:100%; height:78rpx; margin-top:24rpx; border:1rpx solid #cfe1d5; border-radius:18rpx; color:#557565; background:#edf6ef; box-shadow:0 8rpx 18rpx rgba(91,132,104,.1); font-size:24rpx; font-weight:700; line-height:1; }
-.home-weight-save::after { border:0; }
 </style>

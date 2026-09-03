@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page period-page">
     <AppNavBar title="生理期记录" route="/pages/menstruation/MenstruationDetailPage" />
 
     <scroll-view class="date-strip" scroll-x show-scrollbar="false">
@@ -21,8 +21,8 @@
         <text class="section-caption">点选日期，补记经期或症状</text>
       </view>
       <view class="month-actions">
-        <button class="month-button" aria-label="上个月" @tap="changeMonth(-1)">‹</button>
-        <button class="month-button" aria-label="下个月" @tap="changeMonth(1)">›</button>
+        <button class="month-button" aria-label="上个月" @tap="changeMonth(-1)"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button>
+        <button class="month-button" aria-label="下个月" @tap="changeMonth(1)"><image src="/static/icons/svg/forward.svg" mode="aspectFit" /></button>
       </view>
     </view>
 
@@ -101,11 +101,15 @@
       </view>
       <view class="editor-row">
         <view><text class="editor-label">开始</text><text class="editor-value">{{ cycle.start || '未设置' }}</text></view>
-        <button class="small-action" @tap="setCycleStart">{{ cycle.start ? '修改' : '设置' }}</button>
+        <picker mode="date" :value="cycle.start || todayKey" :end="todayKey" @change="updateCycleStart">
+          <view class="small-action">{{ cycle.start ? '修改日期' : '选择日期' }}</view>
+        </picker>
       </view>
       <view class="editor-row">
         <view><text class="editor-label">结束</text><text class="editor-value">{{ cycle.end || '未设置' }}</text></view>
-        <button class="small-action" @tap="setCycleEnd">{{ cycle.end ? '修改' : '设置' }}</button>
+        <picker mode="date" :value="cycle.end || cycle.start || todayKey" :start="cycle.start || undefined" :end="todayKey" @change="updateCycleEnd">
+          <view class="small-action">{{ cycle.end ? '修改日期' : '选择日期' }}</view>
+        </picker>
       </view>
       <view class="cycle-hint"><text>当前按 {{ cycleLength }} 天周期、{{ periodLength }} 天经期估算</text><button @tap="editCycleSettings">调整</button></view>
     </view>
@@ -234,11 +238,16 @@ function markPeriodDay() {
   else cycle.end = selectedDate.value;
   uni.showToast({ title: '已标记经期', icon: 'success' });
 }
-function setCycleStart() {
-  cycle.start = selectedDate.value;
+function updateCycleStart(event: { detail: { value: string } }) {
+  cycle.start = event.detail.value;
+  if (cycle.end && cycle.end < cycle.start) cycle.end = '';
+  saveCycle();
+  uni.showToast({ title: '已更新开始日期', icon: 'none', duration: 700 });
 }
-function setCycleEnd() {
-  cycle.end = selectedDate.value;
+function updateCycleEnd(event: { detail: { value: string } }) {
+  cycle.end = event.detail.value;
+  saveCycle();
+  uni.showToast({ title: '已更新结束日期', icon: 'none', duration: 700 });
 }
 function editCycleSettings() {
   uni.showModal({
@@ -301,6 +310,7 @@ onShow(load);
 .section-caption { display: block; margin-top: 6rpx; color: #a29395; font-size: 19rpx; }
 .month-actions { display: flex; gap: 10rpx; }
 .month-button { width: 50rpx; height: 50rpx; border: 1rpx solid #ead4d2; border-radius: 50%; color: #bd7f8c; background: #fffdfb; font-size: 34rpx; line-height: 44rpx; }
+.month-button image { display: block; width: 24rpx; height: 24rpx; margin: 12rpx auto; opacity: .7; }
 .calendar-card, .symptom-card, .cycle-editor { margin: 0 28rpx; padding: 22rpx 18rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 18rpx; background: rgba(255, 253, 251, .82); box-shadow: 0 12rpx 28rpx rgba(119, 91, 79, .07), inset 0 1rpx 0 rgba(255, 255, 255, .95); backdrop-filter: blur(18px); }
 .week-row, .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
 .week-row text { padding-bottom: 12rpx; color: #b2a3a0; font-size: 19rpx; text-align: center; }
@@ -333,4 +343,27 @@ onShow(load);
 .sticky-action { position: fixed; right: 44rpx; bottom: 28rpx; left: 44rpx; z-index: 20; width: auto; margin: 0; }
 .disclaimer { display: block; margin: 18rpx 36rpx 0; color: #ad9e9d; font-size: 17rpx; line-height: 1.5; text-align: center; }
 @media (min-width: 700px) { .page { max-width: 760px; margin: 0 auto; } }
+</style>
+
+<style scoped>
+/* Period tracking uses rose only for status; the canvas stays warm and neutral. */
+.period-page { background: #faf7f1 !important; color: #5c5558 !important; }
+.period-page .date-strip { background: #f7f3ee !important; border-bottom: 1rpx solid #ebe3dc; }
+.period-page .date-pill { border-color: #e9dfd7; background: #fffdf9; color: #9b918e; box-shadow: none; }
+.period-page .date-pill.active { border-color: #cfa4a4; background: #d7a6a6; box-shadow: 0 5rpx 12rpx rgba(182,132,132,.14); }
+.period-page .date-pill.period:not(.active) { border-color: #ead3d0; color: #b77d7d; background: #fff7f3; }
+.period-page .hero-card { border-bottom: 1rpx solid #ebe3dc; background: #f8f3ec !important; }
+.period-page .cycle-ring { box-shadow: 0 12rpx 26rpx rgba(126,104,94,.09); }
+.period-page .calendar-card,
+.period-page .symptom-card,
+.period-page .cycle-editor { border: 0 !important; border-top: 1rpx solid #ebe3dc !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+.period-page .section-heading { margin-right: 28rpx; margin-left: 28rpx; }
+.period-page .month-button { border-color: #e1d8d1; color: #81938e; background: #fffdf9; box-shadow: none; }
+.period-page .ghost-button,
+.period-page .small-action { border: 1rpx solid #dce9e1; color: #6f9187; background: #f3f8f4; }
+.period-page .option-chip { border-color: #e7ded7; color: #8d8381; background: #fffdf9; }
+.period-page .option-chip.active { border-color: #b8d3c8; color: #63877d; background: #eef6f1; }
+.period-page .note-input { border-color: #e7ded7; background: #fffdf9; }
+.period-page .primary-button { background: #83b4ad !important; box-shadow: 0 10rpx 20rpx rgba(93,145,137,.16) !important; }
+.period-page .sticky-action { right: 28rpx; left: 28rpx; }
 </style>

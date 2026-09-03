@@ -5,7 +5,7 @@ import createSheetSource from '../../components/plans/PlanCreateSheet.vue?raw';
 
 describe('plan visual system', () => {
   it('keeps the page on a clean white canvas with the shared green palette', () => {
-    expect(planPageSource).toContain('background: #ffffff');
+    expect(planPageSource).toContain('background: transparent');
     expect(planPageSource).toContain('color: #365343');
     expect(planPageSource).not.toContain('#fff7f1');
     expect(planPageSource).not.toContain('#fff0f1');

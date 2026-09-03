@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import homePageSource from '../home/HomePage.vue?raw';
+import mePageSource from '../me/MePage.vue?raw';
 import planHeroSource from '../../components/plans/PlanHero.vue?raw';
 
 const visualSystemSource = readFileSync(
@@ -10,7 +10,7 @@ const visualSystemSource = readFileSync(
 
 describe('shared illustration direction', () => {
   it('uses the user-provided default avatar only for the user profile surface', () => {
-    expect(homePageSource).toContain('/static/illustrations/default-user-avatar.png');
+    expect(mePageSource).toContain('/static/illustrations/default-user-avatar.png');
   });
 
   it('keeps the planning hero image in a dedicated, non-overlapping visual region', () => {

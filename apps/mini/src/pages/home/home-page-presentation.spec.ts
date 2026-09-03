@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import homePageSource from './HomePage.vue?raw';
+import homePageRaw from './HomePage.vue?raw';
+
+// 行尾无关：外部编辑器可能把文件转成 CRLF
+const homePageSource = homePageRaw.split(String.fromCharCode(13, 10)).join(String.fromCharCode(10));
 import homeActionsSource from './home-actions.ts?raw';
 
 describe('home card presentation contracts', () => {

@@ -4,9 +4,13 @@
 
     <!-- 日期选择 -->
     <view class="date-section">
-      <button class="date-btn" @tap="prevDay">‹</button>
+      <button class="date-btn" aria-label="前一天" @tap="prevDay">
+        <image class="date-arrow-icon" src="/static/icons/svg/back.svg" mode="aspectFit" />
+      </button>
       <text class="date-text">{{ dateLabel }}</text>
-      <button class="date-btn" @tap="nextDay">›</button>
+      <button class="date-btn" aria-label="后一天" @tap="nextDay">
+        <image class="date-arrow-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+      </button>
     </view>
 
     <!-- 目标信息卡片 -->
@@ -59,7 +63,7 @@
         />
         
         <!-- 水位 -->
-        <view class="water-wrapper" :style="{ height: waterHeight + '%' }">
+        <view class="water-wrapper" :style="{ height: cupWaterHeight }">
           <view class="water-surface">
             <view class="surface-wave wave-one" />
             <view class="surface-wave wave-two" />
@@ -278,6 +282,8 @@ const waterHeight = computed(() => {
   const percent = (totalAmount.value / dailyGoal.value) * 100;
   return Math.min(percent, 95); // 限制最大95%，留顶部空间
 });
+// 玻璃内壁净高 570rpx：水位换算成 rpx，保证水始终落在杯子轮廓里
+const cupWaterHeight = computed(() => `${(waterHeight.value * 570) / 100}rpx`);
 
 function calculateRecommendedWater(userInfo: UserInfo): number {
   const base = userInfo.weight * 30;
@@ -641,44 +647,39 @@ onShow(() => {
 
 .cup-container {
   position: relative;
-  width: 700rpx;
-  height: 850rpx;
+  width: 600rpx;
+  height: 680rpx;
 }
 
+/* 杯子插画：原图四周大量留白，放大 2 倍并按杯体中心（49.3%,50.3%）对齐容器中心 */
 .cup-empty {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  width: 1200rpx;
+  height: 1200rpx;
+  transform: translate(-49.3%, -50.3%);
   z-index: 2;
   pointer-events: none;
 }
 
+/* 水位：精确落在玻璃内壁（x 98-502，底部离容器底 70rpx，内壁净高 570rpx）。
+   水层叠在杯图上方，半透明水色让水彩杯壁透出来，才是"水在杯子里" */
 .water-wrapper {
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 76%;
-  max-height: 82%;
+  bottom: 70rpx;
+  left: 100rpx;
+  width: 400rpx;
   overflow: hidden;
+  border-radius: 14rpx 14rpx 46rpx 46rpx;
   transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 1;
-  border-radius: 0 0 40rpx 40rpx;
-  clip-path: polygon(
-    0% 0%,
-    100% 0%,
-    100% 88%,
-    96% 94%,
-    4% 94%,
-    0% 88%
-  );
+  z-index: 3;
+  background: rgba(157, 206, 226, 0.4);
 }
 
 .water-texture {
   width: 100%;
-  height: 850rpx;
+  height: 570rpx;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -687,13 +688,13 @@ onShow(() => {
 
 .amount-display {
   position: absolute;
-  top: 50%;
+  top: 44%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: baseline;
   gap: 8rpx;
-  z-index: 3;
+  z-index: 5;
 }
 
 .amount-num {
@@ -1089,23 +1090,24 @@ onShow(() => {
 <style scoped>
 .page { background: #fff8f2; }
 .card { border: 1rpx solid rgba(255, 255, 255, .9); background: rgba(255, 253, 251, .78); box-shadow: 0 14rpx 34rpx rgba(126, 104, 94, .08), inset 0 1rpx 0 rgba(255, 255, 255, .9); backdrop-filter: blur(18px); }
-.date-section { margin: 0 24rpx; border-radius: 0 0 22rpx 22rpx; background: rgba(255, 253, 251, .72); }
-.date-btn { color: #7898a5; background: #edf5f5; }.date-text { color: #766b73; }
-.goal-card { margin-top: 18rpx; padding: 24rpx; border-radius: 22rpx; }.stat-label { color: #9d908f; }.stat-value { color: #789aa4; }.stat-value.primary { color: #5d8796; }.stat-divider { background: #e6eeea; }
+.date-section { margin: 0; padding: 14rpx 28rpx 12rpx; border-radius: 0; border-bottom: 1rpx solid #ebe4dc; background: transparent; }
+.date-btn { display: flex; align-items: center; justify-content: center; width: 44rpx; height: 44rpx; border: 1rpx solid #dce9e5; border-radius: 12rpx; color: #7898a5; background: #f1f7f5; }
+.date-arrow-icon { width: 24rpx; height: 24rpx; opacity: .72; }
+.date-text { color: #766b73; }
+.goal-card { margin: 0 28rpx; padding: 18rpx 0 14rpx; border: 0; border-bottom: 1rpx solid #ebe4dc; border-radius: 0; background: transparent; box-shadow: none; }
+.stat-label { color: #9d908f; }.stat-value { color: #789aa4; }.stat-value.primary { color: #5d8796; }.stat-divider { background: #e6eeea; }
 .personalized-info { background: #eef6f2; }.info-badge { background: #dcefe4; }.badge-icon, .badge-text { color: #75878d; }.info-desc { color: #969093; }.reset-btn { color: #7d878c; background: #fffdfb; }
-.setup-btn { border-color: #dfc8bd; color: #aa7772; background: #fff4ed; }
+.setup-btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54rpx; padding: 0 16rpx; border: 1rpx solid #c9e0df; border-radius: 12rpx; color: #5f8790; background: #eaf6f5; font-size: 21rpx; line-height: 1; }
 .cup-display { padding: 12rpx 0 30rpx; }
 .progress-badge { top: 32rpx; right: 42rpx; color: #748e98; background: #e7f3ee; }
 .cup-container { width: 600rpx; height: 680rpx; overflow: hidden; }
-.cup-empty { top: -50%; left: -50%; width: 200%; height: 200%; z-index: 2; }
-.water-wrapper { width: 56%; max-height: 72%; bottom: 9%; border-radius: 0 0 54rpx 54rpx; clip-path: polygon(4% 0, 96% 0, 100% 91%, 92% 100%, 8% 100%, 0 91%); background: rgba(157, 206, 226, .42); z-index: 1; }
-.water-wrapper::before { content: ''; position: absolute; top: -4rpx; right: -8%; left: -8%; height: 34rpx; background: rgba(226, 246, 249, .7); clip-path: polygon(0 42%, 8% 23%, 16% 39%, 25% 9%, 34% 34%, 44% 15%, 53% 38%, 63% 8%, 73% 31%, 83% 13%, 92% 36%, 100% 19%, 100% 100%, 0 100%); z-index: 2; }
-.water-wrapper::after { content: ''; position: absolute; top: 7rpx; right: -10%; left: -10%; height: 18rpx; border: 2rpx solid rgba(204, 235, 241, .7); border-radius: 50%; opacity: .7; z-index: 2; animation: water-ripple 4.6s ease-in-out infinite; }
-.water-texture { top: -52%; bottom: auto; width: 100%; height: 150%; opacity: .9; }
-.water-texture { animation: water-drift 7s ease-in-out infinite alternate; transform-origin: center bottom; }
-.water-wrapper::before { animation: water-breathe 3.8s ease-in-out infinite; }
-.water-surface { position: absolute; top: -8rpx; left: -10%; z-index: 4; width: 120%; height: 42rpx; border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; background: rgba(225, 247, 250, .62); box-shadow: 0 3rpx 10rpx rgba(100, 170, 190, .16); animation: surface-swell 3.2s ease-in-out infinite; }
-.surface-wave { position: absolute; left: -8%; width: 116%; height: 18rpx; border-top: 3rpx solid rgba(194, 231, 239, .8); border-radius: 50%; pointer-events: none; }
+.cup-empty { top: 50%; left: 50%; width: 1200rpx; height: 1200rpx; transform: translate(-49.3%, -50.3%); z-index: 2; }
+.water-wrapper { width: 400rpx; left: 100rpx; bottom: 70rpx; border-radius: 14rpx 14rpx 46rpx 46rpx; background: rgba(157, 206, 226, .4); z-index: 3; }
+.water-wrapper::before { content: ''; position: absolute; top: -2rpx; right: -4%; left: -4%; height: 30rpx; background: rgba(226, 246, 249, .7); clip-path: polygon(0 42%, 8% 23%, 16% 39%, 25% 9%, 34% 34%, 44% 15%, 53% 38%, 63% 8%, 73% 31%, 83% 13%, 92% 36%, 100% 19%, 100% 100%, 0 100%); z-index: 2; animation: water-breathe 3.8s ease-in-out infinite; }
+.water-wrapper::after { content: ''; position: absolute; top: 7rpx; right: -8%; left: -8%; height: 16rpx; border: 2rpx solid rgba(204, 235, 241, .7); border-radius: 50%; opacity: .7; z-index: 2; animation: water-ripple 4.6s ease-in-out infinite; }
+.water-texture { top: auto; bottom: 0; width: 100%; height: 570rpx; opacity: .9; animation: water-drift 7s ease-in-out infinite alternate; transform-origin: center bottom; }
+.water-surface { position: absolute; top: -8rpx; left: -6%; z-index: 4; width: 112%; height: 40rpx; border-radius: 48% 52% 45% 55% / 68% 52% 48% 32%; background: rgba(225, 247, 250, .66); box-shadow: 0 3rpx 10rpx rgba(100, 170, 190, .16); animation: surface-swell 3.2s ease-in-out infinite; }
+.surface-wave { position: absolute; left: -6%; width: 112%; height: 18rpx; border-top: 3rpx solid rgba(194, 231, 239, .8); border-radius: 50%; pointer-events: none; }
 .wave-one { top: 7rpx; animation: wave-one 2.35s ease-in-out infinite; }
 .wave-two { top: 18rpx; border-top-color: rgba(255, 255, 255, .62); animation: wave-two 3.6s ease-in-out infinite reverse; }
 .surface-glint { position: absolute; top: 9rpx; right: 14%; left: 14%; height: 5rpx; border-radius: 50%; background: rgba(255, 255, 255, .78); animation: surface-glint 2.7s ease-in-out infinite alternate; }
@@ -1116,7 +1118,7 @@ onShow(() => {
 @keyframes surface-glint { from { transform: translateX(-10%); opacity: .38; } to { transform: translateX(12%); opacity: .82; } }
 @keyframes wave-one { 0%, 100% { transform: translateX(-7%) scaleX(.9) rotate(-1deg); opacity: .46; } 50% { transform: translateX(8%) scaleX(1.08) rotate(1deg); opacity: .96; } }
 @keyframes wave-two { 0%, 100% { transform: translateX(8%) scaleX(1.08) rotate(1deg); opacity: .3; } 50% { transform: translateX(-8%) scaleX(.88) rotate(-1deg); opacity: .78; } }
-.amount-display { top: 52%; }.amount-num { color: #477b8d; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #789daa; }
+.amount-display { top: 46%; }.amount-num { color: #477b8d; text-shadow: 0 2rpx 10rpx rgba(255, 255, 255, .9); }.amount-unit { color: #789daa; }
 .quick-section, .history-section { margin-right: 28rpx; margin-left: 28rpx; }.header-text, .history-title { color: #6c626a; }.quick-btn { padding: 18rpx 8rpx; border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 16rpx; background: rgba(255, 253, 251, .78); box-shadow: 0 10rpx 22rpx rgba(126, 104, 94, .06); }.btn-text { color: #7d8e96; }
 .quick-drink-picker { padding: 5rpx 12rpx 5rpx 8rpx; color: #71818a; }
 .quick-drink-icon { width: 28rpx; height: 28rpx; }
@@ -1131,4 +1133,40 @@ onShow(() => {
 .drink-image { width: 42rpx; height: 42rpx; }
 .dialog-mask { background: rgba(75, 56, 61, .26); }.dialog-content { border: 1rpx solid rgba(255, 255, 255, .9); border-radius: 28rpx 28rpx 0 0; background: rgba(255, 253, 251, .96); box-shadow: 0 -14rpx 36rpx rgba(100, 76, 75, .16); backdrop-filter: blur(20px); }.dialog-title { color: #5b4f54; }.close-btn { color: #9b8589; background: #f8efec; }.input-num { color: #5c8ca0; }.input-unit { color: #a39391; }.drink-option { border-color: #efe1da; background: #fffaf7; }.drink-option.active { border-color: #b8d8d5; background: #edf7f4; }.drink-name { color: #9b8889; }.drink-option.active .drink-name { color: #5f8997; }.key-btn { color: #667d87; background: #f7f2ee; }.confirm-btn { background: #76b7c7; box-shadow: 0 10rpx 22rpx rgba(94, 157, 176, .2); }
 @media (min-width: 700px) { .page { max-width: 760px; margin: 0 auto; } }
+</style>
+
+<style scoped>
+/* Restore the stable water/cup composition from the morning build. */
+.cup-display .cup-container {
+  width: 600rpx !important;
+  height: 680rpx !important;
+  overflow: hidden !important;
+}
+.cup-display .cup-empty {
+  top: 50% !important;
+  left: 50% !important;
+  width: 1200rpx !important;
+  height: 1200rpx !important;
+  transform: translate(-49.3%, -50.3%) scale(2.05) !important;
+}
+.cup-display .water-wrapper {
+  bottom: 70rpx !important;
+  left: 100rpx !important;
+  width: 400rpx !important;
+  max-height: 570rpx !important;
+  transform: none !important;
+  border-radius: 14rpx 14rpx 46rpx 46rpx !important;
+  overflow: hidden !important;
+  z-index: 1 !important;
+}
+.cup-display .water-texture {
+  top: -52% !important;
+  bottom: auto !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 150% !important;
+}
+.cup-display .water-surface { left: -6% !important; width: 112% !important; }
+.cup-display .surface-wave { left: -6% !important; width: 112% !important; }
+.cup-display .cup-empty { z-index: 2 !important; }
 </style>

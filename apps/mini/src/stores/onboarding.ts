@@ -10,6 +10,7 @@ export type OnboardingForm = {
   birthDate: string;
   heightCm: string;
   weightKg: string;
+  targetWeightKg: string;
   primaryGoal: HealthGoal | '';
   goals: HealthGoal[];
 };
@@ -18,8 +19,9 @@ const form = reactive<OnboardingForm>({
   displayName: '',
   sex: 'unspecified',
   birthDate: '',
-  heightCm: '',
-  weightKg: '',
+  heightCm: '168',
+  weightKg: '60',
+  targetWeightKg: '',
   primaryGoal: '',
   goals: [],
 });
@@ -48,8 +50,9 @@ export function resetOnboarding() {
     displayName: '',
     sex: 'unspecified',
     birthDate: '',
-    heightCm: '',
-    weightKg: '',
+    heightCm: '168',
+    weightKg: '60',
+    targetWeightKg: '',
     primaryGoal: '',
     goals: [],
   });
