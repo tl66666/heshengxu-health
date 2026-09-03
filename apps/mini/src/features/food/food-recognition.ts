@@ -66,6 +66,10 @@ export function createRecognitionJob(uploadId: string) {
   return createMiniApiClient().post<RecognitionJob>('/food-recognition/jobs', { uploadId });
 }
 
+export function analyzeFoodImage(input: { imageBase64: string; contentType: RecognitionUpload['contentType'] }) {
+  return createMiniApiClient().post<RecognitionJob>('/food-recognition/analyze', input);
+}
+
 export function grantFoodRecognitionConsent() {
   return createMiniApiClient().post('/food-recognition/consents', {});
 }
