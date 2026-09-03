@@ -7,6 +7,7 @@ import {
   ConfirmFoodRecognitionDto,
   CreateFoodRecognitionDto,
   CreateFoodRecognitionUploadDto,
+  AnalyzeFoodImageDto,
 } from './food-recognition.dto.js';
 import { FoodRecognitionService } from './food-recognition.service.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
@@ -56,6 +57,18 @@ export class FoodRecognitionController {
   ) {
     return response.status(201).send({
       data: await this.recognition.create(request.user.id, body.uploadId),
+      meta: { requestId: response.locals.requestId },
+    });
+  }
+
+  @Post('analyze')
+  async analyze(
+    @Req() request: AuthenticatedRequest,
+    @ValidatedBody(AnalyzeFoodImageDto) body: AnalyzeFoodImageDto,
+    @Res() response: Response,
+  ) {
+    return response.status(201).send({
+      data: await this.recognition.analyze(request.user.id, body),
       meta: { requestId: response.locals.requestId },
     });
   }

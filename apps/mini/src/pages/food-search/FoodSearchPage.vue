@@ -199,6 +199,8 @@ import { createMealEntry, loadMealEntries } from '../../features/food/food.servi
 import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.js';
 import type { MealEntry } from '../../features/food/food.summary.js';
 import { calculateFoodNutrition } from '../../features/food/food.types.js';
+import { listUserFoods } from '../../features/food/user-foods.service.js';
+import { userFoodToSearchItem } from '../../features/food/food.service.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
@@ -300,7 +302,15 @@ async function load(page = 1, append = false) {
     });
 
     catalogSource.value = result.source;
-    const nextItems = append ? [...foods.value, ...result.items] : result.items;
+    let personalItems: FoodItem[] = [];
+    if (page === 1 && !query.value && !selectedCategory.value) {
+      try {
+        personalItems = (await listUserFoods()).map(userFoodToSearchItem);
+      } catch {
+        // Personal foods are an enhancement; keep the catalog usable when the API is offline.
+      }
+    }
+    const nextItems = append ? [...foods.value, ...result.items] : [...personalItems, ...result.items];
     const seenNames = new Set<string>();
     foods.value = nextItems.filter((item) => {
       const key = item.name.trim().replace(/\s+/gu, '');

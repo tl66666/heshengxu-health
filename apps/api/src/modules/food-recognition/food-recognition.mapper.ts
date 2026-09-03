@@ -14,6 +14,10 @@ type RecognitionJobSource = {
     nameSnapshot: string;
     confidence: number;
     estimatedGrams: number;
+    estimatedEnergyKcal?: number | null;
+    estimatedProteinG?: number | null;
+    estimatedFatG?: number | null;
+    estimatedCarbohydrateG?: number | null;
     rank: number;
   }>;
 };
@@ -33,6 +37,10 @@ export function recognitionJobDto(job: RecognitionJobSource): FoodRecognitionJob
       name: candidate.nameSnapshot,
       confidence: candidate.confidence,
       estimatedGrams: candidate.estimatedGrams,
+      estimatedEnergyKcal: candidate.estimatedEnergyKcal,
+      estimatedProteinG: candidate.estimatedProteinG,
+      estimatedFatG: candidate.estimatedFatG,
+      estimatedCarbohydrateG: candidate.estimatedCarbohydrateG,
       rank: candidate.rank,
     })),
   };

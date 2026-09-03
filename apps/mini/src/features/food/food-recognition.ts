@@ -7,6 +7,10 @@ export type RecognitionCandidate = {
   name: string;
   confidence: number;
   estimatedGrams: number;
+  estimatedEnergyKcal?: number | null;
+  estimatedProteinG?: number | null;
+  estimatedFatG?: number | null;
+  estimatedCarbohydrateG?: number | null;
   rank: number;
 };
 

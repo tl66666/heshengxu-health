@@ -125,7 +125,7 @@ const error = ref('');
 const selectedCandidate = computed(() =>
   job.value?.candidates.find((candidate) => candidate.id === candidateId.value),
 );
-const canContinue = computed(() => Boolean(selectedCandidate.value?.foodId));
+const canContinue = computed(() => Boolean(selectedCandidate.value));
 
 function select(candidate: RecognitionCandidate) {
   candidateId.value = candidate.id;
@@ -146,12 +146,12 @@ async function load(jobId: string) {
 
 function continueToConfirm() {
   const candidate = selectedCandidate.value;
-  if (!candidate?.foodId) {
+  if (!candidate) {
     error.value = '请选择有营养数据的候选食物';
     return;
   }
   uni.navigateTo({
-    url: `/pages/food-confirm/FoodConfirmPage?foodId=${encodeURIComponent(candidate.foodId)}&candidateId=${encodeURIComponent(candidate.id)}&source=photo&grams=${candidate.estimatedGrams}&mealType=${mealType.value}&imagePath=${encodeURIComponent(imagePath.value)}`,
+    url: `/pages/food-confirm/FoodConfirmPage?${candidate.foodId ? `foodId=${encodeURIComponent(candidate.foodId)}&` : ''}jobId=${encodeURIComponent(job.value?.id || '')}&candidateId=${encodeURIComponent(candidate.id)}&source=photo&grams=${candidate.estimatedGrams}&mealType=${mealType.value}&imagePath=${encodeURIComponent(imagePath.value)}`,
   });
 }
 

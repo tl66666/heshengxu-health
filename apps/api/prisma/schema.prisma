@@ -241,6 +241,10 @@ model FoodRecognitionCandidate {
   nameSnapshot   String
   confidence     Float
   estimatedGrams Float
+  estimatedEnergyKcal Float?
+  estimatedProteinG Float?
+  estimatedFatG Float?
+  estimatedCarbohydrateG Float?
   rank           Int
   job            FoodRecognitionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   food           FoodItem?          @relation(fields: [foodId], references: [id], onDelete: SetNull)

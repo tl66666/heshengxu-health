@@ -22,7 +22,11 @@
           <text class="library-title">保存到我的食物</text>
           <text class="library-hint">下次搜索名称就能直接记录</text>
         </view>
-        <switch v-model="saveToLibrary" color="#5c946f" />
+        <switch
+          :checked="saveToLibrary"
+          color="#5c946f"
+          @change="saveToLibrary = Boolean($event.detail.value)"
+        />
       </view>
 
       <view class="section">
@@ -99,7 +103,7 @@ import {
   replaceMealEntry,
   userFoodToSearchItem,
 } from '../../features/food/food.service.js';
-import { confirmRecognition } from '../../features/food/food-recognition.js';
+import { confirmRecognition, loadRecognitionJob } from '../../features/food/food-recognition.js';
 import { createUserFood, listUserFoods } from '../../features/food/user-foods.service.js';
 import type { UserFoodSource } from '../../features/food/user-foods.types.js';
 import {
@@ -119,6 +123,7 @@ const error = ref('');
 const entryId = ref('');
 const userFoodId = ref('');
 const candidateId = ref('');
+const jobId = ref('');
 const source = ref<UserFoodSource>('catalog');
 const imagePath = ref('');
 const saveToLibrary = ref(true);
@@ -158,6 +163,7 @@ async function load(options?: Record<string, string>) {
   entryId.value = options?.entryId || '';
   userFoodId.value = options?.userFoodId || '';
   candidateId.value = options?.candidateId || '';
+  jobId.value = options?.jobId || '';
   source.value = (options?.source as UserFoodSource) || 'catalog';
   imagePath.value = options?.imagePath ? decodeURIComponent(options.imagePath) : '';
   gramsText.value = options?.grams || '100';
@@ -171,6 +177,28 @@ async function load(options?: Record<string, string>) {
       food.value = personalFood ? userFoodToSearchItem(personalFood) : null;
     } else if (options?.foodId) {
       food.value = await getFoodById(options.foodId);
+    } else if (candidateId.value) {
+      const job = await loadRecognitionJob(jobId.value);
+      const candidate = job.candidates.find((item) => item.id === candidateId.value);
+      if (candidate && candidate.estimatedEnergyKcal != null && candidate.estimatedProteinG != null && candidate.estimatedFatG != null && candidate.estimatedCarbohydrateG != null) {
+        const scale = 100 / Math.max(1, candidate.estimatedGrams);
+        food.value = {
+          id: `recognized-${candidate.id}`,
+          name: candidate.name,
+          brand: null,
+          category: null,
+          nutrition: {
+            basisGrams: 100,
+            energyKcal: Math.round(candidate.estimatedEnergyKcal * scale * 10) / 10,
+            proteinG: Math.round(candidate.estimatedProteinG * scale * 10) / 10,
+            fatG: Math.round(candidate.estimatedFatG * scale * 10) / 10,
+            carbohydrateG: Math.round(candidate.estimatedCarbohydrateG * scale * 10) / 10,
+            dietaryFiberG: null,
+            sodiumMg: null,
+          },
+          servings: [{ id: `recognized-serving-${candidate.id}`, label: '识别份量', grams: candidate.estimatedGrams }],
+        };
+      }
     } else {
       food.value = null;
     }

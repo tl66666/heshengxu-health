@@ -18,7 +18,7 @@ export class UserFoodsService {
         userId,
         name: dto.name.trim(),
         imageUrl: dto.imageUrl,
-        source: dto.source.trim(),
+        source: dto.source,
         energyKcal: dto.energyKcal,
         proteinG: dto.proteinG,
         fatG: dto.fatG,

@@ -7,6 +7,7 @@ import { MealEntriesModule } from '../meal-entries/meal-entries.module.js';
 import { FoodRecognitionController } from './food-recognition.controller.js';
 import { FoodRecognitionService } from './food-recognition.service.js';
 import { MockFoodRecognitionProvider } from './providers/mock-food-recognition.provider.js';
+import { CloudBaseFoodRecognitionProvider } from './providers/cloudbase-food-recognition.provider.js';
 import { FoodRecognitionConsentService } from './food-recognition-consent.service.js';
 import {
   resolveFoodRecognitionRuntimeConfig,
@@ -23,6 +24,7 @@ import { MockRecognitionImageStorage } from './storage/mock-recognition-image-st
     FoodRecognitionConsentService,
     FoodRecognitionService,
     MockFoodRecognitionProvider,
+    CloudBaseFoodRecognitionProvider,
     MockRecognitionImageStorage,
     PrismaAiTraceRepository,
     {
@@ -31,11 +33,11 @@ import { MockRecognitionImageStorage } from './storage/mock-recognition-image-st
     },
     {
       provide: 'FoodRecognitionProvider',
-      useFactory: (config: FoodRecognitionRuntimeConfig, mock: MockFoodRecognitionProvider) => {
+      useFactory: (config: FoodRecognitionRuntimeConfig, mock: MockFoodRecognitionProvider, cloudbase: CloudBaseFoodRecognitionProvider) => {
         if (config.visionProvider === 'mock') return mock;
-        throw new Error('Hunyuan food-recognition provider is not deployed in this runtime.');
+        return cloudbase;
       },
-      inject: ['FoodRecognitionRuntimeConfig', MockFoodRecognitionProvider],
+      inject: ['FoodRecognitionRuntimeConfig', MockFoodRecognitionProvider, CloudBaseFoodRecognitionProvider],
     },
     {
       provide: 'RecognitionImageStorage',

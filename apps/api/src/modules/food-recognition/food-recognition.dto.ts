@@ -44,3 +44,11 @@ export class ConfirmFoodRecognitionDto {
   @MaxLength(280)
   note?: string;
 }
+
+export class AnalyzeFoodImageDto {
+  @IsIn(['image/jpeg', 'image/png', 'image/webp'])
+  contentType!: 'image/jpeg' | 'image/png' | 'image/webp';
+
+  @IsString()
+  imageBase64!: string;
+}
