@@ -108,7 +108,7 @@ const previews = [
   width: 100%;
   height: 560rpx;
   overflow: hidden;
-  background: linear-gradient(180deg, #fdfbf0 0%, #fefbf1 100%);
+  background: #fefbee;
 }
 .hero-art {
   width: 100%;
