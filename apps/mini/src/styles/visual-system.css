@@ -1,0 +1,150 @@
+/*
+ * Heshengxu visual system v2.1
+ * One calm canvas, one primary action, and a restrained glass surface.
+ * The opaque fallbacks are intentional: older Android WebViews may not
+ * support backdrop-filter, but the hierarchy must remain identical.
+ */
+page {
+  --hz-bg: #fffdf9;
+  --hz-surface: #ffffff;
+  --hz-surface-glass: rgba(255, 255, 255, 0.84);
+  --hz-surface-soft: #f5f8f3;
+  --hz-ink: #1e2d25;
+  --hz-muted: #748078;
+  --hz-green-deep: #173f30;
+  --hz-green: #2f6b4d;
+  --hz-green-soft: #e7f0e9;
+  --hz-sky-soft: #e9f1f4;
+  --hz-warm-soft: #f8f0df;
+  --hz-rule: #e2e8e1;
+  --hz-radius-card: 22rpx;
+  --hz-radius-control: 16rpx;
+  --hz-shadow-card: 0 10rpx 28rpx rgba(32, 55, 42, 0.07);
+  --hz-shadow-float: 0 18rpx 42rpx rgba(24, 52, 37, 0.14);
+}
+
+page,
+body {
+  background: var(--hz-bg) !important;
+  color: var(--hz-ink) !important;
+}
+
+/* Shared mobile gutters. Narrow devices keep the same rhythm without overflow. */
+.page {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 360px) {
+  .page { padding-right: 24rpx !important; padding-left: 24rpx !important; }
+}
+
+@media (min-width: 700px) {
+  .page { padding-right: 48rpx !important; padding-left: 48rpx !important; }
+}
+
+/* Native-feeling navigation with a single translucent layer. */
+.nav-bar-wrapper {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-bottom: 1rpx solid rgba(226, 232, 225, 0.9) !important;
+  box-shadow: 0 4rpx 16rpx rgba(32, 55, 42, 0.04) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.nav-bar-wrapper .status-bar { background: rgba(255, 253, 249, 0.9) !important; }
+.nav-bar-wrapper .icon-action {
+  border-color: #dbe7dc !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  box-shadow: 0 4rpx 12rpx rgba(32, 55, 42, 0.06) !important;
+}
+.nav-bar-wrapper .title { color: var(--hz-ink) !important; font-size: 30rpx !important; font-weight: 650 !important; }
+
+/* Bottom navigation stays bright and quiet; only the active item gets tint. */
+.mini-tabbar {
+  background: rgba(255, 255, 255, 0.86) !important;
+  border-top: 1rpx solid rgba(226, 232, 225, 0.94) !important;
+  box-shadow: 0 -8rpx 24rpx rgba(32, 55, 42, 0.07) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  backdrop-filter: blur(18px) !important;
+}
+.mini-tabbar .tab { color: #829188 !important; border-radius: 18rpx !important; }
+.mini-tabbar .tab.active:not(.tab--xuxu) {
+  color: var(--hz-green) !important;
+  background: rgba(231, 240, 233, 0.76) !important;
+}
+.mini-tabbar .tab-icon { width: 42rpx !important; height: 42rpx !important; }
+
+/* Shared surfaces. Specific feature colors should remain on artwork and metrics. */
+.page > .card,
+.page > .hero,
+.page > .summary-card,
+.page > .meal-card,
+.page > .plan-card,
+.page > .review,
+.page > .content-card {
+  border-color: var(--hz-rule) !important;
+  border-radius: var(--hz-radius-card) !important;
+  background: var(--hz-surface) !important;
+  box-shadow: var(--hz-shadow-card) !important;
+}
+
+/* Inputs and action controls share one rounded geometry across iOS and Android. */
+button.primary-action,
+button.primary-button,
+button.save,
+button.save-button,
+button.submit,
+button.record-button,
+button.recognize-btn {
+  min-height: 78rpx !important;
+  border: 1rpx solid rgba(159, 195, 173, 0.7) !important;
+  border-radius: var(--hz-radius-control) !important;
+  color: #2f5f4a !important;
+  background: rgba(237, 247, 240, 0.9) !important;
+  box-shadow: 0 8rpx 18rpx rgba(47, 107, 77, 0.1) !important;
+}
+
+button.primary-action:active,
+button.primary-button:active,
+button.save:active,
+button.save-button:active,
+button.submit:active,
+button.record-button:active,
+button.recognize-btn:active {
+  transform: scale(0.985) !important;
+  background: rgba(216, 232, 220, 0.98) !important;
+}
+
+input,
+textarea,
+.input,
+.text-input,
+.field,
+.duration-wrap,
+.input-wrap {
+  border-color: #dfe8df !important;
+  border-radius: var(--hz-radius-control) !important;
+  color: var(--hz-ink) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Images never collapse on the mini-program renderer. */
+image { max-width: 100%; }
+.hero image,
+.banner image,
+.companion-banner image { max-width: 100%; }
+
+/* WXSS does not support the universal selector. Keep motion controls scoped
+ * to project-owned elements so the generated app.wxss remains valid. */
+@media (prefers-reduced-motion: reduce) {
+  page .page,
+  page .page::before,
+  page .page::after,
+  page button,
+  page image {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

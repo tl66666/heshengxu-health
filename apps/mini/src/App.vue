@@ -103,7 +103,6 @@ button::after {
 }
 </style>
 
-
 <style>
 /* Final cascade: these tokens intentionally load last so legacy page rules cannot reintroduce
    the dark green/white/cream split that made the visual system feel disconnected. */
@@ -1668,4 +1667,10 @@ body {
   border-color: #e9e9e3 !important;
   box-shadow: 0 7rpx 18rpx rgba(93, 83, 72, 0.035) !important;
 }
+</style>
+
+<style>
+/* Last-loaded visual system. The explicit final import prevents legacy
+ * per-page cascades from leaking into shared controls. */
+@import './styles/visual-system.css';
 </style>

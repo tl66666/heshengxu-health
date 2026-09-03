@@ -14,7 +14,7 @@
         <text class="greeting">{{ greeting }}，{{ displayName }}</text>
       </view>
       <button class="avatar-wrapper" @tap="toXuxu">
-        <image class="avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
+        <image class="avatar" src="/static/illustrations/default-user-avatar.png" mode="aspectFill" />
         <text class="avatar-hint">和序序聊聊</text>
       </button>
     </view>
