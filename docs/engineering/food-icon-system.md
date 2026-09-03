@@ -8,5 +8,5 @@
 - 未知分类回退到 `/static/icons/svg/meal.svg`，避免后端新增分类时出现空图标。
 - 新增分类时同时添加 SVG、映射项和 `food-icon.spec.ts` 回归测试。
 - `FoodConfirmPage.vue` 与 `food-detail/FoodDetailPage.vue` 复用同一映射，详情/确认页不会再出现首字或 Emoji 占位。
-- 离线目录保留 30+ 种常见食物，营养值按仓库内 `food.sql` 的公开字段整理；API 种子同步补充蔬菜、主食、肉类、奶类和坚果，启动后可继续导入完整 SQL 数据。
-- 本地 API 使用新增种子数据时，在已启动 PostgreSQL 的前提下运行 `npm --prefix apps/api exec prisma db seed`；要从仓库 `food.sql` 导入精选常见数据，运行 `npm --prefix apps/api run food:import`。没有后端时，小程序仍使用同一套精选目录兜底。
+- 小程序包内保留约 82 种常见食物作为应急离线目录，分类会统一为正式 slug。页面必须明确标注离线状态，不能把这批数据冒充完整食物库。
+- PostgreSQL 保存从仓库 `food.sql` 整理的完整目录，基础食物优先、品牌商品后置。日常双击 `start-dev.bat`；启动脚本只在 active 食物不足 10,000 条时执行 `npm --prefix apps/api run food:import`，不会每次启动重复导入。

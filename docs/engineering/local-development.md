@@ -3,7 +3,7 @@
 ## 前置条件
 
 - Node.js 24.x
-- pnpm 11.x
+- npm（随 Node.js 安装）
 - 仅开发微信小程序前端：不需要 Docker Desktop，直接使用 `apps/mini` 和本地构建。
 - 联调 NestJS API、PostgreSQL、Redis：需要 Docker Desktop，启动本地基础设施后再运行 API。
 
@@ -19,15 +19,14 @@
 
 本项目当前以 NestJS + PostgreSQL 为本地事实后端。微信云开发不是本地 API 的前置条件；只有未来把服务部署到腾讯云时，才按部署方案启用云函数、云数据库或云存储。
 
+日常联调只需双击仓库根目录的 `start-dev.bat`。脚本会自动启动 Docker Desktop、等待 PostgreSQL/Redis 健康、执行数据库迁移、启动 API 和小程序监听器。完整食物库存在时会直接复用；只有 active 食物不足 10,000 条时才会自动从 `food.sql` 补齐，因此电脑重启后不需要重新导入。
+
+如果没有运行本地服务，食物页面会明确显示“当前为离线常见食物”，此时约 82 条只是小程序包内的应急目录，并不代表 PostgreSQL 中的完整食物库丢失。
+
 食物拍照识别当前默认使用本地 mock Provider，用于验证“授权 -> 上传会话 -> 候选 -> 用户确认”的流程。不要在小程序填写 CloudBase、腾讯云或混元密钥。未来服务端适配器部署时，才由服务端运行环境配置 `CLOUDBASE_ENV_ID`、`TENCENTCLOUD_SECRET_ID` 和 `TENCENTCLOUD_SECRET_KEY`；选择 `cloudbase` 或 `hunyuan` 但缺少这些变量时，API 会拒绝启动。
 
 ```powershell
-Copy-Item .env.example .env
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
-docker compose --env-file .env -f infra/docker/docker-compose.yml ps
-pnpm --filter @heban/api prisma:generate
-pnpm --filter @heban/api prisma:deploy
-pnpm --filter @heban/domain build
+.\scripts\start-local-dev.ps1
 ```
 
 预期 PostgreSQL 和 Redis 都显示为 `healthy`。
@@ -38,12 +37,12 @@ pnpm --filter @heban/domain build
 docker compose --env-file .env -f infra/docker/docker-compose.yml down
 ```
 
-重置本地开发数据库会清空本机健康档案和测试数据，只在需要从零验证迁移时执行：
+以下命令会删除数据库卷、完整食物库、本机健康档案和测试数据，日常开发禁止执行：
 
 ```powershell
 docker compose --env-file .env -f infra/docker/docker-compose.yml down -v
 docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
-pnpm --filter @heban/api prisma:deploy
+npx -y prisma@6.16.0 migrate deploy --schema apps/api/prisma/schema.prisma
 ```
 
 ## 提交前检查

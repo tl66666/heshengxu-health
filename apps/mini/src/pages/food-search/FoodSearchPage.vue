@@ -1,11 +1,11 @@
 <template>
-  <view class="page">
+  <view class="page food-search-page">
     <AppNavBar title="选择食物" route="/pages/food-search/FoodSearchPage" />
 
     <view class="intro">
       <text class="eyebrow">记下一餐</text>
       <text class="title">从食物目录开始</text>
-      <text class="subtitle">支持中文、拼音搜索，9000+ 种食物任你选</text>
+      <text class="subtitle">常见基础食物优先，品牌食品随后</text>
     </view>
 
     <view class="meal-switch" aria-label="选择餐次">
@@ -52,160 +52,93 @@
       >
     </view>
 
-    <!-- 热门搜索 - 仅在未搜索时显示 -->
-    <view v-if="!query && !selectedCategory" class="hot-searches">
-      <view class="section-header">
-        <image class="section-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
-        <text class="section-title">热门搜索</text>
-      </view>
-      <view class="tag-list">
-        <button
-          v-for="keyword in hotKeywords"
-          :key="keyword"
-          class="tag-btn"
-          @tap="searchByKeyword(keyword)"
-        >
-          {{ keyword }}
-        </button>
-      </view>
-    </view>
-
-    <!-- 搜索历史 - 仅在未搜索时显示 -->
-    <view v-if="!query && !selectedCategory && searchHistory.length > 0" class="search-history">
-      <view class="section-header">
-        <view class="section-left">
-          <image class="section-icon" src="/static/icons/svg/review.svg" mode="aspectFit" />
-          <text class="section-title">搜索历史</text>
+    <view class="catalog-shell">
+      <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-y>
+        <view class="category-list">
+          <view
+            v-for="cat in allCategories"
+            :key="cat.id || 'all'"
+            :class="['category-tab', { active: selectedCategory === cat.id }]"
+            @tap="selectCategory(cat.id)"
+          >
+            <text>{{ cat.name }}</text>
+            <text v-if="cat.count !== undefined" class="count">{{ cat.count }}</text>
+          </view>
         </view>
-        <button class="clear-history" @tap="clearHistory">清空</button>
-      </view>
-      <view class="history-list">
-        <button
-          v-for="(item, index) in searchHistory"
-          :key="index"
-          class="history-item"
-          @tap="searchByKeyword(item)"
-        >
-          <text class="history-text">{{ item }}</text>
-        </button>
-      </view>
-    </view>
+      </scroll-view>
 
-    <!-- 快捷筛选 -->
-    <view v-if="!query && !selectedCategory" class="quick-filters">
-      <button class="filter-btn green" @tap="filterByHealthLight(1)">
-        <image class="filter-icon" src="/static/icons/svg/check.svg" mode="aspectFit" />
-        <text class="filter-text">绿灯食物</text>
-      </button>
-      <button class="filter-btn" @tap="selectCategory(null)">
-        <image class="filter-icon" src="/static/icons/svg/meal.svg" mode="aspectFit" />
-        <text class="filter-text">浏览全部</text>
-      </button>
-    </view>
-
-    <!-- 分类筛选：进入页面即展示，搜索时继续作为筛选条件 -->
-    <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-y>
-      <view class="category-list">
-        <view
-          v-for="cat in allCategories"
-          :key="cat.id || 'all'"
-          :class="['category-tab', { active: selectedCategory === cat.id }]"
-          @tap="selectCategory(cat.id)"
-        >
-          <text>{{ cat.name }}</text>
-          <text v-if="cat.count !== undefined" class="count">({{ cat.count }})</text>
-        </view>
-      </view>
-    </scroll-view>
-
-    <view v-if="!query && !selectedCategory && !selectedHealthLight" class="common-heading">
-      <text class="common-title">常见食物</text>
-      <text class="common-subtitle">按分类快速记录这一餐</text>
-    </view>
-
-    <!-- 结果统计 -->
-    <view v-if="query || selectedCategory" class="result-caption">
-      <text>{{ getResultText() }}</text>
-      <text v-if="totalPages > 1" class="page-info">第 {{ currentPage }}/{{ totalPages }} 页</text>
-    </view>
-
-    <!-- 加载状态 -->
-    <view v-if="loading" class="state">
-      <text>正在搜索...</text>
-    </view>
-
-    <!-- 错误状态 -->
-    <view v-else-if="error" class="state state--error">
-      <text>搜索出错了</text>
-      <text class="state-copy">请检查网络连接</text>
-      <button class="retry" @tap="load">重新加载</button>
-    </view>
-
-    <!-- 空状态 -->
-    <view v-else-if="(query || selectedCategory) && foods.length === 0" class="state">
-      <image class="state-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
-      <text class="state-copy">没有找到相关食物</text>
-      <text class="state-copy">试试换个关键词</text>
-    </view>
-
-    <!-- 食物列表 -->
-    <view v-else-if="foods.length > 0" class="food-list">
-      <view
-        v-for="food in foods"
-        :key="food.id"
-        :class="['food-card', { 'food-card--added': flyingFoodId === food.id }]"
-        hover-class="food-card-active"
-        @tap="choose(food)"
+      <scroll-view
+        class="food-results"
+        scroll-y
+        :scroll-top="resultsScrollTop"
+        lower-threshold="160"
+        @scrolltolower="loadNextPage"
       >
-        <view class="food-main">
-          <view class="food-icon">
-            <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
+        <view v-if="catalogSource === 'offline'" class="offline-notice">
+          <text class="offline-title">当前为离线常见食物</text>
+          <text>本地服务未连接，运行 start-dev.bat 后会恢复完整食物库。</text>
+        </view>
+
+        <view class="result-heading">
+          <view>
+            <text class="common-title">{{ query || selectedCategory ? '筛选结果' : '常见食物' }}</text>
+            <text class="common-subtitle">{{ getResultText() }}</text>
           </view>
-          <view class="food-info">
-            <text class="food-name">{{ food.name }}</text>
-            <view v-if="getHighlights(food).length > 0" class="food-tags">
-              <text v-for="tag in getHighlights(food)" :key="tag" class="tag">{{ tag }}</text>
+          <button class="photo-compact" aria-label="拍照识别食物" @tap="openRecognition">
+            <image src="/static/icons/camera.png" mode="aspectFit" />
+          </button>
+        </view>
+
+        <view v-if="loading" class="state">
+          <text>正在准备食物...</text>
+        </view>
+
+        <view v-else-if="error" class="state state--error">
+          <text>食物目录暂时无法加载</text>
+          <button class="retry" @tap="load(1)">重新加载</button>
+        </view>
+
+        <view v-else-if="foods.length === 0" class="state">
+          <image class="state-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
+          <text class="state-copy">没有找到相关食物，试试换个关键词</text>
+        </view>
+
+        <view v-else class="food-list">
+          <view
+            v-for="food in foods"
+            :key="food.id"
+            :class="['food-card', { 'food-card--added': flyingFoodId === food.id }]"
+            hover-class="food-card-active"
+            @tap="choose(food)"
+          >
+            <view class="food-main">
+              <view class="food-icon">
+                <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
+              </view>
+              <view class="food-info">
+                <text class="food-name">{{ food.name }}</text>
+                <view v-if="getHighlights(food).length > 0" class="food-tags">
+                  <text v-for="tag in getHighlights(food)" :key="tag" class="tag">{{ tag }}</text>
+                </view>
+                <text class="food-calories">{{ food.nutrition?.energyKcal || 0 }} 千卡 / 100g</text>
+              </view>
             </view>
-            <text class="food-calories"> {{ food.nutrition?.energyKcal || 0 }} 千卡 / 100g </text>
+            <view v-if="selectedCount(food.id) > 0" class="food-stepper" @tap.stop>
+              <button class="stepper-btn stepper-btn--minus" aria-label="减少份数" @tap="changeQuantity(food.id, -1)">−</button>
+              <text class="stepper-number">{{ selectedCount(food.id) }}</text>
+              <button class="stepper-btn stepper-btn--plus" aria-label="增加份数" @tap="changeQuantity(food.id, 1)">＋</button>
+            </view>
+            <button v-else class="food-add" aria-label="加入餐次" @tap.stop="toggleCart(food)">
+              <text>＋</text>
+            </button>
+          </view>
+          <view class="load-more">
+            <text v-if="loadingMore">正在加载更多...</text>
+            <text v-else-if="currentPage < totalPages">继续上滑查看更多</text>
+            <text v-else>已显示当前分类的全部食物</text>
           </view>
         </view>
-        <view
-          v-if="food.healthLight !== undefined && food.healthLight !== null"
-          :class="['food-badge', 'badge-' + food.healthLight]"
-        >
-          {{ getHealthLabel(food.healthLight) }}
-        </view>
-        <view v-if="selectedCount(food.id) > 0" class="food-stepper" @tap.stop>
-          <button class="stepper-btn stepper-btn--minus" aria-label="减少份数" @tap="changeQuantity(food.id, -1)">−</button>
-          <text class="stepper-number">{{ selectedCount(food.id) }}</text>
-          <button class="stepper-btn stepper-btn--plus" aria-label="增加份数" @tap="changeQuantity(food.id, 1)">＋</button>
-        </view>
-        <button v-else class="food-add" aria-label="加入餐次" @tap.stop="toggleCart(food)">
-          <text>＋</text>
-        </button>
-      </view>
-      <view v-if="totalPages > 1" class="pagination">
-        <button
-          class="page-button"
-          aria-label="上一页"
-          :disabled="currentPage <= 1"
-          @tap="goToPage(currentPage - 1)"
-        >
-          <image src="/static/icons/svg/back.svg" mode="aspectFit" />
-        </button>
-        <view class="page-progress"
-          ><text>{{ currentPage }}</text
-          ><text class="page-divider">/</text><text>{{ totalPages }}</text></view
-        >
-        <button
-          class="page-button"
-          aria-label="下一页"
-          :disabled="currentPage >= totalPages"
-          @tap="goToPage(currentPage + 1)"
-        >
-          <image class="next-icon" src="/static/icons/svg/forward.svg" mode="aspectFit" />
-        </button>
-      </view>
+      </scroll-view>
     </view>
 
     <view v-if="selectedFoods.length" class="cart-bar">
@@ -246,23 +179,12 @@
       </view>
     </view>
 
-    <!-- 拍照识别入口 -->
-    <button class="photo-entry" @tap="openRecognition">
-      <view class="camera-mark">
-        <image src="/static/icons/camera.png" mode="aspectFit" />
-      </view>
-      <view class="photo-copy">
-        <text>拍照识别食物</text>
-        <text>让序序先帮你看看</text>
-      </view>
-      <image class="photo-arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
-    </button>
   </view>
 </template>
 
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app';
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import AppNavBar from '../../components/AppNavBar.vue';
 import {
   searchFoods,
@@ -288,6 +210,9 @@ const totalCount = ref(0);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const pageSize = 20;
+const catalogSource = ref<'remote' | 'offline'>('remote');
+const loadingMore = ref(false);
+const resultsScrollTop = ref(0);
 const mealType = ref<MealType>('lunch');
 const mealOptions: Array<{ value: MealType; label: string; icon: string }> = [
   { value: 'breakfast', label: '早餐', icon: '/static/icons/breakfast.png' },
@@ -295,7 +220,6 @@ const mealOptions: Array<{ value: MealType; label: string; icon: string }> = [
   { value: 'dinner', label: '晚餐', icon: '/static/icons/dinner.png' },
   { value: 'snack', label: '加餐', icon: '/static/icons/snack.png' },
 ];
-const selectedHealthLight = ref<number | undefined>(undefined);
 type CartItem = { food: FoodItem; grams: number; quantity: number; calories: number };
 const selectedFoods = ref<CartItem[]>([]);
 const cartOpen = ref(false);
@@ -316,8 +240,6 @@ const remainingAfterSelection = computed(() =>
 );
 const mealLabel = computed(() => mealOptions.find((item) => item.value === mealType.value)?.label || '午餐');
 
-// 搜索历史（localStorage）
-const searchHistory = ref<string[]>([]);
 const mealIcon = computed(
   () =>
     ({
@@ -327,22 +249,6 @@ const mealIcon = computed(
       snack: '/static/icons/snack.png',
     })[mealType.value],
 );
-const MAX_HISTORY = 10;
-
-// 热门搜索关键词
-const hotKeywords = [
-  '鸡胸肉',
-  '鸡蛋',
-  '燕麦',
-  '西兰花',
-  '苹果',
-  '牛奶',
-  '香蕉',
-  '番茄',
-  '豆腐',
-  '牛肉',
-];
-
 let searchTimer: number | null = null;
 
 // 所有分类（包含"全部"选项）
@@ -369,80 +275,11 @@ const allCategories = computed(() => {
   return [all, ...[...categories.value].sort((a, b) => rank(a.slug) - rank(b.slug))];
 });
 
-const commonFoodKeywords = [
-  '米饭',
-  '鸡蛋',
-  '鸡胸肉',
-  '西兰花',
-  '苹果',
-  '牛奶',
-  '香蕉',
-  '豆腐',
-  '燕麦',
-  '红薯',
-];
-const commonByCategory: Record<string, string[]> = {
-  staple: ['米饭', '面条', '馒头', '燕麦', '红薯', '玉米'],
-  vegetable: ['西兰花', '番茄', '黄瓜', '菠菜', '生菜', '胡萝卜'],
-  'meat-egg': ['鸡蛋', '鸡胸肉', '牛肉', '猪里脊', '虾仁', '三文鱼'],
-  soy: ['豆腐', '豆浆', '豆干', '毛豆'],
-  dairy: ['牛奶', '无糖酸奶', '奶酪'],
-  fruit: ['苹果', '香蕉', '橙子', '猕猴桃', '草莓'],
-  nut: ['核桃', '杏仁', '花生'],
-};
-
-// 加载搜索历史
-function loadSearchHistory() {
-  try {
-    const history = uni.getStorageSync('searchHistory');
-    if (history) {
-      searchHistory.value = JSON.parse(history);
-    }
-  } catch (e) {
-    console.error('加载搜索历史失败:', e);
-  }
-}
-
-// 保存搜索历史
-function saveSearchHistory(keyword: string) {
-  if (!keyword || keyword.trim() === '') return;
-
-  const trimmed = keyword.trim();
-  const history = searchHistory.value.filter((item) => item !== trimmed);
-  history.unshift(trimmed);
-
-  // 限制数量
-  searchHistory.value = history.slice(0, MAX_HISTORY);
-
-  try {
-    uni.setStorageSync('searchHistory', JSON.stringify(searchHistory.value));
-  } catch (e) {
-    console.error('保存搜索历史失败:', e);
-  }
-}
-
-// 清空搜索历史
-function clearHistory() {
-  uni.showModal({
-    title: '清空搜索历史',
-    content: '确定要清空所有搜索历史吗？',
-    success: (res) => {
-      if (res.confirm) {
-        searchHistory.value = [];
-        try {
-          uni.removeStorageSync('searchHistory');
-        } catch (e) {
-          console.error('清空搜索历史失败:', e);
-        }
-      }
-    },
-  });
-}
-
 // 加载分类数据
 async function loadCategories() {
   try {
     categories.value = await getCategoryStats();
+    if (categories.value[0]?.source) catalogSource.value = categories.value[0].source;
     totalCount.value = categories.value.reduce((sum, cat) => sum + (cat.count || 0), 0);
   } catch (err) {
     console.error('加载分类失败:', err);
@@ -450,8 +287,9 @@ async function loadCategories() {
 }
 
 // 搜索食物
-async function load(page = 1) {
-  loading.value = true;
+async function load(page = 1, append = false) {
+  if (append) loadingMore.value = true;
+  else loading.value = true;
   error.value = false;
   try {
     const result = await searchFoods({
@@ -459,74 +297,39 @@ async function load(page = 1) {
       categoryId: selectedCategory.value || undefined,
       page,
       pageSize,
-      healthLight: selectedHealthLight.value,
     });
 
-    if (page === 1 && !query.value && !selectedHealthLight.value) {
-      const keywords = selectedCategory.value
-        ? commonByCategory[
-            categories.value.find((cat) => cat.id === selectedCategory.value)?.slug || ''
-          ] || []
-        : commonFoodKeywords;
-      const commonResults = await Promise.all(
-        keywords.map((keyword) =>
-          searchFoods({
-            query: keyword,
-            categoryId: selectedCategory.value || undefined,
-            pageSize: 2,
-          }),
-        ),
-      );
-      const common = commonResults
-        .flatMap((item, index) => item.items.map((food) => ({ food, keyword: keywords[index] })))
-        .sort((a, b) => {
-          const score = (entry: { food: FoodItem; keyword: string }) =>
-            entry.food.name === entry.keyword
-              ? 0
-              : entry.food.name.startsWith(entry.keyword)
-                ? 1
-                : 2;
-          return score(a) - score(b);
-        })
-        .map((entry) => entry.food);
-      const seen = new Set<string>();
-      foods.value = [...common, ...result.items]
-        .filter((item) => !seen.has(item.id) && seen.add(item.id))
-        .filter(
-          (item, index, list) =>
-            !commonFoodKeywords.includes(item.name) ||
-            list.findIndex((candidate) => candidate.name === item.name) === index,
-        )
-        .slice(0, pageSize);
-    } else {
-      const seenNames = new Set<string>();
-      foods.value = result.items.filter((item) => {
-        if (!commonFoodKeywords.includes(item.name)) return true;
-        if (seenNames.has(item.name)) return false;
-        seenNames.add(item.name);
-        return true;
-      });
-    }
+    catalogSource.value = result.source;
+    const nextItems = append ? [...foods.value, ...result.items] : result.items;
+    const seenNames = new Set<string>();
+    foods.value = nextItems.filter((item) => {
+      const key = item.name.trim().replace(/\s+/gu, '');
+      if (seenNames.has(key)) return false;
+      seenNames.add(key);
+      return true;
+    });
     totalCount.value = result.total;
     currentPage.value = result.page;
     totalPages.value = result.totalPages;
 
-    // 保存搜索历史
-    if (query.value && query.value.trim()) {
-      saveSearchHistory(query.value.trim());
-    }
   } catch (err) {
     console.error('搜索失败:', err);
     error.value = true;
   } finally {
     loading.value = false;
+    loadingMore.value = false;
   }
 }
 
-function goToPage(page: number) {
-  if (page < 1 || page > totalPages.value || loading.value) return;
-  load(page);
-  uni.pageScrollTo({ scrollTop: 0, duration: 180 });
+function loadNextPage() {
+  if (loading.value || loadingMore.value || currentPage.value >= totalPages.value) return;
+  load(currentPage.value + 1, true);
+}
+
+async function resetResultsScroll() {
+  resultsScrollTop.value = 1;
+  await nextTick();
+  resultsScrollTop.value = 0;
 }
 
 // 搜索输入防抖
@@ -535,19 +338,17 @@ function onSearchInput() {
     clearTimeout(searchTimer);
   }
   searchTimer = setTimeout(() => {
-    if (query.value || selectedCategory.value) {
-      currentPage.value = 1;
-      load(1);
-    }
+    currentPage.value = 1;
+    resetResultsScroll();
+    load(1);
   }, 500);
 }
 
 // 搜索确认
 function handleSearch() {
-  if (query.value || selectedCategory.value) {
-    currentPage.value = 1;
-    load(1);
-  }
+  currentPage.value = 1;
+  resetResultsScroll();
+  load(1);
 }
 
 // 清空搜索
@@ -556,13 +357,7 @@ function clearQuery() {
   selectedCategory.value = null;
   foods.value = [];
   currentPage.value = 1;
-}
-
-// 通过关键词搜索
-function searchByKeyword(keyword: string) {
-  query.value = keyword;
-  selectedCategory.value = null;
-  currentPage.value = 1;
+  resetResultsScroll();
   load(1);
 }
 
@@ -570,16 +365,7 @@ function searchByKeyword(keyword: string) {
 function selectCategory(categoryId: string | null) {
   selectedCategory.value = categoryId;
   currentPage.value = 1;
-  load(1);
-}
-
-// 按健康等级筛选
-function filterByHealthLight(level: number) {
-  // 这里可以扩展，暂时跳转到全部绿灯食物
-  selectedCategory.value = null;
-  selectedHealthLight.value = level;
-  currentPage.value = 1;
-  // TODO: 添加 healthLight 参数到搜索
+  resetResultsScroll();
   load(1);
 }
 
@@ -716,7 +502,6 @@ onLoad(async (options) => {
   ) {
     mealType.value = requestedMealType;
   }
-  loadSearchHistory();
   await loadCategories();
   await loadTodayEntries();
   // 进入餐次记录页时直接展示目录；接口不可用时 searchFoods 会返回本地目录兜底。
@@ -1702,4 +1487,152 @@ onLoad(async (options) => {
 .page-progress { color:#668374; font-size:22rpx; }
 .cart-bar { border-top:1rpx solid #dfe9e1; background:rgba(255,255,255,.98); box-shadow:0 -8rpx 24rpx rgba(40,72,50,.08); }
 .cart-done { height:64rpx; border-radius:18rpx; background:#2f7b4e; font-size:23rpx; }
+
+/* Stable catalog workspace: both columns share one height and scroll independently. */
+.page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  min-height: 0;
+  padding: 0 24rpx calc(18rpx + env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+.intro {
+  flex: none;
+  padding: 12rpx 2rpx 14rpx;
+}
+.eyebrow { display: none; }
+.title { font-size: 31rpx; }
+.subtitle { margin-top: 4rpx; font-size: 19rpx; }
+.meal-switch {
+  flex: none;
+  margin-bottom: 12rpx;
+  padding: 5rpx;
+}
+.meal-switch-item { height: 76rpx; }
+.meal-switch-icon { width: 44rpx; height: 44rpx; }
+.search-box {
+  flex: none;
+  min-height: 72rpx;
+  margin-bottom: 10rpx;
+  padding: 14rpx 18rpx;
+}
+.budget-strip {
+  flex: none;
+  margin-bottom: 12rpx;
+  padding: 12rpx 16rpx;
+}
+.catalog-shell {
+  display: grid;
+  grid-template-columns: 158rpx minmax(0, 1fr);
+  flex: 1;
+  min-height: 360rpx;
+  gap: 14rpx;
+  overflow: hidden;
+}
+.category-tabs,
+.food-results {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.category-tabs {
+  position: static;
+  float: none;
+  top: auto;
+  border: 1rpx solid #e4e7df;
+  border-radius: 18rpx;
+  background: #f3f6ef;
+}
+.category-list {
+  gap: 2rpx;
+  padding: 8rpx 0 120rpx;
+}
+.category-tab {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rpx;
+  min-height: 72rpx;
+  padding: 10rpx 12rpx;
+  border-left: 5rpx solid transparent;
+  border-radius: 0;
+  white-space: normal;
+}
+.category-tab .count {
+  font-size: 17rpx;
+  line-height: 1.2;
+}
+.food-results {
+  border-top: 1rpx solid #ece8e1;
+}
+.offline-notice {
+  margin: 14rpx 4rpx 10rpx;
+  padding: 16rpx 18rpx;
+  border: 1rpx solid #eeddbd;
+  border-radius: 14rpx;
+  color: #8a765b;
+  background: #fff9ec;
+}
+.offline-notice text { display: block; font-size: 19rpx; line-height: 1.5; }
+.offline-notice .offline-title { margin-bottom: 3rpx; color: #6f604d; font-size: 21rpx; font-weight: 650; }
+.result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  padding: 14rpx 4rpx 10rpx;
+}
+.result-heading > view { min-width: 0; }
+.result-heading .common-title,
+.result-heading .common-subtitle { display: block; }
+.result-heading .common-title { font-size: 27rpx; }
+.result-heading .common-subtitle { margin-top: 3rpx; font-size: 18rpx; }
+.photo-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 62rpx;
+  height: 62rpx;
+  padding: 0;
+  border: 1rpx solid #dfe7dc;
+  border-radius: 18rpx;
+  background: #fffdf9;
+  box-shadow: 0 5rpx 14rpx rgba(92, 78, 70, .05);
+}
+.photo-compact::after { border: 0; }
+.photo-compact image { width: 50rpx; height: 50rpx; }
+.common-heading,
+.result-caption,
+.state,
+.food-list { margin-left: 0; }
+.food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  padding: 0 2rpx 180rpx;
+}
+.food-card {
+  width: 100%;
+  min-height: 116rpx;
+  padding: 14rpx;
+}
+.food-icon { width: 72rpx; height: 72rpx; }
+.food-icon image { width: 64rpx; height: 64rpx; }
+.food-badge { display: none; }
+.load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72rpx;
+  color: #9a938c;
+  font-size: 19rpx;
+}
+.cart-bar { z-index: 60; }
+.cart-panel { z-index: 59; }
 </style>

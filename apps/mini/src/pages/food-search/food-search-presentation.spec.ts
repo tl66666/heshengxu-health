@@ -11,7 +11,7 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).not.toContain('>✦<');
     expect(foodSearchPageSource).not.toContain('getFoodEmoji');
     expect(foodSearchPageSource).toContain('class="food-add"');
-    expect(foodSearchPageSource).toContain('class="page-progress"');
+    expect(foodSearchPageSource).toContain('class="load-more"');
     expect(foodSearchPageSource).not.toContain('page-button--primary');
     expect(foodSearchPageSource).toContain('class="cart-bar"');
     expect(foodSearchPageSource).toContain('class="cart-panel"');
@@ -35,5 +35,13 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('/static/icons/lunch.png');
     expect(foodSearchPageSource).toContain('cart-badge--pulse');
     expect(foodSearchPageSource).toContain('food-card--added');
+  });
+
+  it('keeps category navigation visible while results load incrementally', () => {
+    expect(foodSearchPageSource).toContain('class="catalog-shell"');
+    expect(foodSearchPageSource).toContain('class="food-results"');
+    expect(foodSearchPageSource).toContain('@scrolltolower="loadNextPage"');
+    expect(foodSearchPageSource).toContain('class="offline-notice"');
+    expect(foodSearchPageSource).not.toContain('class="pagination"');
   });
 });

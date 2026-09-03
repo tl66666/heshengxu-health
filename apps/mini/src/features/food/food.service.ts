@@ -17,6 +17,7 @@ export interface SearchFoodsResult {
   page: number;
   pageSize: number;
   totalPages: number;
+  source: 'remote' | 'offline';
 }
 
 export interface FoodCategory {
@@ -25,6 +26,7 @@ export interface FoodCategory {
   slug: string;
   sortOrder: number;
   count?: number;
+  source?: 'remote' | 'offline';
 }
 
 const LOCAL_FOOD_CATALOG: FoodItem[] = [
@@ -362,6 +364,46 @@ LOCAL_FOOD_CATALOG.push(
   ),
 );
 
+const LEGACY_CATEGORY_SLUGS: Record<string, string> = {
+  grain: 'staple',
+  egg: 'meat-egg',
+  meat: 'meat-egg',
+  protein: 'meat-egg',
+};
+
+const CANONICAL_CATEGORY_NAMES: Record<string, string> = {
+  staple: '主食类',
+  'meat-egg': '肉蛋类',
+  soy: '大豆及制品',
+  vegetable: '蔬菜菌藻类',
+  fruit: '水果类',
+  dairy: '奶类',
+  oil: '油脂类',
+  nut: '坚果类',
+  seasoning: '调味品',
+  beverage: '饮料类',
+  snack: '休闲零食',
+  restaurant: '餐饮食品',
+};
+
+function normalizeLocalCategory(food: FoodItem): FoodItem {
+  if (!food.category) return food;
+  let slug = LEGACY_CATEGORY_SLUGS[food.category.slug] || food.category.slug;
+  if (/豆腐|豆浆|黄豆|黑豆/u.test(food.name)) slug = 'soy';
+  return {
+    ...food,
+    category: {
+      id: slug,
+      slug,
+      name: CANONICAL_CATEGORY_NAMES[slug] || food.category.name,
+    },
+  };
+}
+
+for (let index = 0; index < LOCAL_FOOD_CATALOG.length; index++) {
+  LOCAL_FOOD_CATALOG[index] = normalizeLocalCategory(LOCAL_FOOD_CATALOG[index]!);
+}
+
 // Keep offline mode useful without shipping the full source SQL. The generated
 // set is exported from the same curated database rows used by the API.
 const localNames = new Set(LOCAL_FOOD_CATALOG.map((food) => food.name));
@@ -388,6 +430,7 @@ function localSearch(options: SearchFoodsOptions = {}): SearchFoodsResult {
     page,
     pageSize,
     totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
+    source: 'offline',
   };
 }
 
@@ -415,6 +458,7 @@ export function searchFoods(options: SearchFoodsOptions = {}) {
   const queryString = buildFoodSearchQuery(options);
   return createMiniApiClient()
     .get<SearchFoodsResult>(`/foods/search${queryString}`)
+    .then((result) => ({ ...result, source: 'remote' as const }))
     .catch(() => localSearch(options));
 }
 
@@ -452,16 +496,23 @@ export function getCategories() {
 export function getCategoryStats() {
   return createMiniApiClient()
     .get<FoodCategory[]>('/foods/categories/stats')
-    .catch(() =>
-      [...new Map(LOCAL_FOOD_CATALOG.map((food) => [food.category?.id, food.category]))].map(
-        ([id, category], index) => ({
-          ...category!,
-          id: id!,
-          sortOrder: index,
-          count: LOCAL_FOOD_CATALOG.filter((food) => food.category?.id === id).length,
-        }),
-      ),
-    );
+    .then((categories) => categories.map((category) => ({ ...category, source: 'remote' as const })))
+    .catch(() => {
+      const categories = new Map<string, FoodCategory>();
+      for (const food of LOCAL_FOOD_CATALOG) {
+        if (!food.category) continue;
+        const existing = categories.get(food.category.slug);
+        categories.set(food.category.slug, {
+          id: food.category.slug,
+          slug: food.category.slug,
+          name: food.category.name,
+          sortOrder: existing?.sortOrder ?? categories.size + 1,
+          count: (existing?.count || 0) + 1,
+          source: 'offline',
+        });
+      }
+      return [...categories.values()];
+    });
 }
 
 /**
