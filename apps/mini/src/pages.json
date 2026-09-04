@@ -7,6 +7,13 @@
       }
     },
     {
+      "path": "pages/auth/AppAuthPage",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "和生序登录"
+      }
+    },
+    {
       "path": "pages/onboarding/OnboardingPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "开始了解自己" }
     },

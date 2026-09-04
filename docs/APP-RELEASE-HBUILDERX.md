@@ -5,8 +5,8 @@
 ## 先看结论
 
 - **小程序**：生产 API、数据库、AI、静态素材 CDN 和微信服务器域名已经配置完成。还需要用微信开发者工具上传 `apps/mini/dist/build/mp-weixin`，提交审核；备案审核通过后才能正式发布。
-- **Android App**：可以使用 HBuilderX 云打包，但当前还缺 Android 包名、签名证书和 App 端登录方案验收。
-- **iOS App**：可以使用 HBuilderX 云打包，但当前还缺 Apple Developer 账号、Bundle ID、证书、描述文件和 TestFlight 验收。
+- **Android App**：可以使用 HBuilderX 云打包；App 账号注册/登录链路已加入，仍需 Android 包名、签名证书和真机验收。
+- **iOS App**：可以使用 HBuilderX 云打包；仍需 Apple Developer 账号、Bundle ID、证书、描述文件和 TestFlight 验收。
 
 ## 一、安装与打开项目
 
@@ -35,7 +35,7 @@
 
 ### 账号登录差异
 
-当前 API 的登录接口是微信小程序 `jscode2session` 流程。App 不能直接复用小程序 code；正式 App 发布前必须增加并验收 App 端登录方式，例如手机号/邮箱登录，或独立的微信 App OAuth 流程。不能把“能打出 APK/IPA”当成“App 登录已经完成”。
+当前 API 同时提供两套登录流程：微信小程序使用 `jscode2session`，App 使用邮箱和密码注册/登录。App 注册成功后需要再次登录，服务端以安全哈希保存密码，并复用 access token / refresh token。不能把“能打出 APK/IPA”当成“App 已完成真机验收”。
 
 ## 三、HBuilderX 云打包
 
@@ -67,4 +67,4 @@
 
 ## 当前阻塞项
 
-App 目前属于“源码可打包、商店未发布”状态。要达到可上架状态，还需要确定 App 登录方案、准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。
+App 目前属于“源码可打包、商店未发布”状态。账号注册/登录代码已完成；要达到可上架状态，还需要准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。

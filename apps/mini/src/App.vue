@@ -1,8 +1,14 @@
 <script lang="ts">
-import { isWechatLoginConfigured, loginWithWechat } from './features/auth/auth-store.js';
+import { isAppRuntime, isWechatLoginConfigured, loginWithWechat } from './features/auth/auth-store.js';
 
 export default {
   onLaunch() {
+    if (isAppRuntime()) {
+      if (!uni.getStorageSync('heban.auth.access-token')) {
+        setTimeout(() => uni.redirectTo({ url: '/pages/auth/AppAuthPage' }), 0);
+      }
+      return;
+    }
     if (isWechatLoginConfigured() && !uni.getStorageSync('heban.auth.access-token')) {
       loginWithWechat().catch(() => undefined);
     }

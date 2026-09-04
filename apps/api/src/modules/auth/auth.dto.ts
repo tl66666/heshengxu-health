@@ -1,4 +1,4 @@
-import { IsString, Length } from 'class-validator';
+import { IsEmail, IsString, Length } from 'class-validator';
 
 export class WechatLoginDto {
   @IsString()
@@ -11,3 +11,14 @@ export class RefreshTokenDto {
   @Length(20, 4096)
   refreshToken!: string;
 }
+
+export class AppRegisterDto {
+  @IsEmail()
+  email!: string;
+
+  @IsString()
+  @Length(8, 128)
+  password!: string;
+}
+
+export class AppLoginDto extends AppRegisterDto {}

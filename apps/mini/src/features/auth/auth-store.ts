@@ -20,6 +20,15 @@ export function isWechatLoginConfigured() {
   );
 }
 
+export function isAppRuntime() {
+  try {
+    const platform = uni.getSystemInfoSync().uniPlatform;
+    return platform === 'app' || platform === 'app-plus';
+  } catch {
+    return false;
+  }
+}
+
 export async function loginWithWechat() {
   const login = await new Promise<{ code: string }>((resolve, reject) => {
     uni.login({ provider: 'weixin', success: resolve, fail: reject });
@@ -32,6 +41,17 @@ export async function loginWithWechat() {
   uni.setStorageSync(REFRESH_KEY, result.refreshToken);
   uni.setStorageSync(USER_KEY, result.userId);
   migrateGuestPlansToUser(result.userId);
+  return result;
+}
+
+export async function registerWithPassword(email: string, password: string) {
+  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{ provider: 'app_password'; userId: string }>('/auth/app/register', { email: normalizeEmail(email), password });
+  return result;
+}
+
+export async function loginWithPassword(email: string, password: string) {
+  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{ accessToken: string; refreshToken: string; userId: string }>('/auth/app/login', { email: normalizeEmail(email), password });
+  persistAuth(result);
   return result;
 }
 
@@ -53,4 +73,13 @@ export async function signOut() {
 
 function apiBase() {
   return (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MINI_API_BASE_URL || 'http://127.0.0.1:3000/api/v1';
+}
+
+function normalizeEmail(value: string) { return value.trim().toLowerCase(); }
+
+function persistAuth(result: { accessToken: string; refreshToken: string; userId: string }) {
+  uni.setStorageSync(ACCESS_KEY, result.accessToken);
+  uni.setStorageSync(REFRESH_KEY, result.refreshToken);
+  uni.setStorageSync(USER_KEY, result.userId);
+  migrateGuestPlansToUser(result.userId);
 }
