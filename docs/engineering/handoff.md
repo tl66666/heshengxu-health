@@ -6,11 +6,12 @@
 
 ## 当前技术架构
 
-- 前端：`apps/mini`，uni-app + Vue 3 + TypeScript，先发布微信小程序，后续复用到 App。
+- 前端：`apps/mini`，uni-app + Vue 3 + TypeScript，可由 HBuilderX 发布微信小程序，也可发布 Android/iOS App。
 - API：`apps/api`，NestJS + Prisma。
 - 数据库：PostgreSQL；Redis 预留给缓存和异步任务。
 - 共享领域：`packages/domain`、`packages/contracts`。
-- CloudBase：用于微信身份、私有对象存储和服务端混元调用，不作为第二套业务数据库。
+- 微信身份：当前由 API 服务端直接调用微信 `jscode2session`；CloudBase 身份/对象存储是可选的后续接入，不作为第二套业务数据库。
+- CloudBase：可用于私有对象存储和服务端混元调用，不作为第二套业务数据库；当前本地识别默认 mock。
 - Cloudflare（可选）：用 R2 + CDN 承载公开插画，或用 Workers 做 API 边缘反向代理；不替代微信登录和 PostgreSQL。
 - Docker：只用于本地 PostgreSQL/Redis/API 联调；上线后由云平台托管，不要求用户电脑常开。
 
@@ -25,8 +26,8 @@
 
 ## 上线前剩余事项
 
-- 微信真实登录和身份会话接入生产环境。
-- 将原始插画上传到 CloudBase 静态托管，并配置 `VITE_MINI_ASSET_BASE_URL`。
+- 微信真实登录和身份会话接入生产环境（当前 API 已有服务端 `jscode2session` 适配，仍需生产凭证和审核配置）。
+- 将原始插画上传到 CloudBase 静态托管，并配置 `VITE_MINI_ASSET_BASE_URL`（或改用 Cloudflare R2/CDN）。
 - 也可以把同一目录上传到 Cloudflare R2/CDN；最终域名必须加入微信公众平台合法域名。
 - 混元视觉生产 Provider 的授权、审计和失败降级验收。
 - 数据导出、彻底删除和隐私设置。

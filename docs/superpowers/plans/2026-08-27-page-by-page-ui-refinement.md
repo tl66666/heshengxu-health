@@ -115,7 +115,7 @@
 - [x] 接入 `onboarding-guide-vertical.png`（双角色书桌指引场景，2:3 竖构图，1.8MB）
 - [x] 建档页 Apple 风格打磨：欢迎大图 640rpx + 留白扩大 + 标题字号放大到 48rpx（欢迎）/46rpx（步骤）+ letter-spacing 呼吸感 + 输入框增高到 98rpx 圆角 20rpx 柔和投影 + 滑杆卡片化 + BMI 数字渐变 78rpx + 选中态抬升投影 + 单选框内嵌白圈动效 + 序序头像放大到 72rpx 金边投影
 - [x] 建档页背景氛围层：固定铺满、按 step 0–4 切换五张插画（guide-vertical/mood/weight/complete/companion）、35% 透明度 + 渐变遮罩、欢迎文案区改半透明白卡（96% 白 + 28rpx 模糊）
-- [x] 建档页完全重写（薄荷健康 + Apple 风格）：欢迎屏全屏沉浸插画 `onboarding-guide-vertical.png`（底部渐变遮罩 0% → 92%）+ 序序对话气泡 + 52rpx 超大标题 + 104rpx 高按钮；步骤页纯色渐变背景（#f9fcfa → #f3f8f4）+ 白卡（32rpx 圆角 + 柔和投影）+ 进度点动画；性别三宫格 140rpx 高 + 64rpx 圆形图标 + 选中抬升 -4rpx；身高体重卡片化 + 108rpx 高输入框 + BMI 88rpx 渐变数字；生日 108rpx 高选择器；目标 2 列网格 + 右上角勾选圈 + 选中抬升投影
+- [x] 建档页完全重写（和生序明亮奶油水彩规范）：欢迎屏全屏沉浸插画 `onboarding-guide-vertical.png`（底部渐变遮罩 0% → 92%）+ 序序对话气泡 + 52rpx 超大标题 + 104rpx 高按钮；步骤页纯色渐变背景（#f9fcfa → #f3f8f4）+ 白卡（32rpx 圆角 + 柔和投影）+ 进度点动画；性别三宫格 140rpx 高 + 64rpx 圆形图标 + 选中抬升 -4rpx；身高体重卡片化 + 108rpx 高输入框 + BMI 88rpx 渐变数字；生日 108rpx 高选择器；目标 2 列网格 + 右上角勾选圈 + 选中抬升投影
 - [ ] 双尺寸真机截图对比（390x844 / 430x932）
 - [ ] 接入 `onboarding-guide-vertical.png`（等下一批生图）
 - [x] 更新 roadmap-status.md

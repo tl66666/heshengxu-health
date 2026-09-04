@@ -16,12 +16,11 @@ TENCENTCLOUD_SECRET_KEY=...
 CLOUDBASE_AI_TEXT_MODEL=hy3
 ```
 
-The API adapter loads `@cloudbase/node-sdk` when this mode is enabled. Add the
-package to the API workspace before deploying this mode:
-
-```powershell
-npm install --workspace apps/api --save @cloudbase/node-sdk
-```
+The API adapter loads `@cloudbase/node-sdk` when this mode is enabled. The
+current public workspace does not vendor that optional SDK, so use the Gateway
+mode below for the first deployment. If you later choose the SDK path, add the
+dependency in your private deployment image and lock it there; do not modify
+the mini-program or commit credentials.
 
 The API creates `app.ai().createModel('cloudbase')` and invokes the model from
 the server. The Tencent secret pair is not sent to the mini program.
@@ -42,13 +41,15 @@ CloudBase Gateway key and will return HTTP 401.
 
 ## Food image recognition
 
-The local setup uses the cheaper `glm-4v-flash` vision model with the GLM
-OpenAI-compatible endpoint:
+The local setup defaults to a mock provider. To enable the cheaper
+`glm-4v-flash` vision model in a server environment, set the provider selector
+and the generic AI endpoint/key expected by the runtime:
 
 ```dotenv
+FOOD_RECOGNITION_VISION_PROVIDER=hunyuan
+CLOUDBASE_AI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+CLOUDBASE_AI_API_KEY=your-glm-provider-key
 CLOUDBASE_AI_VISION_MODEL=glm-4v-flash
-CLOUDBASE_AI_VISION_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-CLOUDBASE_AI_VISION_API_KEY=your-glm-provider-key
 ```
 
 The API stores only a SHA-256 image hash for audit; the original image is not

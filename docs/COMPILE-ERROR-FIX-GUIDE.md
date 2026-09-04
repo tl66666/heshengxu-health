@@ -186,7 +186,7 @@ ls -la D:\禾伴\heban-ai-health-demo\apps\mini\dist\dev\mp-weixin\app.json
 ## 💡 等待期间可以做的
 
 ### 1. 查看参考资料
-查看薄荷健康的设计参考：
+查看和生序的设计规范：
 ```
 D:\禾伴\references\bohejiankang\
 ```

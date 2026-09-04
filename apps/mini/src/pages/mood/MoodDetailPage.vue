@@ -598,7 +598,7 @@ onShow(() => {
 
 <style scoped>
 /* 修复层级：widthFix 图片高度不受容器限制，改为整幅展示，
-   文案区用渐变自下而上叠进画面（同薄荷健康的情绪卡片） */
+   文案区用渐变自下而上叠进画面，保持和生序的轻盈情绪表达 */
 .mood-page .art-stage {
   height: auto;
   overflow: visible;

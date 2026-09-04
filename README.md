@@ -10,7 +10,7 @@
 - **体重管理**：记录、编辑和删除每日体重；首页显示目标差距、半圆进度和趋势曲线。
 - **饮水与饮食**：可调整饮水目标并记录不同饮品；食物库支持搜索、份量确认、营养计算、编辑和删除。
 - **序序相机**：图片只作为识别输入，服务端返回候选食物和营养估算，用户确认后才写入饮食记录。
-- **运动、睡眠、心情和经期**：每项都有独立记录页，支持真实时间、历史查看和修改，不把页面状态当作永久数据。
+- **运动、睡眠、心情和经期**：每项都有独立记录页，支持真实时间、历史查看和修改；当前运动/睡眠服务端接口已接入，心情和经期先保存在本机，跨设备同步属于上线前待补能力。
 - **序序聊天**：小程序只调用本项目 API，服务端负责模型授权、超时反馈、内容安全和审计。
 - **离线可用的基础体验**：API 不可用时，页面显示明确的离线/失败状态；不会静默伪造“已保存”。
 
@@ -31,16 +31,16 @@
 默认生产方案是 **Azure 承载 API 和 PostgreSQL，CloudBase 服务微信生态和 AI，Cloudflare 作为可选的静态素材/CDN 层**：
 
 - **Azure**：部署 NestJS API、PostgreSQL Flexible Server，必要时再加 Redis；密钥放在环境变量或 Key Vault。
-- **CloudBase**：微信身份接入、私有图片存储、CloudBase AI/混元 Gateway。它不再维护第二套健康业务数据库。
+- **CloudBase**：可选的微信生态能力、私有图片存储、CloudBase AI/混元 Gateway；当前微信身份由 API 服务端直接完成 code 换取会话。它不再维护第二套健康业务数据库。
 - **Cloudflare**：可选的 R2 + CDN 或 Workers 入口，用来托管水彩插画、缓存公开素材或反向代理 API；不能替代微信登录。
 
 三者可以替换其中一层，但小程序始终只保存公开的 HTTPS API/素材地址，任何 Secret、API Key 和数据库密码都只能在服务端。
 
 ## 新手快速开始（Windows）
 
-项目日常操作使用 `npm`/`npx`，不需要手动运行 `pnpm`。Node.js 24.x 和 Docker Desktop 是唯一的本地前置条件。
+项目日常操作使用仓库提供的 Windows 脚本，不需要你手动操作包管理器。只开发小程序时需要 Node.js 和微信开发者工具；联调 API 时再需要 Docker Desktop。
 
-1. 首次使用先安装 Node.js 24.x 和 Docker Desktop；启动脚本会为 API 准备独立的 npm 运行时。不要在已经能运行的仓库里反复执行根目录安装命令，以免覆盖工作区链接。
+1. 首次使用先安装 Node.js 24.x；需要联调 API 时再安装 Docker Desktop。启动脚本会准备独立的本地运行时，不会覆盖工作区链接。
 2. 双击 `start-dev.bat`，脚本会启动 PostgreSQL、Redis、API 和小程序监听器。
 3. 微信开发者工具第一次导入 `apps/mini`；日常源码改动后点击“重新编译”。
 4. 开发输出目录固定为 `apps/mini/dist/dev/mp-weixin`，发布输出目录固定为 `apps/mini/dist/build/mp-weixin`。
@@ -48,12 +48,24 @@
 
 更完整的本地排障步骤见 [本地开发说明](docs/engineering/local-development.md)。
 
+## HBuilderX 双端发布
+
+`apps/mini` 是 uni-app 工程，同一套 Vue/TypeScript 页面可通过 HBuilderX 发布到微信小程序和 App：
+
+1. HBuilderX 打开 `apps/mini`，先在“运行 -> 运行到小程序模拟器”选择微信开发者工具进行联调。
+2. 微信发布仍使用 `apps/mini/dist/build/mp-weixin`，并按部署清单配置 HTTPS API 与远程插画域名。
+3. 发布 App 时在 HBuilderX 选择“发行 -> 原生 App-云打包”，填写 Android 包名/证书或 iOS 证书信息，生成安装包后再做真机验收。
+4. App 与小程序共用同一套 NestJS API；不要把数据库、CloudBase 或 AI 密钥写入前端工程。
+
+App 打包需要你自己的开发者证书、苹果/安卓签名资料和平台账号，这些属于发布平台操作，不提交到 GitHub。
+
 ## 仓库结构
 
 ```text
 apps/                 # 后续的 uni-app 小程序与 NestJS API
 packages/             # 跨端 contracts、领域规则和共享配置
-assets/illustrations/ # 唯一图片源目录，Demo 与小程序共用
+assets/illustrations/ # 原始水彩图片源目录（不压缩、不提交构建副本）
+dist/mini-assets/      # 发布前导出的远程素材目录（本地生成，默认忽略）
 prototypes/web-demo/  # 当前静态 Demo，仅用于产品与设计讨论
 infra/                # 本地 Docker 与部署基础设施
 docs/                 # 产品、架构、工程规范和实施计划

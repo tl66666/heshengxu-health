@@ -29,7 +29,7 @@ npx tsc -p packages/domain/tsconfig.build.json
 npx tsc -p apps/api/tsconfig.build.json
 ```
 
-将 `apps/api/dist` 与生产依赖部署到 Node.js 服务，启动入口为 `apps/api/dist/main.js`。发布后访问 `GET /health`，应返回 `{"data":{"status":"ok"}}`。生产环境禁止使用 `dev-*` token。
+将 `apps/api/dist`、`packages/domain/dist` 与生产依赖一起部署到 Node.js 服务，或直接使用包含整个仓库依赖的容器镜像；启动入口为 `apps/api/dist/main.js`。发布后访问 `GET /health`，响应应包含 `data.status = "ok"`（同时会返回请求 ID 元数据）。生产环境禁止使用 `dev-*` token。
 
 Azure 首次部署顺序：创建 PostgreSQL Flexible Server -> 配置 API 环境变量 -> 部署 API -> 执行迁移 -> 配置 HTTPS 自定义域名 -> 检查 `/health` 和日志。数据库防火墙只放行 API 所在网络，`AUTH_TOKEN_SECRET` 使用随机长字符串并定期轮换。
 
@@ -68,7 +68,7 @@ $env:VITE_MINI_ASSET_BASE_URL='https://你的素材域名/heban'
 
 ## 上线前验收
 
-- 建档、体重、饮水、饮食、运动、睡眠、心情和经期记录可以新增、修改、删除并在刷新后保留。
+- 建档、体重、饮食、运动和睡眠记录在已接入的服务端环境中可以新增、修改、删除并在刷新后保留；饮水、心情、经期、用药和轻断食当前为本机保存，跨设备同步需后续补齐对应 API。
 - 序序聊天在 API 正常和模型超时两种情况下都有明确反馈。
 - 序序相机只把识别结果作为候选，用户确认后才保存食物记录。
 - 真实微信用户之间的数据互相隔离。
@@ -80,4 +80,4 @@ $env:VITE_MINI_ASSET_BASE_URL='https://你的素材域名/heban'
 - 每日备份 PostgreSQL，至少保留一份异地备份；迁移前先在测试库演练。
 - 监控 API `/health`、5xx、AI 超时和数据库连接数；告警不要只依赖开发者电脑。
 - 记录发布版本、数据库迁移编号和素材域名，回滚时先回滚 API 镜像，再处理数据库迁移。
-- 用户删除数据时同时删除 PostgreSQL 记录、AI 审计摘要和（若启用）CloudBase/R2 原图。
+- 规划中的彻底删除能力需要同时删除 PostgreSQL 记录、AI 审计摘要和（若未来启用）CloudBase/R2 原图；当前识别流程不保存原始图片。

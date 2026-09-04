@@ -108,7 +108,7 @@ npx uni -p mp-weixin
 **文件路径**：`apps/mini/src/pages/home/edit-cards.vue`（待创建）
 
 **参考**：
-- 薄荷健康图3、图4（在项目讨论中）
+- 和生序产品讨论中的交互截图
 - `docs/AI-HANDOFF-HomePage.md` 中的详细设计
 
 **功能**：
