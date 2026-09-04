@@ -17,8 +17,11 @@ CLOUDBASE_AI_TEXT_MODEL=hy3
 ```
 
 The API adapter loads `@cloudbase/node-sdk` when this mode is enabled. Add the
-package to the API deployment (`pnpm --filter @heban/api add @cloudbase/node-sdk`)
-before deploying this mode.
+package to the API workspace before deploying this mode:
+
+```powershell
+npm install --workspace apps/api --save @cloudbase/node-sdk
+```
 
 The API creates `app.ai().createModel('cloudbase')` and invokes the model from
 the server. The Tencent secret pair is not sent to the mini program.

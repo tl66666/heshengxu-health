@@ -3,7 +3,7 @@
 ## 前置条件
 
 - Node.js 24.x
-- npm（随 Node.js 安装）
+- npm（随 Node.js 安装；仓库脚本通过 `npm`/`npx` 调用）
 - 仅开发微信小程序前端：不需要 Docker Desktop，直接使用 `apps/mini` 和本地构建。
 - 联调 NestJS API、PostgreSQL、Redis：需要 Docker Desktop，启动本地基础设施后再运行 API。
 
@@ -19,7 +19,9 @@
 
 本项目当前以 NestJS + PostgreSQL 为本地事实后端。微信云开发不是本地 API 的前置条件；只有未来把服务部署到腾讯云时，才按部署方案启用云函数、云数据库或云存储。
 
-日常联调只需双击仓库根目录的 `start-dev.bat`。脚本会自动启动 Docker Desktop、等待 PostgreSQL/Redis 健康、执行数据库迁移、启动 API 和小程序监听器。完整食物库存在时会直接复用；只有 active 食物不足 10,000 条时才会自动从 `food.sql` 补齐，因此电脑重启后不需要重新导入。
+日常联调只需双击仓库根目录的 `start-dev.bat`。脚本会自动启动 Docker Desktop、准备独立的 npm 运行时、等待 PostgreSQL/Redis 健康、执行数据库迁移、启动 API 和小程序监听器。完整食物库存在时会直接复用；只有 active 食物不足 10,000 条时才会自动从 `food.sql` 补齐，因此电脑重启后不需要重新导入。
+
+根目录保留现有 workspace 锁文件供 GitHub CI 复现依赖；Windows 本地不要反复执行包管理器安装来“修复”编译卡住的问题，优先关闭重复监听器后重新运行 `start-dev.bat`。该脚本不会把密钥写入项目，也不会改动源插画。
 
 如果没有运行本地服务，食物页面会明确显示“当前为离线常见食物”，此时约 82 条只是小程序包内的应急目录，并不代表 PostgreSQL 中的完整食物库丢失。
 

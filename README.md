@@ -1,43 +1,52 @@
 # 和生序健康
 
-面向微信小程序优先、可扩展到 App 的 AI 健康管理平台。
+和生序是一个微信小程序优先的健康管理产品，帮助用户用轻量、持续的记录理解自己的节律。产品采用“日系治愈奶油水彩”视觉语言：清透、明亮、有呼吸感，但数据和业务流程使用真实的服务端模型，不用演示数据冒充用户记录。
 
-“和生序”取”和身心、生息、循其序”之意：不追求极端的改变，而是通过持续记录、理解变化和小步行动，让健康回到每个人自己的节律。品牌主张：**让健康回到自己的节律。**
+产品主张：**让健康回到自己的节律。**
 
-当前仓库已完成工程底座、健康档案、每日健康记录、食物库与营养记录、序序聊天接口、食物图片识别候选流程，以及微信小程序构建检查。生产上线前仍需配置微信登录、数据库、AI 密钥与静态素材托管，并完成隐私合规和真机验收。
+## 产品与功能亮点
 
-## 🚀 食物库功能快速开始
+- **健康档案**：身高、体重、BMI 和体重目标在建档时即时计算，保存后成为首页的个人基线。
+- **体重管理**：记录、编辑和删除每日体重；首页显示目标差距、半圆进度和趋势曲线。
+- **饮水与饮食**：可调整饮水目标并记录不同饮品；食物库支持搜索、份量确认、营养计算、编辑和删除。
+- **序序相机**：图片只作为识别输入，服务端返回候选食物和营养估算，用户确认后才写入饮食记录。
+- **运动、睡眠、心情和经期**：每项都有独立记录页，支持真实时间、历史查看和修改，不把页面状态当作永久数据。
+- **序序聊天**：小程序只调用本项目 API，服务端负责模型授权、超时反馈、内容安全和审计。
+- **离线可用的基础体验**：API 不可用时，页面显示明确的离线/失败状态；不会静默伪造“已保存”。
 
-**新功能**：完整的食物库、拍照识别、饮食记录、体重管理、营养分析
+健康建议仅供生活方式参考，不提供疾病诊断、处方、药物剂量或替代就医的判断。
 
-👉 **[本地开发说明](docs/engineering/local-development.md)** - 适合第一次启动项目
+## 技术栈
 
-📚 **详细文档**：
-- [功能设计文档](docs/FOOD-NUTRITION-DESIGN.md) - 完整的6大模块设计
-- [上线部署清单](docs/DEPLOYMENT.md)
+| 层 | 技术 |
+| --- | --- |
+| 小程序 | uni-app、Vue 3、TypeScript、微信小程序 |
+| API | NestJS、Prisma、OpenAPI |
+| 数据 | PostgreSQL（唯一业务事实源），Redis（可选缓存/异步任务） |
+| AI | CloudBase AI Gateway/混元或 GLM 视觉 Provider，由服务端适配 |
+| 工程 | Vitest、ESLint、Prettier、Docker Compose、GitHub Actions |
 
-**一键初始化**：
-```powershell
-# Windows PowerShell
-./scripts/init-food-database.ps1
+## 云服务分工
 
-# 或 Git Bash
-./scripts/init-food-database.sh
-```
+默认生产方案是 **Azure 承载 API 和 PostgreSQL，CloudBase 服务微信生态和 AI，Cloudflare 作为可选的静态素材/CDN 层**：
 
-## 小程序快速开始
+- **Azure**：部署 NestJS API、PostgreSQL Flexible Server，必要时再加 Redis；密钥放在环境变量或 Key Vault。
+- **CloudBase**：微信身份接入、私有图片存储、CloudBase AI/混元 Gateway。它不再维护第二套健康业务数据库。
+- **Cloudflare**：可选的 R2 + CDN 或 Workers 入口，用来托管水彩插画、缓存公开素材或反向代理 API；不能替代微信登录。
 
-安装依赖后启动开发监听（以后改源码会自动编译，不需要每次手动 build）：
+三者可以替换其中一层，但小程序始终只保存公开的 HTTPS API/素材地址，任何 Secret、API Key 和数据库密码都只能在服务端。
 
-```powershell
-./scripts/dev-mini.ps1
-```
+## 新手快速开始（Windows）
 
-微信开发者工具导入 `apps/mini`（只需一次）。开发配置会自动使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可看到最新页面。
+项目日常操作使用 `npm`/`npx`，不需要手动运行 `pnpm`。Node.js 24.x 和 Docker Desktop 是唯一的本地前置条件。
 
-发布预览前按[上线部署清单](docs/DEPLOYMENT.md)配置生产 API 与素材域名，再运行 `./scripts/build-mini.ps1`，最后导入 `apps/mini/dist/build/mp-weixin`。
+1. 首次使用先安装 Node.js 24.x 和 Docker Desktop；启动脚本会为 API 准备独立的 npm 运行时。不要在已经能运行的仓库里反复执行根目录安装命令，以免覆盖工作区链接。
+2. 双击 `start-dev.bat`，脚本会启动 PostgreSQL、Redis、API 和小程序监听器。
+3. 微信开发者工具第一次导入 `apps/mini`；日常源码改动后点击“重新编译”。
+4. 开发输出目录固定为 `apps/mini/dist/dev/mp-weixin`，发布输出目录固定为 `apps/mini/dist/build/mp-weixin`。
+5. 发布前按 [上线部署清单](docs/DEPLOYMENT.md) 配置生产地址，再运行 `./scripts/build-mini.ps1`。
 
-开发时只使用 `apps/mini`；发布时才使用 `dist/build/mp-weixin`。如果两个目录同时存在导致混乱，先运行 `node scripts/clean-mini-dist.mjs`，再运行 `./scripts/dev-mini.ps1`。
+更完整的本地排障步骤见 [本地开发说明](docs/engineering/local-development.md)。
 
 ## 仓库结构
 

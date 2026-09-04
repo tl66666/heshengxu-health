@@ -11,6 +11,7 @@
 - 数据库：PostgreSQL；Redis 预留给缓存和异步任务。
 - 共享领域：`packages/domain`、`packages/contracts`。
 - CloudBase：用于微信身份、私有对象存储和服务端混元调用，不作为第二套业务数据库。
+- Cloudflare（可选）：用 R2 + CDN 承载公开插画，或用 Workers 做 API 边缘反向代理；不替代微信登录和 PostgreSQL。
 - Docker：只用于本地 PostgreSQL/Redis/API 联调；上线后由云平台托管，不要求用户电脑常开。
 
 ## 已完成能力
@@ -26,6 +27,7 @@
 
 - 微信真实登录和身份会话接入生产环境。
 - 将原始插画上传到 CloudBase 静态托管，并配置 `VITE_MINI_ASSET_BASE_URL`。
+- 也可以把同一目录上传到 Cloudflare R2/CDN；最终域名必须加入微信公众平台合法域名。
 - 混元视觉生产 Provider 的授权、审计和失败降级验收。
 - 数据导出、彻底删除和隐私设置。
 - 390x844 与 430x932 真机视觉验收、微信审核前检查。
