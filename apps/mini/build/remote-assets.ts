@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite';
 
-const BITMAP_PATH = /\/static\/[^"'`\s)]+\.(?:png|jpe?g|webp|gif)/giu;
+const LOCAL_BITMAP_PATH = /(^|["'`(\s])\/static\/[^"'`\s)]+\.(?:png|jpe?g|webp|gif)/giu;
 
 export function normalizeRemoteAssetBaseUrl(value?: string) {
   const normalized = value?.trim().replace(/\/+$/u, '') || '';
@@ -12,7 +12,11 @@ export function normalizeRemoteAssetBaseUrl(value?: string) {
 
 export function rewriteRemoteBitmapUrls(source: string, baseUrl: string) {
   const normalized = normalizeRemoteAssetBaseUrl(baseUrl);
-  return normalized ? source.replace(BITMAP_PATH, (path) => `${normalized}${path}`) : source;
+  return normalized
+    ? source.replace(LOCAL_BITMAP_PATH, (path, prefix: string) => {
+        return `${prefix}${normalized}${path.slice(prefix.length)}`;
+      })
+    : source;
 }
 
 export function remoteMiniAssetsPlugin(value?: string): Plugin {

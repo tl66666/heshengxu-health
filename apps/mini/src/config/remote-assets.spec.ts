@@ -29,4 +29,12 @@ describe('remote mini-program assets', () => {
     );
     expect(() => normalizeRemoteAssetBaseUrl('http://assets.example.com')).toThrow('HTTPS');
   });
+
+  it('does not prefix bitmap URLs that are already remote', () => {
+    const baseUrl = 'https://assets.example.com/heban';
+    const source = `icon: '${baseUrl}/static/icons/breakfast.png'`;
+
+    expect(rewriteRemoteBitmapUrls(source, baseUrl)).toBe(source);
+    expect(rewriteRemoteBitmapUrls(rewriteRemoteBitmapUrls(source, baseUrl), baseUrl)).toBe(source);
+  });
 });
