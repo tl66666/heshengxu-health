@@ -1,0 +1,38 @@
+FROM node:24-bookworm-slim AS build
+
+WORKDIR /workspace
+COPY apps/api/package.container.json package.json
+RUN npm install --no-audit --no-fund
+
+COPY tsconfig.base.json ./
+COPY packages/domain/package.json packages/domain/tsconfig.json packages/domain/tsconfig.build.json packages/domain/
+COPY packages/domain/src packages/domain/src
+RUN npx tsc -p packages/domain/tsconfig.build.json
+
+COPY packages/contracts/package.json packages/contracts/tsconfig.json packages/contracts/
+COPY packages/contracts/src packages/contracts/src
+RUN npm install --no-save ./packages/domain ./packages/contracts
+
+COPY apps/api/tsconfig.json apps/api/tsconfig.build.json apps/api/
+COPY apps/api/prisma apps/api/prisma
+COPY apps/api/src apps/api/src
+RUN npx prisma generate --schema apps/api/prisma/schema.prisma
+RUN npx tsc -p apps/api/tsconfig.build.json
+
+FROM node:24-bookworm-slim AS runtime
+
+ENV NODE_ENV=production
+ENV API_PORT=3000
+WORKDIR /app
+
+COPY apps/api/package.container.json package.json
+RUN npm install --omit=dev --no-audit --no-fund
+COPY --from=build /workspace/apps/api/dist apps/api/dist
+COPY --from=build /workspace/apps/api/prisma apps/api/prisma
+COPY --from=build /workspace/packages/domain/package.json packages/domain/package.json
+COPY --from=build /workspace/packages/domain/dist packages/domain/dist
+RUN mkdir -p node_modules/@heban && ln -s /app/packages/domain node_modules/@heban/domain
+RUN npx prisma generate --schema apps/api/prisma/schema.prisma
+
+EXPOSE 3000
+CMD ["sh", "-c", "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && node apps/api/dist/main.js"]
