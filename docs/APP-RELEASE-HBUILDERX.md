@@ -1,28 +1,70 @@
 # 和生序 App 双端发布指南
 
-`apps/mini` 是 uni-app 工程，小程序和 App 共用同一套页面、状态和 API。微信小程序继续用微信开发者工具验收；Android/iOS 使用 HBuilderX 云打包。
+和生序客户端是 uni-app 工程。微信小程序和 Android/iOS App 共用页面、业务规则和生产 API，但三个发布平台的登录、签名和审核要求不同。
 
-## 发布前准备
+## 先看结论
 
-- 安装 HBuilderX（建议使用稳定版）并登录 DCloud 账号。
-- 生产 API 必须是 HTTPS，例如 `https://api.example.com/api/v1`。
-- 远程插画必须是 HTTPS，并在小程序后台加入合法域名；App 不受微信合法域名限制，但仍建议统一使用 HTTPS。
-- Android 准备应用包名和签名证书；iOS 准备 Apple Developer 账号、Bundle ID、证书和描述文件。
+- **小程序**：生产 API、数据库、AI、静态素材 CDN 和微信服务器域名已经配置完成。还需要用微信开发者工具上传 `apps/mini/dist/build/mp-weixin`，提交审核；备案审核通过后才能正式发布。
+- **Android App**：可以使用 HBuilderX 云打包，但当前还缺 Android 包名、签名证书和 App 端登录方案验收。
+- **iOS App**：可以使用 HBuilderX 云打包，但当前还缺 Apple Developer 账号、Bundle ID、证书、描述文件和 TestFlight 验收。
 
-## Android/iOS 云打包
+## 一、安装与打开项目
 
-1. HBuilderX 打开仓库中的 `apps/mini`，确认 `manifest.json` 的应用名称、版本号和图标。
-2. 选择“发行 -> 原生 App-云打包”。首次使用先按向导创建 Android 签名，iOS 则上传自己的证书和描述文件。
-3. 选择 Android、iOS 或两者，填写包名、版本号和必要的权限说明。相机功能需要保留相机权限，并在隐私说明中解释图片用途。
-4. 点击打包并等待云端构建。构建完成后下载 APK/IPA 或使用 TestFlight 分发。
-5. 用真实设备检查登录、建档、体重、饮水、饮食、运动、睡眠、心情、经期、用药、序序聊天和序序相机。
+1. 安装 HBuilderX 稳定版并登录 DCloud 账号。
+2. 选择“文件 -> 打开目录”，打开项目中的 `apps/mini`。
+3. 项目入口和应用信息在 `apps/mini/src/manifest.json`。
+4. 生产 API 必须使用 HTTPS；App 不受微信合法域名限制，但仍统一使用生产 HTTPS 地址。
 
-## 与微信小程序的区别
+不要把 `apps/mini/dist/build/mp-weixin` 导入 HBuilderX。它是微信开发者工具的发布包；HBuilderX 打包使用 `apps/mini` 源码目录。
 
-- 小程序入口和底部导航保持不变；App 使用同一套页面路由，但不需要导入 `dist/build/mp-weixin`。
-- App 不能依赖微信专属登录状态。正式发布前需要在 API 增加手机号、邮箱或 Apple/Google 等 App 身份登录，并在客户端选择对应登录方式。
-- App 发布包不能包含 `.env`、CloudBase/Tencent/Azure Secret、模型 Key 或数据库密码。
+## 二、打包前准备
 
-## 版本和回滚
+### Android
 
-每次发布记录：应用版本号、API 镜像版本、数据库迁移编号和素材域名。若只改前端，重新云打包即可；若改 API，先部署兼容版本并验证 `/health`，再在 HBuilderX 发布新包。不要通过回滚 App 来回滚已经执行的数据库迁移。
+- 申请并固定正式包名，例如 `com.example.heshengxu`。包名一旦发布不要随意更改。
+- 准备 Android 签名证书（keystore）、证书别名和密码。
+- 准备应用图标、启动图、隐私政策 URL 和相机权限说明。
+- 在真机上验证登录、建档、体重、饮食、序序聊天、序序相机和记录保存。
+
+### iOS
+
+- 注册 Apple Developer Program。
+- 在 Apple Developer 中创建 Bundle ID。
+- 创建发布证书和 App Store 描述文件。
+- 准备 App 隐私详情、相机用途说明、隐私政策 URL 和 TestFlight 测试账号。
+
+### 账号登录差异
+
+当前 API 的登录接口是微信小程序 `jscode2session` 流程。App 不能直接复用小程序 code；正式 App 发布前必须增加并验收 App 端登录方式，例如手机号/邮箱登录，或独立的微信 App OAuth 流程。不能把“能打出 APK/IPA”当成“App 登录已经完成”。
+
+## 三、HBuilderX 云打包
+
+1. 在 HBuilderX 打开 `apps/mini`。
+2. 选择“发行 -> 原生 App-云打包”。
+3. 选择 Android、iOS 或两者。
+4. 填写应用名称、版本号和版本编码，确认应用图标与启动图。
+5. Android 填写包名和签名证书；iOS 选择 Bundle ID、证书和描述文件。
+6. 在权限说明中填写相机用途，不能只勾选权限而不说明用途。
+7. 点击打包，完成后下载 APK；iOS 包上传到 TestFlight 进行测试。
+
+## 四、发布前验收
+
+在真实设备上逐项操作并记录结果：
+
+- 首次启动、登录、退出和重新登录。
+- 建档、BMI、体重目标和体重记录编辑。
+- 饮食搜索、序序相机识别、用户确认和记录保存。
+- 饮水目标、运动、睡眠、心情、生理期、用药和轻断食。
+- 网络断开、AI 超时、图片识别失败和服务端 5xx 时的提示。
+- 数据删除入口、隐私政策链接和相机权限弹窗。
+
+## 五、禁止事项
+
+- 不把 `.env`、API Key、数据库密码、微信 AppSecret 或 Azure/CloudBase Secret 打进 App 包。
+- 不把微信小程序发布包当作 App 源码导入 HBuilderX。
+- 不在没有真实设备测试的情况下提交商店审核。
+- 不把小程序的微信登录 code 当作 App 登录凭证。
+
+## 当前阻塞项
+
+App 目前属于“源码可打包、商店未发布”状态。要达到可上架状态，还需要确定 App 登录方案、准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。
