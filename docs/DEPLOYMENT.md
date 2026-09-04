@@ -2,6 +2,23 @@
 
 这份清单用于第一次部署正式 API 和微信小程序。建议第一次先部署测试环境，完成真机验收后再切生产。密钥只配置在部署平台的环境变量中，不写入仓库，也不放进小程序包。
 
+## 当前生产环境
+
+| 项目 | 地址或状态 |
+| --- | --- |
+| API | `https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1` |
+| 健康检查 | `https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/health` |
+| 水彩素材 | `https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban` |
+| API 镜像 | `ghcr.io/tl66666/heshengxu-health/api:20260904-2` |
+| 发布包 | `apps/mini/dist/build/mp-weixin`（约 0.85 MB） |
+
+Azure API、PostgreSQL、混元文本模型和 GLM 图片模型已部署并通过连通性检查。微信真实登录仍需在 Azure Container App 中配置 `WECHAT_APP_SECRET`；该值只能从微信公众平台取得，不得提交到仓库。
+
+微信公众平台的“开发管理 -> 开发设置 -> 服务器域名”需要填写以下域名（只填域名，不带路径）：
+
+- `request` 合法域名：`https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io`
+- `downloadFile` 合法域名：`https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com`
+
 ## 推荐部署拓扑
 
 | 能力 | 推荐平台 | 说明 |
@@ -31,7 +48,7 @@ npx tsc -p apps/api/tsconfig.build.json
 
 将 `apps/api/dist`、`packages/domain/dist` 与生产依赖一起部署到 Node.js 服务，或直接使用包含整个仓库依赖的容器镜像；启动入口为 `apps/api/dist/main.js`。发布后访问 `GET /health`，响应应包含 `data.status = "ok"`（同时会返回请求 ID 元数据）。生产环境禁止使用 `dev-*` token。
 
-Azure 首次部署顺序：创建 PostgreSQL Flexible Server -> 配置 API 环境变量 -> 部署 API -> 执行迁移 -> 配置 HTTPS 自定义域名 -> 检查 `/health` 和日志。数据库防火墙只放行 API 所在网络，`AUTH_TOKEN_SECRET` 使用随机长字符串并定期轮换。
+Azure 首次部署顺序：创建 PostgreSQL Flexible Server -> 配置 API 环境变量 -> 部署 API -> 执行迁移 -> 配置 HTTPS 自定义域名 -> 检查 `/health` 和日志。当前低成本环境使用 Azure 服务访问规则连接 PostgreSQL；需要更严格隔离时，应把 Container Apps 与 PostgreSQL 接入同一 VNet 并改为私有访问。`AUTH_TOKEN_SECRET` 使用随机长字符串并定期轮换。
 
 序序相机当前把压缩后的临时照片以 Base64 发给 `/food-recognition/analyze`。服务端请求体上限为 8 MB，识别任务和候选结果会写入 PostgreSQL，只有用户确认后才生成饮食记录。以后如需保存原始用户照片，再接入私有对象存储；当前识别闭环不以对象存储为前置条件。
 
@@ -48,8 +65,8 @@ node scripts/export-mini-assets.mjs
 然后在 PowerShell 设置生产地址并构建：
 
 ```powershell
-$env:VITE_MINI_API_BASE_URL='https://你的-api-域名/api/v1'
-$env:VITE_MINI_ASSET_BASE_URL='https://你的素材域名/heban'
+$env:VITE_MINI_API_BASE_URL='https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1'
+$env:VITE_MINI_ASSET_BASE_URL='https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban'
 ./scripts/build-mini.ps1
 ```
 
