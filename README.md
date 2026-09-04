@@ -91,6 +91,7 @@ npx serve .
 
 - [权威产品蓝图](docs/product/heshengxu-product-blueprint.md)
 - [上线部署清单](docs/DEPLOYMENT.md)
+- [HBuilderX 双端发布指南](docs/APP-RELEASE-HBUILDERX.md)
 - [历史平台探索](docs/product/archive/2026-08-24-platform-exploration.md)
 - [早期范围取舍](docs/superpowers/specs/2026-08-24-product-scope-after-mint-benchmark.md)
 - [阶段 1 建档设计](docs/superpowers/specs/2026-08-24-stage-1-onboarding-design.md)
