@@ -36,6 +36,10 @@
 
 三者可以替换其中一层，但小程序始终只保存公开的 HTTPS API/素材地址，任何 Secret、API Key 和数据库密码都只能在服务端。
 
+当前水彩素材已发布到 CloudBase CDN：
+`https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban`。
+生产构建时仍需把你的 API 地址填入 `VITE_MINI_API_BASE_URL`；没有 API 地址不能生成可上线版本。
+
 ## 新手快速开始（Windows）
 
 项目日常操作使用仓库提供的 Windows 脚本，不需要你手动操作包管理器。只开发小程序时需要 Node.js 和微信开发者工具；联调 API 时再需要 Docker Desktop。

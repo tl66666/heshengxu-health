@@ -61,7 +61,7 @@ $env:VITE_MINI_ASSET_BASE_URL='https://你的素材域名/heban'
 
 两种方案对小程序来说都是公开 HTTPS 地址：
 
-1. CloudBase 静态网站托管：适合已经在腾讯云登录、希望同一控制台管理素材的情况。
+1. CloudBase 静态网站托管：当前已上传到 `https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban`，适合已经在腾讯云登录、希望同一控制台管理素材的情况。
 2. Cloudflare R2 + CDN：适合需要全球缓存或已有 Cloudflare 域名的情况。R2 Bucket 保持私有，使用只读 CDN 域名暴露插画目录，不要把管理 Token 写入仓库。
 
 无论选择哪种方案，都要把最终素材域名加入微信公众平台的 `downloadFile`/`request` 合法域名，并用真机验证图片加载、缓存和失败占位。
