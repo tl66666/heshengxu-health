@@ -40,7 +40,7 @@ jobs:
       - run: pnpm --filter @heban/api prisma db seed
       - run: pnpm --filter @heban/domain build
       - run: pnpm --filter @heban/mini check:layout
-      - run: pnpm check
+      - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @heban/api build
       - run: pnpm --filter @heban/mini typecheck
