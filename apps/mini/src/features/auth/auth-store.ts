@@ -1,4 +1,5 @@
 import { createMiniApiClient } from '../../services/mini-api.js';
+import { resolveMiniRuntime } from '../../config/runtime.js';
 import { migrateGuestPlansToUser } from '../plans/plan-store.js';
 
 const ACCESS_KEY = 'heban.auth.access-token';
@@ -72,7 +73,8 @@ export async function signOut() {
 }
 
 function apiBase() {
-  return (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MINI_API_BASE_URL || 'http://127.0.0.1:3000/api/v1';
+  const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  return resolveMiniRuntime({ ...environment, UNI_PLATFORM: isAppRuntime() ? 'app-plus' : environment.UNI_PLATFORM }).apiBaseUrl;
 }
 
 function normalizeEmail(value: string) { return value.trim().toLowerCase(); }

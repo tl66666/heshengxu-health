@@ -17,4 +17,11 @@ describe('resolveMiniRuntime', () => {
       authorization: undefined,
     });
   });
+
+  it('uses the production API for an App build when no Vite variable is injected', () => {
+    expect(resolveMiniRuntime({ UNI_PLATFORM: 'app-plus' })).toEqual({
+      apiBaseUrl: 'https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1',
+      authorization: undefined,
+    });
+  });
 });
