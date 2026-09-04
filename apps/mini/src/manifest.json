@@ -12,5 +12,6 @@
       "ignoreDevUnusedFiles": false
     },
     "usingComponents": true
-  }
+  },
+  "app-plus": {}
 }

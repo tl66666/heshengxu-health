@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["@dcloudio/types"]
+    "types": ["@dcloudio/types", "node"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "vite.config.ts"]
 }
