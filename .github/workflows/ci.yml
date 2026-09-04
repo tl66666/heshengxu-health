@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://heban:heban_dev_password@localhost:5432/heban?schema=public
+      VITE_MINI_ASSET_BASE_URL: https://assets.example.invalid/heban
     services:
       postgres:
         image: postgres:16-alpine

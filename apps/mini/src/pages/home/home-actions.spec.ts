@@ -38,7 +38,7 @@ describe('home quick actions', () => {
     expect(new Set(icons).size).toBe(icons.length);
   });
 
-  it('keeps four meal shortcuts with explicit meal types and premium line icons', () => {
+  it('keeps four meal shortcuts with explicit meal types and watercolor icons', () => {
     expect(foodRecordActions.map(({ label, route }) => ({ label, route }))).toEqual([
       { label: '早餐', route: '/pages/food-search/FoodSearchPage?mealType=breakfast' },
       { label: '午餐', route: '/pages/food-search/FoodSearchPage?mealType=lunch' },
@@ -46,6 +46,6 @@ describe('home quick actions', () => {
       { label: '加餐', route: '/pages/food-search/FoodSearchPage?mealType=snack' },
     ]);
     expect(Object.values(mealRecordIcons)).toHaveLength(4);
-    expect(Object.values(mealRecordIcons).every((icon) => icon.endsWith('.svg'))).toBe(true);
+    expect(Object.values(mealRecordIcons).every((icon) => icon.endsWith('.png'))).toBe(true);
   });
 });

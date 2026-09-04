@@ -6,7 +6,12 @@
     <template v-else>
       <view class="food-hero">
         <image v-if="imagePath" class="food-photo" :src="imagePath" mode="aspectFill" />
-        <view v-else class="food-mark">{{ food.name.slice(0, 1) }}</view>
+        <view v-else class="food-mark">
+          <image
+            :src="getFoodCategoryIcon(food.category?.slug, food.name)"
+            mode="aspectFit"
+          />
+        </view>
         <view class="food-copy">
           <text class="food-name">{{ food.name }}</text>
           <text class="food-meta">{{ sourceLabel }}</text>
@@ -25,7 +30,7 @@
         <switch
           :checked="saveToLibrary"
           color="#5c946f"
-          @change="saveToLibrary = Boolean($event.detail.value)"
+          @change="updateSaveToLibrary"
         />
       </view>
 
@@ -112,6 +117,7 @@ import {
   type MealType,
 } from '../../features/food/food.types.js';
 import { foodConfirmMode } from '../../features/food/food-entry-form.js';
+import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 
 const food = ref<FoodItem | null>(null);
 const grams = ref(100);
@@ -158,6 +164,11 @@ function syncGrams() {
 function chooseServing(value: number) {
   grams.value = value;
   gramsText.value = String(value);
+}
+function updateSaveToLibrary(event: Event) {
+  saveToLibrary.value = Boolean(
+    (event as unknown as { detail?: { value?: boolean } }).detail?.value,
+  );
 }
 async function load(options?: Record<string, string>) {
   entryId.value = options?.entryId || '';
@@ -294,6 +305,10 @@ onLoad((options) => load(options as Record<string, string>));
   background: #7eae86;
   font-size: 36rpx;
   font-weight: 700;
+}
+.food-mark image {
+  width: 100%;
+  height: 100%;
 }
 .food-photo {
   width: 96rpx;

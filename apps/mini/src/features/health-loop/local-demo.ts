@@ -156,17 +156,17 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
       hasProtein: Boolean(record.hasProtein),
       hasVegetable: Boolean(record.hasVegetable),
       recordedAt: record.recordedAt,
-      note: record.note || null,
+      note: nullableString(record.note),
     }));
   const activities = localRecords
     .filter((record) => record.type === 'activity')
     .map((record) => ({
       id: record.id,
-      activityType: record.activityType,
+      activityType: nullableString(record.activityType) || '',
       durationMinutes: Number(record.durationMinutes),
-      intensity: record.intensity || null,
+      intensity: nullableString(record.intensity),
       recordedAt: record.recordedAt,
-      note: record.note || null,
+      note: nullableString(record.note),
     }));
   const sleepRecord = localRecords.find((record) => record.type === 'sleep');
   const sleep = sleepRecord
@@ -174,10 +174,10 @@ export function createLocalDailyHome(date: string): DailyHomeDto | null {
         id: sleepRecord.id,
         durationMinutes: Number(sleepRecord.durationMinutes),
         quality: sleepRecord.quality as SleepQuality,
-        sleepAt: sleepRecord.sleepAt || null,
-        wakeAt: sleepRecord.wakeAt || null,
+        sleepAt: nullableString(sleepRecord.sleepAt),
+        wakeAt: nullableString(sleepRecord.wakeAt),
         recordedAt: sleepRecord.recordedAt,
-        note: sleepRecord.note || null,
+        note: nullableString(sleepRecord.note),
       }
     : null;
   return {
@@ -230,6 +230,10 @@ type LocalHealthRecord = {
   recordedAt: string;
   [key: string]: unknown;
 };
+
+function nullableString(value: unknown) {
+  return typeof value === 'string' && value ? value : null;
+}
 
 function readLocalHealthRecords(): LocalHealthRecord[] {
   try {

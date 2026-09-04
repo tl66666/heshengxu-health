@@ -111,7 +111,7 @@ const chartData = computed(() => {
   if (!props.records || props.records.length === 0) return [];
   
   const now = Date.now();
-  const periods = {
+  const periods: Record<typeof selectedPeriod.value, number> = {
     week: 7 * 24 * 60 * 60 * 1000,
     month: 30 * 24 * 60 * 60 * 1000,
     quarter: 90 * 24 * 60 * 60 * 1000,
@@ -124,16 +124,16 @@ const chartData = computed(() => {
 
 // 当前体重
 const currentWeight = computed(() => {
-  if (chartData.value.length === 0) return '--';
-  return chartData.value[chartData.value.length - 1].weight.toFixed(1);
+  const latest = chartData.value.at(-1);
+  return latest ? latest.weight.toFixed(1) : '--';
 });
 
 // 变化量
 const weightChange = computed(() => {
   if (chartData.value.length < 2) return 0;
-  const first = chartData.value[0].weight;
-  const last = chartData.value[chartData.value.length - 1].weight;
-  return last - first;
+  const first = chartData.value[0];
+  const last = chartData.value.at(-1);
+  return first && last ? last.weight - first.weight : 0;
 });
 
 const changeLabel = computed(() => {
@@ -161,13 +161,13 @@ const changeClass = computed(() => {
 
 // 日期范围
 const startDate = computed(() => {
-  if (chartData.value.length === 0) return '';
-  return formatDate(chartData.value[0].date);
+  const first = chartData.value[0];
+  return first ? formatDate(first.date) : '';
 });
 
 const endDate = computed(() => {
-  if (chartData.value.length === 0) return '';
-  return formatDate(chartData.value[chartData.value.length - 1].date);
+  const last = chartData.value.at(-1);
+  return last ? formatDate(last.date) : '';
 });
 
 function formatDate(dateStr: string): string {
@@ -193,20 +193,21 @@ function drawChart() {
   
   const query = uni.createSelectorQuery();
   query.select('.chart-canvas')
-    .fields({ node: true, size: true })
+    .fields({ node: true, size: true }, () => undefined)
     .exec((res) => {
-      if (!res[0]) return;
+      const result = res[0];
+      if (!result) return;
       
-      const canvas = res[0].node;
+      const canvas = result.node;
       const ctx = canvas.getContext('2d');
       const dpr = uni.getSystemInfoSync().pixelRatio || 1;
       
-      canvas.width = res[0].width * dpr;
-      canvas.height = res[0].height * dpr;
+      canvas.width = result.width * dpr;
+      canvas.height = result.height * dpr;
       ctx.scale(dpr, dpr);
       
-      const width = res[0].width;
-      const height = res[0].height;
+      const width = result.width;
+      const height = result.height;
       const padding = { top: 20, right: 20, bottom: 30, left: 40 };
       const chartWidth = width - padding.left - padding.right;
       const chartHeight = height - padding.top - padding.bottom;
@@ -261,6 +262,9 @@ function drawChart() {
             ((d.weight - minWeight + padding_y) / (weightRange + 2 * padding_y)) * chartHeight;
           return { x, y, weight: d.weight };
         });
+        const firstPoint = points[0];
+        const lastPoint = points.at(-1);
+        if (!firstPoint || !lastPoint) return;
         
         // 绘制渐变区域
         const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
@@ -269,9 +273,9 @@ function drawChart() {
         
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.moveTo(points[0].x, height - padding.bottom);
+        ctx.moveTo(firstPoint.x, height - padding.bottom);
         points.forEach(p => ctx.lineTo(p.x, p.y));
-        ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
+        ctx.lineTo(lastPoint.x, height - padding.bottom);
         ctx.closePath();
         ctx.fill();
         
@@ -281,9 +285,10 @@ function drawChart() {
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
+        ctx.moveTo(firstPoint.x, firstPoint.y);
         for (let i = 1; i < points.length; i++) {
-          ctx.lineTo(points[i].x, points[i].y);
+          const point = points[i];
+          if (point) ctx.lineTo(point.x, point.y);
         }
         ctx.stroke();
         

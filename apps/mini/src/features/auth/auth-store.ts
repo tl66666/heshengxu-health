@@ -14,6 +14,12 @@ export function isSignedIn() {
   return Boolean(accessToken());
 }
 
+export function isWechatLoginConfigured() {
+  return Boolean(
+    (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MINI_API_BASE_URL,
+  );
+}
+
 export async function loginWithWechat() {
   const login = await new Promise<{ code: string }>((resolve, reject) => {
     uni.login({ provider: 'weixin', success: resolve, fail: reject });

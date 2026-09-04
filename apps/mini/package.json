@@ -8,8 +8,10 @@
     "dev:mp-weixin": "uni -p mp-weixin",
     "clean:dist": "node ../../scripts/clean-mini-dist.mjs",
     "prebuild:mp-weixin": "node ../../scripts/sync-illustrations.mjs",
-    "build:mp-weixin": "uni build -p mp-weixin",
-    "build:mp-weixin:check": "pnpm build:mp-weixin && node ../../scripts/verify-mini-build.mjs",
+    "build:mp-weixin": "uni build -p mp-weixin && node ../../scripts/finalize-mini-build.mjs dist/build/mp-weixin",
+    "build:mp-weixin:local": "uni build -p mp-weixin",
+    "build:mp-weixin:check": "uni build -p mp-weixin && node ../../scripts/finalize-mini-build.mjs dist/build/mp-weixin && node ../../scripts/verify-mini-build.mjs",
+    "export:assets": "node ../../scripts/export-mini-assets.mjs",
     "check:layout": "node ../../scripts/verify-repository-layout.mjs",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit"

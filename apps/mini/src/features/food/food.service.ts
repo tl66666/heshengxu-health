@@ -530,18 +530,23 @@ export function getRecommendedFoods(limit = 10) {
   return createMiniApiClient().get<FoodItem[]>(`/foods/recommended/list?limit=${limit}`);
 }
 
-export function createMealEntry(input: {
+type CreateMealEntryInput = {
   mealType: MealType;
-  foodId: string;
   grams: number;
   recordedAt: string;
   note?: string;
   foodSnapshot?: FoodItem;
-}) {
+} & ({ foodId: string; userFoodId?: never } | { userFoodId: string; foodId?: never });
+
+export function createMealEntry(input: CreateMealEntryInput) {
   const { foodSnapshot, ...request } = input;
   return createMiniApiClient()
     .post<MealEntry>('/meal-entries', request)
-    .catch(() => saveLocalMealEntry(request, foodSnapshot));
+    .catch(() => {
+      const localFoodId = request.foodId ?? request.userFoodId ?? foodSnapshot?.id;
+      if (!localFoodId) throw new Error('FOOD_SNAPSHOT_REQUIRED');
+      return saveLocalMealEntry({ ...request, foodId: localFoodId }, foodSnapshot);
+    });
 }
 
 export function loadMealEntries(date: string) {
@@ -587,6 +592,20 @@ export function userFoodToSearchItem(food: UserFood): FoodItem {
     },
     servings: [{ id: 'default', label: food.defaultServingLabel, grams: food.defaultServingGrams }],
   };
+}
+
+export function mergeFoodResults(personalFoods: UserFood[], catalogFoods: FoodItem[]) {
+  const personalItems = personalFoods.map((food) => ({
+    ...userFoodToSearchItem(food),
+    source: food.source,
+  }));
+  const personalIds = new Set(personalItems.map((food) => food.id));
+  return [
+    ...personalItems,
+    ...catalogFoods
+      .filter((food) => !personalIds.has(food.id))
+      .map((food) => ({ ...food, source: 'catalog' as const })),
+  ];
 }
 
 const LOCAL_MEAL_PREFIX = 'heban.local.meal-entries.';

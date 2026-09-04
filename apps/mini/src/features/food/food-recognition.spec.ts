@@ -27,7 +27,7 @@ describe('food recognition confirmation flow', () => {
 
   it('normalizes supported temporary image paths to an upload content type', () => {
     expect(imageContentType('wxfile://meal.png')).toBe('image/png');
-    expect(imageContentType('wxfile://meal.png')).toBe('image/webp');
+    expect(imageContentType('wxfile://meal.webp')).toBe('image/webp');
     expect(imageContentType('wxfile://meal.jpg')).toBe('image/jpeg');
   });
 });

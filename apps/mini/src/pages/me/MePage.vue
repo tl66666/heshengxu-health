@@ -159,8 +159,7 @@ function openProfile() {
   uni.navigateTo({ url: '/pages/profile/ProfilePage' });
 }
 function openAction(item: (typeof mePrimaryActions)[number]) {
-  if (item.mode === 'tab') uni.switchTab({ url: item.route });
-  else uni.navigateTo({ url: item.route });
+  uni.navigateTo({ url: item.route });
 }
 function manageData() {
   uni.showModal({

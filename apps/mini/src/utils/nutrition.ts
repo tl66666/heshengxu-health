@@ -2,7 +2,7 @@
  * 营养计算工具函数
  */
 
-import type { FoodNutrition } from '../features/food/food.types';
+import type { FoodNutrition } from '../features/food/food.types.js';
 
 /**
  * 计算百分比
@@ -77,7 +77,7 @@ export function getHealthLightIcon(level: number): string {
 /**
  * 格式化营养素数值
  */
-export function formatNutrient(value: number | null, unit: string = 'g'): string {
+export function formatNutrient(value: number | null | undefined, unit: string = 'g'): string {
   if (value === null || value === undefined) return '--';
   if (value === 0) return '--';
   
@@ -107,9 +107,9 @@ export function calculateNutritionByGrams(
     ...nutrition,
     basisGrams: grams,
     energyKcal: Math.round(nutrition.energyKcal * ratio),
-    proteinG: nutrition.proteinG ? Math.round(nutrition.proteinG * ratio * 10) / 10 : null,
-    fatG: nutrition.fatG ? Math.round(nutrition.fatG * ratio * 10) / 10 : null,
-    carbohydrateG: nutrition.carbohydrateG ? Math.round(nutrition.carbohydrateG * ratio * 10) / 10 : null,
+    proteinG: Math.round(nutrition.proteinG * ratio * 10) / 10,
+    fatG: Math.round(nutrition.fatG * ratio * 10) / 10,
+    carbohydrateG: Math.round(nutrition.carbohydrateG * ratio * 10) / 10,
     dietaryFiberG: nutrition.dietaryFiberG ? Math.round(nutrition.dietaryFiberG * ratio * 10) / 10 : null,
     // ... 其他营养素也按比例计算
   };

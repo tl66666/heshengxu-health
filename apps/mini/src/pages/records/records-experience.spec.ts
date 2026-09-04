@@ -29,7 +29,9 @@ describe('supporting screen contracts', () => {
   });
 
   it('uses the shared forward icon for the food entry affordance', () => {
-    expect(recordsPageSource).toContain('class="food-entry-arrow" src="/static/icons/forward.svg"');
+    expect(recordsPageSource).toContain(
+      'class="food-entry-arrow" src="/static/icons/svg/forward.svg"',
+    );
     expect(recordsPageSource).not.toContain('<text class="food-entry-arrow">›</text>');
   });
 });

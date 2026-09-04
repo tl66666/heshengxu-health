@@ -200,7 +200,7 @@ import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.j
 import type { MealEntry } from '../../features/food/food.summary.js';
 import { calculateFoodNutrition } from '../../features/food/food.types.js';
 import { listUserFoods } from '../../features/food/user-foods.service.js';
-import { userFoodToSearchItem } from '../../features/food/food.service.js';
+import { mergeFoodResults } from '../../features/food/food.service.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
@@ -251,7 +251,7 @@ const mealIcon = computed(
       snack: '/static/icons/snack.png',
     })[mealType.value],
 );
-let searchTimer: number | null = null;
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 // 所有分类（包含"全部"选项）
 const allCategories = computed(() => {
@@ -305,7 +305,7 @@ async function load(page = 1, append = false) {
     let personalItems: FoodItem[] = [];
     if (page === 1 && !query.value && !selectedCategory.value) {
       try {
-        personalItems = (await listUserFoods()).map(userFoodToSearchItem);
+        personalItems = mergeFoodResults(await listUserFoods(), []);
       } catch {
         // Personal foods are an enhancement; keep the catalog usable when the API is offline.
       }

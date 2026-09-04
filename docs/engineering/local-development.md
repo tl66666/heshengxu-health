@@ -48,14 +48,15 @@ npx -y prisma@6.16.0 migrate deploy --schema apps/api/prisma/schema.prisma
 ## 提交前检查
 
 ```powershell
-pnpm check
-pnpm test
-pnpm --filter @heban/api test:e2e
-pnpm --filter @heban/api openapi:generate
-pnpm --filter @heban/api build
-pnpm --filter @heban/mini typecheck
-pnpm --filter @heban/mini build:mp-weixin
-pnpm --filter @heban/mini build:mp-weixin:check
+npx prettier . --check
+npx eslint .
+npx vitest run
+npx prisma generate --schema apps/api/prisma/schema.prisma
+npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+npx tsc -p packages/domain/tsconfig.build.json
+npx tsc -p apps/api/tsconfig.build.json
+npx vue-tsc --noEmit --project apps/mini/tsconfig.json
+node scripts/verify-repository-layout.mjs
 ```
 
 微信小程序日常开发先运行 `./scripts/dev-mini.ps1`，脚本会先把 `assets/illustrations/` 同步到小程序构建目录，再在微信开发者工具导入 `apps/mini`；它会使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可更新。发布预览使用 `./scripts/build-mini.ps1`，直接导入 `apps/mini/dist/build/mp-weixin`。开发环境不填微信 AppSecret，真实微信登录会在后续身份接入阶段实现。
@@ -75,5 +76,5 @@ pnpm --filter @heban/mini build:mp-weixin:check
 OpenAPI 生成：
 
 ```powershell
-pnpm --filter @heban/api openapi:generate
+node apps/api/src/openapi.ts
 ```

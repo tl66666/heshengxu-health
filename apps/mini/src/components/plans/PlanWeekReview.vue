@@ -14,7 +14,13 @@ const summary = computed(() => weekSummary(props.plans));
 const total = computed(() => summary.value.reduce((sum, day) => sum + day.completed, 0));
 const max = computed(() => Math.max(1, ...summary.value.map((day) => day.completed)));
 const barHeight = (value: number) => Math.max(8, Math.round((value / max.value) * 100));
-const bestDay = computed(() => { const best = summary.value.reduce((current, day) => day.completed > current.completed ? day : current, summary.value[0]); return best?.completed ? `最有能量的是周${best.label}` : '从今天开始，写下第一个小点'; });
+const bestDay = computed(() => {
+  let best: (typeof summary.value)[number] | undefined;
+  for (const day of summary.value) {
+    if (!best || day.completed > best.completed) best = day;
+  }
+  return best?.completed ? `最有能量的是周${best.label}` : '从今天开始，写下第一个小点';
+});
 const insight = computed(() => total.value === 0 ? '还没有完成记录，先挑一个最轻松的行动吧' : total.value >= 12 ? '你正在建立很稳定的节奏' : '每一次勾选，都是在给自己积累底气');
 </script>
 <style scoped>

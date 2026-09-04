@@ -23,9 +23,9 @@
         </view>
         <text class="food-name">{{ food.name }}</text>
         <view v-if="food.category" class="food-category">{{ food.category.name }}</view>
-        <view :class="['health-tag', 'health-' + food.healthLight]">
-          <view class="health-icon" :class="'health-icon-' + food.healthLight" />
-          <text>{{ getHealthLabel(food.healthLight) }}</text>
+        <view :class="['health-tag', 'health-' + (food.healthLight ?? 0)]">
+          <view class="health-icon" :class="'health-icon-' + (food.healthLight ?? 0)" />
+          <text>{{ getHealthLabel(food.healthLight ?? 0) }}</text>
         </view>
       </view>
 
@@ -293,7 +293,7 @@ async function loadFood() {
       const pending = uni.getStorageSync('pendingFoodSelection') as FoodItem | undefined;
       if (pending?.id === foodId.value) food.value = pending;
     }
-    if (!food.value) error.value = '没有找到这份食物';
+    if (!food.value) error.value = true;
   } catch (err) {
     console.error('加载食物详情失败:', err);
     error.value = true;

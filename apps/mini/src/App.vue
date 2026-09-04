@@ -1,10 +1,9 @@
 <script lang="ts">
-import { loginWithWechat } from './features/auth/auth-store.js';
+import { isWechatLoginConfigured, loginWithWechat } from './features/auth/auth-store.js';
 
 export default {
   onLaunch() {
-    const env = (import.meta as unknown as { env?: Record<string, string> }).env || {};
-    if (env.VITE_MINI_API_BASE_URL && !uni.getStorageSync('heban.auth.access-token')) {
+    if (isWechatLoginConfigured() && !uni.getStorageSync('heban.auth.access-token')) {
       loginWithWechat().catch(() => undefined);
     }
   },

@@ -2,13 +2,20 @@ $ErrorActionPreference = 'Stop'
 
 Set-Location (Join-Path $PSScriptRoot '..')
 
-# Keep only one release output. Stop the development watcher before release builds.
-if (Test-Path 'apps/mini/dist/dev') {
-  Remove-Item -Recurse -Force 'apps/mini/dist/dev'
+if (-not $env:VITE_MINI_API_BASE_URL) {
+  throw '请先设置 VITE_MINI_API_BASE_URL 为生产 API 地址。'
 }
+if (-not $env:VITE_MINI_ASSET_BASE_URL -or -not $env:VITE_MINI_ASSET_BASE_URL.StartsWith('https://')) {
+  throw '请先设置 HTTPS 的 VITE_MINI_ASSET_BASE_URL，并上传 dist/mini-assets。'
+}
+
 node scripts/sync-illustrations.mjs
-pnpm --filter @heban/mini build:mp-weixin
-node scripts/verify-mini-build.mjs
+node scripts/export-mini-assets.mjs
+Set-Location 'apps/mini'
+npx uni build -p mp-weixin
+node ../../scripts/finalize-mini-build.mjs dist/build/mp-weixin
+node ../../scripts/verify-mini-build.mjs dist/build/mp-weixin
+Set-Location '../..'
 
 Write-Host ''
 Write-Host 'For release preview, import this directory in WeChat DevTools:' -ForegroundColor Green

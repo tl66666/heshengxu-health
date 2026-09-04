@@ -66,8 +66,66 @@ export class FoodRecognitionService {
 
   async analyze(userId: string, dto: AnalyzeFoodImageDto) {
     await this.consent.assertGranted(userId);
-    const candidates = await this.provider.recognize({ imageKey: `inline/${userId}`, imageBase64: dto.imageBase64, contentType: dto.contentType });
-    return candidates.map((candidate, index) => ({ ...candidate, rank: index + 1 }));
+    await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
+    await this.audit.record({
+      userId,
+      message: `inline:${dto.contentType}:${dto.imageBase64.length}`,
+      safetyDecision: 'allow',
+      provider: this.provider.provider,
+      model: this.provider.model,
+    });
+    const imageKey = `inline/${userId}/${Date.now()}`;
+    const job = await this.prisma.foodRecognitionJob.create({
+      data: { userId, imageKey, status: 'processing' },
+    });
+    try {
+      const rawCandidates = await this.provider.recognize({
+        imageKey,
+        imageBase64: dto.imageBase64,
+        contentType: dto.contentType,
+      });
+      const candidates = [];
+      for (const [index, raw] of rawCandidates.entries()) {
+        const food = await this.prisma.foodItem.findFirst({
+          where: { name: raw.name, isActive: true },
+        });
+        candidates.push({
+          jobId: job.id,
+          foodId: food?.id,
+          nameSnapshot: raw.name,
+          confidence: raw.confidence,
+          estimatedGrams: raw.estimatedGrams,
+          estimatedEnergyKcal: raw.estimatedEnergyKcal,
+          estimatedProteinG: raw.estimatedProteinG,
+          estimatedFatG: raw.estimatedFatG,
+          estimatedCarbohydrateG: raw.estimatedCarbohydrateG,
+          rank: index + 1,
+        });
+      }
+      if (candidates.length) {
+        await this.prisma.foodRecognitionCandidate.createMany({ data: candidates });
+      }
+      return recognitionJobDto(
+        await this.prisma.foodRecognitionJob.update({
+          where: { id: job.id },
+          data: { status: 'succeeded' },
+          include: { candidates: true },
+        }),
+      );
+    } catch (error) {
+      const failure = safeRecognitionFailure(error);
+      return recognitionJobDto(
+        await this.prisma.foodRecognitionJob.update({
+          where: { id: job.id },
+          data: {
+            status: 'failed',
+            errorCode: failure.code,
+            errorMessage: failure.message,
+          },
+          include: { candidates: true },
+        }),
+      );
+    }
   }
 
   async confirm(userId: string, dto: ConfirmFoodRecognitionDto) {

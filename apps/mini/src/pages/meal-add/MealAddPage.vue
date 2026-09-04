@@ -403,7 +403,8 @@ function changeMeal() {
     itemList: ['早餐', '午餐', '晚餐', '加餐'],
     success: (res) => {
       const types: Array<typeof mealType.value> = ['breakfast', 'lunch', 'dinner', 'snack'];
-      mealType.value = types[res.tapIndex];
+      const selected = types[res.tapIndex];
+      if (selected) mealType.value = selected;
     },
   });
 }

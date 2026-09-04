@@ -10,6 +10,7 @@ import { FoodRecognitionModule } from './modules/food-recognition/food-recogniti
 import { HealthInsightsModule } from './modules/health-insights/health-insights.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { UserFoodsModule } from './modules/user-foods/user-foods.module.js';
+import { XuxuModule } from './modules/xuxu/xuxu.module.js';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserFoodsModule } from './modules/user-foods/user-foods.module.js';
     FoodRecognitionModule,
     HealthInsightsModule,
     UserFoodsModule,
+    XuxuModule,
   ],
   controllers: [SystemController],
 })

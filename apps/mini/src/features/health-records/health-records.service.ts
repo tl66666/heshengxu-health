@@ -2,10 +2,13 @@ import type { TodayRecordsDto } from '../../../../../packages/contracts/src/heal
 import type { HealthRecordRequest } from './health-records.mapper.js';
 
 const LOCAL_RECORDS_KEY = 'heban.health.records.v1';
-type LocalRecord = HealthRecordRequest['data'] & {
+type LocalRecordFor<T extends HealthRecordRequest> = T extends HealthRecordRequest
+  ? T['data'] & {
   id: string;
-  type: HealthRecordRequest['type'];
-};
+      type: T['type'];
+    }
+  : never;
+type LocalRecord = LocalRecordFor<HealthRecordRequest>;
 
 function readLocalRecords(): LocalRecord[] {
   try {
@@ -42,25 +45,46 @@ function emptyTodayRecords(): TodayRecordsDto {
 function localTodayRecords(date: string): TodayRecordsDto {
   const today = emptyTodayRecords();
   for (const record of readLocalRecords().filter((item) => recordDate(item) === date)) {
-    if (record.type === 'weight')
-      today.weight = { id: record.id, ...record, note: record.note || null };
-    if (record.type === 'meal-structure')
-      today.meals.push({ id: record.id, ...record, note: record.note || null });
-    if (record.type === 'activity')
-      today.activities.push({
+    if (record.type === 'weight') {
+      today.weight = {
         id: record.id,
-        ...record,
-        intensity: record.intensity || null,
-        note: record.note || null,
-      });
-    if (record.type === 'sleep')
-      today.sleep = {
-        id: record.id,
-        ...record,
-        sleepAt: record.sleepAt || null,
-        wakeAt: record.wakeAt || null,
+        valueKg: record.valueKg,
+        recordedAt: record.recordedAt,
         note: record.note || null,
       };
+    }
+    if (record.type === 'meal-structure') {
+      today.meals.push({
+        id: record.id,
+        mealType: record.mealType,
+        hasStaple: record.hasStaple,
+        hasProtein: record.hasProtein,
+        hasVegetable: record.hasVegetable,
+        recordedAt: record.recordedAt,
+        note: record.note || null,
+      });
+    }
+    if (record.type === 'activity') {
+      today.activities.push({
+        id: record.id,
+        activityType: record.activityType,
+        durationMinutes: record.durationMinutes,
+        intensity: record.intensity || null,
+        recordedAt: record.recordedAt,
+        note: record.note || null,
+      });
+    }
+    if (record.type === 'sleep') {
+      today.sleep = {
+        id: record.id,
+        durationMinutes: record.durationMinutes,
+        quality: record.quality,
+        sleepAt: record.sleepAt || null,
+        wakeAt: record.wakeAt || null,
+        recordedAt: record.recordedAt,
+        note: record.note || null,
+      };
+    }
   }
   today.meals.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
   today.activities.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));

@@ -6,7 +6,7 @@
   "versionCode": "100",
   "transformPx": false,
   "mp-weixin": {
-    "appid": "wxba6b329bc279b80f",
+    "appid": "",
     "setting": {
       "urlCheck": false,
       "ignoreDevUnusedFiles": false

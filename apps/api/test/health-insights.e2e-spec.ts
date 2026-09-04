@@ -11,7 +11,7 @@ describe('weekly health insights', () => {
     const owner = { Authorization: `Bearer dev-insights-owner-${suffix}` };
     const other = { Authorization: `Bearer dev-insights-other-${suffix}` };
     const foods = await client.get('/api/v1/foods/search').set(owner).expect(200);
-    const food = foods.body.data[0];
+    const food = foods.body.data.items[0];
     expect(food).toBeDefined();
 
     await client

@@ -10,7 +10,7 @@
 - API：`apps/api`，NestJS + Prisma。
 - 数据库：PostgreSQL；Redis 预留给缓存和异步任务。
 - 共享领域：`packages/domain`、`packages/contracts`。
-- CloudBase：后续用于微信身份、私有对象存储和服务端混元调用，不作为第二套业务数据库。
+- CloudBase：用于微信身份、私有对象存储和服务端混元调用，不作为第二套业务数据库。
 - Docker：只用于本地 PostgreSQL/Redis/API 联调；上线后由云平台托管，不要求用户电脑常开。
 
 ## 已完成能力
@@ -22,11 +22,11 @@
 5. 食品闭环：食品搜索、份量确认、营养计算、餐食编辑/删除、周回顾、拍照识别 Mock、候选确认和失败重试。
 6. GitHub CI：格式化、Lint、类型检查、迁移与种子、API 构建、小程序测试和微信构建产物检查均已接入。
 
-## 当前未完成能力
+## 上线前剩余事项
 
-- 微信真实登录和身份会话。
-- CloudBase 私有对象存储生产适配器。
-- 混元视觉生产 Provider、授权提示、审计和失败降级。
+- 微信真实登录和身份会话接入生产环境。
+- 将原始插画上传到 CloudBase 静态托管，并配置 `VITE_MINI_ASSET_BASE_URL`。
+- 混元视觉生产 Provider 的授权、审计和失败降级验收。
 - 数据导出、彻底删除和隐私设置。
 - 390x844 与 430x932 真机视觉验收、微信审核前检查。
 
@@ -34,19 +34,19 @@
 
 1. 先逐页验收前端：健康档案、编辑档案、周回顾、我的页，检查图片比例、文字溢出、返回路径、底部导航和空/错/加载状态。
 2. 接入微信登录，服务端将演示身份替换为真实用户身份；小程序不保存服务端密钥。
-3. 接入 CloudBase 私有对象存储，上传会话只由服务端签发。
+3. 如需长期保存用户拍摄的原始照片，再接入 CloudBase 私有对象存储；当前在线识别使用受限 Base64 请求，不保存原图。
 4. 接入混元视觉 Provider。识别输出始终是候选列表，用户确认后才创建 `MealEntry`。
 5. 补齐隐私导出/删除，再进行全量真机验收和部署。
 
 ## 验证命令
 
 ```powershell
-pnpm install --frozen-lockfile
-pnpm --filter @heban/mini test
-pnpm --filter @heban/mini typecheck
-pnpm --filter @heban/mini build:mp-weixin:check
-pnpm check
-pnpm test
+npm install
+npx vitest run --dir apps/mini
+npx vue-tsc --noEmit --project apps/mini/tsconfig.json
+npx tsc -p packages/domain/tsconfig.build.json
+npx tsc -p apps/api/tsconfig.build.json
+node scripts/verify-repository-layout.mjs
 ```
 
 微信开发者工具日常导入 `apps/mini`，发布预览导入 `apps/mini/dist/build/mp-weixin`。不要导入 `src`，也不要提交 `dist`。

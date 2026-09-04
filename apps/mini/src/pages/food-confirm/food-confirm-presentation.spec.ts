@@ -14,7 +14,8 @@ describe('food confirmation presentation', () => {
 
   it('supports meal context, personal foods, and saving photo results to the library', () => {
     expect(foodConfirmPageSource).toContain('data-testid="save-to-library"');
-    expect(foodConfirmPageSource).toContain('v-model="saveToLibrary"');
+    expect(foodConfirmPageSource).toContain(':checked="saveToLibrary"');
+    expect(foodConfirmPageSource).toContain('@change="updateSaveToLibrary"');
     expect(foodConfirmPageSource).toContain('options?.mealType');
     expect(foodConfirmPageSource).toContain('options?.userFoodId');
     expect(foodConfirmPageSource).toContain('options?.candidateId');

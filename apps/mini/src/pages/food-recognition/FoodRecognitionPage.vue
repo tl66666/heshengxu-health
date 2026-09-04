@@ -99,10 +99,8 @@ import { computed, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import {
+  analyzeFoodImage,
   canStartRecognition,
-  completeRecognitionUpload,
-  createRecognitionUpload,
-  createRecognitionJob,
   grantFoodRecognitionConsent,
   imageContentType,
 } from '../../features/food/food-recognition.js';
@@ -155,15 +153,9 @@ async function recognize() {
   
   try {
     await grantFoodRecognitionConsent();
-    
-    const upload = await createRecognitionUpload({
-      contentType: imageContentType(imagePath.value),
-      sizeBytes: Math.max(1, imageSize.value),
-    });
-    
-    await completeRecognitionUpload(upload.id);
-    
-    const job = await createRecognitionJob(upload.id);
+    const contentType = imageContentType(imagePath.value);
+    const imageBase64 = await readImageBase64(imagePath.value);
+    const job = await analyzeFoodImage({ contentType, imageBase64 });
     
     uni.navigateTo({
       url: `/pages/food-candidates/FoodCandidatesPage?jobId=${encodeURIComponent(job.id)}&imagePath=${encodeURIComponent(imagePath.value)}&mealType=${mealType.value}`,
@@ -174,6 +166,17 @@ async function recognize() {
   } finally {
     processing.value = false;
   }
+}
+
+function readImageBase64(path: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    uni.getFileSystemManager().readFile({
+      filePath: path,
+      encoding: 'base64',
+      success: ({ data }) => resolve(String(data)),
+      fail: reject,
+    });
+  });
 }
 
 onLoad((options) => {

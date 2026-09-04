@@ -1,11 +1,33 @@
 export type FoodNutrition = {
-  basisGrams: 100;
+  basisGrams: number;
   energyKcal: number;
   proteinG: number;
   fatG: number;
   carbohydrateG: number;
   dietaryFiberG: number | null;
   sodiumMg: number | null;
+  vitaminAUg?: number | null;
+  thiamineMg?: number | null;
+  riboflavinMg?: number | null;
+  vitaminB6Mg?: number | null;
+  vitaminCMg?: number | null;
+  vitaminEMg?: number | null;
+  niacinMg?: number | null;
+  folateMcg?: number | null;
+  calciumMg?: number | null;
+  ironMg?: number | null;
+  potassiumMg?: number | null;
+  zincMg?: number | null;
+  seleniumUg?: number | null;
+  magnesiumMg?: number | null;
+  copperMg?: number | null;
+  manganeseMg?: number | null;
+  phosphorusMg?: number | null;
+  cholesterolMg?: number | null;
+  saturatedFatG?: number | null;
+  sugarG?: number | null;
+  gi?: number | null;
+  gl?: number | null;
 };
 
 export type FoodServing = { id: string; label: string; grams: number };

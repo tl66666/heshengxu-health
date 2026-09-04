@@ -56,7 +56,8 @@ function collectJsFiles(dir) {
 // 编译产物里每个 require 的相对模块都必须存在；缺失会让小程序启动即白屏报
 // "module is not defined"，这里把这类损坏拦在提交之前。
 const brokenRequires = [];
-for (const file of collectJsFiles(root)) {
+const jsFiles = collectJsFiles(root);
+for (const file of jsFiles) {
   const source = readFileSync(file, 'utf8');
   for (const match of source.matchAll(/require\(\s*["'](\.[^"']+)["']\s*\)/g)) {
     const base = resolve(file, '..', match[1]);
@@ -71,4 +72,26 @@ if (brokenRequires.length > 0) {
   process.exit(1);
 }
 
-console.log(`微信小程序构建产物检查通过：${root}`);
+function collectAllFiles(dir) {
+  const files = [];
+  for (const entry of readdirSync(dir)) {
+    const full = resolve(dir, entry);
+    if (statSync(full).isDirectory()) files.push(...collectAllFiles(full));
+    else files.push(full);
+  }
+  return files;
+}
+
+const packageBytes = collectAllFiles(root).reduce((total, file) => total + statSync(file).size, 0);
+const maximumBytes = 4 * 1024 * 1024;
+if (packageBytes > maximumBytes) {
+  console.error(
+    `微信小程序包为 ${(packageBytes / 1024 / 1024).toFixed(2)} MB，超过 4 MB 预览限制。` +
+      '请配置 VITE_MINI_ASSET_BASE_URL，并通过正式构建脚本远程化位图。',
+  );
+  process.exit(1);
+}
+
+console.log(
+  `微信小程序构建产物检查通过：${root}（${(packageBytes / 1024 / 1024).toFixed(2)} MB）`,
+);

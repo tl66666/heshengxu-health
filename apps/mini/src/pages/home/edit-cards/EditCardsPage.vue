@@ -30,7 +30,7 @@
           <switch
             :checked="visibility[card.id]"
             color="#78aaa0"
-            @change="toggle(card.id, $event.detail.value)"
+            @change="toggleFromEvent(card.id, $event)"
           />
         </view>
       </view>
@@ -65,6 +65,10 @@ function cardsByGroup(group: string) {
 function toggle(id: HomeCardId, checked: boolean) {
   visibility.value = { ...visibility.value, [id]: checked };
   saveHomeCardVisibility(visibility.value);
+}
+
+function toggleFromEvent(id: HomeCardId, event: Event) {
+  toggle(id, Boolean((event as unknown as { detail?: { value?: boolean } }).detail?.value));
 }
 
 function reset() {

@@ -4,18 +4,17 @@
 
 “和生序”取”和身心、生息、循其序”之意：不追求极端的改变，而是通过持续记录、理解变化和小步行动，让健康回到每个人自己的节律。品牌主张：**让健康回到自己的节律。**
 
-当前仓库已完成阶段 0 工程底座、阶段 0.5 数据持久化、阶段 1 建档闭环、阶段 2A 每日健康闭环和食品记录/识别演示闭环。**阶段 2B 食物库与营养管理**正在进行中。根目录的静态页面仍被隔离为探索性原型，避免将未确认的页面、图片和模拟数据带入正式产品。
+当前仓库已完成工程底座、健康档案、每日健康记录、食物库与营养记录、序序聊天接口、食物图片识别候选流程，以及微信小程序构建检查。生产上线前仍需配置微信登录、数据库、AI 密钥与静态素材托管，并完成隐私合规和真机验收。
 
 ## 🚀 食物库功能快速开始
 
 **新功能**：完整的食物库、拍照识别、饮食记录、体重管理、营养分析
 
-👉 **[3分钟快速启动指南](QUICK-START.md)** - 适合小白
+👉 **[本地开发说明](docs/engineering/local-development.md)** - 适合第一次启动项目
 
 📚 **详细文档**：
 - [功能设计文档](docs/FOOD-NUTRITION-DESIGN.md) - 完整的6大模块设计
-- [小白操作指南](docs/BEGINNER-GUIDE.md) - 分步详细教程
-- [实施进度总结](docs/FOOD-IMPLEMENTATION-STATUS.md) - 当前进度和后续计划
+- [上线部署清单](docs/DEPLOYMENT.md)
 
 **一键初始化**：
 ```powershell
@@ -31,15 +30,14 @@
 安装依赖后启动开发监听（以后改源码会自动编译，不需要每次手动 build）：
 
 ```powershell
-pnpm install
 ./scripts/dev-mini.ps1
 ```
 
 微信开发者工具导入 `apps/mini`（只需一次）。开发配置会自动使用 `apps/mini/dist/dev/mp-weixin`，保存源码后点击“重新编译”即可看到最新页面。
 
-发布预览前运行 `./scripts/build-mini.ps1`，再直接导入 `apps/mini/dist/build/mp-weixin`。
+发布预览前按[上线部署清单](docs/DEPLOYMENT.md)配置生产 API 与素材域名，再运行 `./scripts/build-mini.ps1`，最后导入 `apps/mini/dist/build/mp-weixin`。
 
-开发时只使用 `apps/mini`；发布时才使用 `dist/build/mp-weixin`。如果两个目录同时存在导致混乱，先运行 `pnpm --filter @heban/mini clean:dist`，再运行 `./scripts/dev-mini.ps1`。
+开发时只使用 `apps/mini`；发布时才使用 `dist/build/mp-weixin`。如果两个目录同时存在导致混乱，先运行 `node scripts/clean-mini-dist.mjs`，再运行 `./scripts/dev-mini.ps1`。
 
 ## 仓库结构
 
@@ -71,14 +69,11 @@ npx serve .
 - [本地开发说明](docs/engineering/local-development.md)
 
 - [权威产品蓝图](docs/product/heshengxu-product-blueprint.md)
-- [阶段 2A 每日健康闭环实施计划](docs/superpowers/plans/2026-08-25-stage-2a-daily-health-loop.md)
+- [上线部署清单](docs/DEPLOYMENT.md)
 - [历史平台探索](docs/product/archive/2026-08-24-platform-exploration.md)
 - [早期范围取舍](docs/superpowers/specs/2026-08-24-product-scope-after-mint-benchmark.md)
-- [阶段 0 实施计划（已完成）](docs/superpowers/plans/2026-08-24-stage-0-engineering-foundation.md)
 - [阶段 1 建档设计](docs/superpowers/specs/2026-08-24-stage-1-onboarding-design.md)
-- [阶段 1 建档实施计划（已完成）](docs/superpowers/plans/2026-08-24-stage-1-onboarding.md)
 - [阶段 0.5 持久化设计](docs/superpowers/specs/2026-08-25-stage-0-5-persistence-design.md)
-- [阶段 0.5 持久化实施计划（已完成）](docs/superpowers/plans/2026-08-25-stage-0-5-persistence.md)
 - [项目结构规范](docs/engineering/project-structure.md)
 - [微信小程序导入架构决策](docs/architecture/adr-003-mini-program-import.md)
 
