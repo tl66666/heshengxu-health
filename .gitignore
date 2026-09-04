@@ -24,3 +24,8 @@ food_category.sql
 *.log
 .DS_Store
 Thumbs.db
+
+# 数据库与临时产物
+dev.db
+*.timestamp-*.mjs
+packages/.ignored_*/

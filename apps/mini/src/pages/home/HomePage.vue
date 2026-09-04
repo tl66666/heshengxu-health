@@ -151,22 +151,26 @@
             <text class="value-unit">公斤</text>
           </view>
           <view class="mini-chart">
-            <svg
-              v-if="miniWeightPoints.length"
-              class="mini-trend-svg"
-              viewBox="0 0 120 52"
-              preserveAspectRatio="none"
-            >
-              <path :d="miniWeightPath" class="mini-trend-line" />
-              <circle
-                v-for="point in miniWeightPoints"
-                :key="point.id"
-                :cx="point.x"
-                :cy="point.y"
-                r="2.6"
-                class="mini-trend-point"
+            <view v-if="miniChartGeom" class="mini-chart-view">
+              <view
+                v-for="seg in miniChartGeom.segments"
+                :key="seg.id"
+                class="mini-seg"
+                :style="{
+                  left: seg.x + 'rpx',
+                  top: seg.y + 'rpx',
+                  width: seg.len + 'rpx',
+                  transform: 'rotate(' + seg.angle + 'deg)',
+                }"
               />
-            </svg>
+              <view
+                v-for="pt in miniChartGeom.pts"
+                :key="pt.id"
+                class="mini-dot"
+                :class="{ latest: pt.isLatest }"
+                :style="{ left: pt.x + 'rpx', top: pt.y + 'rpx' }"
+              />
+            </view>
             <image v-else class="chart-icon" src="/static/icons/weight.jpg" mode="aspectFill" />
           </view>
         </view>
@@ -392,7 +396,8 @@ const healthTips = [
 const bubbleTip = ref('');
 function rotateBubble() {
   const pool = healthTips.filter((tip) => tip !== bubbleTip.value);
-  bubbleTip.value = pool[Math.floor(Math.random() * pool.length)];
+  const next = pool[Math.floor(Math.random() * pool.length)];
+  if (next) bubbleTip.value = next;
 }
 
 const { today, loading, error } = healthLoopState;
@@ -513,12 +518,15 @@ const currentWeight = computed(
     '--',
 );
 const latestWeightRecord = computed(() => weightHistory.value[0] || today.value?.todayRecords?.weight || null);
-const miniWeightData = computed(() =>
-  weightHistory.value
-    .slice()
+const miniWeightData = computed(() => {
+  const byDay = new Map<string, { id: string; valueKg: number; recordedAt: string }>();
+  for (const record of weightHistory.value) {
+    byDay.set(record.recordedAt.slice(0, 10), record); // 当天最后一次覆盖前面的
+  }
+  return [...byDay.values()]
     .sort((a, b) => +new Date(a.recordedAt) - +new Date(b.recordedAt))
-    .slice(-7),
-);
+    .slice(-7);
+});
 const miniWeightPoints = computed(() => {
   const data = miniWeightData.value;
   if (!data.length) return [];
@@ -540,6 +548,35 @@ const miniWeightPoints = computed(() => {
     x: data.length === 1 ? 60 : (index / (data.length - 1)) * 120,
     y: 48 - ((item.valueKg - min) / span) * 36,
   }));
+});
+// 迷你折线：svg 不可用，映射到 148x120 rpx 的 view 线段
+const miniChartGeom = computed(() => {
+  const pts = miniWeightPoints.value;
+  if (pts.length < 2) return null;
+  const px = (x: number) => 8 + (x / 120) * 132;
+  const py = (y: number) => 14 + ((y - 8) / 40) * 92;
+  const mapped = pts.map((point) => ({
+    id: point.id,
+    x: px(point.x),
+    y: py(point.y),
+    isLatest: point.id === pts[pts.length - 1]?.id,
+  }));
+  const segments: Array<{ id: string; x: number; y: number; len: number; angle: number }> = [];
+  for (let i = 0; i < mapped.length - 1; i += 1) {
+    const a = mapped[i];
+    const b = mapped[i + 1];
+    if (!a || !b) continue;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    segments.push({
+      id: `${a.id}-${i}`,
+      x: a.x,
+      y: a.y,
+      len: Math.hypot(dx, dy),
+      angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+    });
+  }
+  return { pts: mapped, segments };
 });
 const miniWeightPath = computed(() =>
   miniWeightPoints.value
@@ -1198,16 +1235,35 @@ image.camera-decoration {
   width: 148rpx;
   height: 110rpx;
 }
-.mini-trend-line {
-  fill: none;
-  stroke: var(--hz-green-bright);
-  stroke-width: 2;
-  stroke-linecap: round;
+.mini-chart-view {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
-.mini-trend-point {
-  fill: #fff;
-  stroke: var(--hz-green-bright);
-  stroke-width: 2;
+.mini-seg {
+  position: absolute;
+  height: 5rpx;
+  margin-top: -2.5rpx;
+  border-radius: 2.5rpx;
+  background: linear-gradient(90deg, #86bda0 0%, #48a377 100%);
+  transform-origin: 0 50%;
+}
+.mini-dot {
+  position: absolute;
+  width: 12rpx;
+  height: 12rpx;
+  margin: -6rpx 0 0 -6rpx;
+  border: 3rpx solid #48a377;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2rpx 6rpx rgba(47, 107, 77, 0.18);
+}
+.mini-dot.latest {
+  width: 16rpx;
+  height: 16rpx;
+  margin: -8rpx 0 0 -8rpx;
+  border-color: #2f6b4d;
+  background: #48a377;
 }
 .chart-icon {
   width: 112rpx;

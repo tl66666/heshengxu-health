@@ -58,7 +58,7 @@
           >
             <text v-if="done(task)">✓</text>
           </button>
-          <view class="task-copy"
+          <view class="task-copy" @tap="$emit('toggle', plan.id, task.id)"
             ><text class="task-title">{{ task.title }}</text
             ><text class="task-note">{{
               done(task) ? '今天已经完成，做得很好' : task.note
@@ -105,15 +105,12 @@ const filters = [
   { value: 'done', label: '已完成' },
 ] as const;
 const done = (task: HabitTask) => isTaskDone(task);
+// 顺序稳定是打卡体验的关键：勾选不引起行跳动，避免"点不动/点错行"
 const visibleTasks = (plan: HabitPlan) =>
-  [...plan.tasks]
-    .sort((a, b) => Number(done(a)) - Number(done(b)))
-    .filter(
-      (task) => filter.value === 'all' || (filter.value === 'done' ? done(task) : !done(task)),
-    );
-const sortedPlans = computed(() =>
-  [...props.plans].sort((a, b) => planStats(a).progress - planStats(b).progress),
-);
+  plan.tasks.filter(
+    (task) => filter.value === 'all' || (filter.value === 'done' ? done(task) : !done(task)),
+  );
+const sortedPlans = computed(() => [...props.plans]);
 const planTint = (plan: HabitPlan) => {
   const palette: Record<string, string> = {
     weight: '#e7f0ea',
@@ -293,15 +290,17 @@ const weekDays = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42rpx;
-  height: 42rpx;
+  width: 52rpx;
+  height: 52rpx;
   flex: none;
   border: 2rpx solid #a9c7ab;
   border-radius: 50%;
   color: #fff;
-  font-size: 26rpx;
+  font-size: 28rpx;
   background: #ffffff;
+  transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
+.check:active { transform: scale(0.92); }
 .check.checked {
   border-color: #6f9f7a;
   background: #6f9f7a;

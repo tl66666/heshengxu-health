@@ -14,8 +14,9 @@ describe('shared illustration direction', () => {
   });
 
   it('keeps the planning hero image in a dedicated, non-overlapping visual region', () => {
-    expect(planHeroSource).toContain('/static/illustrations/plan-hero-journal.png');
-    expect(planHeroSource).toContain('object-fit: contain');
+    expect(planHeroSource).toContain('/static/illustrations/plan-hero-banner.png');
+    expect(planHeroSource).toContain('mode="widthFix"');
+    expect(planHeroSource).toContain('height: auto');
     expect(planHeroSource).toContain('display: none');
   });
 

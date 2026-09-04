@@ -31,7 +31,7 @@ function archive() {
 }
 </script>
 <style scoped>
-.scrim { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end; background:rgba(39,67,50,.22); }
+.scrim { position:fixed; inset:0; z-index:120; display:flex; align-items:flex-end; background:rgba(39,67,50,.22); }
 .sheet { width:100%; max-height:88vh; overflow:auto; padding:26rpx 28rpx calc(26rpx + env(safe-area-inset-bottom)); border-radius:26rpx 26rpx 0 0; background:#ffffff; box-shadow:0 -12rpx 36rpx rgba(54,83,67,.16); }
 .sheet-head { display:flex; align-items:flex-start; justify-content:space-between; }.sheet-title { display:block; color:#365343; font-size:32rpx; font-weight:700; }.sheet-note { display:block; margin-top:6rpx; color:#84988c; font-size:20rpx; }.close { width:48rpx; height:48rpx; color:#78907f; font-size:40rpx; line-height:44rpx; }.label { display:block; margin:20rpx 0 9rpx; color:#4f6756; font-size:21rpx; }
 .plan-picker { width:100%; white-space:nowrap; }.plan-picker button { display:inline-block; margin-right:10rpx; padding:11rpx 16rpx; border:1rpx solid #dfe9df; border-radius:999rpx; color:#78907f; font-size:20rpx; background:#fff; }.plan-picker button.selected { border-color:#9fc8a4; color:#4f8a61; background:#edf5e8; }

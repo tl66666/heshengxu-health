@@ -31,6 +31,12 @@
           <text class="stat-value">{{ remainingAmount }}<text class="stat-unit">ml</text></text>
         </view>
       </view>
+      <view class="goal-progress" aria-label="今日饮水进度">
+        <view class="goal-progress-track">
+          <view class="goal-progress-fill" :style="{ width: progressPercent + '%' }" />
+        </view>
+        <text class="goal-progress-text">{{ progressPercent }}%</text>
+      </view>
       
       <!-- 个性化推荐信息 -->
       <view v-if="isPersonalized" class="personalized-info">
@@ -1169,4 +1175,203 @@ onShow(() => {
 .cup-display .water-surface { left: -6% !important; width: 112% !important; }
 .cup-display .surface-wave { left: -6% !important; width: 112% !important; }
 .cup-display .cup-empty { z-index: 2 !important; }
+</style>
+
+<style scoped>
+/* ============================================================
+ * 喝水页 v3 精修（杯与水的绘制逻辑不动）
+ * 青蓝水色系 + 玻璃表面 + 发丝分隔，去掉旧版的拼贴感
+ * ============================================================ */
+.water-page .date-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  border-bottom: 0;
+  background: transparent;
+}
+.water-page .date-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05), inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+}
+.water-page .date-text {
+  min-width: 180rpx;
+  color: var(--hz-ink);
+  font-size: 27rpx;
+  font-weight: 750;
+  text-align: center;
+}
+.water-page .goal-card {
+  padding: 26rpx 8rpx;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9), 0 10rpx 30rpx rgba(29, 55, 41, 0.06);
+}
+.water-page .goal-card .stat-label {
+  color: var(--hz-muted);
+  font-size: 19rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+.water-page .goal-card .stat-value {
+  margin-top: 6rpx;
+  color: #2e5e6b;
+  font-size: 38rpx;
+  font-weight: 800;
+}
+.water-page .goal-card .stat-value.primary { color: #23808f; }
+.water-page .stat-divider {
+  width: 1rpx;
+  height: 48rpx;
+  background: rgba(125, 178, 190, 0.28);
+}
+.water-page .personalized-info {
+  margin-top: 14rpx;
+  padding: 12rpx 18rpx;
+  border: 1rpx solid rgba(125, 178, 190, 0.3);
+  border-radius: 999rpx;
+  background: rgba(233, 244, 246, 0.7);
+}
+.water-page .badge-icon { color: #4f8794; }
+.water-page .badge-text { color: #4f8794; font-weight: 650; }
+.water-page .info-desc { color: #6d8a92; }
+.water-page .setup-btn {
+  height: 46rpx;
+  padding: 0 18rpx;
+  border: 0;
+  border-radius: 999rpx;
+  color: #23808f;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 20rpx;
+  font-weight: 700;
+  box-shadow: 0 3rpx 8rpx rgba(35, 128, 143, 0.12);
+}
+.water-page .section-header { margin-bottom: 16rpx; }
+.water-page .header-text { color: var(--hz-ink); font-size: 27rpx; font-weight: 750; }
+.water-page .header-icon { mix-blend-mode: multiply; }
+.water-page .quick-drink-picker {
+  height: 54rpx;
+  padding: 0 18rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 999rpx;
+  color: #2e5e6b;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 20rpx;
+  font-weight: 650;
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05);
+}
+.water-page .quick-drink-chevron { color: var(--hz-muted); }
+.water-page .quick-buttons { gap: 12rpx; }
+.water-page .quick-btn {
+  padding: 20rpx 6rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.95), 0 5rpx 14rpx rgba(29, 55, 41, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.water-page .quick-btn:active {
+  transform: scale(0.95);
+  background: rgba(233, 244, 246, 0.95);
+  box-shadow: 0 3rpx 8rpx rgba(35, 128, 143, 0.12);
+}
+.water-page .btn-icon { width: 34rpx; height: 34rpx; mix-blend-mode: multiply; }
+.water-page .btn-drink-icon { font-size: 32rpx; }
+.water-page .btn-text { margin-top: 8rpx; color: var(--hz-ink-soft); font-size: 20rpx; font-weight: 650; }
+.water-page .history-section {
+  padding: 22rpx 24rpx 8rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: var(--hz-radius-card);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9), 0 10rpx 30rpx rgba(29, 55, 41, 0.05);
+}
+.water-page .history-title { color: var(--hz-ink); font-size: 26rpx; font-weight: 750; }
+.water-page .history-count { color: var(--hz-muted); }
+.water-page .record-item { padding: 18rpx 4rpx; border-bottom: 1rpx solid var(--hz-rule-glass); }
+.water-page .record-item:last-child { border-bottom: 0; }
+.water-page .record-drink-icon {
+  background: rgba(233, 244, 246, 0.9);
+  border-radius: 16rpx;
+}
+.water-page .record-name { color: var(--hz-ink); font-size: 25rpx; font-weight: 650; }
+.water-page .record-time { color: var(--hz-faint); }
+.water-page .record-amount { color: #23808f; font-size: 28rpx; font-weight: 800; }
+.water-page .swap { color: #4f8794; font-weight: 650; }
+</style>
+
+<style scoped>
+/* ---- 统计卡进度条：已喝/目标的直观比例 ---- */
+.goal-progress {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin: 20rpx 6rpx 4rpx;
+}
+.goal-progress-track {
+  position: relative;
+  flex: 1;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: rgba(125, 178, 190, 0.18);
+  overflow: hidden;
+}
+.goal-progress-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #7cc3d4 0%, #3d93a8 100%);
+  box-shadow: 0 0 8rpx rgba(61, 147, 168, 0.35);
+  transition: width 0.6s cubic-bezier(0.22, 0.8, 0.36, 1);
+}
+.goal-progress-text {
+  flex: none;
+  min-width: 64rpx;
+  color: #23808f;
+  font-size: 20rpx;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* ---- 记录水 CTA：深青渐变实底，白色图标+文字，唯一的页面焦点 ---- */
+.record-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  height: 96rpx;
+  border: 0 !important;
+  border-radius: 999rpx !important;
+  background: linear-gradient(135deg, #52aec3 0%, #2e7f95 100%) !important;
+  box-shadow: 0 14rpx 30rpx rgba(46, 127, 149, 0.32), inset 0 2rpx 0 rgba(255, 255, 255, 0.35) !important;
+  overflow: hidden;
+}
+.record-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 12%;
+  left: 12%;
+  height: 24rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+.record-btn:active {
+  transform: scale(0.985);
+  background: linear-gradient(135deg, #479fb4 0%, #276f83 100%) !important;
+  box-shadow: 0 8rpx 18rpx rgba(46, 127, 149, 0.28) !important;
+}
+.record-icon-wrap {
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-radius: 50%;
+}
+.record-icon { mix-blend-mode: normal; }
+.record-text {
+  color: #ffffff !important;
+  font-size: 28rpx !important;
+  font-weight: 750 !important;
+  letter-spacing: 2rpx;
+}
 </style>

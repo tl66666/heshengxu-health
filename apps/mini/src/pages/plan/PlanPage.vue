@@ -36,7 +36,7 @@
       @add-task="addTask"
       @archive="archivePlan"
     />
-    <MiniTabBar active="plan" />
+    <MiniTabBar v-if="!sheetVisible && !manageVisible" active="plan" />
   </view>
 </template>
 
@@ -148,7 +148,7 @@ onShow(refresh);
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  padding: 30rpx 28rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 34rpx);
+  padding: 20rpx 28rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 30rpx);
   color: var(--hz-ink);
   background: transparent;
 }
@@ -169,7 +169,7 @@ onShow(refresh);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 .top-eyebrow {
   display: block;
@@ -180,9 +180,9 @@ onShow(refresh);
 .top-title {
   display: block;
   margin-top: 5rpx;
-  color: #365343;
-  font-size: 41rpx;
-  font-weight: 700;
+  color: var(--hz-ink);
+  font-size: 38rpx;
+  font-weight: 800;
 }
 .history {
   padding: 10rpx 0 8rpx 18rpx;

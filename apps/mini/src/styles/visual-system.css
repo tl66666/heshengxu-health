@@ -151,6 +151,10 @@ button.confirm-btn,
 button.wellness-save,
 button.mood-save,
 button.home-weight-save {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
   min-height: 80rpx !important;
   border: 1rpx solid rgba(159, 195, 173, 0.55) !important;
   border-radius: var(--hz-radius-control) !important;
@@ -189,13 +193,24 @@ button.home-weight-save:active {
   background: rgba(230, 246, 249, 0.82) !important;
   box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(84, 143, 161, 0.13) !important;
 }
+/* 经期主动作：玫瑰渐变实底（与周期环同源色），不再是漂在页面外的浅粉块 */
 .period-page .primary-button,
 .period-page .save-button,
 .period-setup-page .primary-button {
-  border-color: rgba(214, 171, 185, 0.55) !important;
-  color: #765565 !important;
-  background: rgba(252, 240, 244, 0.85) !important;
-  box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(177, 105, 126, 0.13) !important;
+  border: 0 !important;
+  border-radius: 999rpx !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #e5a8b8 0%, #cf7f93 100%) !important;
+  box-shadow: 0 12rpx 26rpx rgba(207, 127, 147, 0.32), inset 0 1rpx 0 rgba(255, 255, 255, 0.4) !important;
+  font-size: 27rpx !important;
+  font-weight: 700 !important;
+  letter-spacing: 2rpx !important;
+}
+.period-page .primary-button:active,
+.period-page .save-button:active,
+.period-setup-page .primary-button:active {
+  background: linear-gradient(135deg, #d996a9 0%, #c16e83 100%) !important;
+  transform: scale(0.985) !important;
 }
 
 /* =========================================================
@@ -255,6 +270,20 @@ textarea,
   font-weight: 650 !important;
 }
 
+/* 体重页三视图切换与范围芯片：不要灰色描边，用填充区分状态 */
+.view-tab,
+.range-tab {
+  border: 0 !important;
+  background: rgba(255, 255, 255, 0.66) !important;
+  box-shadow: none !important;
+}
+.view-tab.active,
+.range-tab.active {
+  border: 0 !important;
+  background: var(--hz-green-glass) !important;
+  box-shadow: var(--hz-highlight) !important;
+}
+
 /* =========================================================
  * 顶栏：磨砂玻璃浮层（内容从其下滑过）
  * ========================================================= */
@@ -300,14 +329,27 @@ textarea,
 /* =========================================================
  * 弹层与浮出面板：更实的磨砂
  * ========================================================= */
+/* 弹层蒙层必须压过底部导航(z-index 99)，否则底部按钮点不到 */
+.wellness-scrim,
+.weight-record-scrim,
+.dialog-mask {
+  z-index: 150 !important;
+}
+
+/* 注意：弹层与含输入框的容器禁用 backdrop-filter ——
+   iOS WKWebView 上模糊层内的 input 会无法聚焦/编辑 */
 .wellness-sheet,
 .weight-record-sheet,
 .dialog,
 .dialog-content,
 .settings-sheet,
-.wellness-scrim {
-  -webkit-backdrop-filter: var(--hz-blur);
-  backdrop-filter: var(--hz-blur);
+.wellness-scrim,
+.weight-record-scrim,
+.dialog-mask,
+.records-page .form-section,
+.food-search-page .search-box {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 .wellness-sheet,
 .weight-record-sheet,
@@ -559,10 +601,8 @@ image { max-width: 100%; }
   border-radius: 999rpx !important;
 }
 
-/* ---- 日期胶囊（生理期等）：选中晨绿 ---- */
-.page .date-pill,
-.page .range-tab,
-.page .view-tab {
+/* ---- 日期胶囊（生理期等）：选中晨绿。（view-tab/range-tab 归上方无边框芯片规则） ---- */
+.page .date-pill {
   border: 1rpx solid var(--hz-rule-glass) !important;
   border-radius: 999rpx !important;
   color: var(--hz-ink-soft) !important;
@@ -688,3 +728,64 @@ image { max-width: 100%; }
   background: linear-gradient(180deg, #8fc6a6 0%, var(--hz-green) 100%) !important;
   transform: translateY(-50%) !important;
 }
+
+/* =========================================================
+ * 喝水页精修：统计卡 / 日期切换 / 快捷按钮 / 历史（杯与水不动）
+ * ========================================================= */
+.water-page .date-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05) !important;
+}
+.water-page .date-text {
+  color: var(--hz-ink) !important;
+  font-size: 26rpx !important;
+  font-weight: 700 !important;
+}
+.water-page .goal-card {
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: var(--hz-radius-card) !important;
+  background: var(--hz-surface-glass) !important;
+  box-shadow: var(--hz-highlight), var(--hz-shadow-card) !important;
+  padding: 22rpx 10rpx !important;
+}
+.water-page .stat-label { color: var(--hz-muted) !important; font-size: 20rpx !important; }
+.water-page .stat-value { color: #3f7180 !important; font-size: 34rpx !important; font-weight: 800 !important; }
+.water-page .stat-value.primary { color: #2e5e6b !important; }
+.water-page .stat-divider { width: 1rpx !important; height: 44rpx !important; background: var(--hz-rule-glass) !important; }
+.water-page .personalized-info {
+  border: 1rpx solid rgba(159, 195, 173, 0.4) !important;
+  border-radius: 999rpx !important;
+  background: var(--hz-green-soft) !important;
+}
+.water-page .setup-btn {
+  min-height: 52rpx !important;
+  border: 0 !important;
+  border-radius: 999rpx !important;
+  color: var(--hz-green) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  font-weight: 650 !important;
+}
+.water-page .quick-btn {
+  border: 1rpx solid var(--hz-rule-glass) !important;
+  border-radius: var(--hz-radius-control) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: var(--hz-highlight), 0 5rpx 14rpx rgba(29, 55, 41, 0.04) !important;
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+.water-page .quick-btn:active { transform: scale(0.96); }
+.water-page .btn-text { color: var(--hz-ink-soft) !important; font-weight: 650 !important; }
+.water-page .history-title { color: var(--hz-ink) !important; }
+.water-page .record-item {
+  border-bottom: 1rpx solid var(--hz-rule-glass) !important;
+  background: transparent !important;
+}
+.water-page .record-item:last-child { border-bottom: 0 !important; }
+.water-page .record-name { color: var(--hz-ink) !important; font-weight: 650 !important; }
+.water-page .record-amount { color: #3f7180 !important; font-weight: 750 !important; }

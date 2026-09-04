@@ -754,3 +754,34 @@ onShow(() => {
   background: #ffffff !important;
 }
 </style>
+
+<style scoped>
+/* 修复层级：widthFix 图片整幅展示，文案渐变叠入 */
+.sleep-page .art-stage {
+  height: auto;
+  overflow: visible;
+  background: transparent;
+}
+.sleep-page .art-stage image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.sleep-page .hero-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: -96rpx;
+  padding: 120rpx 28rpx 24rpx;
+  background: linear-gradient(180deg, rgba(244, 248, 251, 0) 0%, rgba(244, 248, 251, 0.94) 64rpx, #f4f8fb 100%);
+}
+.sleep-page .hero-copy text:first-child {
+  color: var(--hz-ink);
+  font-size: 30rpx;
+  font-weight: 750;
+}
+.sleep-page .hero-copy text:last-child {
+  margin-top: 8rpx;
+  color: var(--hz-muted);
+  font-size: 20rpx;
+}
+</style>

@@ -9,7 +9,7 @@
         <image
           class="hero-art"
           src="/static/illustrations/xuxu-safe-support.png"
-          mode="aspectFit"
+          mode="widthFix"
         />
         <view class="hero-fade" />
       </view>
@@ -103,16 +103,15 @@ const previews = [
   margin: 0 calc(var(--hz-gutter) * -1);
   padding-top: 0;
 }
+/* 整幅原图按宽度通栏展示：铺满且完整，高度随原图比例 */
 .hero-art-wrap {
   position: relative;
   width: 100%;
-  height: 560rpx;
-  overflow: hidden;
-  background: #fefbee;
 }
 .hero-art {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 /* 图片底部渐隐进画布，文字区与图自然衔接 */
 .hero-fade {

@@ -87,7 +87,15 @@ function read(): HabitPlan[] {
   if (!raw) return [];
   try {
     const value = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    return Array.isArray(value) ? value : [];
+    if (!Array.isArray(value)) return [];
+    // 规范化历史数据：旧版本计划的任务可能缺 doneDates/频率字段
+    return value.map((plan) => ({
+      ...plan,
+      tasks: (plan.tasks || []).map((task: HabitPlan['tasks'][number]) => ({
+        ...task,
+        doneDates: Array.isArray(task.doneDates) ? task.doneDates : [],
+      })),
+    }));
   } catch {
     return [];
   }

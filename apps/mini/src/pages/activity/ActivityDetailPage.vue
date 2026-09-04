@@ -13,7 +13,7 @@
 
     <view class="hero">
       <view class="hero-visual">
-        <image class="hero-image" src="/static/illustrations/hero.jpg" mode="widthFix" />
+        <image class="hero-image" src="/static/illustrations/hero.jpg" mode="aspectFill" />
         <view class="hero-overlay-copy">
           <text class="hero-kicker">今天也为自己动一动</text>
           <view class="hero-total">
@@ -42,16 +42,28 @@
       </view>
 
       <text class="field-label">做了什么</text>
+      <scroll-view class="category-strip" scroll-x show-scrollbar="false">
+        <button
+          v-for="cat in activityCategories"
+          :key="cat.key"
+          :class="['category-chip', { active: activeCategory === cat.key }]"
+          @tap="activeCategory = cat.key"
+        >
+          {{ cat.label }}
+        </button>
+      </scroll-view>
       <view class="activity-grid">
         <button
-          v-for="item in activityOptions"
+          v-for="item in filteredActivityOptions"
           :key="item.value"
           :class="['activity-choice', { selected: activityType === item.value }]"
           @tap="activityType = item.value"
         >
           <view class="choice-mark"><image :src="item.icon" mode="aspectFit" /></view>
-          <text>{{ item.label }}</text>
-          <image v-if="activityType === item.value" class="choice-check" src="/static/icons/svg/check.svg" mode="aspectFit" />
+          <text class="choice-name">{{ item.label }}</text>
+          <view v-if="activityType === item.value" class="choice-check">
+            <image src="/static/icons/svg/check.svg" mode="aspectFit" />
+          </view>
         </button>
       </view>
 
@@ -105,7 +117,7 @@
       </view>
       <view v-if="history.length" class="history-list">
         <view v-for="item in history" :key="item.id" class="history-row">
-          <view class="history-icon"><image :src="activityIcon(item.activityType)" mode="aspectFit" /></view>
+          <view class="history-icon"><image class="history-icon-img" :src="activityIcon(item.activityType)" mode="aspectFit" /></view>
           <view class="history-copy">
             <text class="history-title">{{ activityLabel(item.activityType) }}</text>
             <text class="history-meta">{{ item.durationMinutes }} 分钟 · {{ formatTime(item.recordedAt) }}<text v-if="item.intensity"> · {{ intensityLabel(item.intensity) }}</text></text>
@@ -130,14 +142,49 @@ const now = new Date();
 const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 const dateLabel = `${now.getMonth() + 1} 月 ${now.getDate()} 日`;
 
+// 运动库：按类别组织，emoji 图标在微信端渲染为系统表情，风格统一
+type ActivityCategory = { key: string; label: string };
+const activityCategories: ActivityCategory[] = [
+  { key: 'aerobic', label: '有氧' },
+  { key: 'strength', label: '力量' },
+  { key: 'flexibility', label: '柔韧' },
+  { key: 'ball', label: '球类' },
+  { key: 'water', label: '水中' },
+  { key: 'casual', label: '休闲' },
+];
 const activityOptions = [
-  { value: 'walking', label: '散步', icon: '/static/icons/svg/activity-walk.svg' },
-  { value: 'stretching', label: '拉伸', icon: '/static/icons/svg/activity-stretch.svg' },
-  { value: 'yoga', label: '瑜伽', icon: '/static/icons/svg/activity-yoga.svg' },
-  { value: 'running', label: '跑步', icon: '/static/icons/svg/activity-run.svg' },
-  { value: 'cycling', label: '骑行', icon: '/static/icons/svg/activity-cycle.svg' },
-  { value: 'strength', label: '力量训练', icon: '/static/icons/svg/activity-strength.svg' },
+  { value: 'walking', label: '散步', icon: '/static/icons/svg/activity-walk.svg', category: 'aerobic' },
+  { value: 'running', label: '跑步', icon: '/static/icons/svg/activity-run.svg', category: 'aerobic' },
+  { value: 'cycling', label: '骑行', icon: '/static/icons/svg/activity-cycle.svg', category: 'aerobic' },
+  { value: 'rope-skipping', label: '跳绳', icon: '/static/icons/svg/sport-rope.svg', category: 'aerobic' },
+  { value: 'hiking', label: '爬山', icon: '/static/icons/svg/sport-hike.svg', category: 'aerobic' },
+  { value: 'elliptical', label: '椭圆机', icon: '/static/icons/svg/sport-elliptical.svg', category: 'aerobic' },
+  { value: 'strength', label: '力量训练', icon: '/static/icons/svg/activity-strength.svg', category: 'strength' },
+  { value: 'squat', label: '深蹲', icon: '/static/icons/svg/sport-kettlebell.svg', category: 'strength' },
+  { value: 'push-up', label: '俯卧撑', icon: '/static/icons/svg/sport-plank.svg', category: 'strength' },
+  { value: 'plank', label: '平板支撑', icon: '/static/icons/svg/sport-mat.svg', category: 'strength' },
+  { value: 'dumbbell', label: '哑铃', icon: '/static/icons/svg/sport-dumbbell.svg', category: 'strength' },
+  { value: 'stretching', label: '拉伸', icon: '/static/icons/svg/activity-stretch.svg', category: 'flexibility' },
+  { value: 'yoga', label: '瑜伽', icon: '/static/icons/svg/activity-yoga.svg', category: 'flexibility' },
+  { value: 'pilates', label: '普拉提', icon: '/static/icons/svg/sport-pilates.svg', category: 'flexibility' },
+  { value: 'taichi', label: '太极', icon: '/static/icons/svg/sport-taichi.svg', category: 'flexibility' },
+  { value: 'basketball', label: '篮球', icon: '/static/icons/svg/sport-basketball.svg', category: 'ball' },
+  { value: 'football', label: '足球', icon: '/static/icons/svg/sport-football.svg', category: 'ball' },
+  { value: 'badminton', label: '羽毛球', icon: '/static/icons/svg/sport-badminton.svg', category: 'ball' },
+  { value: 'table-tennis', label: '乒乓球', icon: '/static/icons/svg/sport-table-tennis.svg', category: 'ball' },
+  { value: 'tennis', label: '网球', icon: '/static/icons/svg/sport-tennis.svg', category: 'ball' },
+  { value: 'volleyball', label: '排球', icon: '/static/icons/svg/sport-volleyball.svg', category: 'ball' },
+  { value: 'swimming', label: '游泳', icon: '/static/icons/svg/sport-swim.svg', category: 'water' },
+  { value: 'water-aerobics', label: '水中健身', icon: '/static/icons/svg/sport-water-aerobics.svg', category: 'water' },
+  { value: 'dancing', label: '舞蹈', icon: '/static/icons/svg/sport-dance.svg', category: 'casual' },
+  { value: 'bowling', label: '保龄球', icon: '/static/icons/svg/sport-bowling.svg', category: 'casual' },
+  { value: 'frisbee', label: '飞盘', icon: '/static/icons/svg/sport-frisbee.svg', category: 'casual' },
 ] as const;
+
+const activeCategory = ref('aerobic');
+const filteredActivityOptions = computed(() =>
+  activityOptions.filter((item) => item.category === activeCategory.value),
+);
 const durationOptions = [10, 20, 30, 45, 60];
 const intensityOptions = [
   { value: 'easy', label: '轻松', description: '可以自在聊天' },
@@ -194,7 +241,7 @@ function activityLabel(value: string) {
   return activityOptions.find((item) => item.value === value)?.label || value;
 }
 function activityIcon(value: string) {
-  return activityOptions.find((item) => item.value === value)?.icon || '/static/icons/svg/activity-walk.svg';
+  return activityOptions.find((item) => item.value === value)?.icon || '/static/icons/svg/activity-run.svg';
 }
 function intensityLabel(value: string) {
   return intensityOptions.find((item) => item.value === value)?.label || value;
@@ -211,7 +258,7 @@ onShow(load);
 <style scoped>
 .page{min-height:100vh;box-sizing:border-box;overflow-x:hidden;padding:calc(96rpx + env(safe-area-inset-top)) 24rpx calc(46rpx + env(safe-area-inset-bottom));background:#f8faf4;color:#44564c}
 .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:18rpx}.back,.nav-space{width:58rpx;height:58rpx}.back{display:flex;align-items:center;justify-content:center}.back image{width:30rpx;height:30rpx;opacity:.7}.nav-copy{text-align:center}.title{display:block;color:#3d5647;font-size:32rpx;font-weight:750}.date{display:block;margin-top:4rpx;color:#98a69d;font-size:18rpx}
-.hero{width:calc(100% + 48rpx);margin:0 -24rpx;border-bottom:1rpx solid #e7eee3;background:#fffdf7}.hero-visual{position:relative;width:100%;height:430rpx;overflow:hidden;background:#edf4ed}.hero-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center center}.hero-overlay-copy{position:absolute;top:68rpx;left:34rpx;width:42%;color:#3f5b49}.hero-kicker{display:block;color:#6d8e73;font-size:23rpx;font-weight:700;line-height:1.4}.hero-total{display:flex;align-items:baseline;gap:8rpx;margin-top:9rpx;color:#3f7050}.hero-total-number{font-size:76rpx;font-weight:800;line-height:1}.hero-total-unit{font-size:22rpx;font-weight:700}.hero-note{display:block;margin-top:10rpx;color:#78907f;font-size:18rpx;line-height:1.45}.hero-summary{display:flex;align-items:center;justify-content:space-between;padding:20rpx 26rpx 22rpx;background:#fffdf7}.summary-title{display:block;color:#58725e;font-size:22rpx;font-weight:700}.summary-note{display:block;margin-top:5rpx;color:#98a69b;font-size:17rpx}.summary-stamp{display:flex;align-items:center;justify-content:center;flex-direction:column;width:106rpx;height:106rpx;border:1rpx solid #e1ebd9;border-radius:50%;background:#f7fbf0}.stamp-number{color:#6c9877;font-size:34rpx;font-weight:800;line-height:1}.stamp-label{margin-top:7rpx;color:#91a18f;font-size:17rpx}
+.hero{width:calc(100% + 48rpx);margin:0 -24rpx;border-bottom:1rpx solid #e7eee3;background:#fffdf7}.hero-visual{position:relative;width:100%;height:560rpx;overflow:hidden;background:#edf4ed}.hero-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center center}.hero-overlay-copy{position:absolute;top:68rpx;left:34rpx;width:42%;color:#3f5b49}.hero-kicker{display:block;color:#6d8e73;font-size:23rpx;font-weight:700;line-height:1.4}.hero-total{display:flex;align-items:baseline;gap:8rpx;margin-top:9rpx;color:#3f7050}.hero-total-number{font-size:76rpx;font-weight:800;line-height:1}.hero-total-unit{font-size:22rpx;font-weight:700}.hero-note{display:block;margin-top:10rpx;color:#78907f;font-size:18rpx;line-height:1.45}.hero-summary{display:flex;align-items:center;justify-content:space-between;padding:20rpx 26rpx 22rpx;background:#fffdf7}.summary-title{display:block;color:#58725e;font-size:22rpx;font-weight:700}.summary-note{display:block;margin-top:5rpx;color:#98a69b;font-size:17rpx}.summary-stamp{display:flex;align-items:center;justify-content:center;flex-direction:column;width:106rpx;height:106rpx;border:1rpx solid #e1ebd9;border-radius:50%;background:#f7fbf0}.stamp-number{color:#6c9877;font-size:34rpx;font-weight:800;line-height:1}.stamp-label{margin-top:7rpx;color:#91a18f;font-size:17rpx}
 .section{margin-top:18rpx;padding:24rpx 22rpx;border:1rpx solid #e5ede3;border-radius:20rpx;background:rgba(255,255,255,.94);box-shadow:0 8rpx 22rpx rgba(68,94,73,.05)}.section-head{margin-bottom:20rpx}.section-title{display:block;color:#425b4b;font-size:26rpx;font-weight:750}.section-subtitle{display:block;margin-top:6rpx;color:#97a79c;font-size:19rpx}.field-label{display:block;margin-bottom:10rpx;color:#607968;font-size:20rpx;font-weight:700}.activity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10rpx}.activity-choice{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5rpx;height:104rpx;border:1rpx solid #e0eade;border-radius:15rpx;color:#668071;background:#fbfdf9;font-size:19rpx}.activity-choice.selected{border-color:#9fc3a4;background:#f0f8ee;color:#4b7958;box-shadow:0 5rpx 12rpx rgba(105,151,108,.1)}.choice-mark{display:flex;align-items:center;justify-content:center;width:40rpx;height:40rpx;border-radius:13rpx;background:#eef6e9}.choice-mark image{width:29rpx;height:29rpx;opacity:.68}.choice-check{position:absolute;top:9rpx;right:9rpx;width:22rpx;height:22rpx;opacity:.8}.field-label-row{display:flex;align-items:center;justify-content:space-between;margin-top:22rpx}.field-label-row .field-label{margin-bottom:10rpx}.unit{color:#9aa99e;font-size:18rpx}.duration-wrap{display:flex;align-items:center;height:74rpx;padding:0 18rpx;border:1rpx solid #dfe9df;border-radius:15rpx;background:#fbfdf9}.duration-input{flex:1;height:72rpx;padding:0;border:0;background:transparent;color:#3f5748;font-size:30rpx;font-weight:700}.duration-wrap>text{color:#78917f;font-size:20rpx}.duration-options{display:flex;gap:8rpx;margin-top:10rpx}.duration-choice{flex:1;height:48rpx;border:1rpx solid #e5ede4;border-radius:12rpx;color:#789080;background:#fcfefa;font-size:17rpx;line-height:48rpx}.duration-choice.selected{border-color:#b1ceb1;color:#547b5e;background:#eef7ec}.intensity-label{margin-top:22rpx}.intensity-options{display:flex;gap:8rpx}.intensity-choice{display:flex;align-items:flex-start;justify-content:center;flex:1;flex-direction:column;height:68rpx;padding:0 12rpx;border:1rpx solid #e2ebe1;border-radius:14rpx;color:#778b7f;background:#fcfefa;text-align:left}.intensity-choice text:first-child{font-size:19rpx;font-weight:700}.intensity-choice text:last-child{margin-top:4rpx;color:#a0ada3;font-size:15rpx}.intensity-choice.selected{border-color:#b4cdb4;background:#f1f8ee}.intensity-choice.selected text:first-child{color:#567e61}.note-input{width:100%;min-height:110rpx;box-sizing:border-box;margin-top:18rpx;padding:14rpx 16rpx;border:1rpx solid #e1eae1;border-radius:14rpx;color:#4d6253;background:#fbfdf9;font-size:20rpx;line-height:1.5}.note-count{display:block;margin-top:6rpx;color:#a4b0a7;font-size:16rpx;text-align:right}.save-button{display:flex;align-items:center;justify-content:center;width:100%;height:78rpx;margin-top:18rpx;border-radius:18rpx;color:#fffdf8;background:#739d7b;box-shadow:0 8rpx 18rpx rgba(92,137,101,.17);font-size:24rpx;font-weight:700;line-height:1}.save-button[disabled]{opacity:.62}.error{display:block;margin-top:10rpx;color:#b36f61;font-size:19rpx}
 .history-section{margin-top:28rpx}.history-head{display:flex;align-items:flex-end;justify-content:space-between;padding:0 2rpx 12rpx;border-bottom:1rpx solid #e2eae0}.history-subtitle{display:block;margin-top:5rpx;color:#9aa99e;font-size:17rpx}.history-count{color:#90a099;font-size:18rpx}.history-list{border-bottom:1rpx solid #e2eae0}.history-row{display:flex;align-items:flex-start;gap:12rpx;padding:17rpx 2rpx;border-bottom:1rpx solid #e8eee6}.history-row:last-child{border-bottom:0}.history-icon{display:flex;align-items:center;justify-content:center;width:46rpx;height:46rpx;flex:none;border-radius:15rpx;background:#eef6e9}.history-icon image{width:30rpx;height:30rpx;opacity:.72}.history-copy{flex:1;min-width:0}.history-title{display:block;color:#516a59;font-size:21rpx;font-weight:700}.history-meta{display:block;margin-top:5rpx;color:#94a399;font-size:17rpx}.history-note{display:block;margin-top:6rpx;color:#718379;font-size:18rpx;line-height:1.4;word-break:break-all}.empty{display:flex;align-items:center;flex-direction:column;padding:22rpx 0;color:#94a299;text-align:center;font-size:19rpx}.empty image{width:190rpx;height:90rpx;margin-bottom:10rpx;opacity:.55}.empty text:last-child{margin-top:6rpx;color:#a4afa8;font-size:17rpx}
 </style>
@@ -233,7 +280,7 @@ onShow(load);
   overflow: hidden !important;
 }
 .hero-visual {
-  height: 430rpx;
+  height: 560rpx;
   min-height: 0;
   max-height: none;
   line-height: 0;
@@ -271,5 +318,125 @@ onShow(load);
   flex: none;
   width: 90rpx;
   height: 90rpx;
+}
+</style>
+
+<style scoped>
+/* ============================================================
+ * 运动库 v3：分类 chips + 线条图标网格（与全局图标同风格）
+ * ============================================================ */
+.category-strip {
+  display: flex;
+  flex: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 14rpx 0 18rpx;
+  white-space: nowrap;
+}
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 56rpx;
+  margin-right: 12rpx;
+  padding: 0 26rpx;
+  border-radius: 999rpx;
+  color: var(--hz-ink-soft);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 22rpx;
+  font-weight: 650;
+  line-height: 1;
+  box-shadow: 0 3rpx 10rpx rgba(29, 55, 41, 0.04);
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.category-chip.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #6cae8c 0%, #4c9573 100%);
+  box-shadow: 0 8rpx 18rpx rgba(76, 149, 115, 0.28);
+}
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+}
+.activity-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  min-height: 132rpx;
+  padding: 18rpx 8rpx;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: var(--hz-radius-control);
+  color: var(--hz-ink-soft);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.04);
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+}
+.activity-choice:active { transform: scale(0.97); }
+.activity-choice.selected {
+  border-color: rgba(125, 178, 148, 0.65);
+  background: var(--hz-green-glass);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9), 0 6rpx 18rpx rgba(70, 130, 96, 0.14);
+}
+.choice-emoji { font-size: 44rpx; line-height: 1.2; }
+.choice-name { font-size: 21rpx; font-weight: 650; }
+.choice-check {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6cae8c 0%, #4c9573 100%);
+}
+.choice-check image { width: 18rpx; height: 18rpx; }
+.history-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 20rpx;
+  background: var(--hz-green-soft);
+}
+.history-emoji { font-size: 36rpx; line-height: 1; }
+</style>
+
+<style scoped>
+/* 线条图标 + hero 文案衬底（图放大后保证可读性） */
+.choice-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52rpx;
+  height: 52rpx;
+}
+.choice-mark image { width: 44rpx; height: 44rpx; }
+.activity-choice.selected .choice-mark image { filter: saturate(1.4); }
+.history-icon-img { width: 36rpx; height: 36rpx; }
+.hero-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 253, 247, 0.62) 0%, rgba(255, 253, 247, 0.18) 46%, rgba(255, 253, 247, 0) 70%);
+  pointer-events: none;
+}
+.hero-overlay-copy { z-index: 1; }
+.hero-summary {
+  margin: 18rpx 24rpx 0;
+  border: 1rpx solid var(--hz-rule-glass);
+  border-radius: var(--hz-radius-card);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9), 0 8rpx 22rpx rgba(29, 55, 41, 0.05);
+}
+.summary-stamp {
+  border: 1rpx solid rgba(159, 195, 173, 0.5);
+  background: var(--hz-green-soft);
 }
 </style>

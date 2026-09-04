@@ -24,7 +24,7 @@ const frequencies = ['每天', '每周 3 天', '每周 5 天'];
 function submit() { if (!title.value.trim()) return; emit('create', { title: title.value.trim(), subtitle: subtitle.value.trim(), category: category.value, frequency: frequency.value }); title.value = ''; subtitle.value = ''; }
 </script>
 <style scoped>
-.scrim { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end; background:rgba(39,67,50,.22); }
+.scrim { position:fixed; inset:0; z-index:120; display:flex; align-items:flex-end; background:rgba(39,67,50,.22); }
 .sheet { width:100%; padding:26rpx 28rpx calc(26rpx + env(safe-area-inset-bottom)); border-radius:26rpx 26rpx 0 0; background:#ffffff; box-shadow:0 -12rpx 36rpx rgba(54,83,67,.16); }
 .sheet-head { display:flex; align-items:flex-start; justify-content:space-between; }
 .sheet-title { display:block; color:#365343; font-size:32rpx; font-weight:700; }

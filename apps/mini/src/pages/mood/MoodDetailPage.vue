@@ -595,3 +595,35 @@ onShow(() => {
   background: #fffaf8;
 }
 </style>
+
+<style scoped>
+/* 修复层级：widthFix 图片高度不受容器限制，改为整幅展示，
+   文案区用渐变自下而上叠进画面（同薄荷健康的情绪卡片） */
+.mood-page .art-stage {
+  height: auto;
+  overflow: visible;
+  background: transparent;
+}
+.mood-page .art-stage image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.mood-page .intro-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: -96rpx;
+  padding: 120rpx 28rpx 24rpx;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0) 0%, rgba(248, 251, 255, 0.94) 64rpx, #f8fbff 100%);
+}
+.mood-page .intro-copy text:first-child {
+  color: var(--hz-ink);
+  font-size: 30rpx;
+  font-weight: 750;
+}
+.mood-page .intro-copy text:last-child {
+  margin-top: 8rpx;
+  color: var(--hz-muted);
+  font-size: 20rpx;
+}
+</style>

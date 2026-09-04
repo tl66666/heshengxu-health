@@ -104,36 +104,47 @@
         </view>
         <view class="trend-meta">
           <view class="trend-legend"><view class="legend-dot" /> <text>体重</text></view>
-          <text v-if="hasTrendData" class="trend-count">{{ chartData.length }} 次记录</text>
+          <text v-if="hasTrendData" class="trend-count">{{ chartData.length }} 天记录</text>
         </view>
       </view>
       <view v-if="hasTrendComparison" class="chart-shell">
         <view class="chart-scale">
           <text v-for="label in chartScaleLabels" :key="label">{{ label }}</text>
         </view>
-        <svg class="trend-svg" viewBox="0 0 320 150" preserveAspectRatio="none">
-          <line
-            v-for="line in gridLines"
-            :key="line"
-            x1="0"
-            :y1="line"
-            x2="320"
-            :y2="line"
-            class="grid-line"
+        <view v-if="chartGeom" class="chart-canvas">
+          <view
+            v-for="y in chartGeom.gridYs"
+            :key="'grid-' + y"
+            class="chart-grid"
+            :style="{ top: y + 'rpx' }"
           />
-          <line v-if="goalY !== null" x1="0" :y1="goalY" x2="320" :y2="goalY" class="goal-line" />
-          <path :d="trendAreaPath" class="trend-area" />
-          <path :d="trendPath" class="trend-line" />
-          <circle
-            v-for="point in trendPoints"
-            :key="point.id"
-            :cx="point.x"
-            :cy="point.y"
-            r="4"
-            :class="['trend-point', { selected: selectedTrendRecord?.id === point.id }]"
-            @tap="selectTrendPoint(point.id)"
+          <view
+            v-if="chartGeom.goalYpx !== null"
+            class="chart-goal"
+            :style="{ top: chartGeom.goalYpx + 'rpx' }"
           />
-        </svg>
+          <view
+            v-for="seg in chartGeom.segments"
+            :key="seg.id"
+            class="chart-seg"
+            :style="{
+              left: seg.x + 'rpx',
+              top: seg.y + 'rpx',
+              width: seg.len + 'rpx',
+              transform: 'rotate(' + seg.angle + 'deg)',
+            }"
+          />
+          <view
+            v-for="pt in chartGeom.pts"
+            :key="pt.id"
+            class="chart-dot"
+            :class="{ selected: selectedTrendRecord?.id === pt.id }"
+            :style="{ left: pt.x + 'rpx', top: pt.y + 'rpx' }"
+            @tap="selectTrendPoint(pt.id)"
+          />
+          <text class="chart-x-label is-left">{{ chartLabels[0]?.label }}</text>
+          <text v-if="chartLabels[1]" class="chart-x-label is-right">{{ chartLabels[1].label }}</text>
+        </view>
         <view class="chart-labels">
           <text v-for="point in chartLabels" :key="point.id">{{ point.label }}</text>
         </view>
@@ -602,7 +613,14 @@ const trendRecords = computed(() => {
     .filter((item) => +new Date(item.recordedAt) >= cutoff)
     .sort((a, b) => +new Date(a.recordedAt) - +new Date(b.recordedAt));
 });
-const chartData = computed(() => trendRecords.value);
+// 一天只算一个点：同一天多次记录时，保留当天最后一次
+const chartData = computed(() => {
+  const byDay = new Map<string, WeightRecord>();
+  for (const record of trendRecords.value) {
+    byDay.set(record.recordedAt.slice(0, 10), record);
+  }
+  return [...byDay.values()].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+});
 const hasTrendData = computed(() => chartData.value.length > 0);
 const hasTrendComparison = computed(() => chartData.value.length > 1);
 const selectedTrendId = ref<string | null>(null);
@@ -656,12 +674,47 @@ const trendPoints = computed(() => {
     y: 124 - ((item.weight - min) / span) * 96,
   }));
 });
-const trendPath = computed(() =>
-  trendPoints.value.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' '),
-);
-const trendAreaPath = computed(() =>
-  trendPoints.value.length ? `${trendPath.value} L 320 140 L 0 140 Z` : '',
-);
+// 微信 WXML 不支持内联 svg：折线改用「旋转线段 + 圆点 view」渲染（640x260 rpx 画布）
+const CHART_W = 600;
+const CHART_TOP = 30;
+const CHART_BOTTOM = 224;
+const chartGeom = computed(() => {
+  const data = chartData.value;
+  if (data.length < 2) return null;
+  const { min, max } = chartBounds.value;
+  const span = Math.max(0.1, max - min);
+  const px = (t: number) => 24 + t * (CHART_W - 48);
+  const py = (weight: number) => CHART_TOP + (1 - (weight - min) / span) * (CHART_BOTTOM - CHART_TOP);
+  const pts = data.map((item, index) => ({
+    id: item.id,
+    x: px(index / (data.length - 1)),
+    y: py(item.weight),
+  }));
+  const segments: Array<{ id: string; x: number; y: number; len: number; angle: number }> = [];
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const a = pts[i];
+    const b = pts[i + 1];
+    if (!a || !b) continue;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    segments.push({
+      id: `${a.id}-${i}`,
+      x: a.x,
+      y: a.y,
+      len: Math.hypot(dx, dy),
+      angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+    });
+  }
+  const mid = (CHART_TOP + CHART_BOTTOM) / 2;
+  const goal = targetWeight.value;
+  const goalYpx = goal && goal >= min && goal <= max ? py(goal) : null;
+  return {
+    gridYs: [CHART_TOP, Math.round(mid), CHART_BOTTOM],
+    goalYpx,
+    segments,
+    pts,
+  };
+});
 const chartLabels = computed(() =>
   chartData.value
     .filter((_, index) => index === 0 || index === chartData.value.length - 1)
@@ -1267,22 +1320,55 @@ onShow(loadWeightData);
   color: #b5a49e;
   font-size: 17rpx;
 }
-.trend-svg {
-  display: block;
-  width: 100%;
-  height: 230rpx;
-  overflow: visible;
+.chart-canvas {
+  position: relative;
+  width: 600rpx;
+  max-width: 100%;
+  height: 260rpx;
+  margin: 8rpx auto 34rpx;
 }
-.grid-line {
-  stroke: #f0e9e1;
-  stroke-width: 1;
-  stroke-dasharray: 3 5;
+.chart-grid {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-top: 1rpx dashed rgba(125, 144, 133, 0.22);
 }
-.goal-line {
-  stroke: #d7b86f;
-  stroke-width: 1.5;
-  stroke-dasharray: 5 5;
+.chart-goal {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-top: 2rpx dashed rgba(199, 138, 59, 0.5);
 }
+.chart-seg {
+  position: absolute;
+  height: 6rpx;
+  margin-top: -3rpx;
+  border-radius: 3rpx;
+  background: linear-gradient(90deg, #86bda0 0%, #48a377 100%);
+  transform-origin: 0 50%;
+}
+.chart-dot {
+  position: absolute;
+  width: 18rpx;
+  height: 18rpx;
+  margin: -9rpx 0 0 -9rpx;
+  border: 4rpx solid #48a377;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2rpx 8rpx rgba(47, 107, 77, 0.22);
+}
+.chart-dot.selected {
+  border-color: #2f6b4d;
+  box-shadow: 0 0 0 10rpx rgba(72, 163, 119, 0.16);
+}
+.chart-x-label {
+  position: absolute;
+  bottom: -32rpx;
+  color: var(--hz-muted);
+  font-size: 18rpx;
+}
+.chart-x-label.is-left { left: 12rpx; }
+.chart-x-label.is-right { right: 12rpx; }
 .trend-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
