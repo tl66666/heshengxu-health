@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   normalizeRemoteAssetBaseUrl,
+  remoteMiniAssetsPlugin,
   rewriteRemoteBitmapUrls,
 } from '../../build/remote-assets.js';
 
@@ -36,5 +37,22 @@ describe('remote mini-program assets', () => {
 
     expect(rewriteRemoteBitmapUrls(source, baseUrl)).toBe(source);
     expect(rewriteRemoteBitmapUrls(rewriteRemoteBitmapUrls(source, baseUrl), baseUrl)).toBe(source);
+  });
+
+  it('does not transform test fixtures when the production asset base is configured', () => {
+    const plugin = remoteMiniAssetsPlugin('https://assets.example.com/heban');
+    const transform = plugin.transform;
+
+    expect(typeof transform).toBe('function');
+    const result =
+      typeof transform === 'function'
+        ? Reflect.apply(transform, plugin, [`const asset = '/static/icons/test.png';`, 'remote-assets.spec.ts'])
+        : transform
+          ? Reflect.apply(transform.handler, plugin, [
+              `const asset = '/static/icons/test.png';`,
+              'remote-assets.spec.ts',
+            ])
+          : undefined;
+    expect(result).toBeNull();
   });
 });

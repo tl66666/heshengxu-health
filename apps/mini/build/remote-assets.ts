@@ -26,7 +26,9 @@ export function remoteMiniAssetsPlugin(value?: string): Plugin {
     name: 'heban-remote-mini-assets',
     enforce: 'pre',
     transform(source, id) {
+      if (process.env.NODE_ENV === 'test') return null;
       if (!baseUrl || id.includes('node_modules')) return null;
+      if (/(?:^|[./])[^/]+\.(?:spec|test)\.[cm]?[jt]sx?$/iu.test(id)) return null;
       if (!/\.(?:vue|[cm]?[jt]s|s?css)(?:\?|$)/iu.test(id)) return null;
       const code = rewriteRemoteBitmapUrls(source, baseUrl);
       return code === source ? null : { code, map: null };
