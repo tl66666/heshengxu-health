@@ -21,7 +21,7 @@
 
 ## 3. 数据来源边界
 
-已审阅的 `spider-boohee-data`、`food-crawler`、`BoHeSpider` 和 `BooheeFlutter` 仅用于研究数据字段和交互层级。其内容没有提供可用于本产品的明确授权，其中 `BoHeSpider` 明确限制为学习和研究用途。
+早期外部资料仅用于研究数据字段和交互层级，不属于和生序运行时依赖，也没有可直接复用的明确授权。
 
 项目不导入、分发或使用这些仓库的爬虫代码、原始食物 SQL、站点图片或数据。为兼容未来合法数据来源，导入器接受标准 CSV/JSON 并要求写入：`sourceName`、`sourceVersion`、`sourceLicense`、`importedAt`。
 
