@@ -98,3 +98,8 @@ $env:VITE_MINI_ASSET_BASE_URL='https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbas
 - 监控 API `/health`、5xx、AI 超时和数据库连接数；告警不要只依赖开发者电脑。
 - 记录发布版本、数据库迁移编号和素材域名，回滚时先回滚 API 镜像，再处理数据库迁移。
 - 规划中的彻底删除能力需要同时删除 PostgreSQL 记录、AI 审计摘要和（若未来启用）CloudBase/R2 原图；当前识别流程不保存原始图片。
+## 当前已完成的生产配置（2026-09-04）
+
+- 微信公众平台服务器域名已配置：API 使用 `request` 合法域名，CloudBase 静态素材使用 `downloadFile` 合法域名。
+- 微信 `AppSecret` 已保存为 Azure Container App Secret `wechat-app-secret`，并通过环境变量 `WECHAT_APP_SECRET` 引用；密钥未写入代码、构建产物或 GitHub。
+- 配置更新后已生成新容器修订版，生产 `GET /health` 返回 `data.status = "ok"`。
