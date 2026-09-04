@@ -7,6 +7,7 @@ node_modules/
 dist/
 coverage/
 apps/mini/src/static/illustrations/
+docs/assets/
 apps/mini/package-lock.json
 apps/mini/project.private.config.json
 apps/api/.prisma-tools/
