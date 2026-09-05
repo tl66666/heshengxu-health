@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { isTabRoute, ordinaryBackTarget, shouldConfirmOnboardingExit } from './navigation.js';
 import appNavBarSource from './AppNavBar.vue?raw';
+import miniTabBarSource from './MiniTabBar.vue?raw';
 import pagesConfig from '../pages.json' with { type: 'json' };
 
 describe('navigation contracts', () => {
@@ -68,5 +69,10 @@ describe('navigation contracts', () => {
     expect(appSource.default).toMatch(/hideTabBar\(\{ animation: false \}\)/u);
     expect(appSource.default).toMatch(/isAppRuntime\(\)/u);
     expect(appSource.default).toMatch(/ensureAppSession\(\)/u);
+  });
+
+  it('re-applies native tab bar hiding after the custom tab bar mounts', () => {
+    expect(miniTabBarSource).toContain('hideTabBar');
+    expect(miniTabBarSource).toContain('onMounted');
   });
 });

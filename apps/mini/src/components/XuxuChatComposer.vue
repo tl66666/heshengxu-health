@@ -38,7 +38,8 @@
         <view class="message-body">
           <text v-if="message.role === 'assistant'" class="message-label">序序</text>
           <text class="message-text">{{ message.text }}</text>
-          <button v-if="message.id.startsWith('assistant-error')" class="retry-message" @tap="retryLast">再试一次</button>
+          <button v-if="message.sourceTitle === '需要登录'" class="retry-message login-message" @tap="openLogin">去登录</button>
+          <button v-if="message.id.startsWith('assistant-error') && message.sourceTitle !== '需要登录'" class="retry-message" @tap="retryLast">再试一次</button>
           <view v-if="message.sourceTitle" class="source-card"><image src="/static/icons/svg/journal.svg" mode="aspectFit" /><text>参考 · {{ message.sourceTitle }}</text></view>
         </view>
       </view>
@@ -65,8 +66,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 import { healthLoopState } from '../features/health-loop/health-loop.store.js';
-import { createOfflineReply, createUserMessage, quickQuestions, type ChatMessage } from './xuxu-chat.js';
+import { classifyXuxuError, createOfflineReply, createUserMessage, quickQuestions, type ChatMessage } from './xuxu-chat.js';
 import { chatWithXuxu } from '../features/xuxu/xuxu.service.js';
+import { isSignedIn } from '../features/auth/auth-store.js';
 
 const messages = ref<ChatMessage[]>([]);
 const draft = ref('');
@@ -84,6 +86,16 @@ async function send(value: string) {
   if (!text || typing.value) return;
   messages.value.push(createUserMessage(text));
   draft.value = '';
+  if (!isSignedIn()) {
+    messages.value.push({
+      id: `assistant-error-${Date.now()}`,
+      role: 'assistant',
+      text: '登录后我才能同步你的健康记录并使用序序云端对话。请先完成登录，再回来继续聊天。',
+      sourceTitle: '需要登录',
+    });
+    connectionState.value = 'retry';
+    return;
+  }
   typing.value = true;
   connectionState.value = 'thinking';
   await nextTick();
@@ -94,9 +106,20 @@ async function send(value: string) {
   } catch (error) {
     console.error('序序聊天失败:', error);
     // API 不可用时仍给出明确、可执行的陪伴建议，不让输入停在“无响应”。
+    const kind = classifyXuxuError(error);
+    const requestId = error instanceof Error ? error.message.match(/\[([^\]]+)\]/u)?.[1] : undefined;
     const fallback = createOfflineReply(text);
-    // Keep the fallback visible, but mark it as retryable so a transient API failure is recoverable.
-    messages.value.push({ ...fallback, id: `assistant-error-${Date.now()}` });
+    const prefix = kind === 'network'
+      ? '暂时没连上网络。'
+      : kind === 'service'
+        ? '序序云端服务正在忙。'
+        : '这次没有拿到序序云端回复。';
+    messages.value.push({
+      ...fallback,
+      id: `assistant-error-${Date.now()}`,
+      text: `${prefix}下面先给你一条本地陪伴建议（不是大模型回复）：${fallback.text}`,
+      sourceTitle: requestId ? `本地陪伴建议 · 请求号 ${requestId}` : '本地陪伴建议 · 可重试',
+    });
     connectionState.value = 'retry';
   } finally {
     typing.value = false;
@@ -105,6 +128,7 @@ async function send(value: string) {
 
 const connectionStatusLabel = computed(() => connectionState.value === 'thinking' ? '正在回复' : connectionState.value === 'retry' ? '连接稍有波动' : '随时可聊');
 function voiceNotice() { uni.showToast({ title: '语音输入正在准备中，先试试打字吧', icon: 'none' }); }
+function openLogin() { uni.navigateTo({ url: '/pages/auth/AppAuthPage' }); }
 function retryLast() { const last = [...messages.value].reverse().find((message) => message.role === 'user'); if (last) send(last.text); }
 </script>
 
@@ -350,6 +374,9 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
 }
 .source-card image { width: 24rpx; height: 24rpx; opacity: 0.7; }
 .retry-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 9rpx 0 0 5rpx;
   padding: 6rpx 14rpx;
   border: 1rpx solid rgba(199, 121, 134, 0.45);
@@ -359,6 +386,7 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   font-size: 18rpx;
   line-height: 30rpx;
 }
+.login-message { border-color: #c4d9ca; color: #3d7650; background: #f0f7f1; }
 .typing {
   display: flex;
   align-items: center;
@@ -450,7 +478,8 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   flex: none;
   border: 1rpx solid var(--hz-rule-glass);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.8);
+  background: #eef4ef;
+  border-color: #d5e2d8;
 }
 .send::after { border: 0; }
 .send.enabled {
@@ -459,6 +488,8 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   box-shadow: 0 10rpx 22rpx rgba(47, 107, 77, 0.3), inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
 }
 .send image { width: 32rpx; height: 32rpx; opacity: 0.62; }
+.send[disabled] { background: #e7efe9; border-color: #cbdacf; }
+.send[disabled] image { opacity: 0.82; }
 .send.enabled image { opacity: 0.95; }
 .disclaimer { display: block; padding: 10rpx 28rpx 4rpx; color: var(--hz-faint); text-align: center; font-size: 17rpx; }
 </style>

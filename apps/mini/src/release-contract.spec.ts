@@ -16,8 +16,8 @@ describe('release contracts', () => {
       'app-plus'?: { distribute?: { icons?: { android?: Record<string, string>; ios?: { appstore?: string } } } };
     };
     const icons = manifest['app-plus']?.distribute?.icons;
-    expect(icons?.android?.xxhdpi).toBe('static/app-icons/xxhdpi.png');
-    expect(icons?.ios?.appstore).toBe('static/app-icons/ios-appstore.png');
+    expect(icons?.android?.xxhdpi).toBe('src/static/app-icons/xxhdpi.png');
+    expect(icons?.ios?.appstore).toBe('src/static/app-icons/ios-appstore.png');
   });
 
   it('keeps the showcase footer free of the decorative leaf image', () => {

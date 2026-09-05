@@ -80,13 +80,13 @@ async function submit() {
 .subtitle { display: block; margin-top: 12rpx; color: #788278; font-size: 26rpx; }
 .auth-panel { padding: 30rpx; border: 1rpx solid rgba(219, 204, 185, 0.7); border-radius: 28rpx; background: rgba(255, 255, 255, 0.86); box-shadow: 0 18rpx 50rpx rgba(104, 81, 57, 0.08); }
 .mode-switch { display: flex; gap: 8rpx; margin-bottom: 28rpx; padding: 6rpx; border-radius: 18rpx; background: #f4eee6; }
-.mode-button { flex: 1; height: 72rpx; border-radius: 14rpx; color: #8b8277; font-size: 25rpx; }
+.mode-button { display: flex; align-items: center; justify-content: center; flex: 1; height: 72rpx; padding: 0; border-radius: 14rpx; color: #8b8277; font-size: 25rpx; line-height: 1; }
 .mode-button.active { background: #fff; color: #3f6950; font-weight: 700; box-shadow: 0 4rpx 14rpx rgba(84, 75, 62, 0.08); }
 .field { margin-bottom: 20rpx; }
 .field-label { display: block; margin-bottom: 10rpx; color: #59665d; font-size: 23rpx; font-weight: 600; }
 .field-input { width: 100%; height: 84rpx; padding: 0 22rpx; border: 1rpx solid #e6ded3; border-radius: 16rpx; background: #fffdfa; color: #273a30; font-size: 28rpx; }
 .error-message { display: block; margin: 2rpx 0 18rpx; color: #ad654e; font-size: 23rpx; }
-.submit-button { width: 100%; height: 86rpx; border-radius: 18rpx; background: #3f6950; color: #fffdf9; font-size: 28rpx; font-weight: 700; }
+.submit-button { display: flex; align-items: center; justify-content: center; width: 100%; height: 86rpx; padding: 0 24rpx; border-radius: 18rpx; background: #3f6950; color: #fffdf9; font-size: 28rpx; font-weight: 700; line-height: 1; }
 .submit-button[disabled] { opacity: 0.55; }
 .privacy-note { display: block; margin-top: 20rpx; color: #a09a91; font-size: 20rpx; line-height: 1.5; text-align: center; }
 </style>

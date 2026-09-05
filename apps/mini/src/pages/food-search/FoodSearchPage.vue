@@ -20,6 +20,23 @@
       </view>
     </view>
 
+    <view class="library-switch" aria-label="选择食物库">
+      <view
+        :class="['library-switch-item', { active: libraryScope === 'catalog' }]"
+        @tap="switchLibrary('catalog')"
+      >
+        <text class="library-switch-title">公共食物库</text>
+        <text class="library-switch-caption">基础食物与常见菜品</text>
+      </view>
+      <view
+        :class="['library-switch-item', { active: libraryScope === 'mine' }]"
+        @tap="switchLibrary('mine')"
+      >
+        <text class="library-switch-title">我的食物</text>
+        <text class="library-switch-caption">已保存的专属营养数据</text>
+      </view>
+    </view>
+
     <!-- 搜索框 -->
     <view class="search-box">
       <image class="search-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
@@ -52,8 +69,8 @@
       >
     </view>
 
-    <view class="catalog-shell">
-      <scroll-view v-if="categories.length > 0" class="category-tabs" scroll-y>
+    <view class="catalog-shell" :class="{ 'catalog-shell--mine': libraryScope === 'mine' }">
+      <scroll-view v-if="libraryScope === 'catalog' && categories.length > 0" class="category-tabs" scroll-y>
         <view class="category-list">
           <view
             v-for="cat in allCategories"
@@ -74,14 +91,14 @@
         lower-threshold="160"
         @scrolltolower="loadNextPage"
       >
-        <view v-if="catalogSource === 'offline'" class="offline-notice">
+        <view v-if="libraryScope === 'catalog' && catalogSource === 'offline'" class="offline-notice">
           <text class="offline-title">当前为离线常见食物</text>
           <text>暂时显示常见食物，网络恢复后会自动补充完整目录。</text>
         </view>
 
         <view class="result-heading">
           <view>
-            <text class="common-title">{{ query || selectedCategory ? '筛选结果' : '常见食物' }}</text>
+            <text class="common-title">{{ libraryScope === 'mine' ? '我的食物' : query || selectedCategory ? '筛选结果' : '常见食物' }}</text>
             <text class="common-subtitle">{{ getResultText() }}</text>
           </view>
           <button class="photo-compact" aria-label="拍照识别食物" @tap="openRecognition">
@@ -100,7 +117,8 @@
 
         <view v-else-if="foods.length === 0" class="state">
           <image class="state-icon" src="/static/icons/svg/search.svg" mode="aspectFit" />
-          <text class="state-copy">没有找到相关食物，试试换个关键词</text>
+          <text class="state-copy">{{ libraryScope === 'mine' ? '还没有保存的食物，去公共食物库或拍照识别后保存吧' : '没有找到相关食物，试试换个关键词' }}</text>
+          <button v-if="libraryScope === 'mine'" class="state-action" @tap="switchLibrary('catalog')">浏览公共食物库</button>
         </view>
 
         <view v-else class="food-list">
@@ -200,7 +218,7 @@ import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.j
 import type { MealEntry } from '../../features/food/food.summary.js';
 import { calculateFoodNutrition } from '../../features/food/food.types.js';
 import { listUserFoods } from '../../features/food/user-foods.service.js';
-import { mergeFoodResults } from '../../features/food/food.service.js';
+import { userFoodToSearchItem } from '../../features/food/food.service.js';
 import { userStorageKey } from '../../features/auth/user-storage.js';
 
 const query = ref('');
@@ -217,6 +235,7 @@ const catalogSource = ref<'remote' | 'offline'>('remote');
 const loadingMore = ref(false);
 const resultsScrollTop = ref(0);
 const mealType = ref<MealType>('lunch');
+const libraryScope = ref<'catalog' | 'mine'>('catalog');
 const mealOptions: Array<{ value: MealType; label: string; icon: string }> = [
   { value: 'breakfast', label: '早餐', icon: '/static/icons/breakfast.png' },
   { value: 'lunch', label: '午餐', icon: '/static/icons/lunch.png' },
@@ -295,6 +314,16 @@ async function load(page = 1, append = false) {
   else loading.value = true;
   error.value = false;
   try {
+    if (libraryScope.value === 'mine') {
+      const personalFoods = await listUserFoods(query.value);
+      const personalItems = personalFoods.map(userFoodToSearchItem);
+      foods.value = personalItems;
+      totalCount.value = personalItems.length;
+      currentPage.value = 1;
+      totalPages.value = 1;
+      catalogSource.value = 'remote';
+      return;
+    }
     const result = await searchFoods({
       query: query.value || undefined,
       categoryId: selectedCategory.value || undefined,
@@ -303,15 +332,7 @@ async function load(page = 1, append = false) {
     });
 
     catalogSource.value = result.source;
-    let personalItems: FoodItem[] = [];
-    if (page === 1 && !query.value && !selectedCategory.value) {
-      try {
-        personalItems = mergeFoodResults(await listUserFoods(), []);
-      } catch {
-        // Personal foods are an enhancement; keep the catalog usable when the API is offline.
-      }
-    }
-    const nextItems = append ? [...foods.value, ...result.items] : [...personalItems, ...result.items];
+    const nextItems = append ? [...foods.value, ...result.items] : result.items;
     const seenNames = new Set<string>();
     foods.value = nextItems.filter((item) => {
       const key = item.name.trim().replace(/\s+/gu, '');
@@ -330,6 +351,17 @@ async function load(page = 1, append = false) {
     loading.value = false;
     loadingMore.value = false;
   }
+}
+
+function switchLibrary(scope: 'catalog' | 'mine') {
+  if (libraryScope.value === scope) return;
+  libraryScope.value = scope;
+  selectedCategory.value = null;
+  currentPage.value = 1;
+  totalPages.value = 1;
+  foods.value = [];
+  resetResultsScroll();
+  load(1);
 }
 
 function loadNextPage() {
@@ -1646,4 +1678,54 @@ onLoad(async (options) => {
 }
 .cart-bar { z-index: 60; }
 .cart-panel { z-index: 59; }
+
+/* Library scope switch: a clear, real entry point for the user's saved foods. */
+.library-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10rpx;
+  flex: none;
+  margin: 0 0 12rpx;
+  padding: 6rpx;
+  border: 1rpx solid #e2ebe3;
+  border-radius: 18rpx;
+  background: #f1f6f1;
+}
+.library-switch-item {
+  display: flex;
+  min-width: 0;
+  min-height: 66rpx;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3rpx;
+  padding: 8rpx 12rpx;
+  border-radius: 13rpx;
+  color: #829287;
+  text-align: center;
+}
+.library-switch-item.active {
+  color: #315e43;
+  background: #fffefa;
+  box-shadow: 0 4rpx 12rpx rgba(66, 101, 73, 0.09);
+}
+.library-switch-title { font-size: 22rpx; font-weight: 700; line-height: 1.2; }
+.library-switch-caption { overflow: hidden; max-width: 100%; color: #9aa89e; font-size: 16rpx; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.catalog-shell--mine { grid-template-columns: minmax(0, 1fr); }
+.state-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 208rpx;
+  height: 62rpx;
+  margin-top: 18rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid #cfe1d2;
+  border-radius: 18rpx;
+  color: #3f7652;
+  background: #f2f8f1;
+  font-size: 21rpx;
+  line-height: 1;
+}
+.state-action::after { border: 0; }
 </style>

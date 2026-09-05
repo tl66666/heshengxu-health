@@ -37,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+
 defineProps<{ active: 'home' | 'xuxu' | 'community' | 'plan' | 'me' }>();
 
 const items = [
@@ -51,6 +53,20 @@ const items = [
   { key: 'me', path: '/pages/me/MePage', label: '我的', icon: '/static/icons/svg/profile.svg' },
 ] as const;
 const xuxu = { path: '/pages/xuxu/XuxuPage' };
+
+function hideNativeTabBar() {
+  try {
+    uni.hideTabBar({ animation: false });
+  } catch {
+    // The native tab bar may not be ready on the first frame.
+  }
+}
+
+onMounted(() => {
+  hideNativeTabBar();
+  setTimeout(hideNativeTabBar, 120);
+  setTimeout(hideNativeTabBar, 600);
+});
 
 function switchTab(url: string) {
   uni.switchTab({ url });

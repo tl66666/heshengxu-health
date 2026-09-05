@@ -44,4 +44,11 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('class="offline-notice"');
     expect(foodSearchPageSource).not.toContain('class="pagination"');
   });
+
+  it('exposes a real personal-food library alongside the public catalog', () => {
+    expect(foodSearchPageSource).toContain('class="library-switch"');
+    expect(foodSearchPageSource).toContain('libraryScope');
+    expect(foodSearchPageSource).toContain('listUserFoods(query.value)');
+    expect(foodSearchPageSource).toContain('userFoodToSearchItem');
+  });
 });
