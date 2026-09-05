@@ -34,7 +34,9 @@ function isAccessTokenUsable(token: string | undefined) {
   if (!encodedPayload) return false;
   try {
     const normalized = encodedPayload.replace(/-/gu, '+').replace(/_/gu, '/');
-    const payload = JSON.parse(atob(normalized)) as { exp?: number; typ?: string };
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    if (typeof atob !== 'function') return false;
+    const payload = JSON.parse(atob(padded)) as { exp?: number; typ?: string };
     return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp > Date.now();
   } catch {
     return false;

@@ -65,7 +65,7 @@
 - 生理期支持首次设置周期天数、经期天数、最近一次开始日期，并据此计算预计窗口。
 - 用药支持药品、剂量、频次、提醒时段、服用状态和历史记录。
 - 轻断食支持方案选择、开始/结束时间、实时计时、完成记录和首页状态同步。
-- 这些模块当前以本机保存为主，跨设备同步仍是后续服务端能力，不在当前版本伪装成已完成。
+- 这些模块当前以本机保存为主，但会按当前登录账号分桶；退出或切换账号不会读取上一个账号的本机记录。跨设备同步仍是后续服务端能力，不在当前版本伪装成已完成。
 
 ### 序序聊天
 
@@ -162,7 +162,17 @@ API 使用根目录的 Dockerfile.api 构建，容器启动时自动执行 Prism
 
 apps/mini 是 uni-app 工程，可在 HBuilderX 中复用同一套页面和 API 打包 Android/iOS。App 发布还需要独立准备 Android 包名与签名证书、iOS Bundle ID 与 Apple 开发者证书、隐私政策、权限说明和真机验收。
 
-最近一次 Android 云端打包已经成功，安装包由 HBuilderX 云端生成。只有在客户端源码、`manifest.json`、图标、权限或 App 配置发生变化时才需要重新打包；修改 README、展示站或服务端文档不需要重复打包。重新打包前先执行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中导入 `D:\heshengxu-health\apps\mini` 进行云端打包。
+最近一次 Android 云端打包已经成功，安装包由 HBuilderX 云端生成。只有在客户端源码、`manifest.json`、图标、权限或 App 配置发生变化时才需要重新打包；修改 README、展示站或服务端文档不需要重复打包。
+
+HBuilderX 请打开这个完整项目目录：
+
+    D:\禾伴\heban-ai-health-demo\apps\mini
+
+如果 HBuilderX 在中文路径下出现“40% 自动退出”或 `manifest false`，改为打开已经创建好的英文路径联接：
+
+    D:\heshengxu-health\apps\mini
+
+这两个路径指向同一份源码，不要打开 `dist\build\app` 或 `dist\build\mp-weixin` 进行云打包。重新打包前先执行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中选择“发行 -> 原生 App-云打包”。
 
 操作指南见 docs/APP-RELEASE-HBUILDERX.md。
 
