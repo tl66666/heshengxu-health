@@ -1288,6 +1288,81 @@ main {
   }
 }
 
+/* Final polish: let Xuxu lead the identity and keep motion quiet and tactile. */
+.brand-mark {
+  align-items: center;
+  background: var(--white);
+  border: 1px solid rgba(38, 56, 50, 0.1);
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(38, 56, 50, 0.12);
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  overflow: hidden;
+  width: 36px;
+}
+
+.brand-mark img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.hero-actions {
+  align-items: stretch;
+}
+
+.button-repo {
+  border: 1px solid rgba(38, 56, 50, 0.16);
+  color: var(--forest);
+  background: rgba(255, 254, 251, 0.72);
+}
+
+.button-repo:hover,
+.button-repo:focus-visible {
+  background: var(--white);
+  box-shadow: 0 10px 24px rgba(38, 56, 50, 0.1);
+  transform: translateY(-2px);
+}
+
+.hero-art img {
+  animation: hero-breathe 8s ease-in-out infinite;
+  transform-origin: 68% 76%;
+}
+
+.hero-art .art-caption {
+  animation: caption-rise 700ms var(--ease) 350ms both;
+}
+
+.story-weight .story-art {
+  background: linear-gradient(145deg, #edf4e8 0%, #fffdf8 76%);
+}
+
+.story-weight .story-art img {
+  object-position: center center;
+}
+
+@keyframes hero-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.018);
+  }
+}
+
+@keyframes caption-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

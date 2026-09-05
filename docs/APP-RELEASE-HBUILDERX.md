@@ -81,4 +81,24 @@
 
 ## 当前阻塞项
 
+### HBuilderX 停在约 40% 或直接退出
+
+先看 `C:\Users\\<用户名>\\AppData\\Roaming\\HBuilder X\\.log` 的最后一次打包记录。若出现下面两类日志：
+
+```text
+https://app.liuyingyong.cn/app/checkPromotion ... connect to server timeout
+https://app.liuyingyong.cn/build/status ... connect to server timeout
+```
+
+说明请求还没有到达项目编译阶段，是 HBuilderX 到 DCloud 云打包服务的网络或代理超时。此时重复修改项目代码、图片和签名不会改变结果。请先在浏览器打开 `https://app.liuyingyong.cn` 验证网络，关闭系统代理/VPN 后重试；如果所在网络拦截该域名，换手机热点或家庭网络，并在 HBuilderX 偏好设置中清除错误代理配置。确认 `.log` 不再出现 `connect to server timeout` 后，再重新提交云打包。
+
+如果网络检查通过，但日志仍然是：
+
+```text
+compiler compile cresult.success: true
+manifest false
+```
+
+这属于 HBuilderX 5.24 对 Vite/uni CLI 项目的资源交接兼容问题。项目已经保留 App 平台兼容补丁，并提供 CLI 打包入口；可以使用 HBuilderX 安装目录下的 `cli.exe pack`，参数参见官方文档：https://hx.dcloud.net.cn/cli/pack。CLI 与图形界面使用同一账号和证书，不需要把密钥写入仓库。
+
 App 目前属于“源码可打包、商店未发布”状态。账号注册/登录代码已完成；要达到可上架状态，还需要准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。
