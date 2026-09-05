@@ -101,4 +101,26 @@ manifest false
 
 这属于 HBuilderX 5.24 对 Vite/uni CLI 项目的资源交接兼容问题。项目已经保留 App 平台兼容补丁，并提供 CLI 打包入口；可以使用 HBuilderX 安装目录下的 `cli.exe pack`，参数参见官方文档：https://hx.dcloud.net.cn/cli/pack。CLI 与图形界面使用同一账号和证书，不需要把密钥写入仓库。
 
+### 本项目的 HBuilderX 5.24 兼容入口
+
+HBuilderX 5.24 会把 uni-app 项目标记为旧平台名 `app-plus`，但 Vite CLI 使用新平台名 `app`。如果项目路径包含中文，或 HBuilderX 仍在使用旧的资源目录约定，可能出现“编译成功后 `manifest false`”。项目补丁会在 HBuilderX 的无参数构建中同时完成两件事：补上 `-p app`，并把输出目录设为 `dist/build/app-plus`，让 HBuilderX 能继续读取 `manifest.json`。
+
+为了绕过 Windows 工具链的路径兼容问题，不需要复制项目。只需创建一个指向仓库的英文目录联接，并从联接下的 `apps/mini` 导入：
+
+```powershell
+New-Item -ItemType Junction -Path D:\heshengxu-health -Target D:\禾伴\heban-ai-health-demo
+```
+
+然后在 HBuilderX 中关闭原来的中文路径项目，重新导入 `D:\heshengxu-health\apps\mini`。命令行也可以直接验证：
+
+```powershell
+E:\HBuilderX\cli.exe pack `
+  --project D:\heshengxu-health\apps\mini `
+  --platform android `
+  --android.packagename uni.app.UNIFA2E0A8 `
+  --android.androidpacktype 3
+```
+
+本次验证结果：本地编译成功、资源压缩成功、云端任务已提交，已经越过原来的 40% 阶段；随后通过 `cli.exe pack status` 查询到 Android 云端证书任务“打包成功”，并返回 APK 下载地址。若后续任务报告错误，应在 HBuilderX 的云打包状态中查看具体错误日志；那属于签名、隐私配置或云端构建阶段，和 `manifest false` 是不同问题。
+
 App 目前属于“源码可打包、商店未发布”状态。账号注册/登录代码已完成；要达到可上架状态，还需要准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。

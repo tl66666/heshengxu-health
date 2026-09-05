@@ -2,6 +2,9 @@
 
 这是和生序项目的正式展示站，使用仓库中的原始水彩插画和真实工程资料，展示产品闭环、序序 AI、技术架构和部署链路。
 
+- 在线地址：<https://tl66666.github.io/heshengxu-health/>
+- GitHub 仓库：<https://github.com/tl66666/heshengxu-health>
+
 ## 本地运行
 
 在仓库根目录执行：
@@ -25,3 +28,5 @@ npx vite showcase --host 127.0.0.1 --port 4173
 ## 静态部署
 
 执行 `npx vite build showcase` 后，`showcase/dist/` 是可以直接部署的静态目录，原始插画会被复制到输出目录的 `assets/` 下。开发源文件仍只保留一份 `assets/illustrations/`。
+
+仓库通过 `.github/workflows/deploy-showcase.yml` 自动构建并发布 GitHub Pages。推送到 `main` 且修改展示站或插画资源时，会触发新的部署。

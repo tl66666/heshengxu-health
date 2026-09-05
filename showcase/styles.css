@@ -1440,12 +1440,22 @@ body {
 }
 
 .nav-action {
-  background: var(--forest);
+  background: rgba(232, 242, 226, 0.92);
+  border: 1px solid rgba(74, 112, 86, 0.18);
   border-radius: 999px;
-  box-shadow: 0 8px 18px rgba(36, 68, 56, 0.15);
-  color: #fffdf8;
+  box-shadow:
+    0 8px 20px rgba(72, 103, 77, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  color: var(--forest);
   min-height: 40px;
   padding-inline: 18px;
+}
+
+.nav-action:hover,
+.nav-action:focus-visible {
+  background: #dcebd8;
+  border-color: rgba(74, 112, 86, 0.27);
+  box-shadow: 0 12px 24px rgba(72, 103, 77, 0.13);
 }
 
 main {
@@ -1562,8 +1572,18 @@ main {
 }
 
 .button-primary {
-  background: var(--forest);
-  box-shadow: 0 9px 22px rgba(36, 68, 56, 0.17);
+  background: linear-gradient(145deg, #e9f2df 0%, #f7edcf 100%);
+  border: 1px solid rgba(88, 119, 82, 0.19);
+  box-shadow:
+    0 10px 24px rgba(82, 107, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--forest);
+}
+
+.button-primary:hover,
+.button-primary:focus-visible {
+  background: linear-gradient(145deg, #deedd7 0%, #f4e6bf 100%);
+  box-shadow: 0 14px 28px rgba(82, 107, 77, 0.15);
 }
 
 .button-quiet {
@@ -1824,7 +1844,51 @@ main {
 }
 
 .site-footer {
-  background: var(--forest);
+  background: linear-gradient(90deg, rgba(255, 253, 248, 0.94), rgba(232, 242, 226, 0.9));
+  border-top: 1px solid rgba(74, 112, 86, 0.14);
+  color: var(--forest);
+  position: relative;
+}
+
+.footer-leaf {
+  bottom: 0;
+  max-height: 150px;
+  opacity: 0.5;
+  pointer-events: none;
+  position: absolute;
+  right: clamp(20px, 8vw, 120px);
+  width: min(280px, 30vw);
+}
+
+.site-footer::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.68), transparent);
+  content: '';
+  height: 1px;
+  left: 8%;
+  position: absolute;
+  right: 8%;
+  top: 0;
+}
+
+.footer-brand {
+  color: var(--forest);
+}
+
+.footer-inner p,
+.footer-links a,
+.footer-year {
+  color: var(--forest-soft);
+}
+
+.footer-links a {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 4px;
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  border-bottom-color: rgba(74, 112, 86, 0.32);
+  color: var(--forest);
 }
 
 @media (max-width: 900px) {
@@ -1858,6 +1922,11 @@ main {
     bottom: 18px;
     right: var(--gutter);
     width: min(300px, 58vw);
+  }
+
+  .footer-leaf {
+    max-height: 110px;
+    width: min(220px, 44vw);
   }
 }
 
@@ -1920,4 +1989,58 @@ main {
   .image-note {
     font-size: 0.65rem;
   }
+}
+
+/* Final palette pass: keep actions light enough for the watercolor canvas. */
+.nav-action {
+  background: rgba(232, 242, 226, 0.94);
+  border: 1px solid rgba(74, 112, 86, 0.18);
+  box-shadow:
+    0 8px 20px rgba(72, 103, 77, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  color: var(--forest);
+}
+
+.nav-action:hover,
+.nav-action:focus-visible {
+  background: #dcebd8;
+  border-color: rgba(74, 112, 86, 0.27);
+  box-shadow: 0 12px 24px rgba(72, 103, 77, 0.13);
+}
+
+.button-primary {
+  background: linear-gradient(145deg, #e9f2df 0%, #f7edcf 100%);
+  border: 1px solid rgba(88, 119, 82, 0.19);
+  box-shadow:
+    0 10px 24px rgba(82, 107, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--forest);
+}
+
+.button-primary:hover,
+.button-primary:focus-visible {
+  background: linear-gradient(145deg, #deedd7 0%, #f4e6bf 100%);
+  box-shadow: 0 14px 28px rgba(82, 107, 77, 0.15);
+}
+
+.site-footer {
+  background: linear-gradient(90deg, rgba(255, 253, 248, 0.94), rgba(232, 242, 226, 0.9));
+  border-top: 1px solid rgba(74, 112, 86, 0.14);
+  color: var(--forest);
+}
+
+.footer-brand {
+  color: var(--forest);
+}
+
+.footer-inner p,
+.footer-links a,
+.footer-year {
+  color: var(--forest-soft);
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  border-bottom-color: rgba(74, 112, 86, 0.32);
+  color: var(--forest);
 }
