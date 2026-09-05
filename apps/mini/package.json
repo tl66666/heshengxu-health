@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "node build/patch-hbuilderx-app-build.cjs",
     "predev:mp-weixin": "node ../../scripts/sync-illustrations.mjs",
     "dev:mp-weixin": "uni -p mp-weixin",
     "clean:dist": "node ../../scripts/clean-mini-dist.mjs",

@@ -65,6 +65,19 @@
 - 不在没有真实设备测试的情况下提交商店审核。
 - 不把小程序的微信登录 code 当作 App 登录凭证。
 
+## HBuilderX 5.x 40% 自动退出排查
+
+如果云打包在约 40% 处直接结束，先不要反复更换证书。HBuilderX 5.x 在部分 Vue 3 CLI 项目中会调用 `uni build` 时漏传 App 平台参数，导致编译器默认构建 H5，最后生成只有 `manifest.json` 的空 wgt。
+
+仓库已在 `apps/mini/package.json` 的 `postinstall` 中安装兼容补丁。修复后应满足：
+
+1. 完全退出并重新打开 HBuilderX。
+2. 从 HBuilderX 项目列表移除后，重新导入 `apps/mini` 源码目录（不要导入 `dist`）。
+3. 重新选择“发行 -> 原生 App-云打包”。
+4. 若仍失败，查看 HBuilderX 控制台：不应再出现只生成 `dist/build/h5` 或 444 字节 wgt；本地 `npm run build:app` 应输出 `dist/build/app`。
+
+如果日志出现“App 包体积超过限制”，这是第二个独立问题：生产构建应配置 `VITE_MINI_ASSET_BASE_URL`，让原图从 CloudBase 静态托管加载；不要删除仓库中的原图，也不要为了过检查降低图片质量。
+
 ## 当前阻塞项
 
 App 目前属于“源码可打包、商店未发布”状态。账号注册/登录代码已完成；要达到可上架状态，还需要准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。
