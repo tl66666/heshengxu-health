@@ -12,6 +12,8 @@ on:
     paths:
       - Dockerfile.api
       - .dockerignore
+      - food.sql
+      - scripts/import-common-foods.ts
       - apps/api/**
       - packages/contracts/**
       - packages/domain/**
