@@ -1,6 +1,8 @@
 # 和生序小程序工程
 
-本目录是和生序正式 uni-app 客户端源码，当前发布目标为微信小程序，同一套 Vue 3/TypeScript 页面可继续通过 HBuilderX 打包为 App。健康建档、首页、记录、计划、序序聊天、序序相机和个人中心都从这里构建；原始水彩图片统一保存在仓库根目录 `assets/illustrations/`。
+本目录是和生序正式 uni-app 客户端源码，当前发布目标为微信小程序，同一套 Vue 3/TypeScript 页面可继续通过 HBuilderX 打包为 App。健康建档、首页、记录、计划、序序聊天、序序相机和个人中心都从这里构建；原始水彩插画统一保存在仓库根目录 `assets/illustrations/`，位图图标统一保存在 `assets/mini-icons/`。
+
+为了满足 HBuilderX 云打包的源码上传限制，`src/static` 默认只保留 SVG 图标和轻量文件。生产构建会把位图引用改为 HTTPS 静态资源地址；微信开发或导出静态资源前运行 `npm run predev:mp-weixin`（或仓库根目录的同步脚本）即可把原图临时同步回来。提交/云打包前可运行 `npm run clean:source-assets`，不会删除仓库中的原图。
 
 ## 源码边界
 

@@ -1,6 +1,6 @@
 # 和生序视觉资产
 
-`assets/illustrations/` 是项目唯一的图片源目录。所有 Demo 和 uni-app 页面都从这里选图；小程序构建前由 `scripts/sync-illustrations.mjs` 自动同步到 `apps/mini/src/static/illustrations/`，后者是构建缓存，不提交 Git。
+`assets/illustrations/` 是项目插画的唯一源目录，`assets/mini-icons/` 是小程序与 App 位图图标的唯一源目录。所有页面都从这两处选图；需要本地位图的微信开发构建前，由 `scripts/sync-illustrations.mjs` 临时同步到 `apps/mini/src/static/`。HBuilderX 云打包时，源码目录默认不保留这些大位图，生产构建通过 CloudBase HTTPS 地址加载原图。
 
 ## 命名约定
 

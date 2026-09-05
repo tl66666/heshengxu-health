@@ -13,8 +13,11 @@ export default defineConfig(({ mode }) => {
   // config. Read the same public VITE_* values that are exposed to the app so
   // HBuilderX and CLI builds use identical asset handling.
   const env = loadEnv(mode, process.cwd(), '');
-  const assetBaseUrl =
-    env.VITE_MINI_ASSET_BASE_URL || (mode === 'production' ? PUBLIC_ASSET_BASE_URL : '');
+  const isAppBuild =
+    process.env.UNI_PLATFORM === 'app' ||
+    process.env.UNI_APP_PLATFORM === 'android' ||
+    process.env.UNI_APP_PLATFORM === 'ios';
+  const assetBaseUrl = env.VITE_MINI_ASSET_BASE_URL || (mode === 'production' || isAppBuild ? PUBLIC_ASSET_BASE_URL : '');
 
   return {
     plugins: [remoteMiniAssetsPlugin(assetBaseUrl), uni()],

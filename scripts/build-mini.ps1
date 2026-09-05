@@ -15,6 +15,7 @@ Set-Location 'apps/mini'
 npx uni build -p mp-weixin
 node ../../scripts/finalize-mini-build.mjs dist/build/mp-weixin
 node ../../scripts/verify-mini-build.mjs dist/build/mp-weixin
+node ../../scripts/clean-mini-source-assets.mjs
 Set-Location '../..'
 
 Write-Host ''

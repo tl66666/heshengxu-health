@@ -40,12 +40,13 @@
 ## 三、HBuilderX 云打包
 
 1. 在 HBuilderX 打开 `apps/mini`。
-2. 选择“发行 -> 原生 App-云打包”。
-3. 选择 Android、iOS 或两者。
-4. 填写应用名称、版本号和版本编码，确认应用图标与启动图。
-5. Android 填写包名和签名证书；iOS 选择 Bundle ID、证书和描述文件。
-6. 在权限说明中填写相机用途，不能只勾选权限而不说明用途。
-7. 点击打包，完成后下载 APK；iOS 包上传到 TestFlight 进行测试。
+2. 在仓库根目录运行 `npm --prefix apps/mini run clean:source-assets`，确认同步给微信开发工具的临时位图已经从源码目录移除。原图仍在 `assets/`，不会降低画质或丢失。
+3. 选择“发行 -> 原生 App-云打包”。
+4. 选择 Android、iOS 或两者。
+5. 填写应用名称、版本号和版本编码，确认应用图标与启动图。
+6. Android 填写包名和签名证书；iOS 选择 Bundle ID、证书和描述文件。
+7. 在权限说明中填写相机用途，不能只勾选权限而不说明用途。
+8. 点击打包，完成后下载 APK；iOS 包上传到 TestFlight 进行测试。
 
 ## 四、发布前验收
 
@@ -76,7 +77,7 @@
 3. 重新选择“发行 -> 原生 App-云打包”。
 4. 若仍失败，查看 HBuilderX 控制台：不应再出现只生成 `dist/build/h5` 或 444 字节 wgt；本地 `npm run build:app` 应输出 `dist/build/app`。
 
-如果日志出现“App 包体积超过限制”，这是第二个独立问题：生产构建应配置 `VITE_MINI_ASSET_BASE_URL`，让原图从 CloudBase 静态托管加载；不要删除仓库中的原图，也不要为了过检查降低图片质量。
+如果停在 40% 且没有进入编译，首先检查 HBuilderX 上传的是源码目录而不是已精简的 App 产物。仓库已经把原始插画和位图图标移到 `assets/`：`apps/mini` 去掉 `node_modules` 与 `dist` 后约 1.33 MB，本地 `dist/build/app` 约 1.79 MB。不要把 `dist` 或同步后的 60 MB 位图缓存交给云打包。生产构建会将位图引用改为 CloudBase HTTPS 地址；原图没有压缩，也没有删除。
 
 ## 当前阻塞项
 

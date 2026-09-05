@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const output = resolve(root, 'dist/mini-assets/static');
 const miniStatic = resolve(root, 'apps/mini/src/static');
+const illustrations = resolve(root, 'assets/illustrations');
+const miniIcons = resolve(root, 'assets/mini-icons');
 
 if (!existsSync(miniStatic)) {
   throw new Error('找不到小程序静态资源目录。请先运行 scripts/sync-illustrations.mjs。');
@@ -13,6 +15,8 @@ if (!existsSync(miniStatic)) {
 rmSync(resolve(root, 'dist/mini-assets'), { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
 copyDirectory(miniStatic, output);
+copyDirectory(illustrations, resolve(output, 'illustrations'));
+if (existsSync(miniIcons)) copyDirectory(miniIcons, resolve(output, 'icons'));
 console.log(`原图已导出到 ${resolve(root, 'dist/mini-assets')}，可按原目录上传到静态托管。`);
 
 function copyDirectory(source, target) {
