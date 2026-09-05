@@ -30,4 +30,11 @@ describe('resolveMiniRuntime', () => {
     expect(runtime.apiBaseUrl).toMatch(/^https:\/\//u);
     expect(runtime.apiBaseUrl).not.toContain('127.0.0.1');
   });
+
+  it('uses the production API for a production WeChat build without injected variables', () => {
+    expect(resolveMiniRuntime({ MODE: 'production', UNI_PLATFORM: 'mp-weixin' })).toEqual({
+      apiBaseUrl: 'https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1',
+      authorization: undefined,
+    });
+  });
 });

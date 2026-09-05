@@ -1,11 +1,17 @@
 <script lang="ts">
-import { isAppRuntime, isWechatLoginConfigured, loginWithWechat } from './features/auth/auth-store.js';
+import {
+  ensureAppSession,
+  isAppRuntime,
+  isSignedIn,
+  isWechatLoginConfigured,
+  loginWithWechat,
+} from './features/auth/auth-store.js';
 
 export default {
-  onLaunch() {
+  async onLaunch() {
     if (isAppRuntime()) {
       hideNativeTabBar();
-      if (!uni.getStorageSync('heban.auth.access-token')) {
+      if (!(isSignedIn() || (await ensureAppSession()))) {
         setTimeout(() => uni.redirectTo({ url: '/pages/auth/AppAuthPage' }), 0);
       }
       return;

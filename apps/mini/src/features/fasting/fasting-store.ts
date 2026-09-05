@@ -27,12 +27,12 @@ function normalize(value: unknown): FastingPlan {
 }
 
 export function loadFastingPlan(): FastingPlan {
-  const value = uni.getStorageSync(KEY);
+  const value = uni.getStorageSync(userStorageKey(KEY));
   if (!value) return { ...DEFAULT_PLAN, sessions: [], mealLogs: [] };
   try { return normalize(typeof value === 'string' ? JSON.parse(value) : value); } catch { return { ...DEFAULT_PLAN, sessions: [], mealLogs: [] }; }
 }
 
-export function saveFastingPlan(patch: Partial<FastingPlan>) { const next = normalize({ ...loadFastingPlan(), ...patch }); uni.setStorageSync(KEY, next); return next; }
+export function saveFastingPlan(patch: Partial<FastingPlan>) { const next = normalize({ ...loadFastingPlan(), ...patch }); uni.setStorageSync(userStorageKey(KEY), next); return next; }
 
 export function startFasting(at = new Date()) {
   const plan = loadFastingPlan();
@@ -78,3 +78,4 @@ export function remainingSeconds(plan: FastingPlan, now = new Date()) { const ac
 export function formatDuration(totalSeconds: number) { const seconds = Math.max(0, Math.floor(totalSeconds)); return `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
 export function formatRemaining(plan: FastingPlan, now = new Date()) { if (plan.active) return formatDuration(remainingSeconds(plan, now)); const current = now.getHours() * 60 + now.getMinutes(); const target = isEatingNow(plan, now) ? minutes(plan.eatingEnd) : minutes(plan.eatingStart); const remaining = (target - current + 1440) % 1440; return `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}:00`; }
 export function localDate(now = new Date()) { return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+import { userStorageKey } from '../auth/user-storage.js';

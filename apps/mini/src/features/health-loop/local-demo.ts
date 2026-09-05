@@ -5,6 +5,7 @@ import type {
   SaveCurrentPlanRequest,
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
+import { userStorageKey } from '../auth/user-storage.js';
 
 const PROFILE_KEY = 'heshengxu.local.health-profile';
 const PLAN_KEY = 'heshengxu.local.health-plan';
@@ -20,11 +21,11 @@ export type LocalHealthProfile = {
 };
 
 export function saveLocalProfile(profile: LocalHealthProfile) {
-  uni.setStorageSync(PROFILE_KEY, profile);
+  uni.setStorageSync(userStorageKey(PROFILE_KEY), profile);
 }
 
 export function loadLocalProfile(): LocalHealthProfile | null {
-  const value = uni.getStorageSync(PROFILE_KEY) as Partial<LocalHealthProfile> | null;
+  const value = uni.getStorageSync(userStorageKey(PROFILE_KEY)) as Partial<LocalHealthProfile> | null;
   if (!value || !value.heightCm || !value.weightKg || !value.primaryGoal) return null;
   return {
     displayName: value.displayName || '新朋友',
@@ -67,22 +68,25 @@ export function saveLocalPlan(request: SaveCurrentPlanRequest): PersonalPlanDto 
       completedAt: null,
     })),
   };
-  uni.setStorageSync(PLAN_KEY, plan);
+  uni.setStorageSync(userStorageKey(PLAN_KEY), plan);
   return plan;
 }
 
 export function loadLocalPlan(): PersonalPlanDto | null {
-  return (uni.getStorageSync(PLAN_KEY) as PersonalPlanDto | null) || null;
+  return (uni.getStorageSync(userStorageKey(PLAN_KEY)) as PersonalPlanDto | null) || null;
 }
 
 export function clearLocalPlan() {
-  uni.removeStorageSync(PLAN_KEY);
+  uni.removeStorageSync(userStorageKey(PLAN_KEY));
   return null;
 }
 
 export function resetLocalDemoData() {
+  // Remove legacy guest keys as well as the current account bucket.
   uni.removeStorageSync(PROFILE_KEY);
   uni.removeStorageSync(PLAN_KEY);
+  uni.removeStorageSync(userStorageKey(PROFILE_KEY));
+  uni.removeStorageSync(userStorageKey(PLAN_KEY));
   const exactKeys = [
     'heban.health.records.v1',
     'heban-weight-records',
@@ -100,8 +104,12 @@ export function resetLocalDemoData() {
     'pendingFoodSelection',
     'heban.food.daily-target-kcal',
     'heban_home_card_visibility',
+    'heban.user-profile.v1',
   ];
-  exactKeys.forEach((key) => uni.removeStorageSync(key));
+  exactKeys.forEach((key) => {
+    uni.removeStorageSync(key);
+    uni.removeStorageSync(userStorageKey(key));
+  });
 
   // Clear date-scoped records and per-user guest plans without touching the heban.auth.* namespace.
   try {
@@ -111,7 +119,8 @@ export function resetLocalDemoData() {
         /^water_\d{4}_\d{1,2}_\d{1,2}$/.test(key) ||
         key.startsWith('heshengxu.daily-home.') ||
         key.startsWith('heban.local.meal-entries.') ||
-        key.startsWith('heban.local.habit-plans.'),
+        key.startsWith('heban.local.habit-plans.') ||
+        key.includes('.user.'),
       )
       .forEach((key) => uni.removeStorageSync(key));
   } catch {
@@ -127,7 +136,7 @@ export function completeLocalTask(taskId: string) {
     task.status = 'completed';
     task.completedAt = new Date().toISOString();
   }
-  uni.setStorageSync(PLAN_KEY, plan);
+  uni.setStorageSync(userStorageKey(PLAN_KEY), plan);
 }
 
 export function createLocalDailyHome(date: string): DailyHomeDto | null {
@@ -237,7 +246,7 @@ function nullableString(value: unknown) {
 
 function readLocalHealthRecords(): LocalHealthRecord[] {
   try {
-    const value = uni.getStorageSync('heban.health.records.v1');
+    const value = uni.getStorageSync(userStorageKey('heban.health.records.v1'));
     return Array.isArray(value) ? (value as LocalHealthRecord[]) : [];
   } catch {
     return [];
@@ -253,7 +262,7 @@ function localRecordDate(value: string) {
 
 function readLocalWeightRecords(): LocalWeightRecord[] {
   try {
-    const value = uni.getStorageSync('heban-weight-records');
+    const value = uni.getStorageSync(userStorageKey('heban-weight-records'));
     if (Array.isArray(value)) return value as LocalWeightRecord[];
   } catch {
     // Storage may be unavailable during the first render.

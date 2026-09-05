@@ -86,6 +86,7 @@ import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack } from '../../utils/router.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 const gender = ref<'male' | 'female'>('male');
 const weight = ref(75);
@@ -191,12 +192,12 @@ function onGenderChange(e: any) {
 function saveGoal() {
   try {
     // 保存目标
-    uni.setStorageSync('water_daily_goal', selectedDailyGoal.value.toString());
-    if (customGoal.value) uni.setStorageSync('water_daily_goal_custom', String(customGoal.value));
-    else uni.removeStorageSync('water_daily_goal_custom');
+    uni.setStorageSync(userStorageKey('water_daily_goal'), selectedDailyGoal.value.toString());
+    if (customGoal.value) uni.setStorageSync(userStorageKey('water_daily_goal_custom'), String(customGoal.value));
+    else uni.removeStorageSync(userStorageKey('water_daily_goal_custom'));
     
     // 保存用户信息
-    uni.setStorageSync('water_user_info', JSON.stringify({
+    uni.setStorageSync(userStorageKey('water_user_info'), JSON.stringify({
       gender: gender.value,
       weight: weight.value,
       activity: activity.value,
@@ -222,14 +223,14 @@ function saveGoal() {
 onLoad(() => {
   // 加载用户信息
   try {
-    const userInfo = uni.getStorageSync('water_user_info');
+    const userInfo = uni.getStorageSync(userStorageKey('water_user_info'));
     if (userInfo) {
       const data = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
       gender.value = data.gender || 'male';
       weight.value = data.weight || 75;
       activity.value = data.activity || 'none';
     }
-    const savedCustomGoal = Number(uni.getStorageSync('water_daily_goal_custom'));
+    const savedCustomGoal = Number(uni.getStorageSync(userStorageKey('water_daily_goal_custom')));
     customGoal.value = Number.isFinite(savedCustomGoal) && savedCustomGoal > 0 ? savedCustomGoal : null;
   } catch (e) {
     console.error('加载用户信息失败:', e);

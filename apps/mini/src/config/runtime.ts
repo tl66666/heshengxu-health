@@ -17,6 +17,10 @@ export function resolveMiniRuntime(environment: MiniRuntimeEnvironment): MiniRun
     };
   }
 
+  if (environment.MODE === 'production') {
+    return { apiBaseUrl: PRODUCTION_API_BASE_URL, authorization: storedAuthorization() };
+  }
+
   if (environment.UNI_PLATFORM === 'app' || environment.UNI_PLATFORM === 'app-plus') {
     return { apiBaseUrl: PRODUCTION_API_BASE_URL, authorization: storedAuthorization() };
   }

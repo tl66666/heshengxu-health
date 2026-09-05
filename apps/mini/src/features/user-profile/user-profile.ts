@@ -4,6 +4,8 @@
  * 健康档案来自建档流程，这里只存"我的"页面里用户主动修改的外观信息。
  */
 
+import { userStorageKey } from '../auth/user-storage.js';
+
 const KEY = 'heban.user-profile.v1';
 
 export type LocalUserProfile = {
@@ -13,7 +15,7 @@ export type LocalUserProfile = {
 
 export function loadUserProfile(): LocalUserProfile {
   try {
-    const value = uni.getStorageSync(KEY) as LocalUserProfile | null;
+    const value = uni.getStorageSync(userStorageKey(KEY)) as LocalUserProfile | null;
     if (!value) return {};
     return {
       displayName: typeof value.displayName === 'string' ? value.displayName : '',
@@ -26,7 +28,7 @@ export function loadUserProfile(): LocalUserProfile {
 
 export function saveUserProfile(patch: Partial<LocalUserProfile>) {
   const next = { ...loadUserProfile(), ...patch };
-  uni.setStorageSync(KEY, next);
+  uni.setStorageSync(userStorageKey(KEY), next);
   return next;
 }
 

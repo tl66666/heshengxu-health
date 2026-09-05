@@ -1,11 +1,12 @@
 import type { CycleSettings, PeriodDayRecord } from './menstruation.types.js';
+import { userStorageKey } from '../auth/user-storage.js';
 
 const CYCLE_KEY = 'heban_menstruation_cycle';
 const DAYS_KEY = 'heban_menstruation_daily';
 
 function read<T>(key: string, fallback: T): T {
   try {
-    const raw = uni.getStorageSync(key) as T | string | null;
+    const raw = uni.getStorageSync(userStorageKey(key)) as T | string | null;
     if (!raw) return fallback;
     return (typeof raw === 'string' ? JSON.parse(raw) : raw) as T;
   } catch {
@@ -34,7 +35,7 @@ export function loadCycleSettings(): CycleSettings | null {
 }
 
 export function saveCycleSettings(settings: CycleSettings) {
-  uni.setStorageSync(CYCLE_KEY, JSON.stringify(settings));
+  uni.setStorageSync(userStorageKey(CYCLE_KEY), JSON.stringify(settings));
 }
 
 export function loadPeriodDay(date: string): PeriodDayRecord | null {
@@ -45,7 +46,7 @@ export function loadPeriodDay(date: string): PeriodDayRecord | null {
 export function savePeriodDay(record: PeriodDayRecord) {
   const records = read<Record<string, PeriodDayRecord>>(DAYS_KEY, {});
   records[record.date] = { ...record, symptoms: [...record.symptoms] };
-  uni.setStorageSync(DAYS_KEY, JSON.stringify(records));
+  uni.setStorageSync(userStorageKey(DAYS_KEY), JSON.stringify(records));
 }
 
 export function listPeriodDays(): PeriodDayRecord[] {
@@ -54,6 +55,6 @@ export function listPeriodDays(): PeriodDayRecord[] {
 }
 
 export function clearCycleSettings() {
-  uni.removeStorageSync(CYCLE_KEY);
-  uni.removeStorageSync(DAYS_KEY);
+  uni.removeStorageSync(userStorageKey(CYCLE_KEY));
+  uni.removeStorageSync(userStorageKey(DAYS_KEY));
 }

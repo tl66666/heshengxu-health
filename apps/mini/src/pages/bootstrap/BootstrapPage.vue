@@ -39,8 +39,16 @@ import { onShow } from '@dcloudio/uni-app';
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
+import { ensureAppSession, isAppRuntime, isSignedIn } from '../../features/auth/auth-store.js';
 
 onShow(async () => {
+  if (isAppRuntime()) {
+    const authenticated = isSignedIn() || (await ensureAppSession());
+    if (!authenticated) {
+      uni.reLaunch({ url: '/pages/auth/AppAuthPage' });
+      return;
+    }
+  }
   const client = createMiniApiClient();
 
   // 先检查本地档案

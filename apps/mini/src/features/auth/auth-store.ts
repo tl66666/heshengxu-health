@@ -12,13 +12,38 @@ export function accessToken() {
 }
 
 export function isSignedIn() {
-  return Boolean(accessToken());
+  return isAccessTokenUsable(accessToken());
+}
+
+export async function ensureAppSession() {
+  if (isSignedIn()) return true;
+  try {
+    const refreshed = await refreshLogin();
+    return Boolean(refreshed?.accessToken);
+  } catch {
+    uni.removeStorageSync(ACCESS_KEY);
+    uni.removeStorageSync(REFRESH_KEY);
+    uni.removeStorageSync(USER_KEY);
+    return false;
+  }
+}
+
+function isAccessTokenUsable(token: string | undefined) {
+  if (!token) return false;
+  const encodedPayload = token.split('.')[0];
+  if (!encodedPayload) return false;
+  try {
+    const normalized = encodedPayload.replace(/-/gu, '+').replace(/_/gu, '/');
+    const payload = JSON.parse(atob(normalized)) as { exp?: number; typ?: string };
+    return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp > Date.now();
+  } catch {
+    return false;
+  }
 }
 
 export function isWechatLoginConfigured() {
-  return Boolean(
-    (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MINI_API_BASE_URL,
-  );
+  const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  return Boolean(environment.VITE_MINI_API_BASE_URL || (environment.MODE === 'production' && !isAppRuntime()));
 }
 
 export function isAppRuntime() {

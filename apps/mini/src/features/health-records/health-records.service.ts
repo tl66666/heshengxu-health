@@ -1,5 +1,6 @@
 import type { TodayRecordsDto } from '../../../../../packages/contracts/src/health-loop.js';
 import type { HealthRecordRequest } from './health-records.mapper.js';
+import { userStorageKey } from '../auth/user-storage.js';
 
 const LOCAL_RECORDS_KEY = 'heban.health.records.v1';
 type LocalRecordFor<T extends HealthRecordRequest> = T extends HealthRecordRequest
@@ -12,7 +13,7 @@ type LocalRecord = LocalRecordFor<HealthRecordRequest>;
 
 function readLocalRecords(): LocalRecord[] {
   try {
-    const value = uni.getStorageSync(LOCAL_RECORDS_KEY);
+    const value = uni.getStorageSync(userStorageKey(LOCAL_RECORDS_KEY));
     return Array.isArray(value) ? (value as LocalRecord[]) : [];
   } catch {
     return [];
@@ -21,7 +22,7 @@ function readLocalRecords(): LocalRecord[] {
 
 function writeLocalRecords(records: LocalRecord[]) {
   try {
-    uni.setStorageSync(LOCAL_RECORDS_KEY, records);
+    uni.setStorageSync(userStorageKey(LOCAL_RECORDS_KEY), records);
   } catch {
     // Keep the in-memory request successful when storage is temporarily unavailable.
   }

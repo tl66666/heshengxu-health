@@ -10,7 +10,7 @@ const HEALTH_RECORDS_KEY = 'heban.health.records.v1';
 
 function readArray(key: string): Array<Record<string, unknown>> {
   try {
-    const value = uni.getStorageSync(key);
+    const value = uni.getStorageSync(userStorageKey(key));
     return Array.isArray(value) ? value : [];
   } catch {
     return [];
@@ -33,7 +33,7 @@ function normalize(record: Record<string, unknown>): LocalWeightRecord | null {
 
 function persist(records: LocalWeightRecord[]) {
   const sorted = records.slice().sort((a, b) => +new Date(b.recordedAt) - +new Date(a.recordedAt));
-  uni.setStorageSync(LEGACY_KEY, sorted);
+  uni.setStorageSync(userStorageKey(LEGACY_KEY), sorted);
 
   const healthRecords = readArray(HEALTH_RECORDS_KEY).filter((record) => record.type !== 'weight');
   const weights = sorted.map((record) => ({
@@ -43,7 +43,7 @@ function persist(records: LocalWeightRecord[]) {
     recordedAt: record.recordedAt,
     note: record.note,
   }));
-  uni.setStorageSync(HEALTH_RECORDS_KEY, [...healthRecords, ...weights]);
+  uni.setStorageSync(userStorageKey(HEALTH_RECORDS_KEY), [...healthRecords, ...weights]);
 }
 
 export function listLocalWeightRecords(): LocalWeightRecord[] {
@@ -79,3 +79,4 @@ export function deleteLocalWeightRecord(id: string) {
   const records = listLocalWeightRecords();
   persist(records.filter((record) => record.id !== id));
 }
+import { userStorageKey } from '../auth/user-storage.js';

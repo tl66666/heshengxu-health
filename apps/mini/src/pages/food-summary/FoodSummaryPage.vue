@@ -70,6 +70,7 @@ import { summarizeFoodEntries } from '../../features/food/food.summary.js';
 import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.js';
 import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 import type { MealType } from '../../features/food/food.types.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 const date = ref(localDate());
 const entries = ref<MealEntry[]>([]);
@@ -109,7 +110,7 @@ function localDate() {
 }
 async function load() {
   entries.value = await loadMealEntries(date.value);
-  const saved = Number(uni.getStorageSync('heban.food.daily-target-kcal'));
+  const saved = Number(uni.getStorageSync(userStorageKey('heban.food.daily-target-kcal')));
   if (saved > 0) target.value = saved;
 }
 function addMeal(mealType?: MealType) {

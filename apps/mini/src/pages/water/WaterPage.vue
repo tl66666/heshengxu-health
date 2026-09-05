@@ -222,6 +222,7 @@ import { ref, computed, onMounted } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack, navigateTo } from '../../utils/router.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 interface WaterRecord {
   id: string;
@@ -305,15 +306,15 @@ function calculateRecommendedWater(userInfo: UserInfo): number {
 
 function loadUserInfo() {
   try {
-    const rawUserInfo = uni.getStorageSync('water_user_info') as UserInfo | string | null;
+    const rawUserInfo = uni.getStorageSync(userStorageKey('water_user_info')) as UserInfo | string | null;
     const userInfo = typeof rawUserInfo === 'string' ? (JSON.parse(rawUserInfo) as UserInfo) : rawUserInfo;
     if (userInfo && userInfo.weight) {
       const recommended = calculateRecommendedWater(userInfo);
-      const customGoal = Number(uni.getStorageSync('water_daily_goal_custom'));
+      const customGoal = Number(uni.getStorageSync(userStorageKey('water_daily_goal_custom')));
       dailyGoal.value = Number.isFinite(customGoal) && customGoal > 0 ? customGoal : recommended;
       isPersonalized.value = true;
     } else {
-      const savedGoal = uni.getStorageSync('water_daily_goal');
+      const savedGoal = uni.getStorageSync(userStorageKey('water_daily_goal'));
       dailyGoal.value = savedGoal || 2000;
       isPersonalized.value = false;
     }
@@ -438,7 +439,7 @@ function formatTime(timestamp: number): string {
 
 function getStorageKey(): string {
   const d = currentDate.value;
-  return `water_${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`;
+  return userStorageKey(`water_${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`);
 }
 
 function saveRecords() {

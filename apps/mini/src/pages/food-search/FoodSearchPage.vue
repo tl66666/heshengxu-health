@@ -201,6 +201,7 @@ import type { MealEntry } from '../../features/food/food.summary.js';
 import { calculateFoodNutrition } from '../../features/food/food.types.js';
 import { listUserFoods } from '../../features/food/user-foods.service.js';
 import { mergeFoodResults } from '../../features/food/food.service.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 const query = ref('');
 const foods = ref<FoodItem[]>([]);
@@ -381,7 +382,7 @@ function selectCategory(categoryId: string | null) {
 
 // 选择食物
 function choose(food: FoodItem) {
-  uni.setStorageSync('pendingFoodSelection', food);
+  uni.setStorageSync(userStorageKey('pendingFoodSelection'), food);
   navigateToFoodConfirm(food.id, mealType.value);
   uni.$emit('food-selected', food);
 }
@@ -462,7 +463,7 @@ async function loadTodayEntries() {
   } catch {
     todayEntries.value = [];
   }
-  const target = Number(uni.getStorageSync('heban.food.daily-target-kcal'));
+  const target = Number(uni.getStorageSync(userStorageKey('heban.food.daily-target-kcal')));
   if (target > 0) dailyTarget.value = target;
 }
 

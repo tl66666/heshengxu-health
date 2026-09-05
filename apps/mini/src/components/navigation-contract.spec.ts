@@ -67,5 +67,6 @@ describe('navigation contracts', () => {
     const appSource = await import('../App.vue?raw');
     expect(appSource.default).toMatch(/hideTabBar\(\{ animation: false \}\)/u);
     expect(appSource.default).toMatch(/isAppRuntime\(\)/u);
+    expect(appSource.default).toMatch(/ensureAppSession\(\)/u);
   });
 });

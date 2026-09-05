@@ -176,6 +176,7 @@ import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 import { createMealEntry, loadMealEntries, searchFoods } from '../../features/food/food.service.js';
 import { calorieBudget, sumCalories } from '../../features/food/calorie-budget.js';
 import type { MealEntry } from '../../features/food/food.summary.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 interface Food {
   id: string;
@@ -493,7 +494,7 @@ async function loadTodayEntries() {
   } catch {
     todayEntries.value = [];
   }
-  const storedTarget = Number(uni.getStorageSync('heban.food.daily-target-kcal'));
+  const storedTarget = Number(uni.getStorageSync(userStorageKey('heban.food.daily-target-kcal')));
   if (storedTarget > 0) dailyTarget.value = storedTarget;
 }
 </script>

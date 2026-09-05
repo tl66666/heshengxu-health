@@ -249,6 +249,7 @@ import {
   formatNutrient,
 } from '../../utils/nutrition.js';
 import { navigateBack, navigateToFoodConfirm } from '../../utils/router.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 const food = ref<FoodItem | null>(null);
 const loading = ref(false);
@@ -290,7 +291,7 @@ async function loadFood() {
   try {
     food.value = await getFoodById(foodId.value);
     if (!food.value) {
-      const pending = uni.getStorageSync('pendingFoodSelection') as FoodItem | undefined;
+      const pending = uni.getStorageSync(userStorageKey('pendingFoodSelection')) as FoodItem | undefined;
       if (pending?.id === foodId.value) food.value = pending;
     }
     if (!food.value) error.value = true;

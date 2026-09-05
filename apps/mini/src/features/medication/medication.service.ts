@@ -1,11 +1,12 @@
 import type { MedicationCheckin, MedicationReminder } from './medication.types.js';
+import { userStorageKey } from '../auth/user-storage.js';
 
 const REMINDERS_KEY = 'heban_medication_reminders';
 const CHECKINS_KEY = 'heban_medication_checkins';
 
 function read<T>(key: string, fallback: T): T {
   try {
-    const raw = uni.getStorageSync(key) as T | string | null;
+    const raw = uni.getStorageSync(userStorageKey(key)) as T | string | null;
     if (!raw) return fallback;
     return (typeof raw === 'string' ? JSON.parse(raw) : raw) as T;
   } catch {
@@ -21,12 +22,12 @@ export function loadMedicationReminders() {
 export function saveMedicationReminder(reminder: MedicationReminder) {
   const records = read<MedicationReminder[]>(REMINDERS_KEY, []).filter((item) => item.id !== reminder.id);
   records.push(reminder);
-  uni.setStorageSync(REMINDERS_KEY, JSON.stringify(records));
+  uni.setStorageSync(userStorageKey(REMINDERS_KEY), JSON.stringify(records));
 }
 
 export function deleteMedicationReminder(id: string) {
   const records = read<MedicationReminder[]>(REMINDERS_KEY, []).filter((item) => item.id !== id);
-  uni.setStorageSync(REMINDERS_KEY, JSON.stringify(records));
+  uni.setStorageSync(userStorageKey(REMINDERS_KEY), JSON.stringify(records));
 }
 
 export function loadCheckinsForDate(date: string) {
@@ -39,5 +40,5 @@ export function setMedicationCheckin(reminderId: string, date: string, checked: 
     (item) => !(item.reminderId === reminderId && item.date === date),
   );
   if (checked) records.push({ reminderId, date, checkedAt: new Date().toISOString() });
-  uni.setStorageSync(CHECKINS_KEY, JSON.stringify(records));
+  uni.setStorageSync(userStorageKey(CHECKINS_KEY), JSON.stringify(records));
 }

@@ -379,6 +379,7 @@ import { navigateTo, navigateToXuxu } from '../../utils/router.js';
 import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remainingSeconds, type FastingPlan } from '../../features/fasting/fasting-store.js';
 import { loadWellnessJournal, saveMood, saveSleep, type MoodTone, type WellnessJournal } from '../../features/wellness/wellness-journal.js';
 import { loadUserProfile } from '../../features/user-profile/user-profile.js';
+import { userStorageKey } from '../../features/auth/user-storage.js';
 
 // 序序小贴士：右上角气泡随机轮换的健康常识
 const healthTips = [
@@ -645,7 +646,7 @@ const todayWaterTotal = computed(() => {
   try {
     const now = new Date();
     const value = uni.getStorageSync(
-      `water_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`,
+      userStorageKey(`water_${now.getFullYear()}_${now.getMonth() + 1}_${now.getDate()}`),
     );
     return Array.isArray(value)
       ? value.reduce((total, item) => total + Number(item.amount || 0), 0)
@@ -828,14 +829,14 @@ const loadWeightTrend = () => {
 
 const loadPersonalSignals = () => {
   try {
-    const cycleRaw = uni.getStorageSync('heban_menstruation_cycle');
+    const cycleRaw = uni.getStorageSync(userStorageKey('heban_menstruation_cycle'));
     menstruationCycle.value = cycleRaw
       ? typeof cycleRaw === 'string'
         ? JSON.parse(cycleRaw)
         : cycleRaw
       : null;
-    const remindersRaw = uni.getStorageSync('heban_medication_reminders');
-    const checkinsRaw = uni.getStorageSync('heban_medication_checkins');
+    const remindersRaw = uni.getStorageSync(userStorageKey('heban_medication_reminders'));
+    const checkinsRaw = uni.getStorageSync(userStorageKey('heban_medication_checkins'));
     const medications = remindersRaw
       ? typeof remindersRaw === 'string'
         ? JSON.parse(remindersRaw)

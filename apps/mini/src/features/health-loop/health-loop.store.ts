@@ -13,6 +13,7 @@ import {
   type RecordRequest,
 } from './health-loop.service.js';
 import { completeLocalTask, createLocalDailyHome, saveLocalPlan } from './local-demo.js';
+import { userStorageKey } from '../auth/user-storage.js';
 
 const today = ref<DailyHomeDto | null>(null);
 const plan = ref<PersonalPlanDto | null>(null);
@@ -32,7 +33,7 @@ export const healthLoopState = {
     if (!options.force && Date.now() < offlineUntil) {
       const fallback =
         createLocalDailyHome(date) ||
-        (uni.getStorageSync(`${HOME_CACHE_PREFIX}${date}`) as DailyHomeDto | null);
+        (uni.getStorageSync(userStorageKey(`${HOME_CACHE_PREFIX}${date}`)) as DailyHomeDto | null);
       if (fallback) {
         today.value = fallback;
         plan.value = fallback.activePlan;
@@ -50,7 +51,7 @@ export const healthLoopState = {
     }
   },
   async loadTodayInternal(date: string) {
-    const cachedToday = uni.getStorageSync(`${HOME_CACHE_PREFIX}${date}`) as DailyHomeDto | null;
+    const cachedToday = uni.getStorageSync(userStorageKey(`${HOME_CACHE_PREFIX}${date}`)) as DailyHomeDto | null;
     // A completed local profile is the source of truth. Cached/API home data may predate an edit.
     const localToday = createLocalDailyHome(date) || cachedToday;
     if (!today.value && localToday) {
@@ -69,7 +70,7 @@ export const healthLoopState = {
     try {
       today.value = await loadToday(date);
       plan.value = today.value.activePlan;
-      uni.setStorageSync(`${HOME_CACHE_PREFIX}${date}`, today.value);
+      uni.setStorageSync(userStorageKey(`${HOME_CACHE_PREFIX}${date}`), today.value);
     } catch (reason) {
       offlineUntil = Date.now() + 30_000;
       error.value = reason instanceof Error ? reason.message : '暂时无法加载今日状态';
