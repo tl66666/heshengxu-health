@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - Dockerfile.api
+      - .dockerignore
       - apps/api/**
       - packages/contracts/**
       - packages/domain/**
