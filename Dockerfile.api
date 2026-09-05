@@ -38,10 +38,11 @@ COPY --from=build /workspace/apps/api/prisma apps/api/prisma
 COPY food.sql ./food.sql
 COPY scripts/import-common-foods.ts ./scripts/import-common-foods.ts
 COPY apps/api/prisma/ensure-food-catalog.mjs apps/api/prisma/ensure-food-catalog.mjs
+COPY apps/api/start-container.mjs apps/api/start-container.mjs
 COPY --from=build /workspace/packages/domain/package.json packages/domain/package.json
 COPY --from=build /workspace/packages/domain/dist packages/domain/dist
 RUN mkdir -p node_modules/@heban && ln -s /app/packages/domain node_modules/@heban/domain
 RUN npx prisma generate --schema apps/api/prisma/schema.prisma
 
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && node apps/api/prisma/ensure-food-catalog.mjs && node apps/api/dist/main.js"]
+CMD ["node", "apps/api/start-container.mjs"]
