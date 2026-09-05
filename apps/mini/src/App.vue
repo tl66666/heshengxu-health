@@ -1,10 +1,10 @@
 <script lang="ts">
 import {
   ensureAppSession,
+  ensureWechatSession,
   isAppRuntime,
   isSignedIn,
   isWechatLoginConfigured,
-  loginWithWechat,
 } from './features/auth/auth-store.js';
 
 export default {
@@ -17,7 +17,7 @@ export default {
       return;
     }
     if (isWechatLoginConfigured() && !uni.getStorageSync('heban.auth.access-token')) {
-      loginWithWechat().catch(() => undefined);
+      await ensureWechatSession();
     }
   },
   onShow() {

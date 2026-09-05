@@ -28,6 +28,18 @@ export async function ensureAppSession() {
   }
 }
 
+/** Initialize the runtime's native session without showing the App password form. */
+export async function ensureWechatSession() {
+  if (isSignedIn()) return true;
+  if (isAppRuntime() || !isWechatLoginConfigured()) return false;
+  try {
+    await loginWithWechat();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function isAccessTokenUsable(token: string | undefined) {
   if (!token) return false;
   const encodedPayload = token.split('.')[0];

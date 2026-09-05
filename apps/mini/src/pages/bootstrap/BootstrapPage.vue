@@ -39,7 +39,8 @@ import { onShow } from '@dcloudio/uni-app';
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
-import { ensureAppSession, isAppRuntime, isSignedIn } from '../../features/auth/auth-store.js';
+import { ensureAppSession, ensureWechatSession, isAppRuntime, isSignedIn } from '../../features/auth/auth-store.js';
+import { isWechatLoginConfigured } from '../../features/auth/auth-store.js';
 
 onShow(async () => {
   if (isAppRuntime()) {
@@ -48,6 +49,8 @@ onShow(async () => {
       uni.reLaunch({ url: '/pages/auth/AppAuthPage' });
       return;
     }
+  } else if (isWechatLoginConfigured()) {
+    await ensureWechatSession();
   }
   const client = createMiniApiClient();
 

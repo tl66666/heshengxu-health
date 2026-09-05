@@ -68,7 +68,7 @@ import { computed, nextTick, ref } from 'vue';
 import { healthLoopState } from '../features/health-loop/health-loop.store.js';
 import { classifyXuxuError, createOfflineReply, createUserMessage, quickQuestions, type ChatMessage } from './xuxu-chat.js';
 import { chatWithXuxu } from '../features/xuxu/xuxu.service.js';
-import { isSignedIn } from '../features/auth/auth-store.js';
+import { ensureWechatSession, isSignedIn } from '../features/auth/auth-store.js';
 
 const messages = ref<ChatMessage[]>([]);
 const draft = ref('');
@@ -86,6 +86,7 @@ async function send(value: string) {
   if (!text || typing.value) return;
   messages.value.push(createUserMessage(text));
   draft.value = '';
+  if (!isSignedIn()) await ensureWechatSession();
   if (!isSignedIn()) {
     messages.value.push({
       id: `assistant-error-${Date.now()}`,
