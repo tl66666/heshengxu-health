@@ -459,7 +459,12 @@ export function searchFoods(options: SearchFoodsOptions = {}) {
   const queryString = buildFoodSearchQuery(options);
   return createMiniApiClient()
     .get<SearchFoodsResult>(`/foods/search${queryString}`)
-    .then((result) => ({ ...result, source: 'remote' as const }))
+    .then((result) => {
+      // A healthy API with an empty catalog is still unusable for recording.
+      // Fall back to the bundled catalog until the server catalog is seeded.
+      if (!result.items.length && result.total === 0) return localSearch(options);
+      return { ...result, source: 'remote' as const };
+    })
     .catch(() => localSearch(options));
 }
 
@@ -497,7 +502,10 @@ export function getCategories() {
 export function getCategoryStats() {
   return createMiniApiClient()
     .get<FoodCategory[]>('/foods/categories/stats')
-    .then((categories) => categories.map((category) => ({ ...category, source: 'remote' as const })))
+    .then((categories) => {
+      if (!categories.length || categories.every((category) => !category.count)) throw new Error('FOOD_CATALOG_EMPTY');
+      return categories.map((category) => ({ ...category, source: 'remote' as const }));
+    })
     .catch(() => {
       const categories = new Map<string, FoodCategory>();
       for (const food of LOCAL_FOOD_CATALOG) {

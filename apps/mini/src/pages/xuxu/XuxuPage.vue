@@ -30,17 +30,15 @@ function localDate() {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 0;
+  padding: 0 0 calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom));
   background: transparent;
   color: var(--hz-ink);
 }
 .chat-area {
   display: flex;
-  flex: none;
+  flex: 1 1 auto;
   width: 100%;
-  height: calc(
-    100vh - var(--hz-tabbar-height) - var(--hz-tabbar-offset) * 2 - env(safe-area-inset-bottom)
-  );
+  height: auto;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
@@ -53,5 +51,6 @@ function localDate() {
   min-height: 0;
   min-width: 0;
   box-sizing: border-box;
+  height: 100%;
 }
 </style>
