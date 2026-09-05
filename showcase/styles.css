@@ -1326,7 +1326,11 @@ main {
 }
 
 .hero-art img {
-  animation: hero-breathe 8s ease-in-out infinite;
+  transform-origin: 68% 76%;
+}
+
+.hero-art {
+  animation: hero-breathe 10s ease-in-out infinite;
   transform-origin: 68% 76%;
 }
 
@@ -1345,10 +1349,10 @@ main {
 @keyframes hero-breathe {
   0%,
   100% {
-    transform: scale(1);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: scale(1.018);
+    transform: translate3d(0, -3px, 0);
   }
 }
 
@@ -1889,6 +1893,110 @@ main {
 .footer-links a:focus-visible {
   border-bottom-color: rgba(74, 112, 86, 0.32);
   color: var(--forest);
+}
+
+.scroll-progress {
+  background: transparent;
+  height: 2px;
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  top: 78px;
+  z-index: 30;
+}
+
+.scroll-progress span {
+  background: linear-gradient(90deg, var(--apricot), var(--leaf), var(--blue-deep));
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 120ms linear;
+  width: 100%;
+}
+
+.site-header.is-scrolled {
+  background: rgba(255, 253, 248, 0.95);
+  box-shadow: 0 8px 28px rgba(75, 95, 74, 0.08);
+}
+
+.hero-art {
+  --pointer-x: 0;
+  --pointer-y: 0;
+}
+
+.hero-art img {
+  transform: translate3d(calc(var(--pointer-x) * -7px), calc(var(--pointer-y) * -5px), 0)
+    scale(1.018);
+  transition: transform 900ms var(--ease);
+}
+
+.fact-item.reveal {
+  transform: translateY(16px);
+}
+
+.fact-item.reveal.is-visible {
+  transform: translateY(0);
+}
+
+.story-art,
+.insight-art {
+  transition:
+    box-shadow 500ms var(--ease),
+    transform 500ms var(--ease);
+}
+
+.story-art:hover,
+.insight-art:hover {
+  box-shadow: 0 28px 58px rgba(80, 95, 74, 0.16);
+  transform: translateY(-4px);
+}
+
+.detail-panel[hidden] {
+  display: block;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-block: 0;
+  pointer-events: none;
+}
+
+.detail-panel {
+  max-height: 420px;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    max-height 500ms var(--ease),
+    opacity 300ms ease,
+    padding 500ms var(--ease);
+}
+
+@media (max-width: 900px) {
+  .scroll-progress {
+    top: 70px;
+  }
+}
+
+@media (max-width: 560px) {
+  .scroll-progress {
+    top: 68px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress span,
+  .hero-art img,
+  .story-art,
+  .insight-art,
+  .detail-panel {
+    transition: none;
+  }
+
+  .story-art:hover,
+  .insight-art:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 900px) {

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div class="scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
     <div class="site-shell">
       <header class="site-header" data-header>
         <a class="brand" href="#top" aria-label="和生序首页">
@@ -69,7 +70,7 @@
               <span>不虚构结果，只记录真实发生过的每一天</span>
             </div>
           </div>
-          <div class="hero-art reveal reveal-late">
+          <div class="hero-art reveal reveal-late" data-parallax-art>
             <div class="art-wash"></div>
             <img
               src="./assets/illustrations/hero.jpg"
@@ -84,10 +85,16 @@
         </section>
 
         <section class="fact-rail" aria-label="项目事实">
-          <div class="fact-item"><strong>10</strong><span>个健康记录场景</span></div>
-          <div class="fact-item"><strong>1</strong><span>套统一的每日健康循环</span></div>
-          <div class="fact-item"><strong>AI</strong><span>聊天与食物识别双入口</span></div>
-          <div class="fact-item"><strong>双端</strong><span>微信小程序与 App 共用客户端</span></div>
+          <div class="fact-item reveal"><strong>10</strong><span>个健康记录场景</span></div>
+          <div class="fact-item reveal reveal-late">
+            <strong>1</strong><span>套统一的每日健康循环</span>
+          </div>
+          <div class="fact-item reveal reveal-late">
+            <strong>AI</strong><span>聊天与食物识别双入口</span>
+          </div>
+          <div class="fact-item reveal reveal-late">
+            <strong>双端</strong><span>微信小程序与 App 共用客户端</span>
+          </div>
         </section>
 
         <section class="loop-section section-shell" aria-labelledby="loop-title">
@@ -382,11 +389,11 @@
             </div>
             <div class="status-row">
               <span class="status-state is-ready">已验证</span>
-              <p>类型检查、单元测试、正式构建和 App 云打包体积控制。</p>
+              <p>类型检查、单元测试、正式构建和 Android App 云端打包均已完成验证。</p>
             </div>
             <div class="status-row">
               <span class="status-state is-next">发布前</span>
-              <p>微信审核、App 签名与隐私材料、真实设备验收和应用商店审核。</p>
+              <p>微信审核、App 签名与隐私材料、真实设备验收和应用商店审核仍需在平台侧完成。</p>
             </div>
           </div>
         </section>

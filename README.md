@@ -4,6 +4,8 @@
 
 **[在线查看项目展示站](https://tl66666.github.io/heshengxu-health/)** · **[浏览源代码](https://github.com/tl66666/heshengxu-health)** · **[查看发布清单](docs/RELEASE-CHECKLIST.md)**
 
+> 这是一个从产品设计、客户端实现、AI 接入到云端交付都由个人完成的真实项目。展示站用于快速了解产品和工程取舍，仓库文档用于复现开发、部署和发布流程。
+
 和生序是一个由个人独立完成的健康管理项目，面向希望用轻量记录建立生活节律的人。产品把体重、饮食、饮水、运动、睡眠、心情、生理期、用药和轻断食放在同一个每日健康循环里，并用序序提供温和、可解释的陪伴。
 
 产品视觉采用明亮、清透的日系治愈奶油水彩风格。界面强调留白、清晰层级和真实记录，不用虚构的健康结果替代用户数据，也不把 AI 建议包装成诊断。
@@ -22,6 +24,18 @@
 | 质量保障 | 类型检查、单元测试、构建检查、隐私与安全边界文档                       |
 
 展示站源码位于 [`showcase/`](showcase/README.md)，由 GitHub Pages 自动发布。页面只展示项目事实和原始水彩资源，不读取生产数据库或任何密钥。
+
+## 从设计到上线
+
+项目按“先建立可用记录，再接入智能能力，最后完成云端交付”的顺序推进：
+
+1. **产品与视觉**：围绕每日健康循环设计建档、记录、目标和回看路径，统一使用明亮清透的日系治愈奶油水彩视觉语言。
+2. **客户端**：用 uni-app / Vue 3 / TypeScript 复用微信小程序与 Android/iOS App 的页面、状态和接口调用。
+3. **服务端**：NestJS API 统一处理账号、健康记录、AI 代理和数据校验，Prisma 负责 PostgreSQL 数据模型与迁移。
+4. **云端交付**：Docker 构建 API 镜像，GitHub Actions 推送到 GHCR，Azure Container Apps 运行 API，CloudBase 托管静态插画资源。
+5. **发布验收**：通过健康检查、类型检查、测试、生产构建和真机验收后，再分别提交微信小程序审核或 App 签名发布。
+
+展示站的 GitHub Pages 部署由 [`.github/workflows/deploy-showcase.yml`](.github/workflows/deploy-showcase.yml) 自动完成；README 或展示站的更新不会改变已经生成的 App 安装包。
 
 ## 产品能力
 
@@ -147,6 +161,8 @@ API 使用根目录的 Dockerfile.api 构建，容器启动时自动执行 Prism
 ## App 双端发布
 
 apps/mini 是 uni-app 工程，可在 HBuilderX 中复用同一套页面和 API 打包 Android/iOS。App 发布还需要独立准备 Android 包名与签名证书、iOS Bundle ID 与 Apple 开发者证书、隐私政策、权限说明和真机验收。
+
+最近一次 Android 云端打包已经成功，安装包由 HBuilderX 云端生成。只有在客户端源码、`manifest.json`、图标、权限或 App 配置发生变化时才需要重新打包；修改 README、展示站或服务端文档不需要重复打包。重新打包前先执行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中导入 `D:\heshengxu-health\apps\mini` 进行云端打包。
 
 操作指南见 docs/APP-RELEASE-HBUILDERX.md。
 
