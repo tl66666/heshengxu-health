@@ -312,6 +312,7 @@ import {
   createLocalWeightRecord,
   listLocalWeightRecords,
 } from '../../features/weight/weight-records.local.js';
+import { saveHealthProfile } from '../../features/health-profile/health-profile.service.js';
 
 const { form, bmi, bmiCategory } = onboardingState;
 const step = ref(0);
@@ -451,6 +452,18 @@ async function nextStep() {
       primaryGoal,
       goals: form.goals as string[],
     });
+    try {
+      await saveHealthProfile({
+        displayName: form.displayName || '新朋友',
+        sex: form.sex,
+        birthDate: form.birthDate,
+        heightCm: Number(form.heightCm),
+        weightKg: Number(form.weightKg),
+        primaryGoal,
+      });
+    } catch {
+      // Keep the account-scoped local profile available while the API is offline.
+    }
     if (!listLocalWeightRecords().length) {
       createLocalWeightRecord({
         weight: Number(form.weightKg),
