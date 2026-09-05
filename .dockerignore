@@ -15,5 +15,6 @@ cloud-data
 .env
 .env.*
 *.log
-food.sql
+# The API startup importer needs the public catalog source in the image.
+!food.sql
 food_category.sql
