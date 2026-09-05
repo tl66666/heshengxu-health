@@ -1854,16 +1854,6 @@ main {
   position: relative;
 }
 
-.footer-leaf {
-  bottom: 0;
-  max-height: 150px;
-  opacity: 0.5;
-  pointer-events: none;
-  position: absolute;
-  right: clamp(20px, 8vw, 120px);
-  width: min(280px, 30vw);
-}
-
 .site-footer::before {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.68), transparent);
   content: '';
@@ -2032,10 +2022,6 @@ main {
     width: min(300px, 58vw);
   }
 
-  .footer-leaf {
-    max-height: 110px;
-    width: min(220px, 44vw);
-  }
 }
 
 @media (max-width: 560px) {

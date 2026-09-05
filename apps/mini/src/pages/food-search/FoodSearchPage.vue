@@ -76,7 +76,7 @@
       >
         <view v-if="catalogSource === 'offline'" class="offline-notice">
           <text class="offline-title">当前为离线常见食物</text>
-          <text>本地服务未连接，运行 start-dev.bat 后会恢复完整食物库。</text>
+          <text>暂时显示常见食物，网络恢复后会自动补充完整目录。</text>
         </view>
 
         <view class="result-heading">

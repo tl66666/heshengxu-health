@@ -24,4 +24,10 @@ describe('resolveMiniRuntime', () => {
       authorization: undefined,
     });
   });
+
+  it('does not expose the local development endpoint to an App build', () => {
+    const runtime = resolveMiniRuntime({ UNI_PLATFORM: 'app' });
+    expect(runtime.apiBaseUrl).toMatch(/^https:\/\//u);
+    expect(runtime.apiBaseUrl).not.toContain('127.0.0.1');
+  });
 });

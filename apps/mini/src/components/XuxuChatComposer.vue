@@ -103,7 +103,7 @@ async function send(value: string) {
   }
 }
 
-const connectionStatusLabel = computed(() => connectionState.value === 'thinking' ? '正在回复' : connectionState.value === 'retry' ? '离线陪伴' : '随时可聊');
+const connectionStatusLabel = computed(() => connectionState.value === 'thinking' ? '正在回复' : connectionState.value === 'retry' ? '连接稍有波动' : '随时可聊');
 function voiceNotice() { uni.showToast({ title: '语音输入正在准备中，先试试打字吧', icon: 'none' }); }
 function retryLast() { const last = [...messages.value].reverse().find((message) => message.role === 'user'); if (last) send(last.text); }
 </script>

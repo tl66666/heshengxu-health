@@ -34,10 +34,11 @@ export async function loginWithWechat() {
   const login = await new Promise<{ code: string }>((resolve, reject) => {
     uni.login({ provider: 'weixin', success: resolve, fail: reject });
   });
-  const result = await createMiniApiClient({
-    apiBaseUrl: (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MINI_API_BASE_URL || 'http://127.0.0.1:3000/api/v1',
-    authorization: undefined,
-  }).post<{ accessToken: string; refreshToken: string; userId: string }>('/auth/wechat/login', { code: login.code });
+  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+  }>('/auth/wechat/login', { code: login.code });
   uni.setStorageSync(ACCESS_KEY, result.accessToken);
   uni.setStorageSync(REFRESH_KEY, result.refreshToken);
   uni.setStorageSync(USER_KEY, result.userId);

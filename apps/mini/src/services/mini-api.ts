@@ -12,9 +12,7 @@ type MiniRequestAdapter = <T>(request: {
 }) => Promise<{ statusCode: number; data: ApiSuccess<T> | ApiFailure }>;
 
 export function createMiniApiClient(
-  runtime: MiniRuntime = resolveMiniRuntime(
-    (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {},
-  ),
+  runtime: MiniRuntime = resolveMiniRuntime(runtimeEnvironment()),
   request: MiniRequestAdapter = requestWithUni,
 ) {
   const header: Record<string, string> = {};
@@ -23,6 +21,18 @@ export function createMiniApiClient(
     baseUrl: runtime.apiBaseUrl,
     request: ({ url, method, data }) => request({ url, method, data, header }),
   });
+}
+
+function runtimeEnvironment() {
+  const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  let platform = environment.UNI_PLATFORM;
+  try {
+    const detected = uni.getSystemInfoSync().uniPlatform;
+    if (detected === 'app' || detected === 'app-plus') platform = detected;
+  } catch {
+    // `uni` is unavailable in unit tests and during server-side tooling.
+  }
+  return { ...environment, UNI_PLATFORM: platform };
 }
 
 function requestWithUni<T>({

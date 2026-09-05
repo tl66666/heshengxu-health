@@ -9,16 +9,22 @@ const limit = 4 * 1024 * 1024;
 const bitmapPattern = /\.(?:png|jpe?g|webp|gif)$/iu;
 const files = collect(root);
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
-const sourceBitmaps = files.filter((file) => bitmapPattern.test(file));
+const sourceBitmaps = files.filter(
+  (file) => bitmapPattern.test(file) && !file.startsWith(resolve(root, 'src/static/app-icons')),
+);
 
 if (bytes >= limit) {
   throw new Error(`HBuilderX source payload is ${(bytes / 1024 / 1024).toFixed(2)} MB; keep it below 4 MB.`);
 }
 if (sourceBitmaps.length > 0) {
-  throw new Error(`HBuilderX source tree still contains ${sourceBitmaps.length} bitmap files. Run npm --prefix apps/mini run clean:source-assets.`);
+  throw new Error(
+    `HBuilderX source tree still contains ${sourceBitmaps.length} unmanaged bitmap files. Run npm --prefix apps/mini run clean:source-assets.`,
+  );
 }
 
-console.log(`HBuilderX source check passed: ${(bytes / 1024 / 1024).toFixed(2)} MB, no bitmap cache files.`);
+console.log(
+  `HBuilderX source check passed: ${(bytes / 1024 / 1024).toFixed(2)} MB, only approved App icon bitmaps retained.`,
+);
 
 function collect(directory) {
   const files = [];

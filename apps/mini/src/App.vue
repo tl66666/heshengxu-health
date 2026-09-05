@@ -4,6 +4,7 @@ import { isAppRuntime, isWechatLoginConfigured, loginWithWechat } from './featur
 export default {
   onLaunch() {
     if (isAppRuntime()) {
+      hideNativeTabBar();
       if (!uni.getStorageSync('heban.auth.access-token')) {
         setTimeout(() => uni.redirectTo({ url: '/pages/auth/AppAuthPage' }), 0);
       }
@@ -13,7 +14,18 @@ export default {
       loginWithWechat().catch(() => undefined);
     }
   },
+  onShow() {
+    if (isAppRuntime()) hideNativeTabBar();
+  },
 };
+
+function hideNativeTabBar() {
+  try {
+    uni.hideTabBar({ animation: false });
+  } catch {
+    setTimeout(() => uni.hideTabBar({ animation: false }), 80);
+  }
+}
 </script>
 
 <style>
