@@ -57,9 +57,10 @@ function isAccessTokenUsable(token: string | undefined) {
 
 export function isWechatLoginConfigured() {
   const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  const platform = runtimePlatform(environment);
   return Boolean(
     !isAppRuntime() &&
-      (environment.UNI_PLATFORM === 'mp-weixin' ||
+      (platform === 'mp-weixin' ||
         environment.VITE_MINI_API_BASE_URL ||
         environment.MODE === 'production'),
   );
@@ -119,7 +120,17 @@ export async function signOut() {
 
 function apiBase() {
   const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
-  return resolveMiniRuntime({ ...environment, UNI_PLATFORM: isAppRuntime() ? 'app-plus' : environment.UNI_PLATFORM }).apiBaseUrl;
+  return resolveMiniRuntime({ ...environment, UNI_PLATFORM: runtimePlatform(environment) }).apiBaseUrl;
+}
+
+function runtimePlatform(environment: Record<string, string | undefined>) {
+  try {
+    const platform = uni.getSystemInfoSync().uniPlatform;
+    if (platform) return platform;
+  } catch {
+    // `uni` is unavailable in unit tests and build tooling.
+  }
+  return environment.UNI_PLATFORM;
 }
 
 function normalizeEmail(value: string) { return value.trim().toLowerCase(); }

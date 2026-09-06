@@ -28,7 +28,7 @@ function runtimeEnvironment() {
   let platform = environment.UNI_PLATFORM;
   try {
     const detected = uni.getSystemInfoSync().uniPlatform;
-    if (detected === 'app' || detected === 'app-plus') platform = detected;
+    if (detected === 'app' || detected === 'app-plus' || detected === 'mp-weixin') platform = detected;
   } catch {
     // `uni` is unavailable in unit tests and during server-side tooling.
   }
