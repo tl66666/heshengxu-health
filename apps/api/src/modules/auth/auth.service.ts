@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,6 +16,8 @@ const PASSWORD_KEY_LENGTH = 64;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: TokenService,
@@ -47,8 +50,23 @@ export class AuthService {
         ...(await this.tokens.issue(user.id, deviceLabel)),
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('WECHAT_APP_SECRET'))
+      if (error instanceof Error && error.message.includes('WECHAT_APP_SECRET')) {
         throw new ServiceUnavailableException('服务端尚未配置微信登录密钥');
+      }
+
+      const exchangeCode = getWechatExchangeCode(error);
+      if (exchangeCode) {
+        this.logger.warn(`WeChat login exchange failed (errcode=${exchangeCode})`);
+        if (exchangeCode === '40013' || exchangeCode === '40125') {
+          throw new ServiceUnavailableException('微信登录配置已失效，请稍后重试');
+        }
+        if (exchangeCode === '40029' || exchangeCode === '40163') {
+          throw new UnauthorizedException('微信登录凭证已失效，请重新授权');
+        }
+        if (exchangeCode === '45011') {
+          throw new ServiceUnavailableException('微信登录请求过于频繁，请稍后重试');
+        }
+      }
       throw error;
     }
   }
@@ -86,6 +104,11 @@ export class AuthService {
       ...(await this.tokens.issue(credential.userId, deviceLabel)),
     };
   }
+}
+
+function getWechatExchangeCode(error: unknown) {
+  if (!(error instanceof Error)) return null;
+  return /^WECHAT_EXCHANGE_(\d+)$/.exec(error.message)?.[1] ?? null;
 }
 
 function normalizeEmail(value: string) {
