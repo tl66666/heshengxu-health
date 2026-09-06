@@ -174,7 +174,10 @@ async function recognize() {
     if (uploadPath && uploadPath !== imagePath.value) imagePath.value = uploadPath;
     const contentType = imageContentType(uploadPath || imagePath.value);
     const imageBase64 = await readImageBase64(uploadPath || imagePath.value);
-    if (imageBase64.length > 5_500_000) {
+    // Keep the JSON request comfortably below mobile gateway limits. A Base64
+    // payload is larger than the original image, so leave room for headers and
+    // the model prompt as well.
+    if (imageBase64.length > 3_600_000) {
       throw new Error('IMAGE_TOO_LARGE');
     }
     const job = await analyzeFoodImage({ contentType, imageBase64 });
@@ -193,6 +196,7 @@ async function recognize() {
 function recognitionErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : String(error || '');
   if (message.includes('IMAGE_TOO_LARGE')) return '照片尺寸较大，请换一张或重新拍摄后再试';
+  if (/413|payload|request entity/iu.test(message)) return '照片文件太大，请重新拍摄后再试';
   if (/unauthorized|forbidden|登录|401|403/iu.test(message)) return '登录状态已过期，请重新登录后再识别';
   if (/VISION_NOT_CONFIGURED|未配置|服务未开通/iu.test(message)) return '食物识别服务尚未配置，请稍后再试或先用食物库记录';
   if (/NETWORK|TIMEOUT|网络|超时/iu.test(message)) return '暂时没连上服务，请检查网络后重试';
@@ -211,8 +215,8 @@ function compressForRecognition(path: string): Promise<string> {
     }
     compressor({
       src: path,
-      quality: 78,
-      compressedWidth: 1600,
+      quality: 68,
+      compressedWidth: 1280,
       success: (result) => resolve(result.tempFilePath || path),
       fail: () => resolve(path),
     });
