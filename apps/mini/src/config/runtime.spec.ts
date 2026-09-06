@@ -37,4 +37,11 @@ describe('resolveMiniRuntime', () => {
       authorization: undefined,
     });
   });
+
+  it('uses the production API for a development WeChat build without injected variables', () => {
+    expect(resolveMiniRuntime({ MODE: 'development', UNI_PLATFORM: 'mp-weixin' })).toEqual({
+      apiBaseUrl: 'https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1',
+      authorization: undefined,
+    });
+  });
 });

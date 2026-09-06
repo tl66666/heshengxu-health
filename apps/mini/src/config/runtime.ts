@@ -21,6 +21,12 @@ export function resolveMiniRuntime(environment: MiniRuntimeEnvironment): MiniRun
     return { apiBaseUrl: PRODUCTION_API_BASE_URL, authorization: storedAuthorization() };
   }
 
+  // 微信开发者工具的 dev 构建也必须走可访问的线上 API。
+  // 本机接口仅在显式传入 VITE_MINI_API_BASE_URL 时启用，避免微信授权请求误发到 127.0.0.1。
+  if (environment.UNI_PLATFORM === 'mp-weixin') {
+    return { apiBaseUrl: PRODUCTION_API_BASE_URL, authorization: storedAuthorization() };
+  }
+
   if (environment.UNI_PLATFORM === 'app' || environment.UNI_PLATFORM === 'app-plus') {
     return { apiBaseUrl: PRODUCTION_API_BASE_URL, authorization: storedAuthorization() };
   }

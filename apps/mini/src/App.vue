@@ -16,7 +16,7 @@ export default {
       }
       return;
     }
-    if (isWechatLoginConfigured() && !uni.getStorageSync('heban.auth.access-token')) {
+    if (isWechatLoginConfigured() && !isSignedIn()) {
       await ensureWechatSession();
     }
   },

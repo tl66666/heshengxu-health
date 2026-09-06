@@ -57,7 +57,12 @@ function isAccessTokenUsable(token: string | undefined) {
 
 export function isWechatLoginConfigured() {
   const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
-  return Boolean(environment.VITE_MINI_API_BASE_URL || (environment.MODE === 'production' && !isAppRuntime()));
+  return Boolean(
+    !isAppRuntime() &&
+      (environment.UNI_PLATFORM === 'mp-weixin' ||
+        environment.VITE_MINI_API_BASE_URL ||
+        environment.MODE === 'production'),
+  );
 }
 
 export function isAppRuntime() {
