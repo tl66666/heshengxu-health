@@ -39,8 +39,13 @@ import { onShow } from '@dcloudio/uni-app';
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
-import { ensureAppSession, ensureWechatSession, isAppRuntime, isSignedIn } from '../../features/auth/auth-store.js';
-import { isWechatLoginConfigured } from '../../features/auth/auth-store.js';
+import {
+  ensureAppSession,
+  ensureWechatSession,
+  isAppRuntime,
+  isSignedIn,
+  isWechatLoginConfigured,
+} from '../../features/auth/auth-store.js';
 
 onShow(async () => {
   if (isAppRuntime()) {
@@ -50,7 +55,11 @@ onShow(async () => {
       return;
     }
   } else if (isWechatLoginConfigured()) {
-    await ensureWechatSession();
+    const authenticated = isSignedIn() || (await ensureWechatSession());
+    if (!authenticated) {
+      promptWechatLoginRetry();
+      return;
+    }
   }
   const client = createMiniApiClient();
 
@@ -88,6 +97,18 @@ onShow(async () => {
     uni.redirectTo({ url: '/pages/onboarding/OnboardingPage' });
   }, 1200);
 });
+
+function promptWechatLoginRetry() {
+  uni.showModal({
+    title: '微信登录未完成',
+    content: '暂时没有连接到你的账号数据，请检查网络后重新连接。',
+    confirmText: '重新连接',
+    showCancel: false,
+    success: ({ confirm }) => {
+      if (confirm) uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
+    },
+  });
+}
 </script>
 
 <style scoped>
@@ -119,7 +140,7 @@ onShow(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.6) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.6) 100%);
   z-index: 1;
 }
 

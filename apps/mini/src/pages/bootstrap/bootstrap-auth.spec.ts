@@ -5,7 +5,7 @@ describe('bootstrap authentication gate', () => {
   it('requires an App session before reading local profile or entering onboarding', () => {
     expect(bootstrapSource).toContain('isAppRuntime()');
     expect(bootstrapSource).toContain('isSignedIn()');
-    expect(bootstrapSource).toContain("/pages/auth/AppAuthPage");
+    expect(bootstrapSource).toContain('/pages/auth/AppAuthPage');
   });
 
   it('checks authentication before using cached profile data', () => {
@@ -13,5 +13,15 @@ describe('bootstrap authentication gate', () => {
     expect(bootstrapSource.indexOf('const localProfile')).toBeGreaterThan(
       bootstrapSource.indexOf('ensureAppSession'),
     );
+  });
+
+  it('does not request profile data when native WeChat authentication fails', () => {
+    expect(bootstrapSource).toContain(
+      'const authenticated = isSignedIn() || (await ensureWechatSession())',
+    );
+    expect(bootstrapSource.indexOf('if (!authenticated)')).toBeLessThan(
+      bootstrapSource.indexOf('const client = createMiniApiClient()'),
+    );
+    expect(bootstrapSource).toContain('promptWechatLoginRetry()');
   });
 });

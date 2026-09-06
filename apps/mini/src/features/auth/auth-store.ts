@@ -35,7 +35,11 @@ export async function ensureWechatSession() {
   try {
     await loginWithWechat();
     return true;
-  } catch {
+  } catch (error) {
+    console.warn(
+      'WeChat session initialization failed',
+      error instanceof Error ? error.message : 'unknown error',
+    );
     return false;
   }
 }
@@ -49,21 +53,21 @@ function isAccessTokenUsable(token: string | undefined) {
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
     if (typeof atob !== 'function') return false;
     const payload = JSON.parse(atob(padded)) as { exp?: number; typ?: string };
-    // JWT `exp` is expressed in Unix seconds, while Date.now() is milliseconds.
-    return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();
+    return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp > Date.now();
   } catch {
     return false;
   }
 }
 
 export function isWechatLoginConfigured() {
-  const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  const environment =
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
   const platform = runtimePlatform(environment);
   return Boolean(
     !isAppRuntime() &&
-      (platform === 'mp-weixin' ||
-        environment.VITE_MINI_API_BASE_URL ||
-        environment.MODE === 'production'),
+    (platform === 'mp-weixin' ||
+      environment.VITE_MINI_API_BASE_URL ||
+      environment.MODE === 'production'),
   );
 }
 
@@ -80,7 +84,10 @@ export async function loginWithWechat() {
   const login = await new Promise<{ code: string }>((resolve, reject) => {
     uni.login({ provider: 'weixin', success: resolve, fail: reject });
   });
-  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{
+  const result = await createMiniApiClient({
+    apiBaseUrl: apiBase(),
+    authorization: undefined,
+  }).post<{
     accessToken: string;
     refreshToken: string;
     userId: string;
@@ -93,12 +100,24 @@ export async function loginWithWechat() {
 }
 
 export async function registerWithPassword(email: string, password: string) {
-  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{ provider: 'app_password'; userId: string }>('/auth/app/register', { email: normalizeEmail(email), password });
+  const result = await createMiniApiClient({
+    apiBaseUrl: apiBase(),
+    authorization: undefined,
+  }).post<{ provider: 'app_password'; userId: string }>('/auth/app/register', {
+    email: normalizeEmail(email),
+    password,
+  });
   return result;
 }
 
 export async function loginWithPassword(email: string, password: string) {
-  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{ accessToken: string; refreshToken: string; userId: string }>('/auth/app/login', { email: normalizeEmail(email), password });
+  const result = await createMiniApiClient({
+    apiBaseUrl: apiBase(),
+    authorization: undefined,
+  }).post<{ accessToken: string; refreshToken: string; userId: string }>('/auth/app/login', {
+    email: normalizeEmail(email),
+    password,
+  });
   persistAuth(result);
   return result;
 }
@@ -106,7 +125,10 @@ export async function loginWithPassword(email: string, password: string) {
 export async function refreshLogin() {
   const refreshToken = uni.getStorageSync(REFRESH_KEY);
   if (typeof refreshToken !== 'string' || !refreshToken) return null;
-  const result = await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: undefined }).post<{ accessToken: string; refreshToken: string }>('/auth/refresh', { refreshToken });
+  const result = await createMiniApiClient({
+    apiBaseUrl: apiBase(),
+    authorization: undefined,
+  }).post<{ accessToken: string; refreshToken: string }>('/auth/refresh', { refreshToken });
   uni.setStorageSync(ACCESS_KEY, result.accessToken);
   return result;
 }
@@ -114,14 +136,21 @@ export async function refreshLogin() {
 export async function signOut() {
   const refreshToken = uni.getStorageSync(REFRESH_KEY);
   if (typeof refreshToken === 'string' && refreshToken) {
-    await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: accessToken() }).post('/auth/logout', { refreshToken });
+    await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: accessToken() }).post(
+      '/auth/logout',
+      { refreshToken },
+    );
   }
-  uni.removeStorageSync(ACCESS_KEY); uni.removeStorageSync(REFRESH_KEY); uni.removeStorageSync(USER_KEY);
+  uni.removeStorageSync(ACCESS_KEY);
+  uni.removeStorageSync(REFRESH_KEY);
+  uni.removeStorageSync(USER_KEY);
 }
 
 function apiBase() {
-  const environment = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
-  return resolveMiniRuntime({ ...environment, UNI_PLATFORM: runtimePlatform(environment) }).apiBaseUrl;
+  const environment =
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  return resolveMiniRuntime({ ...environment, UNI_PLATFORM: runtimePlatform(environment) })
+    .apiBaseUrl;
 }
 
 function runtimePlatform(environment: Record<string, string | undefined>) {
@@ -134,7 +163,9 @@ function runtimePlatform(environment: Record<string, string | undefined>) {
   return environment.UNI_PLATFORM;
 }
 
-function normalizeEmail(value: string) { return value.trim().toLowerCase(); }
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
 
 function persistAuth(result: { accessToken: string; refreshToken: string; userId: string }) {
   uni.setStorageSync(ACCESS_KEY, result.accessToken);
