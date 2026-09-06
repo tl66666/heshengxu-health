@@ -196,6 +196,7 @@ async function recognize() {
 
 function recognitionErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : String(error || '');
+  if (/IMAGE_READ_/u.test(message)) return '照片读取失败，请重新拍摄或从相册选择一张照片';
   if (message.includes('IMAGE_TOO_LARGE')) return '照片尺寸较大，请换一张或重新拍摄后再试';
   if (/413|payload|request entity/iu.test(message)) return '照片文件太大，请重新拍摄后再试';
   if (/unauthorized|forbidden|登录|401|403/iu.test(message)) return '登录状态已过期，请重新登录后再识别';
