@@ -32,8 +32,8 @@
   },
   "compileType": "miniprogram",
   "projectname": "heshengxu-health",
-  "miniprogramRoot": "dist/dev/mp-weixin/",
-  "appid": "",
+  "miniprogramRoot": "dist/build/mp-weixin/",
+  "appid": "wxba6b329bc279b80f",
   "condition": {},
   "simulatorPluginLibVersion": {},
   "editorSetting": {}
