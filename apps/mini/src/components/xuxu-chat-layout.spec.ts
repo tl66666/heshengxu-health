@@ -21,4 +21,11 @@ describe('Xuxu chat layout contracts', () => {
     expect(componentSource).toContain('id="chat-bottom"');
     expect(componentSource).toMatch(/\.messages-spacer\s*\{[^}]*height:\s*420rpx/s);
   });
+
+  it('retries native WeChat authorization instead of opening the App password page', () => {
+    expect(componentSource).toContain("if (isAppRuntime()) {");
+    expect(componentSource).toContain("uni.navigateTo({ url: '/pages/auth/AppAuthPage' })");
+    expect(componentSource).toContain('const authenticated = await ensureWechatSession()');
+    expect(componentSource).toContain("'重新微信授权'");
+  });
 });

@@ -38,7 +38,9 @@
         <view class="message-body">
           <text v-if="message.role === 'assistant'" class="message-label">序序</text>
           <text class="message-text">{{ message.text }}</text>
-          <button v-if="message.sourceTitle === '需要登录'" class="retry-message login-message" @tap="openLogin">去登录</button>
+          <button v-if="message.sourceTitle === '需要登录'" class="retry-message login-message" @tap="openLogin">
+            {{ isAppRuntime() ? '去登录' : '重新微信授权' }}
+          </button>
           <button v-if="message.id.startsWith('assistant-error') && message.sourceTitle !== '需要登录'" class="retry-message" @tap="retryLast">再试一次</button>
           <view v-if="message.sourceTitle" class="source-card"><image src="/static/icons/svg/journal.svg" mode="aspectFit" /><text>参考 · {{ message.sourceTitle }}</text></view>
         </view>
@@ -72,7 +74,7 @@ import { computed, nextTick, ref } from 'vue';
 import { healthLoopState } from '../features/health-loop/health-loop.store.js';
 import { classifyXuxuError, createOfflineReply, createUserMessage, quickQuestions, type ChatMessage } from './xuxu-chat.js';
 import { chatWithXuxu } from '../features/xuxu/xuxu.service.js';
-import { ensureWechatSession, isSignedIn } from '../features/auth/auth-store.js';
+import { ensureWechatSession, isAppRuntime, isSignedIn } from '../features/auth/auth-store.js';
 
 const messages = ref<ChatMessage[]>([]);
 const draft = ref('');
@@ -147,7 +149,22 @@ async function scrollToLatest() {
 
 const connectionStatusLabel = computed(() => connectionState.value === 'thinking' ? '正在回复' : connectionState.value === 'retry' ? '连接稍有波动' : '随时可聊');
 function voiceNotice() { uni.showToast({ title: '语音输入正在准备中，先试试打字吧', icon: 'none' }); }
-function openLogin() { uni.navigateTo({ url: '/pages/auth/AppAuthPage' }); }
+async function openLogin() {
+  if (isAppRuntime()) {
+    uni.navigateTo({ url: '/pages/auth/AppAuthPage' });
+    return;
+  }
+  connectionState.value = 'thinking';
+  const authenticated = await ensureWechatSession();
+  if (!authenticated) {
+    connectionState.value = 'retry';
+    uni.showToast({ title: '微信授权暂未完成，请稍后重试', icon: 'none' });
+    return;
+  }
+  messages.value = messages.value.filter((message) => message.sourceTitle !== '需要登录');
+  connectionState.value = 'ready';
+  retryLast();
+}
 function retryLast() { const last = [...messages.value].reverse().find((message) => message.role === 'user'); if (last) send(last.text); }
 </script>
 
