@@ -49,7 +49,8 @@ function isAccessTokenUsable(token: string | undefined) {
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
     if (typeof atob !== 'function') return false;
     const payload = JSON.parse(atob(padded)) as { exp?: number; typ?: string };
-    return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp > Date.now();
+    // JWT `exp` is expressed in Unix seconds, while Date.now() is milliseconds.
+    return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();
   } catch {
     return false;
   }
