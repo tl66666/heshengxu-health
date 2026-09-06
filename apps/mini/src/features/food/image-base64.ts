@@ -8,6 +8,11 @@
  */
 export function readImageBase64(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => reject(new Error('IMAGE_READ_TIMEOUT')), 15_000);
+    const finish = (callback: () => void) => {
+      clearTimeout(timeoutId);
+      callback();
+    };
     const fileSystem = (typeof uni !== 'undefined' ? uni.getFileSystemManager?.() : undefined) as
       | { readFile?: (options: { filePath: string; encoding: 'base64'; success?: (result: { data: unknown }) => void; fail?: (error: unknown) => void }) => void }
       | undefined;
@@ -18,15 +23,15 @@ export function readImageBase64(path: string): Promise<string> {
         encoding: 'base64',
         success: ({ data }) => {
           const value = String(data ?? '');
-          if (value) resolve(value);
-          else readWithPlus(path, resolve, reject);
+          if (value) finish(() => resolve(value));
+          else readWithPlus(path, (result) => finish(() => resolve(result)), (error) => finish(() => reject(error)));
         },
-        fail: () => readWithPlus(path, resolve, reject),
+        fail: () => readWithPlus(path, (result) => finish(() => resolve(result)), (error) => finish(() => reject(error))),
       });
       return;
     }
 
-    readWithPlus(path, resolve, reject);
+    readWithPlus(path, (result) => finish(() => resolve(result)), (error) => finish(() => reject(error)));
   });
 }
 

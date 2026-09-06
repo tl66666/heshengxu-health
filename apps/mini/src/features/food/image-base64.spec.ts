@@ -3,6 +3,7 @@ import { readImageBase64 } from './image-base64.js';
 
 describe('readImageBase64', () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -33,5 +34,17 @@ describe('readImageBase64', () => {
     });
 
     await expect(readImageBase64('/tmp/food.jpg')).resolves.toBeTypeOf('string');
+  });
+
+  it('does not wait forever when a native reader never calls back', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('uni', {
+      getFileSystemManager: () => ({ readFile: () => undefined }),
+    });
+
+    const pending = readImageBase64('/tmp/food.jpg');
+    const failure = expect(pending).rejects.toThrow('IMAGE_READ_TIMEOUT');
+    await vi.advanceTimersByTimeAsync(15_000);
+    await failure;
   });
 });
