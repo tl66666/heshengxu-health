@@ -58,9 +58,11 @@ const publicMiniConfig = JSON.parse(
 const publicManifest = JSON.parse(
   readFileSync(resolve(repoRoot, 'apps/mini/src/manifest.json'), 'utf8'),
 );
-if (publicMiniConfig.appid || publicManifest['mp-weixin']?.appid) {
+const projectAppId = publicMiniConfig.appid;
+const manifestAppId = publicManifest['mp-weixin']?.appid;
+if (!/^wx[a-f0-9]{16}$/i.test(projectAppId) || projectAppId !== manifestAppId) {
   console.error(
-    '公开小程序配置不能包含 AppID，请将个人 AppID 放在被 .gitignore 忽略的 project.private.config.json。',
+    '微信小程序 AppID 必须格式正确，并在 project.config.json 与 manifest.json 中保持一致。',
   );
   process.exit(1);
 }
