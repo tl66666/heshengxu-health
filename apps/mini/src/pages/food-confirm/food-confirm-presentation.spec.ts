@@ -23,4 +23,11 @@ describe('food confirmation presentation', () => {
     expect(foodConfirmPageSource).toContain('confirmRecognition');
     expect(foodConfirmPageSource).toContain('userFoodId:');
   });
+
+  it('lets photo results correct dish name and component portions before saving', () => {
+    expect(foodConfirmPageSource).toContain('v-model="foodName"');
+    expect(foodConfirmPageSource).toContain('v-for="(component, index) in components"');
+    expect(foodConfirmPageSource).toContain('recalculateFromComponents');
+    expect(foodConfirmPageSource).toContain('estimatedEnergyKcal: preview.energyKcal');
+  });
 });
