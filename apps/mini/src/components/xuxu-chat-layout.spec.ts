@@ -19,5 +19,6 @@ describe('Xuxu chat layout contracts', () => {
   it('scrolls to a bottom anchor after a reply instead of aligning the bubble itself', () => {
     expect(componentSource).toContain(':scroll-into-view="scrollTarget"');
     expect(componentSource).toContain('id="chat-bottom"');
+    expect(componentSource).toMatch(/\.messages-spacer\s*\{[^}]*height:\s*420rpx/s);
   });
 });

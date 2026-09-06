@@ -299,7 +299,9 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
 }
 .messages-spacer {
   width: 100%;
-  height: 340rpx;
+  /* 420rpx covers the quick prompts, composer, disclaimer, custom tabbar
+     and the largest iPhone safe-area inset without hiding the last line. */
+  height: 420rpx;
   flex: none;
 }
 .chat-bottom-anchor {
