@@ -14,7 +14,8 @@ export function resolveFoodRecognitionRuntimeConfig(
     ['mock', 'cloudbase'],
   );
   const visionProvider = readProvider(
-    environment.FOOD_RECOGNITION_VISION_PROVIDER,
+    environment.FOOD_RECOGNITION_VISION_PROVIDER ??
+      (hasVisionCredentials(environment) ? 'hunyuan' : undefined),
     'FOOD_RECOGNITION_VISION_PROVIDER',
     ['mock', 'hunyuan'],
   );
@@ -44,6 +45,19 @@ export function resolveFoodRecognitionRuntimeConfig(
   }
 
   return { storageProvider, visionProvider };
+}
+
+function hasVisionCredentials(environment: RuntimeEnvironment) {
+  const hasSdkCredentials = [
+    environment.CLOUDBASE_ENV_ID,
+    environment.TENCENTCLOUD_SECRET_ID,
+    environment.TENCENTCLOUD_SECRET_KEY,
+  ].every((value) => Boolean(value?.trim()));
+  const hasGatewayCredentials = [
+    environment.CLOUDBASE_AI_VISION_BASE_URL ?? environment.CLOUDBASE_AI_BASE_URL,
+    environment.CLOUDBASE_AI_VISION_API_KEY ?? environment.CLOUDBASE_AI_API_KEY,
+  ].every((value) => Boolean(value?.trim()));
+  return hasSdkCredentials || hasGatewayCredentials;
 }
 
 function readProvider<T extends string>(

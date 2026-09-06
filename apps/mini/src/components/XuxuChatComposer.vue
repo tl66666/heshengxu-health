@@ -24,7 +24,7 @@
       </view>
     </view>
 
-    <scroll-view class="messages" scroll-y :scroll-into-view="lastMessageId">
+    <scroll-view class="messages" scroll-y :scroll-into-view="scrollTarget">
       <view v-if="!messages.length && !typing" class="empty-chat">
         <view class="empty-medallion">
           <image class="empty-illustration" src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFill" />
@@ -47,6 +47,8 @@
         <image class="message-avatar" src="/static/illustrations/xuxu-avatar.png" mode="aspectFill" />
         <view class="typing"><text /><text /><text /></view>
       </view>
+      <view v-if="messages.length || typing" class="messages-spacer" />
+      <view id="chat-bottom" class="chat-bottom-anchor" />
     </scroll-view>
 
     <view class="composer-dock">
@@ -77,7 +79,7 @@ const draft = ref('');
 const typing = ref(false);
 const connectionState = ref<'ready' | 'thinking' | 'retry'>('ready');
 const profileOpen = ref(true);
-const lastMessageId = computed(() => messages.value.at(-1)?.id || '');
+const scrollTarget = ref('');
 const profileTags = computed(() => {
   const today = healthLoopState.today.value;
   return [today?.displayName || '新朋友', today?.activePlan?.kind === 'sleep' ? '睡眠与精力' : today?.activePlan ? '体重管理' : '从一个小目标开始'];
@@ -88,6 +90,7 @@ async function send(value: string) {
   if (!text || typing.value) return;
   messages.value.push(createUserMessage(text));
   draft.value = '';
+  await scrollToLatest();
   if (!isSignedIn()) await ensureWechatSession();
   if (!isSignedIn()) {
     messages.value.push({
@@ -97,6 +100,7 @@ async function send(value: string) {
       sourceTitle: '需要登录',
     });
     connectionState.value = 'retry';
+    await scrollToLatest();
     return;
   }
   typing.value = true;
@@ -106,6 +110,7 @@ async function send(value: string) {
     const result = await chatWithXuxu(messages.value.map((message) => ({ role: message.role, content: message.text })));
     messages.value.push({ id: `assistant-${Date.now()}`, role: 'assistant', text: result.message.content });
     connectionState.value = 'ready';
+    await scrollToLatest();
   } catch (error) {
     console.error('序序聊天失败:', error);
     // API 不可用时仍给出明确、可执行的陪伴建议，不让输入停在“无响应”。
@@ -124,9 +129,20 @@ async function send(value: string) {
       sourceTitle: requestId ? `本地陪伴建议 · 请求号 ${requestId}` : '本地陪伴建议 · 可重试',
     });
     connectionState.value = 'retry';
+    await scrollToLatest();
   } finally {
     typing.value = false;
   }
+}
+
+async function scrollToLatest() {
+  await nextTick();
+  // Reset first so repeated replies always trigger WeChat's scroll-into-view
+  // observer, then target a one-pixel anchor after the reserve spacer. This
+  // keeps the entire bubble above the fixed composer on both runtimes.
+  scrollTarget.value = '';
+  await nextTick();
+  scrollTarget.value = 'chat-bottom';
 }
 
 const connectionStatusLabel = computed(() => connectionState.value === 'thinking' ? '正在回复' : connectionState.value === 'retry' ? '连接稍有波动' : '随时可聊');
@@ -145,10 +161,12 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   display: flex;
   flex: 1 1 auto;
   width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
   flex-direction: column;
   box-sizing: border-box;
+  overflow: hidden;
   padding: 0;
   background: transparent;
   color: var(--hz-ink);
@@ -276,8 +294,18 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   box-sizing: border-box;
   /* The fixed composer dock sits above the tabbar. Reserve its full height
      so the last bubble remains readable and scrollable. */
-  padding: 24rpx 28rpx 258rpx;
+  padding: 24rpx 28rpx 24rpx;
   overscroll-behavior: contain;
+}
+.messages-spacer {
+  width: 100%;
+  height: 340rpx;
+  flex: none;
+}
+.chat-bottom-anchor {
+  width: 100%;
+  height: 1rpx;
+  flex: none;
 }
 .empty-chat {
   display: flex;
@@ -346,7 +374,10 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
 .message-text {
   display: block;
   max-width: 100%;
+  box-sizing: border-box;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
   padding: 18rpx 22rpx;
   border: 1rpx solid var(--hz-rule-glass);
   border-radius: 6rpx 26rpx 26rpx 26rpx;

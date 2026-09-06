@@ -17,6 +17,15 @@ describe('food recognition runtime configuration', () => {
     });
   });
 
+  it('automatically enables real vision when a server-side vision key is present', () => {
+    expect(
+      resolveFoodRecognitionRuntimeConfig({
+        CLOUDBASE_AI_BASE_URL: 'https://env.api.tcloudbasegateway.com/v1/ai/cloudbase',
+        CLOUDBASE_AI_API_KEY: 'server-only-key',
+      }),
+    ).toMatchObject({ visionProvider: 'hunyuan' });
+  });
+
   it('rejects CloudBase storage without server-only credentials', () => {
     expect(() =>
       resolveFoodRecognitionRuntimeConfig({ FOOD_RECOGNITION_STORAGE_PROVIDER: 'cloudbase' }),

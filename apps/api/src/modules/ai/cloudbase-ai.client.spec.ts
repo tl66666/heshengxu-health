@@ -85,4 +85,11 @@ describe('CloudBaseAiClient', () => {
       CloudBaseAiError,
     );
   });
+
+  it('uses the supported GLM vision model by default', () => {
+    const client = new CloudBaseAiClient({
+      auth: { mode: 'gateway', apiKey: 'vision-key' },
+    });
+    expect(client.visionModel).toBe('glm-4v-flash');
+  });
 });
