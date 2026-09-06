@@ -2,6 +2,12 @@ import type { MealType } from './health-loop.js';
 
 export type FoodRecognitionStatus = 'queued' | 'processing' | 'succeeded' | 'failed' | 'confirmed';
 
+export type FoodRecognitionComponentDto = {
+  name: string;
+  estimatedGrams: number;
+  estimatedEnergyKcal: number;
+};
+
 export type FoodRecognitionCandidateDto = {
   id: string;
   foodId: string | null;
@@ -12,6 +18,8 @@ export type FoodRecognitionCandidateDto = {
   estimatedProteinG?: number | null;
   estimatedFatG?: number | null;
   estimatedCarbohydrateG?: number | null;
+  components: FoodRecognitionComponentDto[];
+  uncertaintyNote: string | null;
   rank: number;
 };
 
@@ -46,4 +54,10 @@ export type ConfirmFoodRecognitionRequest = {
   grams: number;
   recordedAt: string;
   note?: string;
+  saveToLibrary?: boolean;
+  name?: string;
+  estimatedEnergyKcal?: number;
+  estimatedProteinG?: number;
+  estimatedFatG?: number;
+  estimatedCarbohydrateG?: number;
 };

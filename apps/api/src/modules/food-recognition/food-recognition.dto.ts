@@ -3,6 +3,7 @@ import {
   IsIn,
   IsNumber,
   IsOptional,
+  IsBoolean,
   IsString,
   Max,
   MaxLength,
@@ -43,6 +44,39 @@ export class ConfirmFoodRecognitionDto {
   @IsString()
   @MaxLength(280)
   note?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  saveToLibrary?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  name?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(10000)
+  estimatedEnergyKcal?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1000)
+  estimatedProteinG?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1000)
+  estimatedFatG?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(2000)
+  estimatedCarbohydrateG?: number;
 }
 
 export class AnalyzeFoodImageDto {

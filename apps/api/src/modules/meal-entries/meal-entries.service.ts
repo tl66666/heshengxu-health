@@ -58,6 +58,39 @@ export class MealEntriesService {
     });
   }
 
+  /** Records an AI/custom meal without creating a reusable food-library item. */
+  async createSnapshot(userId: string, input: {
+    mealType: CreateMealEntryDto['mealType'];
+    name: string;
+    grams: number;
+    energyKcal: number;
+    proteinG: number;
+    fatG: number;
+    carbohydrateG: number;
+    recordedAt: string;
+    note?: string;
+    source?: CreateMealEntryDto['source'];
+  }) {
+    await this.prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} });
+    return this.prisma.mealEntry.create({
+      data: {
+        userId,
+        mealType: input.mealType,
+        foodId: null,
+        userFoodId: null,
+        foodNameSnapshot: input.name.trim(),
+        grams: input.grams,
+        energyKcal: input.energyKcal,
+        proteinG: input.proteinG,
+        fatG: input.fatG,
+        carbohydrateG: input.carbohydrateG,
+        source: input.source ?? 'photo_confirmed',
+        recordedAt: new Date(input.recordedAt),
+        note: input.note,
+      },
+    });
+  }
+
   list(userId: string, from: Date, to: Date) {
     return this.prisma.mealEntry.findMany({
       where: { userId, isCurrent: true, recordedAt: { gte: from, lt: to } },

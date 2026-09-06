@@ -19,10 +19,22 @@ describe('recognition job response mapping', () => {
             nameSnapshot: '鸡蛋',
             confidence: 0.8,
             estimatedGrams: 50,
+            components: [
+              { name: '鸡蛋', estimatedGrams: 50, estimatedEnergyKcal: 72 },
+            ],
+            uncertaintyNote: '份量按一枚中等鸡蛋估算',
             rank: 1,
           },
         ],
       }),
-    ).toMatchObject({ status: 'succeeded', candidates: [{ name: '鸡蛋', estimatedGrams: 50 }] });
+    ).toMatchObject({
+      status: 'succeeded',
+      candidates: [{
+        name: '鸡蛋',
+        estimatedGrams: 50,
+        components: [{ name: '鸡蛋', estimatedGrams: 50, estimatedEnergyKcal: 72 }],
+        uncertaintyNote: '份量按一枚中等鸡蛋估算',
+      }],
+    });
   });
 });

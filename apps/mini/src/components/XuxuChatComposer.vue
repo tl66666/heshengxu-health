@@ -24,7 +24,7 @@
       </view>
     </view>
 
-    <scroll-view class="messages" scroll-y :scroll-into-view="scrollTarget">
+    <scroll-view class="messages" scroll-y :scroll-into-view="scrollTarget" :scroll-top="scrollTop" @keyboardheightchange="handleKeyboardHeight">
       <view v-if="!messages.length && !typing" class="empty-chat">
         <view class="empty-medallion">
           <image class="empty-illustration" src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFill" />
@@ -82,6 +82,7 @@ const typing = ref(false);
 const connectionState = ref<'ready' | 'thinking' | 'retry'>('ready');
 const profileOpen = ref(true);
 const scrollTarget = ref('');
+const scrollTop = ref(0);
 const profileTags = computed(() => {
   const today = healthLoopState.today.value;
   return [today?.displayName || '新朋友', today?.activePlan?.kind === 'sleep' ? '睡眠与精力' : today?.activePlan ? '体重管理' : '从一个小目标开始'];
@@ -145,6 +146,15 @@ async function scrollToLatest() {
   scrollTarget.value = '';
   await nextTick();
   scrollTarget.value = 'chat-bottom';
+  // App runtime sometimes ignores scroll-into-view while the keyboard is
+  // animating. A large scrollTop is a reliable fallback for the same frame.
+  scrollTop.value = Date.now();
+}
+
+function handleKeyboardHeight(event: unknown) {
+  const height = Number((event as { detail?: { height?: number } })?.detail?.height ?? 0);
+  // Keep the reserve in sync with the native keyboard/composer transition.
+  if (height > 0) scrollToLatest();
 }
 
 const connectionStatusLabel = computed(() => connectionState.value === 'thinking' ? '正在回复' : connectionState.value === 'retry' ? '连接稍有波动' : '随时可聊');
@@ -175,6 +185,7 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
  * 全页共享全局氛围画布（根容器透明）。
  * ============================================================ */
 .chat-shell {
+  --composer-height: 360rpx;
   display: flex;
   flex: 1 1 auto;
   width: 100%;
@@ -318,7 +329,7 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   width: 100%;
   /* 420rpx covers the quick prompts, composer, disclaimer, custom tabbar
      and the largest iPhone safe-area inset without hiding the last line. */
-  height: 420rpx;
+  height: var(--composer-height);
   flex: none;
 }
 .chat-bottom-anchor {

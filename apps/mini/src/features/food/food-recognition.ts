@@ -11,6 +11,12 @@ export type RecognitionCandidate = {
   estimatedProteinG?: number | null;
   estimatedFatG?: number | null;
   estimatedCarbohydrateG?: number | null;
+  components: Array<{
+    name: string;
+    estimatedGrams: number;
+    estimatedEnergyKcal: number;
+  }>;
+  uncertaintyNote: string | null;
   rank: number;
 };
 
@@ -86,6 +92,12 @@ export function confirmRecognition(input: {
   grams: number;
   recordedAt: string;
   note?: string;
+  saveToLibrary?: boolean;
+  name?: string;
+  estimatedEnergyKcal?: number;
+  estimatedProteinG?: number;
+  estimatedFatG?: number;
+  estimatedCarbohydrateG?: number;
 }) {
   return createMiniApiClient().post('/food-recognition/confirm', input);
 }

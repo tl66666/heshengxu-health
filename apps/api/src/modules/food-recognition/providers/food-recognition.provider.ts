@@ -7,6 +7,12 @@ export type RecognitionProviderCandidate = {
   estimatedProteinG?: number;
   estimatedFatG?: number;
   estimatedCarbohydrateG?: number;
+  components: Array<{
+    name: string;
+    estimatedGrams: number;
+    estimatedEnergyKcal: number;
+  }>;
+  uncertaintyNote?: string;
 };
 
 export interface FoodRecognitionProvider {

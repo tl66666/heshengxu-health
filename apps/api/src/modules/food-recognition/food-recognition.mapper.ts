@@ -18,6 +18,8 @@ type RecognitionJobSource = {
     estimatedProteinG?: number | null;
     estimatedFatG?: number | null;
     estimatedCarbohydrateG?: number | null;
+    components?: unknown;
+    uncertaintyNote?: string | null;
     rank: number;
   }>;
 };
@@ -41,7 +43,19 @@ export function recognitionJobDto(job: RecognitionJobSource): FoodRecognitionJob
       estimatedProteinG: candidate.estimatedProteinG,
       estimatedFatG: candidate.estimatedFatG,
       estimatedCarbohydrateG: candidate.estimatedCarbohydrateG,
+      components: normalizeComponents(candidate.components),
+      uncertaintyNote: candidate.uncertaintyNote ?? null,
       rank: candidate.rank,
     })),
   };
+}
+
+function normalizeComponents(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((component) => {
+    if (!component || typeof component !== 'object') return [];
+    const item = component as Record<string, unknown>;
+    if (typeof item.name !== 'string' || typeof item.estimatedGrams !== 'number' || typeof item.estimatedEnergyKcal !== 'number') return [];
+    return [{ name: item.name, estimatedGrams: item.estimatedGrams, estimatedEnergyKcal: item.estimatedEnergyKcal }];
+  });
 }

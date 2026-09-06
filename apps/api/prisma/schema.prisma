@@ -256,6 +256,8 @@ model FoodRecognitionCandidate {
   estimatedProteinG Float?
   estimatedFatG Float?
   estimatedCarbohydrateG Float?
+  components     Json?
+  uncertaintyNote String?
   rank           Int
   job            FoodRecognitionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   food           FoodItem?          @relation(fields: [foodId], references: [id], onDelete: SetNull)

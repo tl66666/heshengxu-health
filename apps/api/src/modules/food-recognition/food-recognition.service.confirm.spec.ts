@@ -14,6 +14,8 @@ describe('FoodRecognitionService.confirm', () => {
       estimatedProteinG: 22,
       estimatedFatG: 14,
       estimatedCarbohydrateG: 72,
+      components: [{ name: '面条', estimatedGrams: 260, estimatedEnergyKcal: 360 }],
+      uncertaintyNote: '汤汁含油量按常见做法估算',
       rank: 1,
       food: null,
       job: { id: 'job-1' },
@@ -43,18 +45,23 @@ describe('FoodRecognitionService.confirm', () => {
         mealType: 'lunch',
         grams: 380,
         recordedAt: '2026-09-03T04:00:00.000Z',
+        name: '番茄鸡蛋汤面',
+        estimatedEnergyKcal: 500,
+        estimatedProteinG: 24,
+        estimatedFatG: 12,
+        estimatedCarbohydrateG: 70,
       }),
     ).resolves.toMatchObject({ id: 'entry-1' });
 
     expect(prisma.userFood.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         userId: 'user-1',
-        name: '番茄鸡蛋面',
+        name: '番茄鸡蛋汤面',
         source: 'photo',
-        energyKcal: expect.closeTo(136.8, 0.1),
-        proteinG: expect.closeTo(5.8, 0.1),
-        fatG: expect.closeTo(3.7, 0.1),
-        carbohydrateG: expect.closeTo(18.9, 0.1),
+        energyKcal: expect.closeTo(131.6, 0.1),
+        proteinG: expect.closeTo(6.3, 0.1),
+        fatG: expect.closeTo(3.2, 0.1),
+        carbohydrateG: expect.closeTo(18.4, 0.1),
       }),
     });
     expect(mealEntries.create).toHaveBeenCalledWith(

@@ -19,7 +19,9 @@ describe('Xuxu chat layout contracts', () => {
   it('scrolls to a bottom anchor after a reply instead of aligning the bubble itself', () => {
     expect(componentSource).toContain(':scroll-into-view="scrollTarget"');
     expect(componentSource).toContain('id="chat-bottom"');
-    expect(componentSource).toMatch(/\.messages-spacer\s*\{[^}]*height:\s*420rpx/s);
+    expect(componentSource).toContain(':scroll-top="scrollTop"');
+    expect(componentSource).toContain('@keyboardheightchange="handleKeyboardHeight"');
+    expect(componentSource).toMatch(/\.messages-spacer\s*\{[^}]*height:\s*var\(--composer-height\)/s);
   });
 
   it('retries native WeChat authorization instead of opening the App password page', () => {
