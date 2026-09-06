@@ -117,7 +117,7 @@ New-Item -ItemType Junction -Path D:\heshengxu-health -Target D:\禾伴\heban-ai
 E:\HBuilderX\cli.exe pack `
   --project D:\heshengxu-health\apps\mini `
   --platform android `
-  --android.packagename uni.app.UNIFA2E0A8 `
+  --android.packagename com.heshengxu.health `
   --android.androidpacktype 3
 ```
 

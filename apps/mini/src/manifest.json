@@ -15,9 +15,11 @@
     },
     "app-plus" : {
         "distribute" : {
+            "android" : {
+                "packagename" : "com.heshengxu.health"
+            },
             "icons" : {
                 "android" : {
-                    "packagename" : "com.heshengxu.health",
                     "mdpi" : "src/static/app-icons/mdpi.png",
                     "hdpi" : "src/static/app-icons/hdpi.png",
                     "xhdpi" : "src/static/app-icons/xhdpi.png",
