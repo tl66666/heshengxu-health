@@ -35,8 +35,13 @@
 </template>
 
 <script setup lang="ts">
+import { onLoad } from '@dcloudio/uni-app';
 import { ref } from 'vue';
-import { loginWithPassword, registerWithPassword } from '../../features/auth/auth-store.js';
+import { isAppRuntime, loginWithPassword, registerWithPassword } from '../../features/auth/auth-store.js';
+
+onLoad(() => {
+  if (!isAppRuntime()) uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
+});
 
 const mode = ref<'register' | 'login'>('register');
 const email = ref('');
