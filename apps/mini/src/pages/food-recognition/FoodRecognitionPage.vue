@@ -104,6 +104,7 @@ import {
   grantFoodRecognitionConsent,
   imageContentType,
 } from '../../features/food/food-recognition.js';
+import { readImageBase64 } from '../../features/food/image-base64.js';
 import { ensureAppSession, ensureWechatSession, isAppRuntime, isSignedIn } from '../../features/auth/auth-store.js';
 import type { MealType } from '../../features/food/food.types.js';
 
@@ -219,17 +220,6 @@ function compressForRecognition(path: string): Promise<string> {
       compressedWidth: 1280,
       success: (result) => resolve(result.tempFilePath || path),
       fail: () => resolve(path),
-    });
-  });
-}
-
-function readImageBase64(path: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    uni.getFileSystemManager().readFile({
-      filePath: path,
-      encoding: 'base64',
-      success: ({ data }) => resolve(String(data)),
-      fail: reject,
     });
   });
 }
