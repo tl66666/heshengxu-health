@@ -49,17 +49,19 @@
       </view>
     </scroll-view>
 
-    <scroll-view class="quick" scroll-x show-scrollbar="false">
-      <text class="quick-label">可以聊聊</text>
-      <button v-for="item in quickQuestions" :key="item.id" @tap="send(item.label)">{{ item.label }}</button>
-    </scroll-view>
+    <view class="composer-dock">
+      <scroll-view class="quick" scroll-x show-scrollbar="false">
+        <text class="quick-label">可以聊聊</text>
+        <button v-for="item in quickQuestions" :key="item.id" @tap="send(item.label)">{{ item.label }}</button>
+      </scroll-view>
 
-    <view class="composer">
-      <button class="icon-button" aria-label="语音输入" @tap="voiceNotice"><image src="/static/icons/svg/mic.svg" mode="aspectFit" /></button>
-      <input v-model="draft" confirm-type="send" placeholder="输入你想聊的事…" @confirm="send(draft)" />
-      <button class="send" :class="{ enabled: draft.trim() }" :disabled="!draft.trim() || typing" aria-label="发送" @tap="send(draft)"><image src="/static/icons/svg/send.svg" mode="aspectFit" /></button>
+      <view class="composer">
+        <button class="icon-button" aria-label="语音输入" @tap="voiceNotice"><image src="/static/icons/svg/mic.svg" mode="aspectFit" /></button>
+        <input v-model="draft" confirm-type="send" placeholder="输入你想聊的事…" @confirm="send(draft)" />
+        <button class="send" :class="{ enabled: draft.trim() }" :disabled="!draft.trim() || typing" aria-label="发送" @tap="send(draft)"><image src="/static/icons/svg/send.svg" mode="aspectFit" /></button>
+      </view>
+      <text class="disclaimer">序序提供健康管理与生活方式建议，不能替代医生诊疗。</text>
     </view>
-    <text class="disclaimer">序序提供健康管理与生活方式建议，不能替代医生诊疗。</text>
   </view>
 </template>
 
@@ -272,7 +274,10 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   height: 0;
   min-height: 0;
   box-sizing: border-box;
-  padding: 24rpx 28rpx 18rpx;
+  /* The fixed composer dock sits above the tabbar. Reserve its full height
+     so the last bubble remains readable and scrollable. */
+  padding: 24rpx 28rpx 258rpx;
+  overscroll-behavior: contain;
 }
 .empty-chat {
   display: flex;
@@ -415,6 +420,23 @@ function retryLast() { const last = [...messages.value].reverse().find((message)
   -webkit-backdrop-filter: var(--hz-blur);
   backdrop-filter: var(--hz-blur);
   white-space: nowrap;
+}
+
+/* One fixed dock keeps quick prompts, composer and legal copy together.
+ * It is above the custom tabbar on both App and WeChat runtimes. */
+.composer-dock {
+  position: fixed;
+  right: 0;
+  bottom: calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom));
+  left: 0;
+  z-index: 80;
+  box-sizing: border-box;
+  padding-bottom: 8rpx;
+  border-top: 1rpx solid rgba(224, 232, 224, 0.92);
+  background: rgba(255, 253, 249, 0.97);
+  box-shadow: 0 -12rpx 28rpx rgba(56, 77, 62, 0.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
 }
 .quick-label {
   display: inline-flex;

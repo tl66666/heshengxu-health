@@ -30,7 +30,9 @@ function localDate() {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 0 calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom));
+  /* XuxuChatComposer owns its bottom dock. Keeping the page flush prevents
+     the global tabbar reserve from creating a second blank strip. */
+  padding: 0;
   background: transparent;
   color: var(--hz-ink);
 }
@@ -38,7 +40,7 @@ function localDate() {
   display: flex;
   flex: 1 1 auto;
   width: 100%;
-  height: auto;
+  height: 100%;
   min-height: 0;
   min-width: 0;
   overflow: hidden;

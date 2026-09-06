@@ -302,7 +302,10 @@ async function loadCategories() {
   try {
     categories.value = await getCategoryStats();
     if (categories.value[0]?.source) catalogSource.value = categories.value[0].source;
-    totalCount.value = categories.value.reduce((sum, cat) => sum + (cat.count || 0), 0);
+    // The search API de-duplicates equivalent names (for example branded and
+    // unbranded rows). Leave the headline count to `load()` so the number shown
+    // on screen matches the actual paginated results rather than a raw category
+    // row sum.
   } catch (err) {
     console.error('加载分类失败:', err);
   }
@@ -524,6 +527,7 @@ function getHealthLabel(level: number): string {
 function getResultText() {
   if (loading.value) return '搜索中...';
   if (error.value) return '搜索失败';
+  const countLabel = catalogSource.value === 'offline' ? '随包常见目录' : '公共食物库';
   if (query.value) {
     return `找到 ${totalCount.value} 种相关食物`;
   }
@@ -531,7 +535,7 @@ function getResultText() {
     const cat = categories.value.find((c) => c.id === selectedCategory.value);
     return cat ? `${cat.name} - ${totalCount.value} 种食物` : `${totalCount.value} 种食物`;
   }
-  return `共 ${totalCount.value} 种食物`;
+  return `${countLabel} · ${totalCount.value} 种`;
 }
 
 // 页面加载

@@ -418,10 +418,24 @@ LOCAL_FOOD_CATALOG.push(
 
 function localSearch(options: SearchFoodsOptions = {}): SearchFoodsResult {
   const query = options.query?.trim().toLowerCase();
+  const commonOrder = [
+    '米饭', '鸡蛋', '面条', '馒头', '燕麦', '牛奶', '豆浆', '豆腐', '鸡胸肉',
+    '牛肉', '猪里脊', '虾仁', '西兰花', '番茄', '黄瓜', '苹果', '香蕉',
+  ];
+  const commonRank = new Map(commonOrder.map((name, index) => [name, index]));
   const filtered = LOCAL_FOOD_CATALOG.filter((food) => {
     if (query && !food.name.toLowerCase().includes(query)) return false;
     if (options.categoryId && food.category?.id !== options.categoryId) return false;
     return true;
+  }).sort((a, b) => {
+    const aRank = commonRank.get(a.name) ?? Number.MAX_SAFE_INTEGER;
+    const bRank = commonRank.get(b.name) ?? Number.MAX_SAFE_INTEGER;
+    if (aRank !== bRank) return aRank - bRank;
+    // Keep the bundled catalogue deterministic while still grouping basic
+    // foods ahead of any branded entries when offline.
+    const aBrand = a.brand ? 1 : 0;
+    const bBrand = b.brand ? 1 : 0;
+    return aBrand - bBrand || a.name.localeCompare(b.name, 'zh-CN');
   });
   const page = options.page || 1;
   const pageSize = options.pageSize || 20;

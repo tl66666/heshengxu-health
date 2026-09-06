@@ -104,6 +104,7 @@ import {
   grantFoodRecognitionConsent,
   imageContentType,
 } from '../../features/food/food-recognition.js';
+import { ensureAppSession, ensureWechatSession, isAppRuntime, isSignedIn } from '../../features/auth/auth-store.js';
 import type { MealType } from '../../features/food/food.types.js';
 
 const imagePath = ref('');
@@ -129,10 +130,16 @@ function chooseImage() {
     sizeType: ['compressed'],
     sourceType: ['camera', 'album'],
     success: ({ tempFilePaths, tempFiles }) => {
-      imagePath.value = tempFilePaths[0] || '';
+      const sourcePath = tempFilePaths[0] || '';
+      imagePath.value = sourcePath;
       const firstFile = Array.isArray(tempFiles) ? tempFiles[0] : tempFiles;
       imageSize.value = Number((firstFile as { size?: number } | undefined)?.size || 0);
       error.value = '';
+      // Camera images can be several megabytes. Compress before Base64 upload
+      // so App and WeChat stay below the API request limit.
+      compressForRecognition(sourcePath).then((compressedPath) => {
+        if (compressedPath && compressedPath !== sourcePath) imagePath.value = compressedPath;
+      });
     },
   });
 }
@@ -152,20 +159,64 @@ async function recognize() {
   error.value = '';
   
   try {
+    const sessionReady = isSignedIn()
+      ? true
+      : isAppRuntime()
+        ? await ensureAppSession()
+        : await ensureWechatSession();
+    if (!sessionReady) {
+      error.value = '请先登录，再使用序序相机识别食物';
+      if (isAppRuntime()) uni.navigateTo({ url: '/pages/auth/AppAuthPage' });
+      return;
+    }
     await grantFoodRecognitionConsent();
-    const contentType = imageContentType(imagePath.value);
-    const imageBase64 = await readImageBase64(imagePath.value);
+    const uploadPath = await compressForRecognition(imagePath.value);
+    if (uploadPath && uploadPath !== imagePath.value) imagePath.value = uploadPath;
+    const contentType = imageContentType(uploadPath || imagePath.value);
+    const imageBase64 = await readImageBase64(uploadPath || imagePath.value);
+    if (imageBase64.length > 5_500_000) {
+      throw new Error('IMAGE_TOO_LARGE');
+    }
     const job = await analyzeFoodImage({ contentType, imageBase64 });
     
     uni.navigateTo({
       url: `/pages/food-candidates/FoodCandidatesPage?jobId=${encodeURIComponent(job.id)}&imagePath=${encodeURIComponent(imagePath.value)}&mealType=${mealType.value}`,
     });
   } catch (err) {
-    error.value = '暂时无法识别，请检查网络或稍后重试';
+    error.value = recognitionErrorMessage(err);
     console.error('识别失败:', err);
   } finally {
     processing.value = false;
   }
+}
+
+function recognitionErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '');
+  if (message.includes('IMAGE_TOO_LARGE')) return '照片尺寸较大，请换一张或重新拍摄后再试';
+  if (/unauthorized|forbidden|登录|401|403/iu.test(message)) return '登录状态已过期，请重新登录后再识别';
+  if (/VISION_NOT_CONFIGURED|未配置|服务未开通/iu.test(message)) return '食物识别服务尚未配置，请稍后再试或先用食物库记录';
+  if (/NETWORK|TIMEOUT|网络|超时/iu.test(message)) return '暂时没连上服务，请检查网络后重试';
+  if (/recognition_failed|识别结果缺少/iu.test(message)) return '这张照片暂时没识别出清晰食物，请换一张光线更好的照片';
+  return '暂时无法完成识别，请重试或改用食物库记录';
+}
+
+function compressForRecognition(path: string): Promise<string> {
+  return new Promise((resolve) => {
+    const compressor = (uni as unknown as {
+      compressImage?: (options: { src: string; quality?: number; compressedWidth?: number; success?: (result: { tempFilePath?: string }) => void; fail?: () => void }) => void;
+    }).compressImage;
+    if (!compressor) {
+      resolve(path);
+      return;
+    }
+    compressor({
+      src: path,
+      quality: 78,
+      compressedWidth: 1600,
+      success: (result) => resolve(result.tempFilePath || path),
+      fail: () => resolve(path),
+    });
+  });
 }
 
 function readImageBase64(path: string): Promise<string> {
@@ -474,7 +525,11 @@ onLoad((options) => {
 
 /* 识别按钮 */
 .recognize-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  min-height: 88rpx;
   padding: 28rpx;
   border: none;
   background: #2e7d4f;
@@ -491,8 +546,9 @@ onLoad((options) => {
 }
 
 .recognize-btn.disabled {
-  background: #dce7db;
-  box-shadow: none;
+  background: #e7efe5;
+  border: 1rpx solid #c8d9cb;
+  box-shadow: 0 6rpx 16rpx rgba(77, 111, 86, 0.08);
   transform: none;
 }
 
@@ -504,7 +560,7 @@ onLoad((options) => {
 }
 
 .recognize-btn.disabled .btn-text {
-  color: #9aaca0;
+  color: #5c7563;
 }
 .manual-search {
   display: flex;
