@@ -613,6 +613,7 @@ export function userFoodToSearchItem(food: UserFood): FoodItem {
       sodiumMg: null,
     },
     servings: [{ id: 'default', label: food.defaultServingLabel, grams: food.defaultServingGrams }],
+    imageUrl: food.imageUrl,
   };
 }
 

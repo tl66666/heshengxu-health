@@ -2,11 +2,10 @@ import { describe, expect, it } from 'vitest';
 import foodCandidatesPageSource from './FoodCandidatesPage.vue?raw';
 
 describe('food candidates presentation', () => {
-  it('keeps candidate markers fixed while only the copy column expands', () => {
-    expect(foodCandidatesPageSource).toContain('class="candidate-copy"');
-    expect(foodCandidatesPageSource).toContain('.candidate-copy {');
-    expect(foodCandidatesPageSource).not.toContain('.candidate view {');
-    expect(foodCandidatesPageSource).toContain('mode="aspectFill"');
+  it('keeps the complete meal photo visible above a stable result summary', () => {
+    expect(foodCandidatesPageSource).toContain('class="preview-img"');
+    expect(foodCandidatesPageSource).toContain('mode="aspectFit"');
+    expect(foodCandidatesPageSource).toContain('class="result-heading"');
   });
 
   it('preselects the strongest dish result and continues to editable confirmation', () => {

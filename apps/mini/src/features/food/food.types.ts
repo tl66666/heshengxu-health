@@ -39,6 +39,7 @@ export type FoodItem = {
   healthLight?: number;
   nutrition: FoodNutrition;
   servings: FoodServing[];
+  imageUrl?: string | null;
 };
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';

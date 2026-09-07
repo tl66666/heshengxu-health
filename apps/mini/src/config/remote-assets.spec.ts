@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   normalizeRemoteAssetBaseUrl,
+  pruneGeneratedAppIcons,
   remoteMiniAssetsPlugin,
   rewriteRemoteBitmapUrls,
 } from '../../build/remote-assets.js';
@@ -54,5 +59,18 @@ describe('remote mini-program assets', () => {
             ])
           : undefined;
     expect(result).toBeNull();
+  });
+});
+
+describe('mini program package cleanup', () => {
+  it('removes App-only icons from generated WeChat output', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'heban-mini-'));
+    const icons = join(root, 'dist', 'build', 'mp-weixin', 'static', 'app-icons');
+    mkdirSync(icons, { recursive: true });
+    writeFileSync(join(icons, 'ios-appstore.png'), Buffer.alloc(1024));
+
+    expect(pruneGeneratedAppIcons(root, 'mp-weixin')).toBe(1);
+    expect(existsSync(join(icons, 'ios-appstore.png'))).toBe(false);
+    await rm(root, { recursive: true, force: true });
   });
 });

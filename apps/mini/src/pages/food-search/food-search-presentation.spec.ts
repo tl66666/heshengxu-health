@@ -50,5 +50,6 @@ describe('food search presentation', () => {
     expect(foodSearchPageSource).toContain('libraryScope');
     expect(foodSearchPageSource).toContain('listUserFoods(query.value)');
     expect(foodSearchPageSource).toContain('userFoodToSearchItem');
+    expect(foodSearchPageSource).toContain('v-if="food.imageUrl"');
   });
 });

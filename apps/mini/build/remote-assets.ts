@@ -28,6 +28,11 @@ export function remoteMiniAssetsPlugin(value?: string): Plugin {
     name: 'heban-remote-mini-assets',
     enforce: 'pre',
     closeBundle() {
+      const platform = process.env.UNI_PLATFORM ?? '';
+      const prunedIcons = pruneGeneratedAppIcons(process.cwd(), platform);
+      if (prunedIcons > 0) {
+        console.log(`[heban] removed ${prunedIcons} App-only icons from the Mini Program package`);
+      }
       // App packages are uploaded to HBuilderX as a single archive. Once the
       // source references point at CloudBase, keeping the same bitmaps locally
       // only increases the archive size and can make cloud packaging stop at
@@ -58,6 +63,25 @@ export function remoteMiniAssetsPlugin(value?: string): Plugin {
       return code === source ? null : { code, map: null };
     },
   };
+}
+
+export function pruneGeneratedAppIcons(root: string, platform: string) {
+  if (platform !== 'mp-weixin') return 0;
+  const candidates = [
+    resolve(root, 'dist/build/mp-weixin/static/app-icons'),
+    resolve(root, 'dist/dev/mp-weixin/static/app-icons'),
+    resolve(root, 'apps/mini/dist/build/mp-weixin/static/app-icons'),
+    resolve(root, 'apps/mini/dist/dev/mp-weixin/static/app-icons'),
+  ];
+  let removed = 0;
+  for (const directory of candidates) {
+    if (!existsSync(directory)) continue;
+    for (const file of collectFiles(directory)) {
+      unlinkSync(file);
+      removed += 1;
+    }
+  }
+  return removed;
 }
 
 function collectFiles(directory: string): string[] {

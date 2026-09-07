@@ -1,10 +1,21 @@
 <template>
-  <!-- class="nutrition" is the nutrition summary surface. -->
   <view class="page">
     <AppNavBar title="确认这份食物" route="/pages/food-confirm/FoodConfirmPage" />
 
-    <view v-if="!food" class="state">正在准备这份餐食...</view>
-    <template v-else>
+    <view v-if="loading" class="state loading-state">
+      <view class="loading-pulse"><view /><view /><view /></view>
+      <text>正在准备这份餐食</text>
+    </view>
+    <view v-else-if="loadError" class="state error-state">
+      <image src="/static/illustrations/xuxu-ai-empty.png" mode="aspectFit" />
+      <text class="state-title">这份结果需要重新确认</text>
+      <text class="state-copy">{{ loadError }}</text>
+      <view class="state-actions">
+        <button class="state-secondary" @tap="openFoodLibrary">去食物库</button>
+        <button class="state-primary" @tap="restartRecognition">重新识别</button>
+      </view>
+    </view>
+    <template v-else-if="food">
       <view v-if="imagePath" class="photo-hero">
         <image class="food-photo" :src="imagePath" mode="aspectFit" />
         <text class="photo-caption">照片仅用于本次识别确认</text>
@@ -47,7 +58,7 @@
         <button class="add-component" @tap="addComponent">＋ 添加漏掉的食材</button>
       </view>
 
-      <view class="nutrition-section nutrition">
+      <view class="nutrition-section">
         <view class="calorie-copy"><text class="calorie-value">{{ preview.energyKcal }}</text><text class="calorie-unit">千卡</text><text class="calorie-note">当前份量估算</text></view>
         <view class="macro-grid">
           <view><text>{{ preview.proteinG }}g</text><text>蛋白质</text></view>
@@ -86,14 +97,22 @@ import { computed, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { createMealEntry, getFoodById, replaceMealEntry, userFoodToSearchItem } from '../../features/food/food.service.js';
-import { confirmRecognition, loadRecognitionJob, type RecognitionCandidate } from '../../features/food/food-recognition.js';
-import { listUserFoods } from '../../features/food/user-foods.service.js';
+import {
+  confirmRecognition,
+  getCachedRecognitionJob,
+  loadRecognitionJob,
+  recognitionCandidateToFood,
+  type RecognitionCandidate,
+} from '../../features/food/food-recognition.js';
+import { listUserFoods, persistUserFoodPhoto } from '../../features/food/user-foods.service.js';
 import type { UserFoodSource } from '../../features/food/user-foods.types.js';
 import { calculateFoodNutrition, type FoodItem, type MealType } from '../../features/food/food.types.js';
 import { foodConfirmMode } from '../../features/food/food-entry-form.js';
 import { getFoodCategoryIcon } from '../../features/food/food-icon.js';
 
 const food = ref<FoodItem | null>(null);
+const loading = ref(true);
+const loadError = ref('');
 const foodName = ref('');
 const grams = ref(100);
 const gramsText = ref('100');
@@ -108,7 +127,7 @@ const jobId = ref('');
 const source = ref<UserFoodSource>('catalog');
 const imagePath = ref('');
 const saveToLibrary = ref(true);
-const components = ref<RecognitionCandidate['components']>([]);
+const components = ref<NonNullable<RecognitionCandidate['components']>>([]);
 const mode = computed(() => foodConfirmMode(entryId.value));
 const canSaveToLibrary = computed(() => mode.value === 'create' && source.value === 'photo');
 const sourceLabel = computed(() => userFoodId.value ? '我的食物' : `${food.value?.category?.name || '日常食物'} · 食物库营养数据`);
@@ -131,8 +150,12 @@ function recalculateFromComponents() {
 }
 function removeComponent(index: number) { components.value.splice(index, 1); recalculateFromComponents(); }
 function addComponent() { components.value.push({ name: '其他食材', estimatedGrams: 50, estimatedEnergyKcal: 0 }); recalculateFromComponents(); }
+function restartRecognition() { uni.redirectTo({ url: `/pages/food-recognition/FoodRecognitionPage?mealType=${mealType.value}` }); }
+function openFoodLibrary() { uni.redirectTo({ url: `/pages/food-search/FoodSearchPage?mealType=${mealType.value}` }); }
 
 async function load(options?: Record<string, string>) {
+  loading.value = true;
+  loadError.value = '';
   entryId.value = options?.entryId || '';
   userFoodId.value = options?.userFoodId || '';
   candidateId.value = options?.candidateId || '';
@@ -150,29 +173,25 @@ async function load(options?: Record<string, string>) {
     } else if (options?.foodId && !candidateId.value) {
       food.value = await getFoodById(options.foodId);
     } else if (candidateId.value) {
-      const job = await loadRecognitionJob(jobId.value);
+      const job = getCachedRecognitionJob(jobId.value) ?? await loadRecognitionJob(jobId.value);
       const candidate = job.candidates.find((item) => item.id === candidateId.value);
-      if (candidate && candidate.estimatedEnergyKcal != null && candidate.estimatedProteinG != null && candidate.estimatedFatG != null && candidate.estimatedCarbohydrateG != null) {
-        const scale = 100 / Math.max(1, candidate.estimatedGrams);
+      if (!candidate) {
+        loadError.value = '没有找到刚才的识别结果，可以重新拍摄或手动记录。';
+      } else {
         foodName.value = candidate.name;
-        components.value = candidate.components.map((item) => ({ ...item }));
-        food.value = {
-          id: `recognized-${candidate.id}`, name: candidate.name, brand: null, category: null,
-          nutrition: {
-            basisGrams: 100,
-            energyKcal: Math.round(candidate.estimatedEnergyKcal * scale * 10) / 10,
-            proteinG: Math.round(candidate.estimatedProteinG * scale * 10) / 10,
-            fatG: Math.round(candidate.estimatedFatG * scale * 10) / 10,
-            carbohydrateG: Math.round(candidate.estimatedCarbohydrateG * scale * 10) / 10,
-            dietaryFiberG: null, sodiumMg: null,
-          },
-          servings: [{ id: `recognized-serving-${candidate.id}`, label: '识别份量', grams: candidate.estimatedGrams }],
-        };
+        components.value = (candidate.components ?? []).map((item) => ({ ...item }));
+        food.value = recognitionCandidateToFood(candidate);
+        if (!food.value && candidate.foodId) food.value = await getFoodById(candidate.foodId);
+        if (!food.value) loadError.value = '旧识别结果缺少营养估算，请重新识别一次，新的结果会给出完整热量和食材组成。';
       }
     }
     if (food.value && !foodName.value) foodName.value = food.value.name;
-    if (!food.value) error.value = '没有找到这份食物';
-  } catch { error.value = '食物信息加载失败，请返回重试'; }
+    if (!food.value && !loadError.value) loadError.value = '没有找到这份食物，可以重新识别或从食物库选择。';
+  } catch {
+    loadError.value = '读取识别结果时网络有波动，可以重试识别或从食物库手动记录。';
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function save() {
@@ -185,12 +204,15 @@ async function save() {
     if (candidateId.value) {
       // createUserFood is intentionally handled server-side by confirmRecognition
       // estimatedEnergyKcal: preview.energyKcal is sent as the visible-portion snapshot.
-      await confirmRecognition({
+      const result = await confirmRecognition({
         candidateId: candidateId.value, ...commonInput, saveToLibrary: saveToLibrary.value,
         name: foodName.value.trim(), estimatedEnergyKcal: preview.value.energyKcal,
         estimatedProteinG: preview.value.proteinG, estimatedFatG: preview.value.fatG,
         estimatedCarbohydrateG: preview.value.carbohydrateG,
       });
+      if (saveToLibrary.value && result.userFoodId && imagePath.value) {
+        await persistUserFoodPhoto(result.userFoodId, imagePath.value);
+      }
     } else {
       const foodReference = userFoodId.value ? { userFoodId: userFoodId.value } : { foodId: food.value.id };
       if (mode.value === 'edit') await replaceMealEntry(entryId.value, { ...commonInput, ...foodReference });
@@ -208,7 +230,20 @@ onLoad((options) => load(options as Record<string, string>));
 <style scoped>
 .page { min-height: 100vh; box-sizing: border-box; padding: 16rpx 32rpx 178rpx; color: #2b4034; background: #fffdf9; }
 button::after { border: 0; }
-.state { padding: 180rpx 20rpx; color: #7d8c82; text-align: center; font-size: 24rpx; }
+.state { display: flex; align-items: center; flex-direction: column; padding: 180rpx 24rpx; color: #7d8c82; text-align: center; font-size: 24rpx; }
+.loading-pulse { display: flex; align-items: flex-end; gap: 8rpx; height: 46rpx; margin-bottom: 22rpx; }
+.loading-pulse view { width: 9rpx; height: 26rpx; border-radius: 8rpx; background: #8caf98; animation: load-wave 1s ease-in-out infinite; }
+.loading-pulse view:nth-child(2) { height: 42rpx; animation-delay: .14s; }
+.loading-pulse view:nth-child(3) { height: 32rpx; animation-delay: .28s; }
+@keyframes load-wave { 50% { opacity: .35; transform: scaleY(.58); } }
+.error-state { padding-top: 100rpx; }
+.error-state > image { width: 240rpx; height: 190rpx; margin-bottom: 24rpx; }
+.state-title { color: #31483b; font-size: 31rpx; font-weight: 750; }
+.state-copy { max-width: 560rpx; margin-top: 12rpx; color: #849087; font-size: 21rpx; line-height: 1.65; }
+.state-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; width: 100%; margin-top: 30rpx; }
+.state-actions button { display: flex; align-items: center; justify-content: center; height: 78rpx; border-radius: 18rpx; font-size: 23rpx; line-height: 1; }
+.state-secondary { border: 1rpx solid #dce5dd; color: #587062; background: #f7faf6; }
+.state-primary { color: #fff; background: #71977e; box-shadow: 0 10rpx 24rpx rgba(72,111,83,.18); }
 .photo-hero { position: relative; height: 330rpx; margin-top: 8rpx; overflow: hidden; border: 1rpx solid #ece5da; border-radius: 24rpx; background: #f7f0e7; }
 .food-photo { width: 100%; height: 100%; }
 .photo-caption { position: absolute; right: 16rpx; bottom: 14rpx; padding: 8rpx 14rpx; border-radius: 999rpx; color: #77736c; background: rgba(255,253,249,.88); font-size: 17rpx; }

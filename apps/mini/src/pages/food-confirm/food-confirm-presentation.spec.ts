@@ -4,7 +4,7 @@ import foodConfirmPageSource from './FoodConfirmPage.vue?raw';
 describe('food confirmation presentation', () => {
   it('uses the shared navigation and keeps nutrition preview visible', () => {
     expect(foodConfirmPageSource).toContain('<AppNavBar title="确认这份食物"');
-    expect(foodConfirmPageSource).toContain('class="nutrition"');
+    expect(foodConfirmPageSource).toContain('class="nutrition-section"');
     expect(foodConfirmPageSource).toContain('class="save"');
     expect(foodConfirmPageSource).not.toContain('class="back"');
     expect(foodConfirmPageSource).not.toContain('>‹</button>');
@@ -19,9 +19,15 @@ describe('food confirmation presentation', () => {
     expect(foodConfirmPageSource).toContain('options?.mealType');
     expect(foodConfirmPageSource).toContain('options?.userFoodId');
     expect(foodConfirmPageSource).toContain('options?.candidateId');
-    expect(foodConfirmPageSource).toContain('createUserFood');
     expect(foodConfirmPageSource).toContain('confirmRecognition');
-    expect(foodConfirmPageSource).toContain('userFoodId:');
+    expect(foodConfirmPageSource).toContain('persistUserFoodPhoto');
+    expect(foodConfirmPageSource).toContain('result.userFoodId');
+  });
+
+  it('shows a recoverable error instead of an endless loading label', () => {
+    expect(foodConfirmPageSource).toContain('v-else-if="loadError"');
+    expect(foodConfirmPageSource).toContain('重新识别');
+    expect(foodConfirmPageSource).toContain('recognitionCandidateToFood');
   });
 
   it('lets photo results correct dish name and component portions before saving', () => {

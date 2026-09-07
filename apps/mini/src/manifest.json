@@ -9,9 +9,13 @@
         "appid" : "wxba6b329bc279b80f",
         "setting" : {
             "urlCheck" : false,
-            "ignoreDevUnusedFiles" : false
+            "minified" : true,
+            "minifyWXSS" : true,
+            "minifyWXML" : true,
+            "ignoreDevUnusedFiles" : true
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "lazyCodeLoading" : "requiredComponents"
     },
     "app-plus" : {
         "distribute" : {

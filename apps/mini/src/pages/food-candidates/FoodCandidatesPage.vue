@@ -1,6 +1,4 @@
 <template>
-  <!-- class="candidate-copy" remains the expanding copy column contract. -->
-  <!-- mode="aspectFill" is reserved for square catalog thumbnails; the meal photo below uses aspectFit to avoid cropping. -->
   <view class="page">
     <AppNavBar title="识别结果" route="/pages/food-candidates/FoodCandidatesPage" />
 
@@ -28,7 +26,7 @@
 
       <template v-else-if="selectedCandidate">
         <view class="result-heading">
-          <view class="heading-copy candidate-copy">
+          <view class="heading-copy">
             <text class="eyebrow">序序判断这份是</text>
             <text class="dish-name">{{ selectedCandidate.name }}</text>
           </view>
@@ -230,7 +228,7 @@ button::after { border: 0; }
 .status-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #7fad8e; box-shadow: 0 0 0 5rpx rgba(127,173,142,.16); }
 .result-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24rpx; padding: 38rpx 6rpx 22rpx; }
 .heading-copy { min-width: 0; }
-.candidate-copy { flex: 1; }
+.heading-copy { flex: 1; }
 .eyebrow { display: block; margin-bottom: 8rpx; color: #879189; font-size: 21rpx; }
 .dish-name { display: block; color: #263b30; font-size: 44rpx; font-weight: 780; line-height: 1.25; }
 .confidence { flex: none; padding: 10rpx 16rpx; border-radius: 14rpx; background: #edf4ed; text-align: center; }

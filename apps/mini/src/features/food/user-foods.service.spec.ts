@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { mergeFoodResults } from './food.service.js';
-import { createUserFood, deleteUserFood, listUserFoods } from './user-foods.service.js';
+import { createUserFood, deleteUserFood, listUserFoods, persistUserFoodPhoto } from './user-foods.service.js';
 import type { UserFood } from './user-foods.types.js';
 
 vi.mock('../../services/mini-api.js', () => ({
@@ -36,6 +36,11 @@ describe('personal food mini client', () => {
       post,
       delete: remove,
     } as never);
+    vi.stubGlobal('uni', {
+      getStorageSync: vi.fn(() => ({})),
+      setStorageSync: vi.fn(),
+      saveFile: vi.fn(({ success }: { success: (value: { savedFilePath: string }) => void }) => success({ savedFilePath: 'wxfile://saved/meal.jpg' })),
+    });
   });
 
   it('puts personal foods before public catalog foods and de-duplicates by id', () => {
@@ -89,6 +94,16 @@ describe('personal food mini client', () => {
 
     await expect(listUserFoods(' 燕麦 & 牛奶 ')).resolves.toEqual([personalFood]);
     expect(get).toHaveBeenCalledWith('/user-foods?q=%E7%87%95%E9%BA%A6+%26+%E7%89%9B%E5%A5%B6');
+  });
+
+  it('keeps recognized food photos on this device and restores them in my foods', async () => {
+    const storage: Record<string, unknown> = {};
+    vi.mocked(uni.getStorageSync).mockImplementation((key: string) => storage[key] || {});
+    vi.mocked(uni.setStorageSync).mockImplementation((key: string, value: unknown) => { storage[key] = value; });
+
+    await expect(persistUserFoodPhoto('mine-1', 'wxfile://temp/meal.jpg')).resolves.toBe('wxfile://saved/meal.jpg');
+    get.mockResolvedValue([personalFood]);
+    await expect(listUserFoods()).resolves.toMatchObject([{ id: 'mine-1', imageUrl: 'wxfile://saved/meal.jpg' }]);
   });
 
   it('returns an empty list only when the personal-food endpoint is not found', async () => {

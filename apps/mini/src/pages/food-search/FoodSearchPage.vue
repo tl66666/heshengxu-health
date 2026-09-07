@@ -131,7 +131,8 @@
           >
             <view class="food-main">
               <view class="food-icon">
-                <image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
+                <image v-if="food.imageUrl" :src="food.imageUrl" class="food-photo" mode="aspectFill" />
+                <image v-else :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" />
               </view>
               <view class="food-info">
                 <text class="food-name">{{ food.name }}</text>
@@ -1527,6 +1528,7 @@ onLoad(async (options) => {
 .food-calories { font-size:20rpx; color:#8b9b90; }
 .food-icon { width:82rpx; height:82rpx; background:#f4faf5; border-color:#d8e8dc; }
 .food-icon image { width:72rpx; height:72rpx; opacity:1; }
+.food-icon .food-photo { width:100%; height:100%; border-radius:inherit; object-fit:cover; }
 .food-add, .food-stepper { flex-shrink:0; }
 .pagination { padding-top:22rpx; }
 .page-button { display:flex; align-items:center; justify-content:center; height:58rpx; min-width:116rpx; border:1rpx solid #dbe7de; border-radius:16rpx; background:#fff; line-height:58rpx; }
