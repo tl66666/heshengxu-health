@@ -34,3 +34,9 @@ npx vite showcase --host 127.0.0.1 --port 4173
 执行 `npx vite build showcase` 后，`showcase/dist/` 是可以直接部署的静态目录，原始插画会被复制到输出目录的 `assets/` 下。开发源文件仍只保留一份 `assets/illustrations/`。
 
 仓库通过 `.github/workflows/deploy-showcase.yml` 自动构建并发布 GitHub Pages。推送到 `main` 且修改展示站或插画资源时，会触发新的部署。
+
+## 双端构建入口
+
+- 微信小程序正式上传目录：`apps/mini/dist/build/mp-weixin`。先执行仓库根目录的 `scripts/build-mini.ps1`，脚本会远程化位图并校验体积；最近一次产物约 0.88 MB。
+- HBuilderX App 源码目录：`D:\heshengxu-mini\apps\mini`。这是仓库源码的英文路径联接，不是构建产物。
+- `dist/dev/mp-weixin` 仅用于开发预览，不能作为正式上传包。

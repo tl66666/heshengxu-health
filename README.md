@@ -272,3 +272,25 @@ docs/                   产品、工程、部署与发布文档
 当前版本的 API、PostgreSQL、AI 代理、食物目录、静态资源 CDN、小程序与 App 构建链路均已实现。部分以本地优先保存的健康记录尚未提供跨设备同步；App 应用商店与 iOS 发布资料仍需在对应平台完成。仓库明确记录这些边界，不使用假数据或未交付状态冒充已上线能力。
 
 健康建议仅用于健康管理和生活方式参考，不替代医生诊疗。
+
+## 微信小程序上传前速查
+
+正式上传前必须在仓库根目录执行 `scripts/build-mini.ps1`。该脚本会把位图引用切换到 CloudBase HTTPS CDN、删除构建目录中的本地位图，并校验产物体积。最近一次实际构建结果约为 **0.88 MB**。
+
+微信开发者工具只导入并上传：
+
+```text
+D:\禾伴\heban-ai-health-demo\apps\mini\dist\build\mp-weixin
+```
+
+不要上传 `apps/mini/dist/dev/mp-weixin`（开发预览目录），也不要上传未执行正式脚本的 `dist/build/mp-weixin`，后者会把约 60 MB 原图打进包并触发微信 `80051 source size exceed`。原始图片仍完整保存在 `assets/`，由 CloudBase CDN 提供运行时资源。
+
+## HBuilderX App 源码路径
+
+HBuilderX 应打开源码，不是 `dist` 目录。当前推荐使用英文路径联接：
+
+```text
+D:\heshengxu-mini\apps\mini
+```
+
+它与仓库源码 `D:\禾伴\heban-ai-health-demo\apps\mini` 指向同一份文件，修改会同步；App 云打包包含这份源码中的最新代码。

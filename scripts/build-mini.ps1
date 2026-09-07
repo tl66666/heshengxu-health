@@ -3,10 +3,10 @@ $ErrorActionPreference = 'Stop'
 Set-Location (Join-Path $PSScriptRoot '..')
 
 if (-not $env:VITE_MINI_API_BASE_URL) {
-  throw '请先设置 VITE_MINI_API_BASE_URL 为生产 API 地址。'
+  throw 'Set VITE_MINI_API_BASE_URL to the production API URL before building.'
 }
 if (-not $env:VITE_MINI_ASSET_BASE_URL -or -not $env:VITE_MINI_ASSET_BASE_URL.StartsWith('https://')) {
-  throw '请先设置 HTTPS 的 VITE_MINI_ASSET_BASE_URL，并上传 dist/mini-assets。'
+  throw 'Set VITE_MINI_ASSET_BASE_URL to an HTTPS asset CDN URL before building.'
 }
 
 node scripts/sync-illustrations.mjs
