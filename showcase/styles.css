@@ -1245,13 +1245,6 @@ h2 em {
   scroll-margin-top: 110px;
 }
 .mini-program-section { scroll-margin-top: 110px; }
-.closing-copy > img {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 22px;
-  border-radius: 50%;
-  box-shadow: 0 10px 30px rgba(56, 103, 80, 0.18);
-}
 .closing-copy > p {
   color: #7a9185;
   font-size: 10px;
