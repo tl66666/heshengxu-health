@@ -8,13 +8,52 @@
  */
 export function readImageBase64(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => reject(new Error('IMAGE_READ_TIMEOUT')), 15_000);
+    let settled = false;
+    const timeoutId = setTimeout(
+      () => finish(() => reject(new Error('IMAGE_READ_TIMEOUT'))),
+      15_000,
+    );
     const finish = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeoutId);
-      callback();
+      try {
+        callback();
+      } catch (error) {
+        reject(error);
+      }
     };
+    const plusRuntime = getPlusRuntime();
+    const platform = getUniPlatform();
+    const isAppPlus =
+      platform === 'app' ||
+      platform === 'app-plus' ||
+      Boolean(plusRuntime?.io?.resolveLocalFileSystemURL);
+    const readFromPlus = () =>
+      readWithPlus(
+        path,
+        plusRuntime,
+        (result) => finish(() => resolve(result)),
+        (error) => finish(() => reject(error)),
+      );
+
+    // App-plus exposes a getFileSystemManager compatibility shim on some
+    // versions, but its readFile callback can remain pending for camera paths.
+    // Always use the native plus.io reader first on App.
+    if (isAppPlus) {
+      readFromPlus();
+      return;
+    }
+
     const fileSystem = (typeof uni !== 'undefined' ? uni.getFileSystemManager?.() : undefined) as
-      | { readFile?: (options: { filePath: string; encoding: 'base64'; success?: (result: { data: unknown }) => void; fail?: (error: unknown) => void }) => void }
+      | {
+          readFile?: (options: {
+            filePath: string;
+            encoding: 'base64';
+            success?: (result: { data: unknown }) => void;
+            fail?: (error: unknown) => void;
+          }) => void;
+        }
       | undefined;
 
     if (fileSystem?.readFile) {
@@ -24,14 +63,14 @@ export function readImageBase64(path: string): Promise<string> {
         success: ({ data }) => {
           const value = String(data ?? '');
           if (value) finish(() => resolve(value));
-          else readWithPlus(path, (result) => finish(() => resolve(result)), (error) => finish(() => reject(error)));
+          else readFromPlus();
         },
-        fail: () => readWithPlus(path, (result) => finish(() => resolve(result)), (error) => finish(() => reject(error))),
+        fail: () => readFromPlus(),
       });
       return;
     }
 
-    readWithPlus(path, (result) => finish(() => resolve(result)), (error) => finish(() => reject(error)));
+    readFromPlus();
   });
 }
 
@@ -39,35 +78,111 @@ type PlusFileEntry = {
   file: (success: (file: Blob) => void, fail?: (error: unknown) => void) => void;
 };
 
-function readWithPlus(path: string, resolve: (value: string) => void, reject: (reason?: unknown) => void) {
-  const plusRuntime = (globalThis as {
-    plus?: {
-      io?: {
-        resolveLocalFileSystemURL?: (
-          url: string,
-          success: (entry: PlusFileEntry) => void,
-          fail?: (error: unknown) => void,
-        ) => void;
-      };
+type PlusRuntime = {
+  io?: {
+    FileReader?: new () => {
+      result?: unknown;
+      onload?: (() => void) | null;
+      onerror?: (() => void) | null;
+      readAsDataURL: (file: Blob) => void;
     };
-  }).plus;
+    resolveLocalFileSystemURL?: (
+      url: string,
+      success: (entry: PlusFileEntry) => void,
+      fail?: (error: unknown) => void,
+    ) => void;
+  };
+};
+
+function getPlusRuntime(): PlusRuntime | undefined {
+  return (
+    globalThis as {
+      plus?: {
+        io?: {
+          FileReader?: new () => {
+            result?: unknown;
+            onload?: (() => void) | null;
+            onerror?: (() => void) | null;
+            readAsDataURL: (file: Blob) => void;
+          };
+          resolveLocalFileSystemURL?: (
+            url: string,
+            success: (entry: PlusFileEntry) => void,
+            fail?: (error: unknown) => void,
+          ) => void;
+        };
+      };
+    }
+  ).plus;
+}
+
+function getUniPlatform(): string | undefined {
+  try {
+    const value = (
+      uni as unknown as { getSystemInfoSync?: () => { uniPlatform?: string } }
+    ).getSystemInfoSync?.().uniPlatform;
+    return typeof value === 'string' ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function readWithPlus(
+  path: string,
+  plusRuntime: PlusRuntime | undefined,
+  resolve: (value: string) => void,
+  reject: (reason?: unknown) => void,
+) {
   const resolveUrl = plusRuntime?.io?.resolveLocalFileSystemURL;
   if (!resolveUrl) {
     reject(new Error('IMAGE_READ_UNSUPPORTED'));
     return;
   }
 
-  resolveUrl(path, (entry) => {
-    entry.file((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const value = String(reader.result ?? '');
-        const comma = value.indexOf(',');
-        const base64 = comma >= 0 ? value.slice(comma + 1) : value;
-        base64 ? resolve(base64) : reject(new Error('IMAGE_READ_EMPTY'));
-      };
-      reader.onerror = () => reject(new Error('IMAGE_READ_FAILED'));
-      reader.readAsDataURL(file);
-    }, reject);
-  }, reject);
+  try {
+    resolveUrl(
+      path,
+      (entry) => {
+        try {
+          entry.file((file) => {
+            try {
+              const Reader =
+                plusRuntime?.io?.FileReader ??
+                (
+                  globalThis as {
+                    FileReader?: new () => {
+                      result?: unknown;
+                      onload?: (() => void) | null;
+                      onerror?: (() => void) | null;
+                      readAsDataURL: (file: Blob) => void;
+                    };
+                  }
+                ).FileReader;
+              if (!Reader) {
+                reject(new Error('IMAGE_READ_UNSUPPORTED'));
+                return;
+              }
+              const reader = new Reader();
+              reader.onload = () => {
+                const value = String(reader.result ?? '');
+                const comma = value.indexOf(',');
+                const base64 = comma >= 0 ? value.slice(comma + 1) : value;
+                if (base64) resolve(base64);
+                else reject(new Error('IMAGE_READ_EMPTY'));
+              };
+              reader.onerror = () => reject(new Error('IMAGE_READ_FAILED'));
+              reader.readAsDataURL(file);
+            } catch (error) {
+              reject(error);
+            }
+          }, reject);
+        } catch (error) {
+          reject(error);
+        }
+      },
+      reject,
+    );
+  } catch (error) {
+    reject(error);
+  }
 }

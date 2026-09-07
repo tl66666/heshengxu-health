@@ -10,7 +10,8 @@ describe('readImageBase64', () => {
   it('reads base64 through the uni file manager on mini-program runtimes', async () => {
     vi.stubGlobal('uni', {
       getFileSystemManager: () => ({
-        readFile: ({ success }: { success: (result: { data: string }) => void }) => success({ data: 'abc123' }),
+        readFile: ({ success }: { success: (result: { data: string }) => void }) =>
+          success({ data: 'abc123' }),
       }),
     });
 
@@ -19,21 +20,61 @@ describe('readImageBase64', () => {
 
   it('falls back to plus.io when the uni file manager is unavailable', async () => {
     vi.stubGlobal('uni', {});
-    vi.stubGlobal('FileReader', class {
-      result = 'data:image/jpeg;base64,Zm9vZA==';
-      onload: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      readAsDataURL() { this.onload?.(); }
-    });
     vi.stubGlobal('plus', {
       io: {
-        resolveLocalFileSystemURL: (_path: string, success: (entry: { file: (callback: (file: Blob) => void) => void }) => void) => {
+        FileReader: class {
+          result = 'data:image/jpeg;base64,Zm9vZA==';
+          onload: (() => void) | null = null;
+          onerror: (() => void) | null = null;
+          readAsDataURL() {
+            this.onload?.();
+          }
+        },
+        resolveLocalFileSystemURL: (
+          _path: string,
+          success: (entry: { file: (callback: (file: Blob) => void) => void }) => void,
+        ) => {
           success({ file: (callback) => callback(new Blob(['food'])) });
         },
       },
     });
 
     await expect(readImageBase64('/tmp/food.jpg')).resolves.toBeTypeOf('string');
+  });
+
+  it('uses the native plus reader on App even when the uni file manager exists but never calls back', async () => {
+    vi.useFakeTimers();
+    const uniReadFile = vi.fn();
+    vi.stubGlobal('uni', {
+      getFileSystemManager: () => ({ readFile: uniReadFile }),
+    });
+    vi.stubGlobal('plus', {
+      io: {
+        FileReader: class {
+          result = 'data:image/jpeg;base64,YXBwLWZvb2Q=';
+          onload: (() => void) | null = null;
+          onerror: (() => void) | null = null;
+          readAsDataURL() {
+            this.onload?.();
+          }
+        },
+        resolveLocalFileSystemURL: (
+          _path: string,
+          success: (entry: { file: (callback: (file: Blob) => void) => void }) => void,
+        ) => {
+          success({ file: (callback) => callback(new Blob(['app-food'])) });
+        },
+      },
+    });
+
+    const outcome = readImageBase64('_doc/uniapp_temp/food.jpg').then(
+      (value) => ({ value }),
+      (error: Error) => ({ error: error.message }),
+    );
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    await expect(outcome).resolves.toEqual({ value: 'YXBwLWZvb2Q=' });
+    expect(uniReadFile).not.toHaveBeenCalled();
   });
 
   it('does not wait forever when a native reader never calls back', async () => {
