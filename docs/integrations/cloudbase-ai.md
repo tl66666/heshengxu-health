@@ -41,15 +41,15 @@ CloudBase Gateway key and will return HTTP 401.
 
 ## Food image recognition
 
-The local setup defaults to a mock provider. To enable the cheaper
-`glm-4v-flash` vision model in a server environment, set the provider selector
+The local setup defaults to a mock provider. To enable the production-validated
+`glm-4.6v` vision model in a server environment, set the provider selector
 and the generic AI endpoint/key expected by the runtime:
 
 ```dotenv
 FOOD_RECOGNITION_VISION_PROVIDER=hunyuan
 CLOUDBASE_AI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 CLOUDBASE_AI_API_KEY=your-glm-provider-key
-CLOUDBASE_AI_VISION_MODEL=glm-4v-flash
+CLOUDBASE_AI_VISION_MODEL=glm-4.6v
 ```
 
 The API stores only a SHA-256 image hash for audit; the original image is not

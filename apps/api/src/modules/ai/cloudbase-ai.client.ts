@@ -49,7 +49,7 @@ export class CloudBaseAiClient {
     this.apiKey = options.apiKey ?? process.env.CLOUDBASE_AI_API_KEY ?? '';
     this.textModel = options.textModel ?? process.env.CLOUDBASE_AI_TEXT_MODEL ?? 'hy3';
     this.visionModel =
-      options.visionModel ?? process.env.CLOUDBASE_AI_VISION_MODEL ?? 'glm-4v-flash';
+      options.visionModel ?? process.env.CLOUDBASE_AI_VISION_MODEL ?? 'glm-4.6v';
     const visionBaseUrl =
       process.env.CLOUDBASE_AI_VISION_BASE_URL ??
       (this.visionModel.startsWith('glm-') ? 'https://open.bigmodel.cn/api/paas/v4' : this.baseUrl);
