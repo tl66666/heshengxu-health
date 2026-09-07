@@ -80,7 +80,7 @@
         <text v-if="error" class="error-text">{{ error }}</text>
         <view class="action-dock">
           <button class="retake-button" @tap="retry">重拍</button>
-          <button class="confirm-button" @tap="continueToConfirm">调整内容与份量</button>
+          <button class="confirm-button" @tap="continueToConfirm">检查份量并保存</button>
         </view>
       </template>
     </template>

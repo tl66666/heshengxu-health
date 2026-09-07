@@ -145,27 +145,87 @@ export class FoodRecognitionService {
       const carbohydrateG = values[3]!;
       const entry = await this.mealEntries.createSnapshot(userId, { mealType: dto.mealType, name: correctedName, grams: dto.grams, energyKcal, proteinG, fatG, carbohydrateG, recordedAt: dto.recordedAt, note: dto.note, source: 'photo_confirmed' });
       await this.prisma.foodRecognitionJob.update({ where: { id: candidate.jobId }, data: { status: 'confirmed' } });
-      return entry;
+      return { mealEntryId: entry.id, userFoodId: null, savedToLibrary: false };
     }
-    let foodReference: { foodId: string } | { userFoodId: string };
-    if (candidate.food?.nutrition && !hasNutritionOverride && !dto.name) {
-      foodReference = { foodId: candidate.food.id };
+
+    const candidateValues = [
+      candidate.estimatedEnergyKcal,
+      candidate.estimatedProteinG,
+      candidate.estimatedFatG,
+      candidate.estimatedCarbohydrateG,
+    ];
+    let nutrition: {
+      energyKcal: number;
+      proteinG: number;
+      fatG: number;
+      carbohydrateG: number;
+    };
+    if (hasNutritionOverride) {
+      const per100 = (value: number) => Math.round(((value * 100) / dto.grams) * 10) / 10;
+      nutrition = {
+        energyKcal: per100(overrideValues[0]!),
+        proteinG: per100(overrideValues[1]!),
+        fatG: per100(overrideValues[2]!),
+        carbohydrateG: per100(overrideValues[3]!),
+      };
+    } else if (
+      candidate.estimatedGrams &&
+      candidateValues.every((value) => value !== null && value !== undefined)
+    ) {
+      const per100 = (value: number) =>
+        Math.round(((value * 100) / candidate.estimatedGrams) * 10) / 10;
+      nutrition = {
+        energyKcal: per100(candidateValues[0]!),
+        proteinG: per100(candidateValues[1]!),
+        fatG: per100(candidateValues[2]!),
+        carbohydrateG: per100(candidateValues[3]!),
+      };
+    } else if (candidate.food?.nutrition) {
+      const basis = candidate.food.nutrition.basisGrams || 100;
+      const per100 = (value: number) => Math.round(((value * 100) / basis) * 10) / 10;
+      nutrition = {
+        energyKcal: per100(candidate.food.nutrition.energyKcal),
+        proteinG: per100(candidate.food.nutrition.proteinG),
+        fatG: per100(candidate.food.nutrition.fatG),
+        carbohydrateG: per100(candidate.food.nutrition.carbohydrateG),
+      };
     } else {
-      const values = hasNutritionOverride
-        ? overrideValues as number[]
-        : [candidate.estimatedEnergyKcal, candidate.estimatedProteinG, candidate.estimatedFatG, candidate.estimatedCarbohydrateG];
-      if (!candidate.estimatedGrams || values.some((value) => value === null || value === undefined)) throw new NotFoundException('识别结果缺少营养估算，请重新拍摄');
-      const nutritionBasisGrams = hasNutritionOverride ? dto.grams : candidate.estimatedGrams;
-      const per100 = (value: number) => Math.round((value * 100 / nutritionBasisGrams) * 10) / 10;
-      const nutrition = { energyKcal: per100(values[0]!), proteinG: per100(values[1]!), fatG: per100(values[2]!), carbohydrateG: per100(values[3]!) };
-      const existing = await this.prisma.userFood.findFirst({ where: { userId, name: correctedName } });
-      const personal = existing
-        ? await this.prisma.userFood.update({ where: { id: existing.id }, data: nutrition })
-        : await this.prisma.userFood.create({ data: { userId, name: correctedName, imageUrl: null, source: 'photo', ...nutrition, defaultServingLabel: '识别份量', defaultServingGrams: dto.grams } });
-      foodReference = { userFoodId: personal.id };
+      throw new NotFoundException('识别结果缺少营养估算，请重新拍摄');
     }
-    const entry = await this.mealEntries.create(userId, { mealType: dto.mealType, ...foodReference, grams: dto.grams, recordedAt: dto.recordedAt, note: dto.note, source: 'photo_confirmed' });
+
+    const existing = await this.prisma.userFood.findFirst({
+      where: { userId, name: correctedName },
+    });
+    const personal = existing
+      ? await this.prisma.userFood.update({
+          where: { id: existing.id },
+          data: {
+            ...nutrition,
+            source: 'photo',
+            defaultServingLabel: '识别份量',
+            defaultServingGrams: dto.grams,
+          },
+        })
+      : await this.prisma.userFood.create({
+          data: {
+            userId,
+            name: correctedName,
+            imageUrl: null,
+            source: 'photo',
+            ...nutrition,
+            defaultServingLabel: '识别份量',
+            defaultServingGrams: dto.grams,
+          },
+        });
+    const entry = await this.mealEntries.create(userId, {
+      mealType: dto.mealType,
+      userFoodId: personal.id,
+      grams: dto.grams,
+      recordedAt: dto.recordedAt,
+      note: dto.note,
+      source: 'photo_confirmed',
+    });
     await this.prisma.foodRecognitionJob.update({ where: { id: candidate.jobId }, data: { status: 'confirmed' } });
-    return entry;
+    return { mealEntryId: entry.id, userFoodId: personal.id, savedToLibrary: true };
   }
 }

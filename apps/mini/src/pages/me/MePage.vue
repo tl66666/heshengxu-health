@@ -74,7 +74,14 @@
           >
           <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
-        <view class="row row--last row--disabled">
+        <button class="row row--last logout-row" @tap="logout">
+          <view class="row-copy"
+            ><text class="logout-title">退出登录</text
+            ><text>清除这台设备上的登录凭证，下次使用前需要重新登录</text></view
+          >
+          <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        </button>
+        <view class="row row--disabled">
           <view class="row-copy"
             ><text>记录提醒</text><text>将在账号与通知能力接入后开放</text></view
           >
@@ -101,6 +108,7 @@ import {
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
 import { goalLabels, type HealthGoal } from '../../features/health-profile/health-profile.types.js';
 import { resetOnboarding } from '../../stores/onboarding.js';
+import { isAppRuntime, signOut } from '../../features/auth/auth-store.js';
 import { mePrimaryActions } from './me-actions.js';
 
 const date = localDate();
@@ -178,6 +186,22 @@ function resetDemo() {
       resetLocalDemoData();
       resetOnboarding();
       uni.reLaunch({ url: '/pages/onboarding/OnboardingPage' });
+    },
+  });
+}
+function logout() {
+  uni.showModal({
+    title: '退出登录',
+    content: '退出后不会删除你的健康记录，但这台设备需要重新登录才能继续使用。',
+    confirmText: '退出登录',
+    confirmColor: '#b26455',
+    success: async ({ confirm }) => {
+      if (!confirm) return;
+      try {
+        await signOut();
+      } finally {
+        uni.reLaunch({ url: isAppRuntime() ? '/pages/auth/AppAuthPage' : '/pages/bootstrap/BootstrapPage' });
+      }
     },
   });
 }
@@ -368,6 +392,12 @@ onShow(() => {
 }
 .reset-title {
   color: #b85e43;
+}
+.logout-title {
+  color: #a95f4e;
+}
+.logout-row {
+  border-top: 12rpx solid #fffdf9;
 }
 .coming {
   padding: 6rpx 10rpx;

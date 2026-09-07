@@ -17,13 +17,14 @@ describe('food candidates presentation', () => {
     expect(foodCandidatesPageSource).toContain('imagePath=');
     expect(foodCandidatesPageSource).not.toContain('confirmRecognition');
     expect(foodCandidatesPageSource).not.toContain('confirmRecognition({');
+    expect(foodCandidatesPageSource).toContain('检查份量并保存');
   });
 
   it('shows estimated calories, macros and visible meal components', () => {
     expect(foodCandidatesPageSource).toContain('class="energy-value"');
     expect(foodCandidatesPageSource).toContain('selectedCandidate?.components');
     expect(foodCandidatesPageSource).toContain('class="component-row"');
-    expect(foodCandidatesPageSource).toContain('调整内容与份量');
+    expect(foodCandidatesPageSource).toContain('检查份量并保存');
   });
 
   it('keeps retry and manual search fallbacks in failed or empty states', () => {

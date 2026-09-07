@@ -7,6 +7,7 @@ import {
   normalizeRemoteAssetBaseUrl,
   pruneGeneratedAppIcons,
   remoteMiniAssetsPlugin,
+  rewriteCachedTemplateBitmapUrls,
   rewriteRemoteBitmapUrls,
 } from '../../build/remote-assets.js';
 
@@ -42,6 +43,22 @@ describe('remote mini-program assets', () => {
 
     expect(rewriteRemoteBitmapUrls(source, baseUrl)).toBe(source);
     expect(rewriteRemoteBitmapUrls(rewriteRemoteBitmapUrls(source, baseUrl), baseUrl)).toBe(source);
+  });
+
+  it('routes static template bitmaps through the persistent asset cache', () => {
+    const source = [
+      '<image src="/static/illustrations/hero.jpg" />',
+      '<image :src="imagePath" />',
+      '<image src="/static/icons/svg/back.svg" />',
+    ].join('\n');
+
+    expect(rewriteCachedTemplateBitmapUrls(source)).toBe(
+      [
+        '<image :src="$asset(\'static/illustrations/hero.jpg\')" />',
+        '<image :src="imagePath" />',
+        '<image src="/static/icons/svg/back.svg" />',
+      ].join('\n'),
+    );
   });
 
   it('does not transform test fixtures when the production asset base is configured', () => {

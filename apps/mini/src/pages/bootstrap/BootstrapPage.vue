@@ -46,8 +46,12 @@ import {
   isSignedIn,
   isWechatLoginConfigured,
 } from '../../features/auth/auth-store.js';
+import { preloadCriticalAssets } from '../../config/asset-cache.js';
 
 onShow(async () => {
+  // Keep the branded loading screen visible until the first-run artwork is
+  // either persisted locally or has safely fallen back to the CDN.
+  await preloadCriticalAssets();
   if (isAppRuntime()) {
     const authenticated = isSignedIn() || (await ensureAppSession());
     if (!authenticated) {

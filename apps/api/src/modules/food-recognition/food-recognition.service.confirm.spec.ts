@@ -51,7 +51,11 @@ describe('FoodRecognitionService.confirm', () => {
         estimatedFatG: 12,
         estimatedCarbohydrateG: 70,
       }),
-    ).resolves.toMatchObject({ id: 'entry-1' });
+    ).resolves.toMatchObject({
+      mealEntryId: 'entry-1',
+      userFoodId: 'user-food-1',
+      savedToLibrary: true,
+    });
 
     expect(prisma.userFood.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -67,6 +71,74 @@ describe('FoodRecognitionService.confirm', () => {
     expect(mealEntries.create).toHaveBeenCalledWith(
       'user-1',
       expect.objectContaining({ userFoodId: 'user-food-1', source: 'photo_confirmed' }),
+    );
+  });
+
+  it('saves a recognized catalog match to the users own library when requested', async () => {
+    const candidate = {
+      id: 'candidate-catalog',
+      jobId: 'job-catalog',
+      foodId: 'catalog-rice',
+      nameSnapshot: '米饭',
+      estimatedGrams: 150,
+      estimatedEnergyKcal: 174,
+      estimatedProteinG: 3.9,
+      estimatedFatG: 0.5,
+      estimatedCarbohydrateG: 38.8,
+      food: {
+        id: 'catalog-rice',
+        name: '米饭',
+        nutrition: {
+          basisGrams: 100,
+          energyKcal: 116,
+          proteinG: 2.6,
+          fatG: 0.3,
+          carbohydrateG: 25.9,
+        },
+      },
+      job: { id: 'job-catalog' },
+    };
+    const prisma = {
+      foodRecognitionCandidate: { findFirst: vi.fn().mockResolvedValue(candidate) },
+      userFood: {
+        findFirst: vi.fn().mockResolvedValue(null),
+        create: vi.fn().mockResolvedValue({ id: 'my-rice', name: '米饭' }),
+      },
+      foodRecognitionJob: { update: vi.fn().mockResolvedValue({}) },
+    };
+    const mealEntries = {
+      create: vi.fn().mockResolvedValue({ id: 'entry-rice', userFoodId: 'my-rice' }),
+    };
+    const service = new FoodRecognitionService(
+      prisma as never,
+      {} as never,
+      mealEntries as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+
+    await expect(
+      service.confirm('user-1', {
+        candidateId: 'candidate-catalog',
+        mealType: 'lunch',
+        grams: 150,
+        recordedAt: '2026-09-07T04:00:00.000Z',
+        saveToLibrary: true,
+      }),
+    ).resolves.toMatchObject({ userFoodId: 'my-rice', savedToLibrary: true });
+
+    expect(prisma.userFood.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: 'user-1',
+        name: '米饭',
+        source: 'photo',
+        energyKcal: 116,
+      }),
+    });
+    expect(mealEntries.create).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ userFoodId: 'my-rice' }),
     );
   });
 });

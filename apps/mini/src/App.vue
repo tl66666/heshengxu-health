@@ -6,9 +6,11 @@ import {
   isSignedIn,
   isWechatLoginConfigured,
 } from './features/auth/auth-store.js';
+import { preloadCriticalAssets } from './config/asset-cache.js';
 
 export default {
   async onLaunch() {
+    void preloadCriticalAssets();
     if (isAppRuntime()) {
       hideNativeTabBar();
       if (!(isSignedIn() || (await ensureAppSession()))) {

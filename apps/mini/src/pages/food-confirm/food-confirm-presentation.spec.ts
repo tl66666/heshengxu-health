@@ -22,6 +22,9 @@ describe('food confirmation presentation', () => {
     expect(foodConfirmPageSource).toContain('confirmRecognition');
     expect(foodConfirmPageSource).toContain('persistUserFoodPhoto');
     expect(foodConfirmPageSource).toContain('result.userFoodId');
+    expect(foodConfirmPageSource).toContain('result.savedToLibrary');
+    expect(foodConfirmPageSource).toContain('保存到我的食物并记下这餐');
+    expect(foodConfirmPageSource).toContain('已保存到我的食物');
   });
 
   it('shows a recoverable error instead of an endless loading label', () => {

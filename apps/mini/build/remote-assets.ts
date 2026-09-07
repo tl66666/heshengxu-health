@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 import type { Plugin } from 'vite';
 
 const LOCAL_BITMAP_PATH = /(^|["'`(\s])\/static\/[^"'`\s)]+\.(?:png|jpe?g|webp|gif)/giu;
+const STATIC_TEMPLATE_BITMAP =
+  /(^|\s)src=(?:"|')\/static\/([^"']+\.(?:png|jpe?g|webp|gif))(?:"|')/giu;
 
 export function normalizeRemoteAssetBaseUrl(value?: string) {
   const normalized = value?.trim().replace(/\/+$/u, '') || '';
@@ -19,6 +21,14 @@ export function rewriteRemoteBitmapUrls(source: string, baseUrl: string) {
         return `${prefix}${normalized}${path.slice(prefix.length)}`;
       })
     : source;
+}
+
+export function rewriteCachedTemplateBitmapUrls(source: string) {
+  return source.replace(
+    STATIC_TEMPLATE_BITMAP,
+    (_match, prefix: string, path: string) =>
+      `${prefix}:src="$asset('static/${path}')"`,
+  );
 }
 
 export function remoteMiniAssetsPlugin(value?: string): Plugin {
@@ -59,7 +69,10 @@ export function remoteMiniAssetsPlugin(value?: string): Plugin {
       if (!baseUrl || id.includes('node_modules')) return null;
       if (/(?:^|[./])[^/]+\.(?:spec|test)\.[cm]?[jt]sx?$/iu.test(id)) return null;
       if (!/\.(?:vue|[cm]?[jt]s|s?css)(?:\?|$)/iu.test(id)) return null;
-      const code = rewriteRemoteBitmapUrls(source, baseUrl);
+      const cachedTemplates = id.includes('.vue')
+        ? rewriteCachedTemplateBitmapUrls(source)
+        : source;
+      const code = rewriteRemoteBitmapUrls(cachedTemplates, baseUrl);
       return code === source ? null : { code, map: null };
     },
   };

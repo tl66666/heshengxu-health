@@ -49,5 +49,8 @@ describe('release contracts', () => {
     expect(showcase).toContain('runtime/food-recognition.jpg');
     expect(showcase).toContain('type="module"');
     expect(readme).toContain('runtime/food-catalog.jpg');
+    expect(showcase).toContain('mini-program-code.jpg');
+    expect(readme).toContain('assets/showcase/mini-program-code.jpg');
+    expect(showcase).toContain('insight-report-banner.png');
   });
 });

@@ -5,6 +5,8 @@
 - 在线地址：<https://tl66666.github.io/heshengxu-health/>
 - GitHub 仓库：<https://github.com/tl66666/heshengxu-health>
 
+展示站同时提供微信小程序入口，扫描项目根目录 `assets/showcase/mini-program-code.jpg` 中的小程序码即可体验。
+
 ## 本地运行
 
 在仓库根目录执行：

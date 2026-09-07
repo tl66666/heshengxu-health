@@ -25,7 +25,7 @@
         <text class="field-label">食物名称</text>
         <input v-if="source === 'photo'" v-model="foodName" class="name-input" maxlength="120" />
         <view v-else class="catalog-title">
-          <view class="food-mark"><image :src="getFoodCategoryIcon(food.category?.slug, food.name)" mode="aspectFit" /></view>
+          <view class="food-mark"><image :src="$asset(getFoodCategoryIcon(food.category?.slug, food.name))" mode="aspectFit" /></view>
           <view><text class="food-name">{{ food.name }}</text><text class="food-meta">{{ sourceLabel }}</text></view>
         </view>
         <text v-if="source === 'photo'" class="field-help">识别不准确时，可以直接改成你熟悉的菜名</text>
@@ -86,7 +86,7 @@
 
       <text v-if="error" class="error">{{ error }}</text>
       <view class="save-dock">
-        <button class="save" :disabled="saving" @tap="save">{{ saving ? '正在保存...' : mode === 'edit' ? '保存修改' : '保存这餐' }}</button>
+        <button class="save" :disabled="saving" @tap="save">{{ saving ? '正在保存...' : mode === 'edit' ? '保存修改' : saveToLibrary ? '保存到我的食物并记下这餐' : '只记下这餐' }}</button>
       </view>
     </template>
   </view>
@@ -199,6 +199,7 @@ async function save() {
   if (!food.value || grams.value <= 0 || !foodName.value.trim()) { error.value = '请填写食物名称和有效份量'; return; }
   saving.value = true;
   error.value = '';
+  let savedToLibrary = false;
   try {
     const commonInput = { mealType: mealType.value, grams: grams.value, recordedAt: new Date().toISOString(), note: note.value || undefined };
     if (candidateId.value) {
@@ -210,6 +211,7 @@ async function save() {
         estimatedProteinG: preview.value.proteinG, estimatedFatG: preview.value.fatG,
         estimatedCarbohydrateG: preview.value.carbohydrateG,
       });
+      savedToLibrary = result.savedToLibrary;
       if (saveToLibrary.value && result.userFoodId && imagePath.value) {
         await persistUserFoodPhoto(result.userFoodId, imagePath.value);
       }
@@ -218,7 +220,12 @@ async function save() {
       if (mode.value === 'edit') await replaceMealEntry(entryId.value, { ...commonInput, ...foodReference });
       else await createMealEntry({ ...commonInput, ...foodReference });
     }
-    uni.showToast({ title: mode.value === 'edit' ? '记录已更新' : '这餐已经记好', icon: 'success' });
+      const toastTitle = mode.value === 'edit'
+        ? '记录已更新'
+        : savedToLibrary
+          ? '已保存到我的食物'
+          : '这餐已经记好';
+      uni.showToast({ title: toastTitle, icon: 'success' });
     setTimeout(() => uni.navigateBack({ delta: candidateId.value ? 2 : 1 }), 450);
   } catch { error.value = '暂时没有保存成功，请稍后再试'; }
   finally { saving.value = false; }

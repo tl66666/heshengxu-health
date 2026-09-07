@@ -135,15 +135,19 @@ export async function refreshLogin() {
 
 export async function signOut() {
   const refreshToken = uni.getStorageSync(REFRESH_KEY);
-  if (typeof refreshToken === 'string' && refreshToken) {
-    await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: accessToken() }).post(
-      '/auth/logout',
-      { refreshToken },
-    );
+  try {
+    if (typeof refreshToken === 'string' && refreshToken) {
+      await createMiniApiClient({ apiBaseUrl: apiBase(), authorization: accessToken() }).post(
+        '/auth/logout',
+        { refreshToken },
+      );
+    }
+  } finally {
+    // Local sign-out must complete even when the network is unavailable.
+    uni.removeStorageSync(ACCESS_KEY);
+    uni.removeStorageSync(REFRESH_KEY);
+    uni.removeStorageSync(USER_KEY);
   }
-  uni.removeStorageSync(ACCESS_KEY);
-  uni.removeStorageSync(REFRESH_KEY);
-  uni.removeStorageSync(USER_KEY);
 }
 
 function apiBase() {

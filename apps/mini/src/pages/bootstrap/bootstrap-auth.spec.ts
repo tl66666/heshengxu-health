@@ -15,6 +15,13 @@ describe('bootstrap authentication gate', () => {
     );
   });
 
+  it('warms critical artwork before entering the product', () => {
+    expect(bootstrapSource).toContain('preloadCriticalAssets');
+    expect(bootstrapSource.indexOf('await preloadCriticalAssets()')).toBeLessThan(
+      bootstrapSource.indexOf('const client = createMiniApiClient()'),
+    );
+  });
+
   it('does not request profile data when native WeChat authentication fails', () => {
     expect(bootstrapSource).toContain(
       'const authenticated = isSignedIn() || (await ensureWechatSession())',

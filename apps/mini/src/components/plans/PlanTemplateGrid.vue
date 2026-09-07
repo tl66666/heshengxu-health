@@ -14,7 +14,7 @@
         :style="{ '--tint': template.tint }"
         @tap="$emit('select', template)"
       >
-        <image :src="template.icon" mode="aspectFit" /><text class="template-title">{{
+        <image :src="$asset(template.icon)" mode="aspectFit" /><text class="template-title">{{
           template.title
         }}</text
         ><text class="template-note">{{ template.frequency }}</text

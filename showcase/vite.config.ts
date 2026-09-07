@@ -10,6 +10,7 @@ const showcaseAssets = [
   'illustrations/plan-hero-journal.png',
   'illustrations/program-mood.png',
   'illustrations/weekly-insight-banner.png',
+  'illustrations/insight-report-banner.png',
   'illustrations/xuxu-avatar.jpg',
   'showcase/runtime/food-catalog.jpg',
   'showcase/runtime/food-recognition.jpg',
@@ -19,6 +20,7 @@ const showcaseAssets = [
   'showcase/runtime/plans.jpg',
   'showcase/runtime/weight-management.jpg',
   'showcase/runtime/xuxu-chat.jpg',
+  'showcase/mini-program-code.jpg',
 ];
 
 const contentTypes: Record<string, string> = {

@@ -166,5 +166,9 @@ export function confirmRecognition(input: {
   estimatedFatG?: number;
   estimatedCarbohydrateG?: number;
 }) {
-  return createMiniApiClient().post<{ userFoodId?: string | null }>('/food-recognition/confirm', input);
+  return createMiniApiClient().post<{
+    mealEntryId: string;
+    userFoodId: string | null;
+    savedToLibrary: boolean;
+  }>('/food-recognition/confirm', input);
 }

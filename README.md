@@ -6,6 +6,12 @@
 
 [在线项目展示](https://tl66666.github.io/heshengxu-health/) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
 
+## 微信小程序体验
+
+扫描下方小程序码即可打开“和生序”微信小程序。小程序使用微信授权登录，与 App 共用真实生产 API、食物库、序序聊天和拍照识别能力。
+
+![和生序微信小程序码](assets/showcase/mini-program-code.jpg)
+
 ![和生序女主与序序一起运动的品牌画面](assets/illustrations/hero.jpg)
 
 ## 项目亮点

@@ -24,7 +24,7 @@
       :style="{ '--tint': planTint(plan) }"
     >
       <view class="plan-head">
-        <image :src="plan.icon" mode="aspectFit" />
+        <image :src="$asset(plan.icon)" mode="aspectFit" />
         <view class="plan-head-copy"
           ><text class="plan-title">{{ plan.title }}</text
           ><text class="plan-subtitle">{{ plan.subtitle }}</text

@@ -22,6 +22,13 @@ describe('local health data on the me page', () => {
     expect(mePageSource).not.toContain("uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' })");
   });
 
+  it('exposes a guarded logout action that routes back through authentication', () => {
+    expect(mePageSource).toContain('@tap="logout"');
+    expect(mePageSource).toContain('await signOut()');
+    expect(mePageSource).toContain('/pages/auth/AppAuthPage');
+    expect(mePageSource).toContain('/pages/bootstrap/BootstrapPage');
+  });
+
   it('clears every health record namespace while preserving auth keys', () => {
     expect(localDemoSource).toContain('removeStorageSync(PROFILE_KEY)');
     expect(localDemoSource).toContain('removeStorageSync(PLAN_KEY)');

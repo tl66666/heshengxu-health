@@ -126,7 +126,7 @@
             @tap.stop="openRecordAction(action.route)"
           >
             <view class="meal-icon-wrap">
-              <image class="meal-icon" :src="mealRecordIcons[action.label]" mode="aspectFit" />
+              <image class="meal-icon" :src="$asset(mealRecordIcons[action.label])" mode="aspectFit" />
             </view>
             <text class="meal-name">{{ action.label }}</text>
           </button>
