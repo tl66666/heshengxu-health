@@ -1,211 +1,268 @@
 # 和生序
 
-![和生序：女主与序序的晨间健康节律](assets/illustrations/hero.jpg)
+> 让健康，回到自己的节律。
 
-**[在线查看项目展示站](https://tl66666.github.io/heshengxu-health/)** · **[浏览源代码](https://github.com/tl66666/heshengxu-health)** · **[查看发布清单](docs/RELEASE-CHECKLIST.md)**
+和生序是一套由个人独立完成的 AI 健康管理产品，覆盖**微信小程序与 App**。项目从产品定义、交互与视觉设计出发，完成了 uni-app 双端客户端、NestJS API、PostgreSQL 数据模型、AI 健康对话、食物拍照识别、Docker 容器化以及 Azure / CloudBase 生产部署。
 
-> 这是一个从产品设计、客户端实现、AI 接入到云端交付都由个人完成的真实项目。展示站用于快速了解产品和工程取舍，仓库文档用于复现开发、部署和发布流程。
+[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
 
-和生序是一个由个人独立完成的健康管理项目，面向希望用轻量记录建立生活节律的人。产品把体重、饮食、饮水、运动、睡眠、心情、生理期、用药和轻断食放在同一个每日健康循环里，并用序序提供温和、可解释的陪伴。
+![和生序女主与序序一起运动的品牌画面](assets/illustrations/hero.jpg)
 
-产品视觉采用明亮、清透的日系治愈奶油水彩风格。界面强调留白、清晰层级和真实记录，不用虚构的健康结果替代用户数据，也不把 AI 建议包装成诊断。
+## 项目亮点
 
-> 健康建议仅用于生活方式参考，不提供疾病诊断、处方、药物剂量或替代就医判断。
+| 能力       | 已实现内容                                                                     |
+| ---------- | ------------------------------------------------------------------------------ |
+| 双端产品   | 一套 Vue 3 + uni-app + TypeScript 客户端，同时构建微信小程序与 App             |
+| 健康记录   | 体重、饮食、饮水、运动、睡眠、心情、生理期、用药、轻断食与计划                 |
+| 食物数据   | **49,479 条**公共食物目录，基础食材优先、分类浏览、名称/菜品/拼音搜索          |
+| 序序相机   | 识别组合菜品、拆分可见食材、估算份量/热量/三大营养素，支持用户修改与确认       |
+| 个人食物库 | AI 识别结果可保存到当前用户的“我的食物”，原始照片保留在用户手机本地            |
+| 序序聊天   | 真实大模型回复、对话自动滚动、健康安全边界与明确的失败状态                     |
+| 工程交付   | NestJS、Prisma、PostgreSQL、Docker、GHCR、Azure Container Apps、GitHub Actions |
+| 视觉系统   | 高明度日系治愈奶油水彩风格，品牌角色序序贯穿引导、首页、记录和 AI 场景         |
 
-## 项目概览
+## 真实产品
 
-| 方向     | 当前实现                                                               |
-| -------- | ---------------------------------------------------------------------- |
-| 产品     | 建档、每日记录、目标管理、趋势回看、序序陪伴形成完整健康循环           |
-| 客户端   | 一套 uni-app / Vue 3 / TypeScript 代码支持微信小程序与 App             |
-| 智能能力 | 混元文本对话、GLM 食物图片识别，结果经过用户确认后再保存               |
-| 服务端   | NestJS、Prisma、PostgreSQL，统一承担鉴权、记录与 AI 代理               |
-| 云端交付 | Docker、GitHub Actions、GHCR、Azure Container Apps、CloudBase 静态资源 |
-| 质量保障 | 类型检查、单元测试、构建检查、隐私与安全边界文档                       |
+下列图片均为 2026 年 9 月实际运行截图，不是设计稿或静态原型。
 
-展示站源码位于 [`showcase/`](showcase/README.md)，由 GitHub Pages 自动发布。页面只展示项目事实和原始水彩资源，不读取生产数据库或任何密钥。
+<table>
+  <tr>
+    <td width="33%"><img src="assets/showcase/runtime/home.jpg" alt="和生序首页" /><br/><b>每日健康首页</b><br/>目标、饮食与序序相机集中在同一入口</td>
+    <td width="33%"><img src="assets/showcase/runtime/health-records.jpg" alt="健康记录卡片" /><br/><b>健康记录矩阵</b><br/>体重、饮水、睡眠、运动、心情与照顾提醒</td>
+    <td width="33%"><img src="assets/showcase/runtime/weight-management.jpg" alt="体重管理页面" /><br/><b>体重管理</b><br/>BMI、目标差距、趋势与历史记录</td>
+  </tr>
+  <tr>
+    <td><img src="assets/showcase/runtime/food-catalog.jpg" alt="49479 条食物目录" /><br/><b>49,479 条食物目录</b><br/>公共数据与个人食物库分层</td>
+    <td><img src="assets/showcase/runtime/food-recognition.jpg" alt="猪脚饭拍照识别结果" /><br/><b>真实菜品识别</b><br/>猪脚饭、可见食材和营养估算</td>
+    <td><img src="assets/showcase/runtime/xuxu-chat.jpg" alt="序序真实 AI 对话" /><br/><b>序序 AI 陪伴</b><br/>基于真实服务响应的生活方式建议</td>
+  </tr>
+</table>
 
-## 从设计到上线
+## 序序相机如何工作
 
-项目按“先建立可用记录，再接入智能能力，最后完成云端交付”的顺序推进：
+识别流程不是“在食物库里按图片找一个相似名称”。它允许模型理解数据库中没有预置的组合菜品，并把结果转换为用户能够检查和修改的结构化数据。
 
-1. **产品与视觉**：围绕每日健康循环设计建档、记录、目标和回看路径，统一使用明亮清透的日系治愈奶油水彩视觉语言。
-2. **客户端**：用 uni-app / Vue 3 / TypeScript 复用微信小程序与 Android/iOS App 的页面、状态和接口调用。
-3. **服务端**：NestJS API 统一处理账号、健康记录、AI 代理和数据校验，Prisma 负责 PostgreSQL 数据模型与迁移。
-4. **云端交付**：Docker 构建 API 镜像，GitHub Actions 推送到 GHCR，Azure Container Apps 运行 API，CloudBase 托管静态插画资源。
-5. **发布验收**：通过健康检查、类型检查、测试、生产构建和真机验收后，再分别提交微信小程序审核或 App 签名发布。
+```mermaid
+flowchart LR
+  A[拍照或选择图片] --> B[端侧读取与校验]
+  B --> C[自有 NestJS API]
+  C --> D[GLM 视觉模型]
+  D --> E[菜名与可见食材]
+  E --> F[份量与营养估算]
+  F --> G[用户调整并确认]
+  G --> H[写入当餐记录]
+  G --> I[可选保存到我的食物]
+  A --> J[原图保留在用户手机本地]
+```
 
-展示站的 GitHub Pages 部署由 [`.github/workflows/deploy-showcase.yml`](.github/workflows/deploy-showcase.yml) 自动完成；README 或展示站的更新不会改变已经生成的 App 安装包。
+1. **端侧图片读取**：微信小程序使用小程序文件系统；App 使用原生文件读取能力，分别处理平台临时路径并转换为受控输入。
+2. **服务端代理**：图片发送给项目自己的 NestJS API。视觉模型密钥只存在 Azure 服务端 Secret / 环境变量中，不进入客户端安装包或仓库。
+3. **视觉理解**：GLM 视觉模型判断整道菜并拆分可见组成。例如猪脚饭可以拆成米饭、猪脚、卤蛋、酸菜和青菜，而不要求“猪脚饭”已存在于公共目录。
+4. **结构化营养结果**：服务端约束模型返回菜名、置信度、估算总重量、能量、蛋白质、脂肪、碳水、食材组成和估算说明。
+5. **人工确认**：AI 结果不会直接写入记录。用户可以调整名称、食材和份量，再明确确认。
+6. **双向落库**：确认后生成带营养快照的餐次记录；用户可以同时保存为个人食物，便于以后直接搜索和复用。个人食物按用户隔离，不污染 49,479 条公共目录。
 
-## 产品能力
+拍照识别属于营养估算，图片角度、遮挡、烹饪用油和调味料会带来误差，因此产品同时展示置信度与估算说明，并始终保留用户修改权。
 
-### 个人健康档案与体重目标
+## 49,479 条食物数据
+
+食物库承担的是可搜索、可计算的产品基础设施，而不是首页上的几条演示数据。
+
+- 公共目录包含主食、蔬菜菌藻、肉蛋、大豆及制品、奶类、水果、坚果、饮料、休闲零食、餐饮食品、油脂和调味品等分类。
+- 米饭、鸡蛋等常见无品牌基础食物通过 `catalogRank` 优先展示，品牌食品随后，避免大量商品名淹没日常选择。
+- 支持名称、菜品和拼音搜索，并保留分类数量与分页查询。
+- 营养数据按每 100 克保存；用户选择或编辑份量时生成该餐次的营养快照，历史记录不会因为公共数据后续调整而被悄悄改写。
+- “公共食物库”与“我的食物”是两个清晰的数据层级。AI 识别和自定义内容只归属于创建它的用户。
+
+![和生序 49,479 条公共食物目录实机截图](assets/showcase/runtime/food-catalog.jpg)
+
+## 健康管理闭环
+
+### 建档、体重与目标
 
 - 建档时记录身高、体重并即时计算 BMI。
-- 设置目标体重，首页展示当前体重、目标差距和半圆进度可视化。
-- 体重记录支持新增、编辑、删除和趋势查看。
-- 重置本机数据会清理本机保存的全部记录。
+- 设置目标体重后，以半圆进度和目标差距呈现当前阶段。
+- 每次体重记录使用真实时间，支持新增、编辑、删除、7/30/90 天趋势回顾与隐私隐藏。
 
-### 饮食与序序相机
+### 饮食、饮水与运动
 
-- 食物库支持搜索、分类、份量和营养信息。
-- 序序相机把图片发送到服务端视觉模型，返回候选食物和热量估算。
-- 识别结果必须由用户确认后，才会写入饮食记录。
-- 原始照片目前只作为识别输入，不默认保存原图。
+- 早餐、午餐、晚餐与加餐共享真实食物目录、个人食物和拍照识别流程。
+- 饮水目标可编辑，水、茶、牛奶等饮品分别记录并汇总当天实际摄入。
+- 运动记录包含活动类型、时长、强度、感受与历史回看。
 
-### 饮水、运动、睡眠与心情
+### 睡眠、心情与日常照顾
 
-- 饮水目标可编辑，支持水、茶、牛奶等饮品记录和当天汇总。
-- 运动记录包含活动类型、时长、强度和历史查看。
-- 睡眠记录使用入睡时间和醒来时间自动计算时长，并可补充睡眠质量、梦境和备注。
-- 心情记录支持情绪选择、能量感受和文字日记。
+- 睡眠使用入睡和醒来时间自动计算时长，并可补充质量、梦境与备注。
+- 心情支持情绪、能量感受和文字记录，让周报不只看到生理指标。
+- 生理期支持周期参数与预测窗口；用药支持药品、剂量、频次、时段和服用状态。
+- 轻断食包含方案选择、进食窗口、实时计时、结束记录与首页状态同步。
 
-### 生理期、用药与轻断食
+### 计划与序序陪伴
 
-- 生理期支持首次设置周期天数、经期天数、最近一次开始日期，并据此计算预计窗口。
-- 用药支持药品、剂量、频次、提醒时段、服用状态和历史记录。
-- 轻断食支持方案选择、开始/结束时间、实时计时、完成记录和首页状态同步。
-- 这些模块当前以本机保存为主，但会按当前登录账号分桶；退出或切换账号不会读取上一个账号的本机记录。跨设备同步仍是后续服务端能力，不在当前版本伪装成已完成。
+- 用户可以把目标拆成每天可完成的小行动，连续天数和周节律来自真实完成记录。
+- 序序聊天通过 CloudBase AI Gateway 连接文本模型，由服务端统一处理鉴权、上下文、超时和安全边界。
+- 序序提供健康管理与生活方式参考，不进行疾病诊断、处方判断或药物剂量决策。
 
-### 序序聊天
+## 双端设计
 
-- 小程序只调用本项目 API，不在客户端保存模型密钥。
-- API 服务端负责调用 CloudBase AI Gateway 的混元文本模型、超时处理、错误提示和安全边界。
-- 服务不可用时，界面明确显示失败原因，不伪造模型回复。
+同一套业务代码通过条件编译处理平台差异，而不是维护两个互相漂移的客户端。
+
+| 关注点    | 微信小程序                                               | App                                                   |
+| --------- | -------------------------------------------------------- | ----------------------------------------------------- |
+| 身份入口  | `wx.login` 获取临时 code，服务端换取并绑定微信身份       | 邮箱/账号与密码注册登录                               |
+| 图片读取  | 微信文件系统读取临时图片                                 | App 原生文件 API 读取相册/相机文件                    |
+| UI 与业务 | 复用 Vue 3 页面、Pinia 状态、领域规则和 API client       | 复用 Vue 3 页面、Pinia 状态、领域规则和 API client    |
+| 构建发布  | uni-app 编译到 `mp-weixin`，微信开发者工具上传           | HBuilderX 原生 App 云打包，Android 使用固定包名和签名 |
+| 数据隔离  | 服务端数据按认证用户隔离；本地数据按微信身份命名空间隔离 | 服务端数据按认证用户隔离；本地数据按账号命名空间隔离  |
+
+当前仓库能够构建微信小程序与 App；Android 安装包已完成云端打包验证。iOS 商店发布仍需要 Apple Developer 账号、证书、Bundle ID 与平台审核，不在仓库中伪装为已经上架。
 
 ## 技术架构
 
-    uni-app / Vue 3 / TypeScript
-            |
-            | HTTPS
-            v
-    NestJS API + Prisma
-            |
-            +--> Azure Database for PostgreSQL
-            +--> CloudBase AI Gateway（混元文本）
-            +--> GLM 视觉 API（食物图片识别）
+```mermaid
+flowchart TB
+  subgraph Clients[双端客户端]
+    MP[微信小程序]
+    APP[App]
+  end
 
-    原始插画 --> CloudBase 静态托管/CDN --> 小程序 downloadFile 合法域名
-    Docker 镜像 --> GitHub Container Registry --> Azure Container Apps
+  MP -->|HTTPS / Bearer Token| API
+  APP -->|HTTPS / Bearer Token| API
 
-## 技术栈
+  subgraph Azure[Azure 生产环境]
+    API[NestJS API<br/>Azure Container Apps]
+    DB[(Azure Database<br/>for PostgreSQL)]
+    API -->|Prisma| DB
+  end
 
-| 层级     | 技术                                                                        |
-| -------- | --------------------------------------------------------------------------- |
-| 客户端   | uni-app、Vue 3、TypeScript、微信小程序                                      |
-| 服务端   | NestJS、Prisma、OpenAPI                                                     |
-| 数据库   | PostgreSQL                                                                  |
-| AI       | CloudBase AI Gateway、混元文本模型、GLM 视觉模型                            |
-| 工程质量 | Vitest、TypeScript、ESLint、Prettier、GitHub Actions                        |
-| 交付     | Docker、GitHub Container Registry、Azure Container Apps、CloudBase 静态托管 |
+  API -->|文本对话| TCB[CloudBase AI Gateway]
+  API -->|图片理解| GLM[GLM Vision]
+  CDN[CloudBase 静态托管 / CDN] --> MP
+  CDN --> APP
+  GHCR[GitHub Container Registry] -->|Docker image| API
+  GHA[GitHub Actions] --> GHCR
+```
 
-## 当前生产环境
+| 层级     | 技术与职责                                                  |
+| -------- | ----------------------------------------------------------- |
+| 客户端   | Vue 3、uni-app、TypeScript、Pinia、平台条件编译             |
+| API      | NestJS、DTO 校验、用户鉴权、OpenAPI、AI 代理与错误边界      |
+| 数据层   | Prisma、PostgreSQL、迁移、关系约束与用户级查询              |
+| AI       | CloudBase AI Gateway 文本能力、GLM 视觉理解、结构化结果解析 |
+| 交付     | Docker、GitHub Container Registry、Azure Container Apps     |
+| 静态资源 | CloudBase 静态托管 / CDN，客户端使用合法下载域名            |
+| 质量     | TypeScript、ESLint、Prettier、Vitest、GitHub Actions        |
 
-| 资源       | 当前配置                                                                            |
-| ---------- | ----------------------------------------------------------------------------------- |
-| API        | https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1 |
-| 健康检查   | https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/health |
-| PostgreSQL | Azure Database for PostgreSQL Flexible Server                                       |
-| API 运行时 | Azure Container Apps，0.5 CPU / 1 GiB，最小实例 0，最大实例 2                       |
-| 静态素材   | https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban                     |
-| API 镜像   | GitHub Container Registry 公共镜像                                                  |
+## 数据、安全与可靠性
 
-生产密钥（数据库密码、AI Key、微信 AppSecret）只保存在 Azure Secret/环境变量中，不进入仓库、小程序包、日志或 README。
+- 客户端只调用自有 API，不内置数据库密码、微信 AppSecret 或 AI API Key。
+- 密钥通过 Azure Container Apps Secret / 环境变量注入，不提交到 Git 或写入 README。
+- API 从认证上下文获取 `userId`，记录查询、个人食物、AI 任务和写入操作都带用户所有权约束。
+- 小程序微信身份与 App 账号使用各自认证入口，但最终都转换为服务端会话与访问令牌。
+- 拍照识别要求用户明确授权；模型失败、超时或返回非法结构时显示真实错误，不伪造成功结果。
+- 营养估算、AI 建议与医疗诊断严格分界，界面提供相应风险说明。
 
-## 本地开发（Windows）
+## 工程质量
 
-要求：Node.js 24.x；需要联调 API 时安装 Docker Desktop。日常命令使用 npm，不要求安装 pnpm。
+最近一次完整验证记录包含：
 
-    git clone https://github.com/tl66666/heshengxu-health.git
-    cd heshengxu-health
-    npm install
+- 客户端：73 个测试文件，**198 个测试通过，1 个跳过**。
+- API：31 个测试文件，**64 个测试通过**（包含临时 PostgreSQL 上的迁移与集成测试）。
+- 生产链路：API 构建、微信小程序生产构建、App 构建、展示站构建。
+- 发布检查：数据库迁移、健康检查、合法域名、客户端密钥扫描、包体与资源路径检查。
 
-开发小程序：
+GitHub Actions 在推送和 Pull Request 时执行数据库迁移演练、类型检查、测试与生产构建。API 镜像由 Docker 构建并推送到 GHCR，再由 Azure Container Apps 拉取运行。
 
-    cd apps/mini
-    npm run dev:mp-weixin
+## 本地开发
 
-开发 API：
+环境要求：Node.js 24.x、npm；联调本地 API 时需要 Docker Desktop。
 
-    cd apps/api
-    npm run start:dev
+```powershell
+git clone https://github.com/tl66666/heshengxu-health.git
+cd heshengxu-health
+npm install
+```
 
-也可以在仓库根目录运行 start-dev.bat，再用微信开发者工具导入 apps/mini。本地环境变量以 .env.example 和 apps/api/.env.example 为模板；真实值只放在未跟踪的 .env 文件。
+启动小程序开发构建：
 
-## Docker 与 Azure 部署
+```powershell
+cd apps/mini
+npm run dev:mp-weixin
+```
 
-API 使用根目录的 Dockerfile.api 构建，容器启动时自动执行 Prisma 迁移，然后启动 NestJS 服务：
+启动 API：
 
-    docker build -f Dockerfile.api -t heshengxu-api:local .
-    docker run --rm -p 3000:3000 --env-file apps/api/.env heshengxu-api:local
+```powershell
+cd apps/api
+npm run start:dev
+```
 
-正式部署流程：
+本地环境变量以 [`.env.example`](.env.example) 和 [`apps/api/.env.example`](apps/api/.env.example) 为模板。真实值只保存在未跟踪的 `.env` 文件或云端 Secret 中。
 
-1. GitHub Actions 构建并发布 API 镜像到 GitHub Container Registry。
-2. Azure Container Apps 拉取指定镜像，使用 Azure Secret 注入数据库、AI 和微信配置。
-3. Azure Database for PostgreSQL 执行 Prisma 迁移并保存服务端业务数据。
-4. 发布后检查 /health、关键 API、数据库连接和容器日志。
+## 构建与发布
 
-完整步骤见 docs/DEPLOYMENT.md 和 docs/RELEASE-CHECKLIST.md。
+### 微信小程序
 
-## 微信小程序发布
+```powershell
+$env:VITE_MINI_API_BASE_URL='https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1'
+$env:VITE_MINI_ASSET_BASE_URL='https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban'
+./scripts/build-mini.ps1
+```
 
-使用生产地址构建：
+构建产物位于 `apps/mini/dist/build/mp-weixin`，使用微信开发者工具导入并上传。
 
-    $env:VITE_MINI_API_BASE_URL='https://api-heshengxu-prod.yellowsky-5fa044e1.eastasia.azurecontainerapps.io/api/v1'
-    $env:VITE_MINI_ASSET_BASE_URL='https://tl-d2ghzbl1p09ccaae3-1474520495.tcloudbaseapp.com/heban'
-    ./scripts/build-mini.ps1
+### App
 
-构建产物为 apps/mini/dist/build/mp-weixin，再导入微信开发者工具上传。微信公众平台已配置 API 的 request 合法域名和素材的 downloadFile 合法域名；正式发布仍需完成备案审核、隐私说明和版本审核。
+HBuilderX 应打开完整 uni-app 项目，而不是 `dist` 构建目录：
 
-## App 双端发布
+```text
+D:\禾伴\heban-ai-health-demo\apps\mini
+```
 
-apps/mini 是 uni-app 工程，可在 HBuilderX 中复用同一套页面和 API 打包 Android/iOS。App 发布还需要独立准备 Android 包名与签名证书、iOS Bundle ID 与 Apple 开发者证书、隐私政策、权限说明和真机验收。
+若 HBuilderX 在中文路径下出现打包异常，可打开指向同一份源码的英文目录联接：
 
-最近一次 Android 云端打包已经成功，安装包由 HBuilderX 云端生成。只有在客户端源码、`manifest.json`、图标、权限或 App 配置发生变化时才需要重新打包；修改 README、展示站或服务端文档不需要重复打包。
+```text
+D:\heshengxu-mini\apps\mini
+```
 
-HBuilderX 请打开这个完整项目目录：
+先运行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中选择“发行 → 原生 App-云打包”。详细步骤见 [`docs/APP-RELEASE-HBUILDERX.md`](docs/APP-RELEASE-HBUILDERX.md)。
 
-    D:\禾伴\heban-ai-health-demo\apps\mini
+### API 容器
 
-如果 HBuilderX 在中文路径下出现“40% 自动退出”或 `manifest false`，改为打开已经创建好的英文路径联接：
+```powershell
+docker build -f Dockerfile.api -t heshengxu-api:local .
+docker run --rm -p 3000:3000 --env-file apps/api/.env heshengxu-api:local
+```
 
-    D:\heshengxu-health\apps\mini
-
-这两个路径指向同一份源码，不要打开 `dist\build\app` 或 `dist\build\mp-weixin` 进行云打包。重新打包前先执行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中选择“发行 -> 原生 App-云打包”。
-
-操作指南见 docs/APP-RELEASE-HBUILDERX.md。
+生产 API 运行在 Azure Container Apps，业务数据由 Azure Database for PostgreSQL 保存；静态水彩插画通过 CloudBase CDN 分发。
 
 ## 仓库结构
 
-    apps/mini/              uni-app 小程序与 App 客户端
-    apps/api/               NestJS API、Prisma schema 与迁移
-    packages/               跨端 contracts、领域规则和共享配置
-    assets/illustrations/   原始高质量插画资源
-    scripts/                构建、素材导出和仓库检查脚本
-    infra/                  本地 Docker 与部署辅助配置
-    docs/                   产品、工程、部署和发布文档
-    prototypes/             早期静态原型，仅用于设计讨论
+```text
+apps/mini/              微信小程序与 App 共用客户端
+apps/api/               NestJS API、Prisma schema 与迁移
+packages/contracts/     跨端请求与响应契约
+packages/domain/        可测试的领域规则
+assets/illustrations/   品牌水彩插画原始资源
+assets/showcase/        项目展示所用真实运行截图
+showcase/               GitHub Pages 项目展示站
+scripts/                构建、资源处理与仓库检查脚本
+infra/                  Docker 与部署辅助配置
+docs/                   产品、工程、部署与发布文档
+```
 
-## 文档入口
+## 文档
 
-- [文档中心](docs/README.md)：按主题找到当前有效文档。
-- [上线部署](docs/DEPLOYMENT.md)：生产资源、环境变量和部署步骤。
-- [发布检查清单](docs/RELEASE-CHECKLIST.md)：小程序和 App 发布前后检查。
-- [HBuilderX 双端发布](docs/APP-RELEASE-HBUILDERX.md)：Android/iOS 打包准备。
-- [项目交接](docs/engineering/handoff.md)：给后续开发会话的工程边界。
-- [安全与公开仓库规则](SECURITY.md)：密钥、个人数据和发布安全要求。
+- [文档中心](docs/README.md)
+- [生产部署](docs/DEPLOYMENT.md)
+- [发布检查清单](docs/RELEASE-CHECKLIST.md)
+- [HBuilderX App 发布](docs/APP-RELEASE-HBUILDERX.md)
+- [工程交接说明](docs/engineering/handoff.md)
+- [安全与公开仓库规则](SECURITY.md)
+- [展示站维护说明](showcase/README.md)
 
-## 质量检查
+## 当前边界
 
-    npm exec -- prettier --check .
-    npm exec -- eslint .
-    cd apps/mini
-    npm exec -- vitest run
-    npm exec -- vue-tsc --noEmit
+当前版本的 API、PostgreSQL、AI 代理、食物目录、静态资源 CDN、小程序与 App 构建链路均已实现。部分以本地优先保存的健康记录尚未提供跨设备同步；App 应用商店与 iOS 发布资料仍需在对应平台完成。仓库明确记录这些边界，不使用假数据或未交付状态冒充已上线能力。
 
-GitHub Actions 会在推送和 Pull Request 时执行数据库迁移演练、类型检查、测试、API 构建和小程序生产构建。
-
-## 项目状态
-
-当前 API、数据库、AI 代理、静态素材 CDN 和小程序生产构建链路已部署并通过验证。饮水、心情、生理期、用药和轻断食的跨设备同步尚未完成；App 商店发布资料也需要在平台侧补齐。这些限制会在发布清单中明确标注。
+健康建议仅用于健康管理和生活方式参考，不替代医生诊疗。

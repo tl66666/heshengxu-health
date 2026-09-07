@@ -1,99 +1,137 @@
-const header = document.querySelector('[data-header]');
-const menuToggle = document.querySelector('.menu-toggle');
-const siteNav = document.querySelector('#site-nav');
+/* global IntersectionObserver, addEventListener, document, innerHeight, performance, requestAnimationFrame, scrollY, setTimeout, window */
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const header = document.querySelector('[data-header]');
+const progress = document.querySelector('[data-scroll-progress]');
+const toggle = document.querySelector('.menu-toggle');
+const nav = document.querySelector('#site-nav');
 
-const scrollProgress = document.querySelector('[data-scroll-progress]');
-const updateScrollState = () => {
-  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
-  if (scrollProgress) scrollProgress.style.transform = `scaleX(${progress})`;
-  if (header) header.classList.toggle('is-scrolled', window.scrollY > 18);
-};
-window.addEventListener('scroll', updateScrollState, { passive: true });
-updateScrollState();
+function updateScroll() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  if (progress) progress.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+  header?.classList.toggle('is-scrolled', scrollY > 12);
+}
+addEventListener('scroll', updateScroll, { passive: true });
+updateScroll();
 
-if (header && menuToggle && siteNav) {
-  const closeMenu = () => {
+toggle?.addEventListener('click', () => {
+  const open = header.classList.toggle('nav-open');
+  toggle.setAttribute('aria-expanded', String(open));
+});
+nav?.querySelectorAll('a').forEach((link) =>
+  link.addEventListener('click', () => {
     header.classList.remove('nav-open');
-    document.body.classList.remove('menu-open');
-    menuToggle.setAttribute('aria-expanded', 'false');
-  };
+    toggle?.setAttribute('aria-expanded', 'false');
+  }),
+);
 
-  menuToggle.addEventListener('click', () => {
-    const isOpen = header.classList.toggle('nav-open');
-    document.body.classList.toggle('menu-open', isOpen);
-    menuToggle.setAttribute('aria-expanded', String(isOpen));
-  });
-
-  siteNav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 900) closeMenu();
-  });
-}
-
-const parallaxArt = document.querySelector('[data-parallax-art]');
-if (parallaxArt && !reducedMotion) {
-  let frame = 0;
-  const setParallax = (x, y) => {
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => {
-      parallaxArt.style.setProperty('--pointer-x', `${x}`);
-      parallaxArt.style.setProperty('--pointer-y', `${y}`);
-    });
-  };
-  parallaxArt.addEventListener('pointermove', (event) => {
-    const bounds = parallaxArt.getBoundingClientRect();
-    setParallax(
-      (event.clientX - bounds.left) / bounds.width - 0.5,
-      (event.clientY - bounds.top) / bounds.height - 0.5,
-    );
-  });
-  parallaxArt.addEventListener('pointerleave', () => setParallax(0, 0));
-}
-
-const revealItems = document.querySelectorAll('.reveal');
-if ('IntersectionObserver' in window) {
+const reveals = document.querySelectorAll('.reveal');
+if (reducedMotion || !('IntersectionObserver' in window))
+  reveals.forEach((item) => item.classList.add('is-visible'));
+else {
   const observer = new IntersectionObserver(
-    (entries, currentObserver) => {
+    (entries, self) =>
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         entry.target.classList.add('is-visible');
-        currentObserver.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -30px' },
+        self.unobserve(entry.target);
+      }),
+    { threshold: 0.1, rootMargin: '0px 0px -40px' },
   );
-  revealItems.forEach((item) => observer.observe(item));
-} else {
-  revealItems.forEach((item) => item.classList.add('is-visible'));
+  reveals.forEach((item) => observer.observe(item));
 }
 
-const detailTrigger = document.querySelector('.detail-trigger');
-const detailPanel = document.querySelector('#detail-panel');
-if (detailTrigger && detailPanel) {
-  detailTrigger.addEventListener('click', () => {
-    const expanded = detailTrigger.getAttribute('aria-expanded') === 'true';
-    detailTrigger.setAttribute('aria-expanded', String(!expanded));
-    detailPanel.hidden = expanded;
-    const label = detailTrigger.querySelector('span');
-    if (label) label.textContent = expanded ? '展开工程细节' : '收起工程细节';
+const heroArt = document.querySelector('[data-parallax-art]');
+if (heroArt && !reducedMotion) {
+  heroArt.addEventListener('pointermove', (event) => {
+    const box = heroArt.getBoundingClientRect();
+    heroArt.style.setProperty('--px', String((event.clientX - box.left) / box.width - 0.5));
+    heroArt.style.setProperty('--py', String((event.clientY - box.top) / box.height - 0.5));
+  });
+  heroArt.addEventListener('pointerleave', () => {
+    heroArt.style.setProperty('--px', 0);
+    heroArt.style.setProperty('--py', 0);
   });
 }
 
-const sections = [...document.querySelectorAll('main section[id]')];
-const navLinks = [...document.querySelectorAll('.site-nav a[href^="#"]')];
-if ('IntersectionObserver' in window && sections.length && navLinks.length) {
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        navLinks.forEach((link) => {
-          link.classList.toggle('is-current', link.getAttribute('href') === `#${entry.target.id}`);
-        });
-      });
-    },
-    { rootMargin: '-28% 0px -60% 0px', threshold: 0 },
+const gallery = document.querySelector('[data-gallery]');
+if (gallery) {
+  const shots = [
+    [
+      './assets/showcase/runtime/onboarding.jpg',
+      './assets/showcase/runtime/home.jpg',
+      '和生序引导页实机截图',
+    ],
+    [
+      './assets/showcase/runtime/home.jpg',
+      './assets/showcase/runtime/health-records.jpg',
+      '和生序首页实机截图',
+    ],
+    [
+      './assets/showcase/runtime/health-records.jpg',
+      './assets/showcase/runtime/onboarding.jpg',
+      '健康记录矩阵实机截图',
+    ],
+  ];
+  const main = gallery.querySelector('[data-main-shot]');
+  const back = gallery.querySelector('[data-back-shot]');
+  gallery.querySelectorAll('[data-slide]').forEach((button) =>
+    button.addEventListener('click', () => {
+      const [mainSrc, backSrc, alt] = shots[Number(button.dataset.slide)];
+      gallery.classList.add('is-changing');
+      setTimeout(
+        () => {
+          main.src = mainSrc;
+          main.alt = alt;
+          back.src = backSrc;
+          gallery.classList.remove('is-changing');
+        },
+        reducedMotion ? 0 : 180,
+      );
+      gallery
+        .querySelectorAll('[data-slide]')
+        .forEach((item) => item.classList.toggle('is-active', item === button));
+    }),
   );
-  sections.forEach((section) => sectionObserver.observe(section));
 }
+
+const countObserver = new IntersectionObserver(
+  (entries, self) =>
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting || entry.target.dataset.counted) return;
+      const el = entry.target;
+      el.dataset.counted = 'true';
+      const end = Number(el.dataset.count);
+      if (reducedMotion || end < 10) {
+        el.textContent = end.toLocaleString('en-US');
+        return;
+      }
+      const start = performance.now();
+      const draw = (now) => {
+        const ratio = Math.min(1, (now - start) / 1200);
+        const eased = 1 - Math.pow(1 - ratio, 3);
+        el.textContent = Math.round(end * eased).toLocaleString('en-US');
+        if (ratio < 1) requestAnimationFrame(draw);
+      };
+      requestAnimationFrame(draw);
+      self.unobserve(el);
+    }),
+  { threshold: 0.5 },
+);
+document.querySelectorAll('[data-count]').forEach((el) => countObserver.observe(el));
+
+const dialog = document.querySelector('[data-lightbox-dialog]');
+const dialogImage = dialog?.querySelector('img');
+const dialogCaption = dialog?.querySelector('figcaption');
+document.querySelectorAll('[data-lightbox]').forEach((button) =>
+  button.addEventListener('click', () => {
+    dialogImage.src = button.dataset.lightbox;
+    dialogImage.alt = button.dataset.caption || '产品实机截图';
+    dialogCaption.textContent = button.dataset.caption || '';
+    dialog.showModal();
+  }),
+);
+dialog?.querySelector('button').addEventListener('click', () => dialog.close());
+dialog?.addEventListener('click', (event) => {
+  if (event.target === dialog) dialog.close();
+});

@@ -6,14 +6,21 @@ const root = resolve(import.meta.dirname, '../../..');
 
 describe('release contracts', () => {
   it('does not ship local-development instructions in the food catalog', () => {
-    const source = readFileSync(resolve(root, 'apps/mini/src/pages/food-search/FoodSearchPage.vue'), 'utf8');
+    const source = readFileSync(
+      resolve(root, 'apps/mini/src/pages/food-search/FoodSearchPage.vue'),
+      'utf8',
+    );
     expect(source).not.toContain('start-dev.bat');
     expect(source).not.toContain('127.0.0.1');
   });
 
   it('uses the branded Xuxu artwork for App icons', () => {
-    const manifest = JSON.parse(readFileSync(resolve(root, 'apps/mini/src/manifest.json'), 'utf8')) as {
-      'app-plus'?: { distribute?: { icons?: { android?: Record<string, string>; ios?: { appstore?: string } } } };
+    const manifest = JSON.parse(
+      readFileSync(resolve(root, 'apps/mini/src/manifest.json'), 'utf8'),
+    ) as {
+      'app-plus'?: {
+        distribute?: { icons?: { android?: Record<string, string>; ios?: { appstore?: string } } };
+      };
     };
     const icons = manifest['app-plus']?.distribute?.icons;
     expect(icons?.android?.xxhdpi).toBe('src/static/app-icons/xxhdpi.png');
@@ -24,5 +31,23 @@ describe('release contracts', () => {
     const source = readFileSync(resolve(root, 'showcase/index.html'), 'utf8');
     expect(source).not.toContain('footer-leaf');
     expect(source).not.toContain('leaf-corner-decoration.png');
+  });
+
+  it('documents the real dual-platform product and food-recognition workflow', () => {
+    const showcase = readFileSync(resolve(root, 'showcase/index.html'), 'utf8');
+    const readme = readFileSync(resolve(root, 'README.md'), 'utf8');
+    const publicStory = `${showcase}\n${readme}`;
+
+    expect(publicStory).toContain('49,479');
+    expect(publicStory).toContain('微信小程序');
+    expect(publicStory).toContain('App');
+    expect(publicStory).toContain('拍照识别');
+    expect(publicStory).toContain('用户确认');
+    expect(publicStory).toContain('https://github.com/tl66666/heshengxu-health');
+    expect(showcase).toContain('program-mood.png');
+    expect(showcase).toContain('plan-hero-journal.png');
+    expect(showcase).toContain('runtime/food-recognition.jpg');
+    expect(showcase).toContain('type="module"');
+    expect(readme).toContain('runtime/food-catalog.jpg');
   });
 });

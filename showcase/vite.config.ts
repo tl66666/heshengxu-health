@@ -1,10 +1,25 @@
-import { createReadStream, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 
 const showcaseRoot = fileURLToPath(new URL('.', import.meta.url));
 const assetsRoot = resolve(showcaseRoot, '../assets');
+const showcaseAssets = [
+  'illustrations/hero.jpg',
+  'illustrations/plan-hero-journal.png',
+  'illustrations/program-mood.png',
+  'illustrations/weekly-insight-banner.png',
+  'illustrations/xuxu-avatar.jpg',
+  'showcase/runtime/food-catalog.jpg',
+  'showcase/runtime/food-recognition.jpg',
+  'showcase/runtime/health-records.jpg',
+  'showcase/runtime/home.jpg',
+  'showcase/runtime/onboarding.jpg',
+  'showcase/runtime/plans.jpg',
+  'showcase/runtime/weight-management.jpg',
+  'showcase/runtime/xuxu-chat.jpg',
+];
 
 const contentTypes: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -43,10 +58,11 @@ function repositoryAssetsPlugin(): Plugin {
       });
     },
     generateBundle() {
-      collectAssetFiles(assetsRoot).forEach((filePath) => {
+      showcaseAssets.forEach((assetPath) => {
+        const filePath = resolve(assetsRoot, assetPath);
         this.emitFile({
           type: 'asset',
-          fileName: `assets/${relative(assetsRoot, filePath).replaceAll('\\', '/')}`,
+          fileName: `assets/${assetPath}`,
           source: readFileSync(filePath),
         });
       });
@@ -54,18 +70,11 @@ function repositoryAssetsPlugin(): Plugin {
   };
 }
 
-function collectAssetFiles(directory: string): string[] {
-  const files: string[] = [];
-  for (const entry of readdirSync(directory)) {
-    const filePath = resolve(directory, entry);
-    if (statSync(filePath).isDirectory()) files.push(...collectAssetFiles(filePath));
-    else files.push(filePath);
-  }
-  return files;
-}
-
 export default defineConfig({
   root: showcaseRoot,
   publicDir: false,
   plugins: [repositoryAssetsPlugin()],
+  build: {
+    emptyOutDir: true,
+  },
 });
