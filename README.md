@@ -4,7 +4,7 @@
 
 和生序是一套由个人独立完成的 AI 健康管理产品，覆盖**微信小程序与 App**。项目从产品定义、交互与视觉设计出发，完成了 uni-app 双端客户端、NestJS API、PostgreSQL 数据模型、AI 健康对话、食物拍照识别、Docker 容器化以及 Azure / CloudBase 生产部署。
 
-[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
+[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [下载 Android 测试包](assets/showcase/heshengxu-android.apk) · [微信小程序码](assets/showcase/mini-program-code.jpg) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
 
 ## 微信小程序体验
 

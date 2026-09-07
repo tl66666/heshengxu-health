@@ -4,6 +4,8 @@
 
 - 在线地址：<https://tl66666.github.io/heshengxu-health/>
 - GitHub 仓库：<https://github.com/tl66666/heshengxu-health>
+- Android 安装包：[`下载和生序 App`](../assets/showcase/heshengxu-android.apk)
+- 微信小程序码：[`打开小程序码`](../assets/showcase/mini-program-code.jpg)
 
 展示站同时提供微信小程序入口，扫描项目根目录 `assets/showcase/mini-program-code.jpg` 中的小程序码即可体验。
 

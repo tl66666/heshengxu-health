@@ -41,6 +41,14 @@ else {
   reveals.forEach((item) => observer.observe(item));
 }
 
+// Deep links should never land on a still-hidden section while the observer is settling.
+if (window.location.hash) {
+  document
+    .querySelector(window.location.hash)
+    ?.querySelectorAll('.reveal')
+    .forEach((item) => item.classList.add('is-visible'));
+}
+
 const heroArt = document.querySelector('[data-parallax-art]');
 if (heroArt && !reducedMotion) {
   heroArt.addEventListener('pointermove', (event) => {
