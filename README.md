@@ -4,7 +4,13 @@
 
 和生序是一套由个人独立完成的 AI 健康管理产品，覆盖**微信小程序与 App**。项目从产品定义、交互与视觉设计出发，完成了 uni-app 双端客户端、NestJS API、PostgreSQL 数据模型、AI 健康对话、食物拍照识别、Docker 容器化以及 Azure / CloudBase 生产部署。
 
-[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [下载 Android 测试包](assets/showcase/heshengxu-android.apk) · [微信小程序码](assets/showcase/mini-program-code.jpg) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
+[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [下载 Android 测试包（GitHub 直链）](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk) · [微信小程序码](assets/showcase/mini-program-code.jpg) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
+
+### App 下载
+
+在 GitHub 上请使用下面的直链下载，不要进入 APK 文件预览页：
+
+[下载和生序 Android App](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk)
 
 ## 微信小程序体验
 
@@ -231,7 +237,7 @@ D:\禾伴\heban-ai-health-demo\apps\mini
 D:\heshengxu-mini\apps\mini
 ```
 
-Android 安装包下载：[`assets/showcase/heshengxu-android.apk`](assets/showcase/heshengxu-android.apk)。这是当前 HBuilderX 云打包测试包，正式商店发布仍需完成签名、隐私协议和审核。
+Android 安装包下载：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk)。仓库内文件位于 [`assets/showcase/heshengxu-android.apk`](assets/showcase/heshengxu-android.apk)，这是当前 HBuilderX 云打包测试包，正式商店发布仍需完成签名、隐私协议和审核。
 
 先运行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中选择“发行 → 原生 App-云打包”。详细步骤见 [`docs/APP-RELEASE-HBUILDERX.md`](docs/APP-RELEASE-HBUILDERX.md)。
 

@@ -17,9 +17,11 @@
 }
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 body {
   margin: 0;
+  overflow-x: hidden;
   color: var(--ink);
   background: var(--cream);
   font-family:
@@ -203,7 +205,8 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: 54% center;
+  animation: hero-drift 18s ease-in-out infinite alternate;
 }
 .hero::before {
   position: absolute;
@@ -211,13 +214,11 @@ img {
   inset: 0;
   content: '';
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 253, 248, 0.98) 0%,
-    rgba(255, 253, 248, 0.9) 34%,
-    rgba(255, 253, 248, 0.48) 58%,
-    rgba(255, 253, 248, 0.08) 100%
-  );
+  background: transparent;
+}
+@keyframes hero-drift {
+  from { transform: scale(1.01) translate3d(0, 0, 0); }
+  to { transform: scale(1.04) translate3d(-0.7%, -0.4%, 0); }
 }
 .hero-copy {
   position: relative;
@@ -1461,9 +1462,10 @@ footer {
   .hero::before {
     background: linear-gradient(
       180deg,
-      rgba(255, 253, 248, 0.98) 0%,
-      rgba(255, 253, 248, 0.86) 44%,
-      rgba(255, 253, 248, 0.24) 100%
+      #fffdf8 0%,
+      #fffdf8 42%,
+      rgba(255, 253, 248, 0.56) 58%,
+      rgba(255, 253, 248, 0) 100%
     );
   }
   .hero h1 {
@@ -1692,6 +1694,7 @@ footer {
     scroll-behavior: auto;
   }
   .hero-glass i,
+  .hero-background,
   .scan-line,
   .catalog-orbit,
   .tech-marquee div {
