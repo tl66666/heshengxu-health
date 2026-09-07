@@ -40,3 +40,4 @@ npx vite showcase --host 127.0.0.1 --port 4173
 - 微信小程序正式上传目录：`apps/mini/dist/build/mp-weixin`。先执行仓库根目录的 `scripts/build-mini.ps1`，脚本会远程化位图并校验体积；最近一次产物约 0.88 MB。
 - HBuilderX App 源码目录：`D:\heshengxu-mini\apps\mini`。这是仓库源码的英文路径联接，不是构建产物。
 - `dist/dev/mp-weixin` 仅用于开发预览，不能作为正式上传包。
+- Android 测试包：[`assets/showcase/heshengxu-android.apk`](../assets/showcase/heshengxu-android.apk)。

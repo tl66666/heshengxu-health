@@ -21,9 +21,11 @@ const showcaseAssets = [
   'showcase/runtime/weight-management.jpg',
   'showcase/runtime/xuxu-chat.jpg',
   'showcase/mini-program-code.jpg',
+  'showcase/heshengxu-android.apk',
 ];
 
 const contentTypes: Record<string, string> = {
+  '.apk': 'application/vnd.android.package-archive',
   '.css': 'text/css; charset=utf-8',
   '.gif': 'image/gif',
   '.jpeg': 'image/jpeg',

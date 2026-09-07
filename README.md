@@ -231,6 +231,8 @@ D:\禾伴\heban-ai-health-demo\apps\mini
 D:\heshengxu-mini\apps\mini
 ```
 
+Android 安装包下载：[`assets/showcase/heshengxu-android.apk`](assets/showcase/heshengxu-android.apk)。这是当前 HBuilderX 云打包测试包，正式商店发布仍需完成签名、隐私协议和审核。
+
 先运行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中选择“发行 → 原生 App-云打包”。详细步骤见 [`docs/APP-RELEASE-HBUILDERX.md`](docs/APP-RELEASE-HBUILDERX.md)。
 
 ### API 容器
