@@ -49,14 +49,35 @@ function isAccessTokenUsable(token: string | undefined) {
   const encodedPayload = token.split('.')[0];
   if (!encodedPayload) return false;
   try {
-    const normalized = encodedPayload.replace(/-/gu, '+').replace(/_/gu, '/');
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-    if (typeof atob !== 'function') return false;
-    const payload = JSON.parse(atob(padded)) as { exp?: number; typ?: string };
+    const payload = JSON.parse(decodeBase64Url(encodedPayload)) as {
+      exp?: number;
+      typ?: string;
+    };
     return payload.typ === 'access' && typeof payload.exp === 'number' && payload.exp > Date.now();
   } catch {
     return false;
   }
+}
+
+function decodeBase64Url(value: string) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const normalized = value.replace(/-/gu, '+').replace(/_/gu, '/').replace(/=+$/u, '');
+  const bytes: number[] = [];
+  let buffer = 0;
+  let bitCount = 0;
+
+  for (const character of normalized) {
+    const index = alphabet.indexOf(character);
+    if (index < 0) throw new Error('INVALID_BASE64URL');
+    buffer = (buffer << 6) | index;
+    bitCount += 6;
+    if (bitCount >= 8) {
+      bitCount -= 8;
+      bytes.push((buffer >> bitCount) & 0xff);
+    }
+  }
+
+  return decodeURIComponent(bytes.map((byte) => `%${byte.toString(16).padStart(2, '0')}`).join(''));
 }
 
 export function isWechatLoginConfigured() {

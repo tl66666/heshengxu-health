@@ -15,6 +15,17 @@ describe('auth session state', () => {
     expect(isSignedIn()).toBe(true);
   });
 
+  it('accepts an unexpired access token when the mini program runtime has no atob', () => {
+    const payload = Buffer.from(
+      JSON.stringify({ typ: 'access', exp: Date.now() + 60_000 }),
+      'utf8',
+    ).toString('base64url');
+    vi.stubGlobal('atob', undefined);
+    vi.stubGlobal('uni', { getStorageSync: () => `${payload}.signature` });
+
+    expect(isSignedIn()).toBe(true);
+  });
+
   it('rejects an expired access token issued by the API', () => {
     const payload = btoa(JSON.stringify({ typ: 'access', exp: Date.now() - 1_000 }));
     vi.stubGlobal('uni', { getStorageSync: () => `${payload}.signature` });
