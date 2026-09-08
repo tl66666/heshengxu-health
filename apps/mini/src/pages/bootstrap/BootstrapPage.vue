@@ -39,31 +39,19 @@ import { onShow } from '@dcloudio/uni-app';
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
-import {
-  ensureAppSession,
-  ensureWechatSession,
-  isAppRuntime,
-  isSignedIn,
-  isWechatLoginConfigured,
-} from '../../features/auth/auth-store.js';
+import { ensureAppSession, isSignedIn } from '../../features/auth/auth-store.js';
+import { currentUniPlatform, resolveAuthEntry } from '../../features/auth/auth-routing.js';
 import { preloadCriticalAssets } from '../../config/asset-cache.js';
 
 onShow(async () => {
   // Keep the branded loading screen visible until the first-run artwork is
   // either persisted locally or has safely fallen back to the CDN.
   await preloadCriticalAssets();
-  if (isAppRuntime()) {
-    const authenticated = isSignedIn() || (await ensureAppSession());
-    if (!authenticated) {
-      uni.reLaunch({ url: '/pages/auth/AppAuthPage' });
-      return;
-    }
-  } else if (isWechatLoginConfigured()) {
-    const authenticated = isSignedIn() || (await ensureWechatSession());
-    if (!authenticated) {
-      promptWechatLoginRetry();
-      return;
-    }
+  const signedIn = isSignedIn() || (await ensureAppSession());
+  const authEntry = resolveAuthEntry({ platform: currentUniPlatform(), signedIn });
+  if (authEntry) {
+    uni.reLaunch({ url: authEntry });
+    return;
   }
   const client = createMiniApiClient();
 
@@ -101,18 +89,6 @@ onShow(async () => {
     uni.redirectTo({ url: '/pages/onboarding/OnboardingPage' });
   }, 1200);
 });
-
-function promptWechatLoginRetry() {
-  uni.showModal({
-    title: '微信登录未完成',
-    content: '暂时没有连接到你的账号数据，请检查网络后重新连接。',
-    confirmText: '重新连接',
-    showCancel: false,
-    success: ({ confirm }) => {
-      if (confirm) uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
-    },
-  });
-}
 </script>
 
 <style scoped>

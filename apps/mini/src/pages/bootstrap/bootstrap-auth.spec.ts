@@ -3,9 +3,9 @@ import bootstrapSource from './BootstrapPage.vue?raw';
 
 describe('bootstrap authentication gate', () => {
   it('requires an App session before reading local profile or entering onboarding', () => {
-    expect(bootstrapSource).toContain('isAppRuntime()');
     expect(bootstrapSource).toContain('isSignedIn()');
-    expect(bootstrapSource).toContain('/pages/auth/AppAuthPage');
+    expect(bootstrapSource).toContain('resolveAuthEntry');
+    expect(bootstrapSource).toContain('currentUniPlatform()');
   });
 
   it('checks authentication before using cached profile data', () => {
@@ -22,13 +22,11 @@ describe('bootstrap authentication gate', () => {
     );
   });
 
-  it('does not request profile data when native WeChat authentication fails', () => {
-    expect(bootstrapSource).toContain(
-      'const authenticated = isSignedIn() || (await ensureWechatSession())',
-    );
-    expect(bootstrapSource.indexOf('if (!authenticated)')).toBeLessThan(
+  it('sends signed-out WeChat users to the explicit authorization page before profile reads', () => {
+    expect(bootstrapSource).toContain('const authEntry = resolveAuthEntry');
+    expect(bootstrapSource.indexOf('const authEntry = resolveAuthEntry')).toBeLessThan(
       bootstrapSource.indexOf('const client = createMiniApiClient()'),
     );
-    expect(bootstrapSource).toContain('promptWechatLoginRetry()');
+    expect(bootstrapSource).not.toContain('promptWechatLoginRetry()');
   });
 });

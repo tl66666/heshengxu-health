@@ -15,6 +15,13 @@
       }
     },
     {
+      "path": "pages/auth/WechatAuthPage",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "微信授权登录"
+      }
+    },
+    {
       "path": "pages/onboarding/OnboardingPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "开始了解自己" }
     },

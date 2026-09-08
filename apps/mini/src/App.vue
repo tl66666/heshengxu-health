@@ -1,11 +1,5 @@
 <script lang="ts">
-import {
-  ensureAppSession,
-  ensureWechatSession,
-  isAppRuntime,
-  isSignedIn,
-  isWechatLoginConfigured,
-} from './features/auth/auth-store.js';
+import { isAppRuntime } from './features/auth/auth-store.js';
 import { preloadCriticalAssets } from './config/asset-cache.js';
 
 export default {
@@ -13,13 +7,6 @@ export default {
     void preloadCriticalAssets();
     if (isAppRuntime()) {
       hideNativeTabBar();
-      if (!(isSignedIn() || (await ensureAppSession()))) {
-        setTimeout(() => uni.redirectTo({ url: '/pages/auth/AppAuthPage' }), 0);
-      }
-      return;
-    }
-    if (isWechatLoginConfigured() && !isSignedIn()) {
-      await ensureWechatSession();
     }
   },
   onShow() {

@@ -64,11 +64,12 @@ describe('navigation contracts', () => {
     }
   });
 
-  it('hides the native tab bar only for App builds', async () => {
+  it('hides the native tab bar only for App builds and leaves authentication to bootstrap', async () => {
     const appSource = await import('../App.vue?raw');
     expect(appSource.default).toMatch(/hideTabBar\(\{ animation: false \}\)/u);
     expect(appSource.default).toMatch(/isAppRuntime\(\)/u);
-    expect(appSource.default).toMatch(/ensureAppSession\(\)/u);
+    expect(appSource.default).not.toMatch(/ensureAppSession\(\)/u);
+    expect(appSource.default).not.toMatch(/ensureWechatSession\(\)/u);
   });
 
   it('re-applies native tab bar hiding after the custom tab bar mounts', () => {
