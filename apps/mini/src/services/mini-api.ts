@@ -1,6 +1,7 @@
 import type { ApiFailure, ApiSuccess } from '../../../../packages/contracts/src/index.js';
 import { resolveMiniRuntime, type MiniRuntime } from '../config/runtime.js';
 import { createApiClient } from './api-client.js';
+import { toRuntimeError } from '../features/auth/wechat-auth-error.js';
 
 type ApiMethod = 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE';
 
@@ -69,7 +70,7 @@ function requestWithUni<T>({
             data: response.data as ApiSuccess<T> | ApiFailure,
           }),
         ),
-      fail: (reason) => finish(() => reject(reason)),
+      fail: (reason) => finish(() => reject(toRuntimeError(reason))),
     });
   });
 }

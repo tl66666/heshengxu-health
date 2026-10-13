@@ -1,4 +1,5 @@
 import { createMiniApiClient } from '../../services/mini-api.js';
+import { toRuntimeError } from './wechat-auth-error.js';
 import { resolveMiniRuntime } from '../../config/runtime.js';
 import { migrateGuestPlansToUser } from '../plans/plan-store.js';
 
@@ -103,7 +104,7 @@ export function isAppRuntime() {
 
 export async function loginWithWechat() {
   const login = await new Promise<{ code: string }>((resolve, reject) => {
-    uni.login({ provider: 'weixin', success: resolve, fail: reject });
+    uni.login({ provider: 'weixin', success: resolve, fail: (reason) => reject(toRuntimeError(reason)) });
   });
   const result = await createMiniApiClient({
     apiBaseUrl: apiBase(),

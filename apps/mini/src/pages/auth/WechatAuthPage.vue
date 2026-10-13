@@ -41,6 +41,7 @@
 import { onLoad } from '@dcloudio/uni-app';
 import { ref } from 'vue';
 import { isAppRuntime, isSignedIn, loginWithWechat } from '../../features/auth/auth-store.js';
+import { readableWechatError } from '../../features/auth/wechat-auth-error.js';
 
 const submitting = ref(false);
 const errorMessage = ref('');
@@ -50,7 +51,11 @@ onLoad(() => {
     uni.reLaunch({ url: '/pages/auth/AppAuthPage' });
     return;
   }
-  if (isSignedIn()) uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
+  if (isSignedIn()) {
+    uni.reLaunch({ url: '/pages/bootstrap/BootstrapPage' });
+    return;
+  }
+  void authorize();
 });
 
 async function authorize() {
@@ -67,13 +72,6 @@ async function authorize() {
   }
 }
 
-function readableWechatError(error: unknown) {
-  const message = error instanceof Error ? error.message : '';
-  if (/配置|APP_SECRET|40013|40125/u.test(message)) return '微信登录配置暂时不可用，请稍后再试。';
-  if (/40029|40163|凭证|code/iu.test(message)) return '本次授权已过期，请重新连接微信。';
-  if (/timeout|network|request:fail/iu.test(message)) return '网络连接不稳定，请检查网络后重新连接。';
-  return '暂时没有连接成功，请稍后重新连接。';
-}
 </script>
 
 <style scoped>

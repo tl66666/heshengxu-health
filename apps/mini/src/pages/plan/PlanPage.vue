@@ -22,6 +22,7 @@
       ><button @tap="openSetup">调整</button></view
     >
 
+    <LibraryBridge />
     <PlanTaskList :plans="plans" @toggle="toggleTask" @manage="openManage" />
     <PlanWeekReview :plans="plans" />
     <PlanTemplateGrid @select="addTemplate" @custom="sheetVisible = true" />
@@ -44,6 +45,7 @@
 import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
+import LibraryBridge from '../../components/LibraryBridge.vue';
 import PlanHero from '../../components/plans/PlanHero.vue';
 import PlanTaskList from '../../components/plans/PlanTaskList.vue';
 import PlanTemplateGrid from '../../components/plans/PlanTemplateGrid.vue';

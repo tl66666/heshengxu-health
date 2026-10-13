@@ -4,7 +4,7 @@
       ><view
         ><text class="section-title">正在进行</text
         ><text class="section-note">今天完成一点点即可</text></view
-      ><text class="count">{{ completedTotal }}/{{ totalTasks }}</text></view
+      ><text class="count">{{ totalTasks ? `${completedTotal}/${totalTasks}` : '暂无任务' }}</text></view
     >
     <scroll-view scroll-x class="filters" show-scrollbar="false">
       <button

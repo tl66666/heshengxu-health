@@ -10,6 +10,7 @@ describe('bootstrap authentication gate', () => {
 
   it('checks authentication before using cached profile data', () => {
     expect(bootstrapSource.indexOf('ensureAppSession')).toBeGreaterThan(-1);
+    expect(bootstrapSource.indexOf('ensureWechatSession')).toBeGreaterThan(-1);
     expect(bootstrapSource.indexOf('const localProfile')).toBeGreaterThan(
       bootstrapSource.indexOf('ensureAppSession'),
     );

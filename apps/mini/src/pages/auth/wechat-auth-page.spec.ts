@@ -14,6 +14,8 @@ describe('WeChat authorization page', () => {
 
   it('keeps authorization failures on the page with a readable retry state', () => {
     expect(pageSource).toContain('errorMessage.value');
+    expect(pageSource).toContain("readableWechatError");
+    expect(pageSource).toContain('void authorize()');
     expect(pageSource).toContain('重新连接');
   });
 

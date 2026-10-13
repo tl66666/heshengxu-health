@@ -1,14 +1,9 @@
 <template>
   <view class="page sleep-page">
-    <view class="nav"
-      ><button class="back" aria-label="返回" @tap="goBack"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button
-      ><view
-        ><text class="title">睡眠记录</text><text class="date">{{ dateLabel }}</text></view
-      ><view class="nav-space"
-    /></view>
+    <AppNavBar title="睡眠记录" route="/pages/sleep/SleepDetailPage" /><view class="detail-date-chip">{{ dateLabel }}</view>
     <view class="hero"
       ><view class="art-stage"
-        ><image src="/static/illustrations/program-sleep.png" mode="widthFix" /></view
+        ><image src="/static/illustrations/program-sleep.png" mode="aspectFit" /></view
       ><view class="hero-copy"
         ><text>把昨晚的安稳，留给今天</text><text>序序会帮你把作息和梦境轻轻收好</text></view
       ></view
@@ -89,10 +84,13 @@
         ></view
       ><view v-else class="empty">保存后，这里会出现你的睡眠记录。</view></view
     >
+      <DetailReadingCard guide-id="muscle-recovery" heading="看看这一周的恢复与安排" />
   </view>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import DetailReadingCard from '../../components/DetailReadingCard.vue';
+import AppNavBar from '../../components/AppNavBar.vue';
 import { onShow } from '@dcloudio/uni-app';
 import {
   formatSleepDuration,

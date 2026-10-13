@@ -1,4 +1,57 @@
 /* global IntersectionObserver, addEventListener, document, innerHeight, performance, requestAnimationFrame, scrollY, setTimeout, window */
+import { libraryScenes } from './feature-story.js';
+import downloads from '../assets/showcase/downloads.json';
+
+const libraryStory = document.querySelector('[data-library-story]');
+if (libraryStory) {
+  const buttons = [...libraryStory.querySelectorAll('[data-library-scene]')];
+  function showLibraryScene(button) {
+    const scene = libraryScenes.find((item) => item.id === button.dataset.libraryScene);
+    if (!scene) return;
+    buttons.forEach((item) => {
+      item.setAttribute('aria-selected', String(item === button));
+      item.tabIndex = item === button ? 0 : -1;
+    });
+    const panel = libraryStory.querySelector('[role=tabpanel]');
+    panel.setAttribute('aria-labelledby', button.id);
+    for (const [selector, value] of [
+      ['title', scene.title],
+      ['copy', scene.copy],
+      ['detail', scene.detail],
+      ['label', scene.label],
+    ])
+      libraryStory.querySelector(`[data-library-${selector}]`).textContent = value;
+    const img = libraryStory.querySelector('[data-library-image]');
+    img.src = scene.image;
+    img.alt = scene.alt;
+    const zoom = libraryStory.querySelector('[data-library-zoom]');
+    zoom.dataset.lightbox = scene.image;
+    zoom.dataset.caption = scene.alt;
+  }
+  buttons.forEach((button, index) => {
+    button.addEventListener('click', () => showLibraryScene(button));
+    button.addEventListener('keydown', (event) => {
+      let next;
+      if (event.key === 'ArrowRight') next = (index + 1) % buttons.length;
+      else if (event.key === 'ArrowLeft') next = (index + buttons.length - 1) % buttons.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = buttons.length - 1;
+      if (next === undefined) return;
+      event.preventDefault();
+      buttons[next].focus();
+      showLibraryScene(buttons[next]);
+    });
+  });
+}
+document.querySelectorAll('[data-apk-version]').forEach((el) => {
+  el.textContent = downloads.android.version;
+});
+document.querySelectorAll('[data-apk-updated]').forEach((el) => {
+  el.textContent = downloads.android.updatedAt;
+});
+document.querySelectorAll('[data-apk-size]').forEach((el) => {
+  el.textContent = `${(downloads.android.sizeBytes / 1048576).toFixed(2)} MiB`;
+});
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const header = document.querySelector('[data-header]');

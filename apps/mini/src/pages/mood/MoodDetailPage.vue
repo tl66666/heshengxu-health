@@ -1,14 +1,9 @@
 <template>
   <view class="page mood-page">
-    <view class="nav"
-      ><button class="back" aria-label="返回" @tap="goBack"><image src="/static/icons/svg/back.svg" mode="aspectFit" /></button
-      ><view
-        ><text class="title">心情记录</text><text class="date">{{ dateLabel }}</text></view
-      ><view class="nav-space"
-    /></view>
+    <AppNavBar title="心情记录" route="/pages/mood/MoodDetailPage" /><view class="detail-date-chip">{{ dateLabel }}</view>
     <view class="intro"
       ><view class="art-stage"
-        ><image src="/static/illustrations/program-mood-crop.png" mode="widthFix" /></view
+        ><image src="/static/illustrations/program-mood-crop.png" mode="aspectFit" /></view
       ><view class="intro-copy"
         ><text>给今天的心情留一页</text><text>不用解释得很完整，先把此刻收好</text></view
       ></view
@@ -65,10 +60,13 @@
         ></view
       ><view v-else class="empty">保存后，这里会出现你的心情轨迹。</view></view
     >
+      <DetailReadingCard guide-id="sun-data" heading="了解如何整理自己的记录" />
   </view>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
+import DetailReadingCard from '../../components/DetailReadingCard.vue';
+import AppNavBar from '../../components/AppNavBar.vue';
 import { onShow } from '@dcloudio/uni-app';
 import {
   listWellnessJournals,

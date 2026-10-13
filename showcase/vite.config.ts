@@ -22,6 +22,12 @@ const showcaseAssets = [
   'showcase/runtime/xuxu-chat.jpg',
   'showcase/mini-program-code.jpg',
   'showcase/heshengxu-android.apk',
+  'showcase/downloads.json',
+  'showcase/runtime/library-20261013.jpg',
+  'showcase/runtime/lean-hub-20261013.jpg',
+  'showcase/runtime/bible-directory-20261013.jpg',
+  'showcase/runtime/bible-reader-20261013.jpg',
+  'showcase/runtime/home-20261013.jpg',
 ];
 
 const contentTypes: Record<string, string> = {

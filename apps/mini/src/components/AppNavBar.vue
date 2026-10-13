@@ -1,27 +1,36 @@
 <template>
-  <view class="nav-bar-wrapper">
-    <!-- 状态栏占位 -->
-    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }" />
-    
-    <!-- 导航栏 -->
+  <view
+    :class="['nav-bar-wrapper', `nav-tone-${tone}`]"
+    :style="{ '--nav-height': layout.barHeight + 'px', '--nav-right': layout.rightInset + 'px' }"
+  >
+    <view class="status-bar" :style="{ height: layout.statusBarHeight + 'px' }" />
     <view class="nav-bar">
-      <button v-if="!backDisabled" class="icon-action" aria-label="返回" @tap="back">
+      <button
+        v-if="!backDisabled"
+        class="icon-action"
+        aria-label="返回"
+        hover-class="nav-action-pressed"
+        @tap="back"
+      >
         <image class="icon-image" src="/static/icons/svg/back.svg" mode="aspectFit" />
       </button>
       <view v-else class="placeholder" />
-      <text class="title">{{ title }}</text>
+      <view class="nav-title-group"
+        ><text v-if="tone !== 'default'" class="nav-caption">{{
+          tone === 'paper' ? '阅读手记' : '和生序 · 生活指南'
+        }}</text
+        ><text class="title">{{ title }}</text></view
+      >
       <button v-if="closeLabel" class="icon-action close" aria-label="退出" @tap="close">
         <image class="icon-image" src="/static/icons/svg/close.svg" mode="aspectFit" />
       </button>
-      <view v-else class="placeholder" />
     </view>
   </view>
 </template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { ordinaryBackTarget } from './navigation.js';
-
+import { navigationLayout } from './navigation-layout.js';
 const props = defineProps<{
   title: string;
   route: string;
@@ -30,23 +39,31 @@ const props = defineProps<{
   backMode?: 'navigate' | 'emit';
 }>();
 const emit = defineEmits<{ close: []; back: [] }>();
-
-function readStatusBarHeight() {
+const tone = computed(() =>
+  /GuidePage|BiblePage/.test(props.route)
+    ? 'paper'
+    : /version-answer|lean-muscle/.test(props.route)
+      ? 'library'
+      : 'default',
+);
+function readLayout() {
   try {
-    return Number(uni.getSystemInfoSync().statusBarHeight || 0);
+    const system = uni.getSystemInfoSync();
+    let capsule;
+    try {
+      capsule = uni.getMenuButtonBoundingClientRect?.();
+    } catch {
+      /* App has no native capsule. */
+    }
+    return navigationLayout(system, capsule);
   } catch {
-    return 0;
+    return navigationLayout();
   }
 }
-
-const statusBarHeight = ref(readStatusBarHeight());
-
+const layout = ref(readLayout());
 onMounted(() => {
-  // 获取系统状态栏高度
-  const systemInfo = uni.getSystemInfoSync();
-  statusBarHeight.value = systemInfo.statusBarHeight || 0;
+  layout.value = readLayout();
 });
-
 function back() {
   if (props.backMode === 'emit') {
     emit('back');
@@ -63,7 +80,6 @@ function close() {
   emit('close');
 }
 </script>
-
 <style scoped>
 .nav-bar-wrapper {
   position: sticky;
@@ -71,66 +87,104 @@ function close() {
   z-index: 100;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  background: rgba(255, 253, 249, 0.95);
-  border-bottom: 1rpx solid rgba(232, 223, 216, 0.86);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  --app-nav-surface: rgba(255, 253, 249, 0.9);
+  --app-nav-ink: #405447;
+  --app-nav-rule: rgba(90, 105, 89, 0.06);
+  background: var(--app-nav-surface);
+  border-bottom: 1rpx solid var(--app-nav-rule);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
-
+.nav-tone-library {
+  --app-nav-surface: rgba(247, 242, 232, 0.94);
+  --app-nav-ink: #685a45;
+  --app-nav-rule: rgba(157, 124, 77, 0.1);
+  --app-nav-button: rgba(245, 235, 216, 0.65);
+}
+.nav-tone-paper {
+  --app-nav-surface: rgba(240, 231, 213, 0.95);
+  --app-nav-ink: #755b3c;
+  --app-nav-rule: rgba(157, 124, 77, 0.14);
+  --app-nav-button: rgba(242, 229, 205, 0.7);
+}
 .status-bar {
   width: 100%;
-  background: #fbfaf6;
+  background: transparent;
 }
-
 .nav-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 76rpx;
-  padding: 0 24rpx;
-  background: transparent;
+  gap: 16rpx;
+  min-height: var(--nav-height, 44px);
+  padding: 0 var(--nav-right, 12px) 0 20rpx;
 }
-
 .icon-action {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56rpx;
-  height: 56rpx;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   padding: 0;
   border: 1rpx solid #dfe8df;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 2rpx 8rpx rgba(119, 91, 79, 0.08);
-  transition: all 0.2s ease;
+  background: var(--app-nav-button, rgba(255, 255, 255, 0.65));
+  border-color: var(--app-nav-rule, #dfe8df);
+  box-shadow: none;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease;
 }
-
 .icon-action::after {
   border: none;
 }
-
+.nav-action-pressed,
 .icon-action:active {
-  transform: scale(0.95);
-  background: rgba(255, 255, 255, 1);
+  transform: translateX(-3rpx) scale(0.94);
+  background: #eee5d4;
 }
-
 .icon-image {
-  width: 32rpx;
-  height: 32rpx;
+  width: 29rpx;
+  height: 29rpx;
+  opacity: 0.8;
 }
-
-.title {
+.nav-title-group {
+  min-width: 0;
   flex: 1;
-  color: #5b5357;
-  font-size: 32rpx;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rpx;
 }
-
+.nav-caption {
+  font-size: 17rpx;
+  line-height: 1.4;
+  color: #998268;
+  letter-spacing: 2rpx;
+}
+.title {
+  display: block;
+  color: var(--app-nav-ink);
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-tone-library .title,
+.nav-tone-paper .title {
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  letter-spacing: 1rpx;
+}
 .placeholder {
-  width: 56rpx;
-  height: 56rpx;
+  width: 8rpx;
 }
-
+@media (prefers-reduced-motion: reduce) {
+  .icon-action {
+    transition: none;
+  }
+}
 </style>

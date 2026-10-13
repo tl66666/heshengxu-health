@@ -1,0 +1,11 @@
+{
+  "android": {
+    "file": "heshengxu-android.apk",
+    "version": "0.1.0",
+    "versionCode": 100,
+    "sha256": "DAB7A393BD30D81D82EFD3A4A6BE44D1FC85B0FCF8F1E809E4BC11829F940D40",
+    "updatedAt": "2026-10-13",
+    "name": "和生序",
+    "sizeBytes": 15745656
+  }
+}

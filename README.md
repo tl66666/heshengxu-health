@@ -4,13 +4,15 @@
 
 和生序是一套由个人独立完成的 AI 健康管理产品，覆盖**微信小程序与 App**。项目从产品定义、交互与视觉设计出发，完成了 uni-app 双端客户端、NestJS API、PostgreSQL 数据模型、AI 健康对话、食物拍照识别、Docker 容器化以及 Azure / CloudBase 生产部署。
 
-[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [下载 Android 测试包（GitHub 直链）](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk) · [微信小程序码](assets/showcase/mini-program-code.jpg) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
+[在线项目展示](https://tl66666.github.io/heshengxu-health/) · [下载 Android 测试包（GitHub 直链）](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk?v=20261013) · [微信小程序码](assets/showcase/mini-program-code.jpg) · [部署说明](docs/DEPLOYMENT.md) · [发布检查清单](docs/RELEASE-CHECKLIST.md) · [安全说明](SECURITY.md)
 
 ### App 下载
 
 在 GitHub 上请使用下面的直链下载，不要进入 APK 文件预览页：
 
-[下载和生序 Android App](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk)
+[下载和生序 Android App](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk?v=20261013)
+
+**2026-10-13 更新**：Android 测试包 v0.1.0（100），15.02 MiB，包含版本答案与薄肌养成。下载元数据及 SHA256 见 [downloads.json](assets/showcase/downloads.json)。
 
 ## 微信小程序体验
 
@@ -32,6 +34,18 @@
 | 序序聊天   | 真实大模型回复、对话自动滚动、健康安全边界与明确的失败状态                     |
 | 工程交付   | NestJS、Prisma、PostgreSQL、Docker、GHCR、Azure Container Apps、GitHub Actions |
 | 视觉系统   | 高明度日系治愈奶油水彩风格，品牌角色序序贯穿引导、首页、记录和 AI 场景         |
+
+## 版本答案：从生活书柜，到身体养成
+
+新增五主题书柜：薄肌圣经、孙学视角、大水理论、Codex 实践与高性价比人生。40 篇实践指南另有八章薄肌圣经，正文带出处，支持阅读进度、收藏、字号与前后章节。读懂一页后，可以安排日期、勾选三步清单，记录执行与复盘。
+
+薄肌养成分为今日、训练、评分、圣经。保存真实动作、次数与负重，按力量训练 35、饮食支持 25、睡眠恢复 25、个人进步 15 回看养成表现。未记录保持未知区间，年龄信息不全时保留待开启；阅读进度不计入身体评分。
+
+下面是 2026 年 10 月新版产品图片，完整原图可点击查看：
+
+<table><tr><td width="33%"><a href="assets/showcase/runtime/library-20261013.jpg"><img src="assets/showcase/runtime/library-20261013.jpg" alt="版本答案五主题书柜" /></a><br/><b>一座成长书柜</b></td><td width="33%"><a href="assets/showcase/runtime/lean-hub-20261013.jpg"><img src="assets/showcase/runtime/lean-hub-20261013.jpg" alt="薄肌养成今日安排" /></a><br/><b>从自己的安排开始</b></td><td width="33%"><a href="assets/showcase/runtime/bible-reader-20261013.jpg"><img src="assets/showcase/runtime/bible-reader-20261013.jpg" alt="薄肌圣经纸张阅读页" /></a><br/><b>把理解变成行动</b></td></tr></table>
+
+[在线特色展示](https://tl66666.github.io/heshengxu-health/#library) · [八章圣经原文](docs/product/lean-muscle-bible.md) · [阅读与行动实现](apps/mini/src/features/version-answer)
 
 ## 真实产品
 
@@ -178,7 +192,7 @@ flowchart TB
 
 最近一次完整验证记录包含：
 
-- 客户端：73 个测试文件，**198 个测试通过，1 个跳过**。
+- 客户端：91 个测试文件，**283 个测试通过，1 个跳过**。
 - API：31 个测试文件，**64 个测试通过**（包含临时 PostgreSQL 上的迁移与集成测试）。
 - 生产链路：API 构建、微信小程序生产构建、App 构建、展示站构建。
 - 发布检查：数据库迁移、健康检查、合法域名、客户端密钥扫描、包体与资源路径检查。
@@ -237,7 +251,7 @@ D:\禾伴\heban-ai-health-demo\apps\mini
 D:\heshengxu-mini\apps\mini
 ```
 
-Android 安装包下载：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk)。仓库内文件位于 [`assets/showcase/heshengxu-android.apk`](assets/showcase/heshengxu-android.apk)，这是当前 HBuilderX 云打包测试包，正式商店发布仍需完成签名、隐私协议和审核。
+Android 安装包下载：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk?v=20261013)。仓库内文件位于 [`assets/showcase/heshengxu-android.apk`](assets/showcase/heshengxu-android.apk?v=20261013)，这是当前 HBuilderX 云打包测试包，正式商店发布仍需完成签名、隐私协议和审核。
 
 先运行 `npm --prefix apps/mini run build:app`，再在 HBuilderX 中选择“发行 → 原生 App-云打包”。详细步骤见 [`docs/APP-RELEASE-HBUILDERX.md`](docs/APP-RELEASE-HBUILDERX.md)。
 

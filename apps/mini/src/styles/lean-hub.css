@@ -1,0 +1,63 @@
+/* One entry point in App.vue for both web and WeChat; scope hub changes to this page. */
+.lean-hub-page .journal-hero {
+  min-height: 294rpx;
+  padding: 25rpx 27rpx;
+}
+.lean-hub-page .journal-hero .hero-title {
+  max-width: 59%;
+  font-size: 41rpx;
+  line-height: 1.4;
+  margin: 20rpx 0 10rpx;
+}
+.lean-hub-page .journal-hero .hero-copy {
+  max-width: 63%;
+  font-size: 23rpx;
+}
+.lean-hub-page .journal-scene {
+  width: 215rpx;
+  height: 175rpx;
+  right: 12rpx;
+  bottom: 30rpx;
+}
+.lean-hub-page .hero-bottom-note {
+  margin-top: 16rpx;
+}
+.lean-hub-page .tabs {
+  gap: 6rpx;
+  margin: 22rpx 0;
+}
+.lean-hub-page .tabs button {
+  min-height: 88rpx;
+  padding: 20rpx 6rpx;
+  font-size: 25rpx;
+  flex: 1;
+}
+.lean-hub-page .panel {
+  padding: 26rpx;
+}
+.lean-hub-page .section-top {
+  flex-wrap: wrap;
+  gap: 8rpx 16rpx;
+}
+.lean-hub-page .primary,
+.lean-hub-page .secondary {
+  min-height: 88rpx;
+}
+.lean-hub-page .hub-score-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  flex-wrap: wrap;
+}
+.lean-hub-page .hub-score-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #816449;
+}
+.lean-hub-page .hub-section-intro {
+  margin: 28rpx 0 12rpx;
+}
+.lean-hub-page .today-card .primary {
+  margin-top: 22rpx;
+}

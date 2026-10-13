@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page water-page">
     <AppNavBar title="喝水记录" route="/pages/water/WaterPage" />
 
     <!-- 日期选择 -->
@@ -214,11 +214,13 @@
         </view>
       </view>
     </view>
+      <DetailReadingCard guide-id="water-review" heading="回看饮水习惯与记录" />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import DetailReadingCard from '../../components/DetailReadingCard.vue';
 import { onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { navigateBack, navigateTo } from '../../utils/router.js';
@@ -1154,7 +1156,7 @@ onShow(() => {
   left: 50% !important;
   width: 1200rpx !important;
   height: 1200rpx !important;
-  transform: translate(-49.3%, -50.3%) scale(2.05) !important;
+  transform: translate(-49.3%, -50.3%) !important;
 }
 .cup-display .water-wrapper {
   bottom: 70rpx !important;

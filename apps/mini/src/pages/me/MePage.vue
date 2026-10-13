@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page me-page">
     <view class="page-header"><text>我的</text><text>健康管理</text></view>
 
     <button class="profile-summary" @tap="openProfile">
@@ -19,21 +19,18 @@
       <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
     </button>
 
+    <LibraryBridge compact />
     <view class="section">
       <text class="section-title">账号资料</text>
       <view class="card">
         <button class="row" @tap="changeAvatar">
           <view class="row-copy"
-            ><text>更换头像</text
-            ><text>从相册选择或拍一张，作为你的头像</text></view
+            ><text>更换头像</text><text>从相册选择或拍一张，作为你的头像</text></view
           >
           <image class="arrow" src="/static/icons/svg/camera.svg" mode="aspectFit" />
         </button>
         <button class="row row--last" @tap="editName">
-          <view class="row-copy"
-            ><text>修改昵称</text
-            ><text>首页问候语将显示这个称呼</text></view
-          >
+          <view class="row-copy"><text>修改昵称</text><text>首页问候语将显示这个称呼</text></view>
           <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
       </view>
@@ -70,7 +67,7 @@
         <button class="row" @tap="resetDemo">
           <view class="row-copy"
             ><text class="reset-title">重置本机数据</text
-            ><text>清除本机保存的全部健康记录，登录状态会保留</text></view
+            ><text>清除本机记录、计划与书柜笔记，登录状态会保留</text></view
           >
           <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
@@ -81,12 +78,11 @@
           >
           <image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
         </button>
-        <view class="row row--disabled">
+        <button class="row row--last" @tap="openLibraryActions">
           <view class="row-copy"
-            ><text>记录提醒</text><text>将在账号与通知能力接入后开放</text></view
-          >
-          <text class="coming">准备中</text>
-        </view>
+            ><text>书柜行动日程</text><text>查看计划日期、执行清单和复盘笔记</text></view
+          ><image class="arrow" src="/static/icons/svg/forward.svg" mode="aspectFit" />
+        </button>
       </view>
     </view>
 
@@ -99,6 +95,7 @@
 import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import MiniTabBar from '../../components/MiniTabBar.vue';
+import LibraryBridge from '../../components/LibraryBridge.vue';
 import { loadLocalProfile, resetLocalDemoData } from '../../features/health-loop/local-demo.js';
 import {
   loadUserProfile,
@@ -166,20 +163,25 @@ const profileText = computed(() => {
 function openProfile() {
   uni.navigateTo({ url: '/pages/profile/ProfilePage' });
 }
+function openLibraryActions() {
+  uni.navigateTo({ url: '/pages/version-answer/VersionAnswerPage?tab=actions' });
+}
 function openAction(item: (typeof mePrimaryActions)[number]) {
   uni.navigateTo({ url: item.route });
 }
 function manageData() {
   uni.showModal({
     title: '数据管理',
-    content: '当前版本支持查看和修改自己的健康记录。数据导出与彻底删除会在真实微信身份接入后开放。',
+    content:
+      '健康记录、训练日志和书柜行动可在对应模块中查看与修改。书柜行动摘要可手动复制，它不等于完整健康数据导出。重置本机数据会清除本机记录与书柜笔记，不会注销账号。',
     showCancel: false,
   });
 }
 function resetDemo() {
   uni.showModal({
     title: '重置本机数据',
-    content: '将清除本机保存的建档、计划、体重、饮食、喝水、睡眠、经期和用药记录，并重新进入建档流程。登录状态会保留，仅影响当前设备。',
+    content:
+      '将清除本机保存的建档、计划、体重、饮食、喝水、睡眠、经期、薄肌养成、书柜阅读与行动笔记和用药记录，并重新进入建档流程。登录状态会保留，仅影响当前设备。',
     confirmText: '重置',
     success: (result) => {
       if (!result.confirm) return;
@@ -200,7 +202,9 @@ function logout() {
       try {
         await signOut();
       } finally {
-        uni.reLaunch({ url: isAppRuntime() ? '/pages/auth/AppAuthPage' : '/pages/bootstrap/BootstrapPage' });
+        uni.reLaunch({
+          url: isAppRuntime() ? '/pages/auth/AppAuthPage' : '/pages/bootstrap/BootstrapPage',
+        });
       }
     },
   });
@@ -222,7 +226,8 @@ onShow(() => {
   box-sizing: border-box;
   min-width: 0;
   overflow-x: hidden;
-  padding: calc(env(safe-area-inset-top) + 44rpx) 32rpx calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
+  padding: calc(env(safe-area-inset-top) + 44rpx) 32rpx
+    calc(var(--hz-tabbar-height) + env(safe-area-inset-bottom) + 44rpx);
   background: transparent;
   color: var(--hz-ink);
 }
@@ -271,7 +276,9 @@ onShow(() => {
   border: 1rpx solid rgba(159, 195, 173, 0.6);
   border-radius: 50%;
   background: linear-gradient(160deg, #ffffff 0%, #eef5ef 100%);
-  box-shadow: 0 10rpx 22rpx rgba(29, 55, 41, 0.12), inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 10rpx 22rpx rgba(29, 55, 41, 0.12),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
 }
 .avatar-img {
   width: 100%;

@@ -11,7 +11,7 @@
     <view class="header">
       <view class="header-left">
         <text class="date-chip">{{ dateLabel }}</text>
-        <text class="greeting">{{ greeting }}，{{ displayName }}</text>
+        <view class="greeting-group"><text class="greeting-prefix">{{ greeting }}</text><text class="greeting">{{ displayName }}</text></view>
       </view>
       <view class="header-right">
         <view
@@ -43,27 +43,27 @@
       <!-- 1. 体重管理卡片 - 紧凑SVG半圆 -->
       <view v-if="isCardVisible('weight-plan')" class="weight-card card" @tap="goToWeightProgress">
         <view class="card-top">
-          <text class="card-title">体重管理方案</text>
+          <text class="card-title">{{ weightPlanHasTarget ? '体重管理方案' : '体重记录' }}</text>
           <view class="weight-card-actions">
-            <text class="week-badge">{{ planWeekLabel }}</text>
+            <button v-if="!weightPlanHasTarget" class="week-badge" @tap.stop="goToWeightProgress">设置目标</button><text v-else class="week-badge">{{ planWeekLabel }}</text>
             <button class="weight-visibility" aria-label="显示或隐藏体重" @tap.stop="toggleWeightVisibility">
               <image src="/static/icons/svg/eye.svg" mode="aspectFit" />
             </button>
           </view>
         </view>
 
-        <view class="weight-visual">
+        <view class="weight-visual" aria-label="体重记录圆弧概览">
           <view class="weight-arc-stage">
             <view class="weight-arc-ring" :style="{ background: weightArcBackground }" />
             <view
-              v-if="weightPlanHasTarget"
+              v-if="weightOverviewState.showNode && !weightValuesHidden"
               class="weight-arc-node"
               :style="{ left: `${weightArcNode.x}%`, top: `${weightArcNode.y}%` }"
             />
             <view class="weight-progress-copy">
-              <text class="weight-progress-value">{{ weightProgressAmount }}</text>
-              <text class="weight-progress-label">{{ weightPlanHasTarget ? '已减去（kg）' : '设置目标后开始记录' }}</text>
-              <text class="weight-gap-label">{{ weightPlanHasTarget ? weightGapLabel : '记录目标后，这里会显示你的进度' }}</text>
+              <text class="weight-progress-value">{{ weightValuesHidden ? '••' : weightOverviewState.value }}</text>
+              <text class="weight-progress-label">{{ weightOverviewState.label }}</text>
+              <text class="weight-gap-label">{{ weightValuesHidden ? '体重数值已隐藏' : weightOverviewState.caption }}</text>
             </view>
           </view>
           <view class="weight-row">
@@ -253,6 +253,7 @@
       </view>
 
       <!-- 6. 经期记录卡片 -->
+
       <view v-if="isCardVisible('period')" class="period-card card" @tap="openMenstruation">
         <view class="card-top">
           <text class="card-title">经期</text>
@@ -286,6 +287,7 @@
         />
       </view>
 
+      <VersionAnswerHomeCard v-if="isCardVisible('version-answer')" />
       <!-- 8. 编辑首页卡片 -->
       <button
         class="edit-card"
@@ -380,19 +382,22 @@ import { elapsedSeconds, finishFasting, formatDuration, loadFastingPlan, remaini
 import { loadWellnessJournal, saveMood, saveSleep, type MoodTone, type WellnessJournal } from '../../features/wellness/wellness-journal.js';
 import { loadUserProfile } from '../../features/user-profile/user-profile.js';
 import { userStorageKey } from '../../features/auth/user-storage.js';
+import VersionAnswerHomeCard from './VersionAnswerHomeCard.vue';
+import { localProfileSex, loadHomeProfileSex } from './home-profile.js';
+import { weightOverview } from './weight-overview.js';
 
 // 序序小贴士：右上角气泡随机轮换的健康常识
 const healthTips = [
-  '饭后走一走，血糖更平稳',
-  '睡前三小时，放下手机',
-  '喝水小口多次，更解渴',
-  '久坐 1 小时，起身伸展 2 分钟',
-  '晒晒太阳，补充维生素 D',
-  '细嚼慢咽，饱腹感更准时',
-  '深呼吸 4 秒，给情绪降温',
-  '今晚试试 23 点前入睡',
-  '来一把深色蔬菜吧',
-  '晨起一杯温水，唤醒肠胃',
+  '饭后轻松走一走',
+  '睡前留点放松时间',
+  '喝水小口慢慢来',
+  '起身活动一下',
+  '出门记得防晒',
+  '吃饭慢一点',
+  '慢慢呼吸，歇一会',
+  '今晚早点准备休息',
+  '添一份深色蔬菜',
+  '起床喝点水',
 ] as const;
 const bubbleTip = ref('');
 function rotateBubble() {
@@ -422,7 +427,17 @@ const dateLabel = computed(() => {
 const displayName = computed(() => loadUserProfile().displayName || today.value?.displayName || '新朋友');
 const menstruationCycle = ref<{ lastPeriodStart?: string; cycleLength?: number } | null>(null);
 const medicationStats = ref({ total: 0, done: 0 });
-const cardVisibility = ref(loadHomeCardVisibility());
+const cardVisibility = ref(loadHomeCardVisibility(localProfileSex()));
+let cardProfileRequest = 0;
+async function refreshCardProfile() {
+  const request = ++cardProfileRequest;
+  const account = userStorageKey('home-profile');
+  cardVisibility.value = loadHomeCardVisibility(localProfileSex());
+  const sex = await loadHomeProfileSex();
+  if (request === cardProfileRequest && account === userStorageKey('home-profile')) {
+    cardVisibility.value = loadHomeCardVisibility(sex);
+  }
+}
 const weightValuesHidden = ref(false);
 const isCardVisible = (id: HomeCardId) => cardVisibility.value[id] !== false;
 const periodStatusText = computed(() =>
@@ -604,27 +619,13 @@ const planWeekLabel = computed(() =>
 const targetWeight = computed(
   () => today.value?.activePlan?.healthTarget?.targetWeightKg?.toFixed(1) || '--',
 );
-const weightPlanHasTarget = computed(() => {
-  const target = today.value?.activePlan?.healthTarget?.targetWeightKg;
-  return Number.isFinite(target) && Number(target) > 0;
-});
-const weightGapLabel = computed(() => {
-  if (!weightPlanHasTarget.value) return '记录目标后，这里会显示你的进度';
-  const current = Number(currentWeight.value);
-  const target = Number(targetWeight.value);
-  if (!Number.isFinite(current) || !Number.isFinite(target)) return '等待一次体重记录';
-  const gap = Math.abs(current - target);
-  return gap < 0.05 ? '已到达目标附近' : `距离目标 ${gap.toFixed(1)} kg`;
-});
-const weightProgressAmount = computed(() => {
-  if (!weightPlanHasTarget.value) return '--';
-  const start = Number(startWeight.value);
-  const current = Number(currentWeight.value);
-  if (!Number.isFinite(start) || !Number.isFinite(current)) return '--';
-  const direction = today.value?.activePlan?.healthTarget?.direction;
-  const amount = direction === 'gain' ? current - start : start - current;
-  return amount > 0 ? amount.toFixed(1) : '0.0';
-});
+const weightOverviewState = computed(() => weightOverview({
+  current:Number(currentWeight.value),
+  start:today.value?.activePlan?.healthTarget?.startWeightKg,
+  target:today.value?.activePlan?.healthTarget?.targetWeightKg,
+  direction:today.value?.activePlan?.healthTarget?.direction,
+}));
+const weightPlanHasTarget = computed(() => weightOverviewState.value.hasTarget);
 const weightArcNode = computed(() => {
   const progressRatio = Math.max(0, Math.min(1, progress.value / 100));
   const angle = Math.PI * progressRatio;
@@ -675,21 +676,7 @@ const recordingMessage = computed(
   () => experience.value?.recording.message || '完成一件小事，就已经是在照顾自己',
 );
 
-const progress = computed(() => {
-  if (currentWeight.value === '--' || !today.value?.activePlan?.healthTarget) {
-    return 0;
-  }
-  const start = today.value.activePlan.healthTarget.startWeightKg;
-  const current = Number(currentWeight.value);
-  const target = today.value.activePlan.healthTarget.targetWeightKg;
-  if (start == null || target == null || start === target) return 0;
-
-  const direction = today.value.activePlan.healthTarget.direction;
-  const prog = direction === 'gain'
-    ? ((current - start) / (target - start)) * 100
-    : ((start - current) / (start - target)) * 100;
-  return Math.max(0, Math.min(100, prog));
-});
+const progress = computed(() => weightOverviewState.value.progress);
 
 const formatTime = (timestamp: string) => {
   return new Date(timestamp).toLocaleTimeString('zh-CN', {
@@ -862,6 +849,7 @@ const loadPersonalSignals = () => {
 
 // 修复：首次进入立即加载
 onMounted(() => {
+  void refreshCardProfile();
   load();
   loadWeightTrend();
   loadPersonalSignals();
@@ -871,7 +859,7 @@ onMounted(() => {
 // 每次显示时刷新
 onShow(() => {
   if (today.value) load(true);
-  cardVisibility.value = loadHomeCardVisibility();
+  void refreshCardProfile();
   loadWeightTrend();
   loadPersonalSignals();
   startFastingTicker();
@@ -985,14 +973,14 @@ onUnmounted(stopFastingTicker);
 
 /* 半圆进度：安静的晨绿 */
 .weight-visual {
-  min-height: 270rpx;
+  min-height: 0;
   padding-top: 0;
 }
 .weight-arc-stage {
   position: relative;
   width: 520rpx;
   max-width: 100%;
-  height: 250rpx;
+  height: 220rpx;
   margin: 0 auto;
   overflow: hidden;
 }
@@ -1027,7 +1015,7 @@ onUnmounted(stopFastingTicker);
 }
 .weight-progress-copy {
   position: absolute;
-  top: 46%;
+  top: 54%;
   left: 0;
   right: 0;
   display: flex;
@@ -1085,9 +1073,15 @@ onUnmounted(stopFastingTicker);
 /* ---------- 饮食记录卡片 ---------- */
 .calorie-card {
   padding: 28rpx;
+  --hz-camera-min-height: 112rpx;
+  --hz-camera-art-width: 148rpx;
+  --hz-camera-art-height: 92rpx;
+}
+.calorie-card .card-top {
+  margin-bottom: 10rpx;
 }
 .calorie-main {
-  padding: 14rpx 0 10rpx;
+  padding: 6rpx 0;
   text-align: center;
 }
 .hint-text {
@@ -1096,7 +1090,7 @@ onUnmounted(stopFastingTicker);
 }
 .big-number .number {
   color: var(--hz-ink);
-  font-size: 72rpx;
+  font-size: 58rpx;
   font-weight: 700;
 }
 .big-number .unit {
@@ -1148,7 +1142,7 @@ image.camera-decoration {
 .meal-progress {
   display: flex;
   gap: 8rpx;
-  margin: 16rpx 6rpx 12rpx;
+  margin: 10rpx 6rpx 8rpx;
 }
 .meal-progress-segment {
   flex: 1;

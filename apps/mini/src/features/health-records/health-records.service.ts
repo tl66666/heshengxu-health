@@ -1,11 +1,12 @@
 import type { TodayRecordsDto } from '../../../../../packages/contracts/src/health-loop.js';
 import type { HealthRecordRequest } from './health-records.mapper.js';
 import { userStorageKey } from '../auth/user-storage.js';
+import { leanActivityRecords } from '../lean-muscle/store.js';
 
 const LOCAL_RECORDS_KEY = 'heban.health.records.v1';
 type LocalRecordFor<T extends HealthRecordRequest> = T extends HealthRecordRequest
   ? T['data'] & {
-  id: string;
+      id: string;
       type: T['type'];
     }
   : never;
@@ -14,18 +15,17 @@ type LocalRecord = LocalRecordFor<HealthRecordRequest>;
 function readLocalRecords(): LocalRecord[] {
   try {
     const value = uni.getStorageSync(userStorageKey(LOCAL_RECORDS_KEY));
-    return Array.isArray(value) ? (value as LocalRecord[]) : [];
+    return [...(Array.isArray(value) ? (value as LocalRecord[]) : []), ...leanActivityRecords()];
   } catch {
-    return [];
+    return leanActivityRecords();
   }
 }
 
 function writeLocalRecords(records: LocalRecord[]) {
-  try {
-    uni.setStorageSync(userStorageKey(LOCAL_RECORDS_KEY), records);
-  } catch {
-    // Keep the in-memory request successful when storage is temporarily unavailable.
-  }
+  uni.setStorageSync(
+    userStorageKey(LOCAL_RECORDS_KEY),
+    records.filter((record) => !record.id.startsWith('lean-')),
+  );
 }
 
 function recordDate(record: LocalRecord) {
@@ -109,6 +109,8 @@ export function replaceHealthRecord(
   recordId: string,
   data: Record<string, unknown>,
 ) {
+  if (recordId.startsWith('lean-'))
+    return Promise.reject(new Error('请在薄肌训练日志中修改动作与时长'));
   const records = readLocalRecords();
   const index = records.findIndex((record) => record.id === recordId && record.type === type);
   if (index >= 0) {

@@ -1,0 +1,158 @@
+/* Motion for all product pages: finite entrance, quiet controls, readable content. */
+@keyframes hz-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(12rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes hz-page-turn {
+  from {
+    opacity: 0.3;
+    transform: translateX(10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.page > .card,
+.page > .section,
+.page > .panel {
+  animation: hz-content-in 0.32s cubic-bezier(0.22, 0.8, 0.36, 1) both;
+}
+.lean-page .hero,
+.version-hero {
+  animation: hz-content-in 0.4s cubic-bezier(0.22, 0.8, 0.36, 1) both;
+}
+.library-content,
+.journal-content {
+  animation: hz-content-in 0.28s ease-out both;
+}
+.paper-sheet,
+.guide-paper {
+  animation: hz-page-turn 0.32s ease-out both;
+}
+.lean-page button {
+  transition:
+    transform 0.16s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.lean-page button:active {
+  transform: translateY(2rpx) scale(0.985);
+}
+.lean-page button[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.lean-page .tabs button {
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.lean-page .score-track view {
+  transition: width 0.5s cubic-bezier(0.22, 0.8, 0.36, 1);
+}
+.lean-page .score-detail {
+  animation: hz-content-in 0.2s ease-out both;
+}
+.lean-page input:focus,
+.lean-page textarea:focus {
+  border-color: #a48c66;
+  box-shadow: 0 0 0 3rpx #a48c6617;
+}
+.lean-page button:focus-visible,
+.page button:focus-visible {
+  outline: 3rpx solid #8c9f82;
+  outline-offset: 4rpx;
+}
+.shelf-book-cover {
+  transform-origin: 22% 85%;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 0.8, 0.36, 1),
+    filter 0.22s ease;
+}
+.shelf-book-button:active .shelf-book-cover,
+.shelf-book-pressed .shelf-book-cover {
+  transform: perspective(500rpx) rotateY(-10deg) rotate(-2deg) translateY(-7rpx);
+  filter: drop-shadow(8rpx 14rpx 7rpx #46341f35);
+}
+.shelf-book-button:active {
+  transform: none;
+}
+.bookcase-row {
+  animation: hz-content-in 0.4s ease-out both;
+}
+.bookcase-row.last-shelf {
+  animation-delay: 0.07s;
+}
+.action-check {
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+.lean-page .action-card.done {
+  background: #f4f4e9;
+  border-color: #ced8be;
+}
+/* Retain sticky navigation on existing details without a stark white strip. */
+.page .nav {
+  background: rgba(250, 250, 243, 0.94) !important;
+  box-shadow: none !important;
+  border-bottom-color: #8ba48c19 !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+}
+.page .nav .back,
+.page .nav .icon-button.back {
+  box-shadow: none !important;
+  background: #f0f4eb !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hz-rise,
+  .hz-float,
+  .page > .card,
+  .page > .section,
+  .page > .panel,
+  .lean-page .hero,
+  .version-hero,
+  .library-content,
+  .journal-content,
+  .paper-sheet,
+  .guide-paper,
+  .bookcase-row,
+  .lean-page .score-detail {
+    animation: none !important;
+  }
+  .reading-progress-fill,
+  .lean-page button,
+  .lean-page input,
+  .lean-page textarea,
+  .lean-page .score-track view,
+  .shelf-book-cover,
+  .icon-action,
+  .page button {
+    transition: none !important;
+  }
+  .shelf-book-button:active .shelf-book-cover,
+  .shelf-book-pressed .shelf-book-cover {
+    transform: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .water-page .goal-progress-fill,
+  .water-page .water-wrapper,
+  .water-page .record-btn,
+  .water-page .quick-btn {
+    transition: none !important;
+  }
+  .water-page .surface-wave,
+  .water-page .water-texture {
+    animation: none !important;
+  }
+}

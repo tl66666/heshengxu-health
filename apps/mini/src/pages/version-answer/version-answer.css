@@ -1,0 +1,444 @@
+.version-page {
+  background: #f7f2e8;
+}
+.version-hero {
+  position: relative;
+  margin: 23rpx 0 27rpx;
+  padding: 26rpx 29rpx 30rpx;
+  border: 1rpx solid #e4d4b9;
+  border-radius: 28rpx;
+  background: linear-gradient(115deg, #fff9eb, #f4ead8 60%, #e6ede7);
+  min-height: 324rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.version-hero-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14rpx;
+  border-bottom: 1rpx solid #c7b58f66;
+  padding-bottom: 16rpx;
+  font-size: 17rpx;
+  color: #a28b63;
+  letter-spacing: 2rpx;
+}
+.version-hero-title {
+  display: block;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  font-size: 42rpx;
+  white-space: pre-line;
+  line-height: 1.6;
+  font-weight: 700;
+  color: #5b5d4d;
+  margin: 20rpx 0 12rpx;
+  position: relative;
+  z-index: 1;
+  max-width: 65%;
+}
+.version-hero-copy {
+  display: block;
+  max-width: 57%;
+  font-size: 21rpx;
+  line-height: 1.8;
+  color: #97876d;
+  position: relative;
+  z-index: 1;
+}
+.version-hero-art {
+  position: absolute;
+  right: 0;
+  bottom: 4rpx;
+  width: 286rpx;
+  height: 203rpx;
+}
+.topic-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+  margin-top: 20rpx;
+}
+.topic-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24rpx;
+  min-height: 214rpx;
+  padding: 23rpx 23rpx 19rpx;
+  border: 1rpx solid #e0d5bf;
+  background: #fcf7e9;
+  box-sizing: border-box;
+}
+.topic-card.muscle {
+  grid-column: 1/-1;
+  min-height: 198rpx;
+  background: linear-gradient(115deg, #e8efdf, #f7f7e9);
+  border-color: #d4dec5;
+  padding-right: 230rpx;
+}
+.topic-card.sun {
+  background: #faf0dc;
+  border-color: #e6d5b5;
+}
+.topic-card.water {
+  background: #eaf2f5;
+  border-color: #d0e1e7;
+}
+.topic-card.codex {
+  background: #fbede3;
+  border-color: #ead6c5;
+}
+.topic-card.life {
+  background: #f0f2df;
+  border-color: #dfe3c4;
+}
+.topic-index {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 24rpx;
+  letter-spacing: 3rpx;
+}
+.topic-name {
+  display: block;
+  font-size: 30rpx;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #635c48;
+  margin: 13rpx 0 7rpx;
+}
+.topic-caption {
+  display: block;
+  font-size: 21rpx;
+  color: #9b917d;
+  line-height: 1.6;
+}
+.topic-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10rpx;
+  margin-top: 17rpx;
+  font-size: 17rpx;
+  color: #a0967e;
+  border-top: 1rpx solid #c6b99544;
+  padding-top: 11rpx;
+}
+.topic-muscle-art {
+  position: absolute;
+  right: 9rpx;
+  bottom: 10rpx;
+  width: 218rpx;
+  height: 146rpx;
+}
+.version-note .muted {
+  margin-top: 13rpx;
+  line-height: 1.9;
+}
+.version-note .section-title {
+  font-size: 27rpx;
+}
+.continue-reading {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  border-left: 4rpx solid #b69c6b;
+  padding: 15rpx 20rpx;
+  font-size: 25rpx;
+  color: #8e7854;
+  margin: 27rpx 0;
+}
+.library-search {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  padding: 13rpx 19rpx;
+  border: 1rpx solid #e1d7c5;
+  border-radius: 18rpx;
+  background: #fffcf4;
+  margin-top: 25rpx;
+}
+.library-search input {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  min-height: 51rpx !important;
+  font-size: 24rpx !important;
+}
+.topic-filter {
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+  width: 100%;
+  margin: 20rpx 0;
+}
+.filter-track {
+  display: flex;
+  gap: 11rpx;
+}
+.filter-track button {
+  font-size: 20rpx;
+  flex-shrink: 0;
+  padding: 11rpx 17rpx;
+  background: #eae3d5;
+  color: #9a8667;
+  border-radius: 20rpx;
+}
+.filter-track .chosen {
+  background: #a38b65;
+  color: #fffaf0;
+}
+.reading-controls {
+  margin: 15rpx 2rpx 22rpx;
+}
+.guide-card {
+  background: #fffcf5;
+  border: 1rpx solid #e4dcca;
+  border-radius: 23rpx;
+  padding: 24rpx 26rpx;
+  margin: 18rpx 0;
+}
+.guide-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20rpx;
+}
+.guide-topic {
+  font-size: 20rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+.guide-card-title {
+  display: block;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  font-size: 30rpx;
+  line-height: 1.65;
+  font-weight: 700;
+  color: #67583f;
+  margin: 14rpx 0 8rpx;
+}
+.guide-card-subtitle {
+  display: block;
+  font-size: 23rpx;
+  color: #9b8b71;
+  line-height: 1.8;
+}
+.guide-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 19rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #eee4d1;
+  font-size: 18rpx;
+  color: #a28f70;
+  gap: 14rpx;
+}
+.library-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 11rpx;
+  font-size: 19rpx;
+  color: #b29e7d;
+  line-height: 1.8;
+  margin-top: 32rpx;
+  padding: 0 3rpx;
+}
+.action-intro .muted {
+  margin-top: 14rpx;
+  line-height: 1.9;
+}
+.action-card {
+  display: flex;
+  gap: 20rpx;
+  border: 1rpx solid #dfd7c5;
+  border-radius: 23rpx;
+  background: #fffdf5;
+  padding: 24rpx;
+  margin: 18rpx 0;
+}
+.action-check {
+  border: 2rpx solid #bca374 !important;
+  border-radius: 50% !important;
+  width: 44rpx;
+  height: 44rpx;
+  min-width: 44rpx;
+  padding: 0 !important;
+  color: #fff;
+  background: transparent;
+}
+.action-card.done .action-check {
+  background: #9ba985;
+  border-color: #9ba985 !important;
+}
+.action-copy {
+  flex: 1;
+  min-width: 0;
+}
+.action-copy > text:first-child {
+  font-size: 25rpx;
+  color: #6d624b;
+  line-height: 1.8;
+}
+.action-copy .tiny {
+  margin: 10rpx 0;
+  font-size: 19rpx;
+}
+.action-copy .row {
+  justify-content: space-between;
+}
+.action-copy button {
+  font-size: 20rpx !important;
+}
+.action-card.done .action-copy > text:first-child {
+  color: #9a9d8c;
+}
+.bookcase {
+  position: relative;
+  padding: 20rpx 17rpx 0;
+  border: 1rpx solid #ccb592;
+  border-left: 13rpx solid #b99d77;
+  border-right: 13rpx solid #b99d77;
+  border-radius: 18rpx 18rpx 10rpx 10rpx;
+  background:
+    linear-gradient(90deg, #cbb49144, #f0e5d266 8%, #efe3ce 92%, #c5ad8744),
+    repeating-linear-gradient(0deg, #e8d9bc 0, #ede2cb 4rpx, #e9dbbf 10rpx);
+  box-shadow:
+    inset 0 10rpx 22rpx #79624622,
+    0 15rpx 30rpx #755a2f0d;
+  margin: 22rpx 0 24rpx;
+  overflow: hidden;
+}
+.bookcase-crown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12rpx 18rpx;
+  color: #9c825f;
+  font-family: Georgia, serif;
+  font-size: 17rpx;
+  letter-spacing: 3rpx;
+  border-bottom: 1rpx solid #c2aa8444;
+}
+.bookcase-brass-mark {
+  width: 50rpx;
+  height: 18rpx;
+  border: 2rpx solid #b8a078;
+  border-radius: 10rpx;
+  box-shadow: inset 0 0 0 2rpx #eadbbd;
+}
+.books-on-shelf {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 8rpx;
+  padding: 20rpx 0 10rpx;
+}
+.lean-page .shelf-book-button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+  max-width: 190rpx;
+  background: transparent;
+  border: 0;
+  padding: 0 0 7rpx;
+  border-radius: 6rpx;
+  color: #765b3b;
+  transition: transform 0.16s ease;
+}
+.shelf-book-button:active {
+  transform: translateY(-6rpx) scale(0.985);
+}
+.shelf-book-label {
+  display: block;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 178rpx;
+  margin-top: 1rpx;
+  min-height: 32rpx;
+}
+.shelf-book-caption {
+  display: block;
+  font-size: 15rpx;
+  line-height: 1.8;
+  color: #a18b69;
+  text-align: center;
+  max-width: 178rpx;
+  white-space: nowrap;
+}
+.wooden-shelf {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 22rpx;
+  border-top: 1rpx solid #c2a77e;
+  border-bottom: 3rpx solid #ac8e64;
+  background: linear-gradient(#e6d0a8 0, #c8ad83 35%, #b89a70 100%);
+  margin: 0 -17rpx;
+  box-shadow: 0 7rpx 8rpx #62452026;
+  z-index: 2;
+}
+.wooden-shelf > view {
+  position: absolute;
+  top: 2rpx;
+  left: 12rpx;
+  right: 12rpx;
+  height: 1rpx;
+  background: #f9ead078;
+}
+.wooden-shelf > text {
+  font-family: Georgia, serif;
+  font-size: 12rpx;
+  margin-right: 18rpx;
+  color: #6b5335;
+}
+.last-shelf .books-on-shelf {
+  justify-content: center;
+  gap: 43rpx;
+  padding-top: 25rpx;
+}
+.last-shelf .shelf-book-button {
+  flex: none;
+  width: 190rpx;
+}
+.bookcase-base {
+  height: 20rpx;
+  margin: 0 -17rpx;
+  background: linear-gradient(#c0a47c, #b49970);
+  box-shadow: inset 0 4rpx 7rpx #69512c15;
+}
+.practice-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin: 25rpx 0;
+}
+.lean-page .practice-shortcuts button {
+  background: #edf1e3;
+  border: 1rpx solid #dce2cc;
+  padding: 21rpx 18rpx;
+  color: #7c8b68;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 6rpx;
+  border-radius: 20rpx;
+}
+.lean-page .practice-shortcuts button:last-child {
+  background: #e8f0f2;
+  border-color: #d4e1e6;
+  color: #799ba9;
+}
+.shortcut-title {
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+.practice-shortcuts button > text:last-child {
+  font-size: 18rpx;
+}

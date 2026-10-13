@@ -10,7 +10,7 @@
       />
       <view class="hero-wash" />
       <view class="hero-copy">
-        <text class="hero-kicker">慢慢变轻，也慢慢喜欢自己</text>
+        <text class="hero-kicker">记录变化，慢慢来</text>
         <view class="hero-number-row">
           <text class="hero-number">{{ currentWeight ? currentWeight.toFixed(1) : '--' }}</text>
           <text class="hero-unit">kg</text>
@@ -47,7 +47,10 @@
             >{{ targetWeight ? targetWeight.toFixed(1) : '--'
             }}<text class="small-unit"> kg</text></text
           >
-          <text class="summary-note">预计 {{ targetDate }}</text>
+          <text class="summary-note"
+            >{{ observedWeeklyChange && observedWeeklyChange > 0 ? '参考日期：' : ''
+            }}{{ targetDate }}</text
+          >
         </view>
       </view>
       <view class="progress-track">
@@ -56,7 +59,9 @@
       </view>
       <view class="progress-meta">
         <text>开始 {{ startWeight ? startWeight.toFixed(1) : '--' }} kg</text>
-        <text class="progress-message">已完成 {{ progress.toFixed(0) }}%</text>
+        <text class="progress-message">{{
+          targetWeight ? `已完成 ${progress.toFixed(0)}%` : '未设目标'
+        }}</text>
         <text>目标 {{ targetWeight ? targetWeight.toFixed(1) : '--' }} kg</text>
       </view>
       <view class="plan-timeline">
@@ -143,7 +148,9 @@
             @tap="selectTrendPoint(pt.id)"
           />
           <text class="chart-x-label is-left">{{ chartLabels[0]?.label }}</text>
-          <text v-if="chartLabels[1]" class="chart-x-label is-right">{{ chartLabels[1].label }}</text>
+          <text v-if="chartLabels[1]" class="chart-x-label is-right">{{
+            chartLabels[1].label
+          }}</text>
         </view>
         <view class="chart-labels">
           <text v-for="point in chartLabels" :key="point.id">{{ point.label }}</text>
@@ -244,7 +251,11 @@
           <text class="history-time">{{ formatTime(record.recordedAt) }}</text>
         </view>
         <view class="history-note"
-          ><text>{{ record.note && record.note !== '晨起空腹' ? record.note : recordTimingLabel(record.recordedAt) }}</text></view
+          ><text>{{
+            record.note && record.note !== '晨起空腹'
+              ? record.note
+              : recordTimingLabel(record.recordedAt)
+          }}</text></view
         >
         <view class="history-weight"
           ><text>{{ record.weight.toFixed(1) }}</text
@@ -273,7 +284,9 @@
           <text class="forecast-note">{{ forecastNote }}</text>
         </view>
         <view class="forecast-ring"
-          ><text>{{ progress.toFixed(0) }}<text class="ring-unit">%</text></text
+          ><text
+            >{{ currentWeight && targetWeight ? progress.toFixed(0) : '--'
+            }}<text v-if="currentWeight && targetWeight" class="ring-unit">%</text></text
           ><text>进度</text></view
         >
       </view>
@@ -403,17 +416,21 @@
             ><text>BMI · {{ bmiStatus }}</text></view
           >
           <view
-            ><text>{{ progress.toFixed(0) }}%</text><text>目标进度</text></view
+            ><text>{{ currentWeight && targetWeight ? `${progress.toFixed(0)}%` : '--' }}</text
+            ><text>目标进度</text></view
           >
         </view>
         <button class="success-done" @tap="showSuccess = false">完成</button>
       </view>
     </view>
+    <DetailReadingCard guide-id="muscle-review" heading="看懂记录，再决定下一步" />
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import DetailReadingCard from '../../components/DetailReadingCard.vue';
+import { weightChangeMilestone } from './weight-milestones.js';
 import { onLoad, onShow } from '@dcloudio/uni-app';
 import AppNavBar from '../../components/AppNavBar.vue';
 import { healthLoopState } from '../../features/health-loop/health-loop.store.js';
@@ -497,7 +514,9 @@ const bmi = computed(() =>
 );
 const bmiStatus = computed(() =>
   bmi.value === '--'
-    ? '待完善身高数据'
+    ? heightCm.value
+      ? '待记录体重'
+      : '待完善身高数据'
     : Number(bmi.value) < 18.5
       ? '偏轻'
       : Number(bmi.value) < 24
@@ -591,7 +610,7 @@ const forecastDate = computed(() =>
           : '等待目标体重',
 );
 const forecastNote = computed(() => {
-  if (!currentWeight.value) return '记录 3 次以上后，预测会更准确';
+  if (!currentWeight.value) return '估算仅供回看，条件变化会影响结果';
   if (!targetWeight.value) return '设置目标体重后，这里会显示预计进度';
   if (remainingKg.value <= 0) return '已达到目标，保持现在的节奏就很好';
   if (!observedWeeklyChange.value || observedWeeklyChange.value <= 0)
@@ -684,7 +703,8 @@ const chartGeom = computed(() => {
   const { min, max } = chartBounds.value;
   const span = Math.max(0.1, max - min);
   const px = (t: number) => 24 + t * (CHART_W - 48);
-  const py = (weight: number) => CHART_TOP + (1 - (weight - min) / span) * (CHART_BOTTOM - CHART_TOP);
+  const py = (weight: number) =>
+    CHART_TOP + (1 - (weight - min) / span) * (CHART_BOTTOM - CHART_TOP);
   const pts = data.map((item, index) => ({
     id: item.id,
     x: px(index / (data.length - 1)),
@@ -730,15 +750,19 @@ const trendChangeLabel = computed(
 );
 const trendCaption = computed(() =>
   !hasTrendComparison.value
-    ? '再记录一次，就能看到变化'
+    ? hasTrendData.value
+      ? '再补一条可比较的记录'
+      : '先保存第一条体重记录'
     : trendChange.value <= 0
       ? '比周期开始轻了一点'
       : '这段时间有些波动',
 );
 const insightText = computed(() =>
-  trendChange.value <= 0
-    ? '小絮说：曲线在向下走，今天也值得被好好夸奖。'
-    : '小絮说：体重有波动很正常，先照顾好今天的自己。',
+  !hasTrendComparison.value
+    ? '记录逐渐积累后，再一起观察变化。'
+    : trendChange.value === 0
+      ? '这段时间记录较稳定，结合感受继续观察。'
+      : '记录有所变化，结合目标、作息和测量条件一起看。',
 );
 const recordList = computed(() => {
   if (recordFilter.value === 'all') return records.value;
@@ -752,23 +776,20 @@ const milestones = computed(() => [
     note: `${recordStreak.value} 天`,
     achieved: recordStreak.value >= 3,
   },
-  {
-    title: targetDirection.value === 'gain' ? '稳步增加 1kg' : '轻盈 1kg',
-    note:
-      (targetDirection.value === 'gain'
-        ? currentWeight.value - startWeight.value
-        : startWeight.value - currentWeight.value) >= 1
-        ? '已达成'
-        : '还差 1kg',
-    achieved:
-      (targetDirection.value === 'gain'
-        ? currentWeight.value - startWeight.value
-        : startWeight.value - currentWeight.value) >= 1,
-  },
+  weightChangeMilestone({
+    start: startWeight.value,
+    current: currentWeight.value,
+    direction: targetDirection.value,
+    hasGoal: targetWeight.value > 0,
+  }),
   {
     title: '靠近目标',
-    note: `${remainingKg.value.toFixed(1)} kg`,
-    achieved: progress.value >= 60,
+    note: !targetWeight.value
+      ? '待设目标'
+      : !currentWeight.value
+        ? '待记录'
+        : `还差 ${remainingKg.value.toFixed(1)} kg`,
+    achieved: currentWeight.value > 0 && targetWeight.value > 0 && progress.value >= 60,
   },
 ]);
 const recordDates = computed(
@@ -906,7 +927,9 @@ function saveWeight() {
     : undefined;
   const now = new Date();
   const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  const previousTime = previous ? new Date(previous.recordedAt).toTimeString().slice(0, 8) : undefined;
+  const previousTime = previous
+    ? new Date(previous.recordedAt).toTimeString().slice(0, 8)
+    : undefined;
   const payload = {
     weight: Number(value.toFixed(1)),
     recordedAt: recordedDate.value
@@ -1367,8 +1390,12 @@ onShow(loadWeightData);
   color: var(--hz-muted);
   font-size: 18rpx;
 }
-.chart-x-label.is-left { left: 12rpx; }
-.chart-x-label.is-right { right: 12rpx; }
+.chart-x-label.is-left {
+  left: 12rpx;
+}
+.chart-x-label.is-right {
+  right: 12rpx;
+}
 .trend-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2294,30 +2321,193 @@ onShow(loadWeightData);
 </style>
 
 <style scoped>
-.dialog-mask { align-items:flex-end; padding:0 18rpx calc(18rpx + env(safe-area-inset-bottom)); box-sizing:border-box; background:rgba(57,55,50,.24); backdrop-filter:blur(2px); }
-.dialog { width:100%; max-height:84vh; margin:0; padding:18rpx 24rpx calc(22rpx + env(safe-area-inset-bottom)); border:1rpx solid rgba(235,226,214,.9); border-radius:30rpx; background:#fffdf9; box-shadow:0 -12rpx 36rpx rgba(88,75,64,.14); box-sizing:border-box; }
-.dialog-handle { width:68rpx; height:7rpx; margin:0 auto 20rpx; border-radius:99rpx; background:#e3d9ce; }
-.dialog-head { align-items:flex-start; }
-.dialog-title { color:#5a5553; font-size:32rpx; line-height:1.25; }
-.dialog-subtitle { display:block; margin-top:7rpx; color:#a69a91; font-size:19rpx; }
-.dialog-close { display:flex; align-items:center; justify-content:center; width:48rpx; height:48rpx; padding:0; border:1rpx solid #eee5da; border-radius:50%; color:#a39388; background:#fbf5ed; font-size:28rpx; line-height:1; }
-.dialog-close::after { border:0; }
-.dialog-hint { margin:17rpx 0 6rpx; padding:11rpx 13rpx; border:1rpx solid #e8eee3; border-radius:15rpx; color:#849482; background:#f7faf4; font-size:19rpx; }
-.field-block { margin-top:18rpx; }
-.field-label { margin:0 0 9rpx; color:#6c6560; font-size:20rpx; font-weight:700; }
-.weight-input-wrap { display:flex; align-items:center; height:78rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; background:#fffaf3; box-sizing:border-box; }
-.weight-input { flex:1; width:auto; height:76rpx; padding:0; border:0; color:#514c49; background:transparent; font-size:34rpx; font-weight:700; }
-.input-unit { color:#a38b75; font-size:22rpx; font-weight:700; }
-.date-picker-value { display:flex; align-items:center; justify-content:space-between; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:23rpx; box-sizing:border-box; }
-.picker-chevron { width:28rpx; height:28rpx; opacity:.45; }
-.note-input { width:100%; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:22rpx; box-sizing:border-box; }
-.save-button { display:flex; align-items:center; justify-content:center; width:100%; height:78rpx; margin-top:23rpx; border:1rpx solid #d2e2d5; border-radius:18rpx; color:#557563; background:#edf6ef; box-shadow:0 8rpx 18rpx rgba(104,141,111,.1); font-size:24rpx; font-weight:700; line-height:1; }
-.save-button::after { border:0; }
-.delete-record-button { display:flex; align-items:center; justify-content:center; width:100%; height:58rpx; margin-top:6rpx; color:#aa8279; background:transparent; font-size:19rpx; line-height:1; }
-.delete-record-button::after { border:0; }
-.success-sheet { width:100%; padding:34rpx 26rpx calc(28rpx + env(safe-area-inset-bottom)); border-radius:30rpx 30rpx 0 0; background:#fffdf9; box-sizing:border-box; }
-.success-done { display:flex; align-items:center; justify-content:center; width:100%; height:76rpx; margin-top:25rpx; border:1rpx solid #d2e2d5; border-radius:18rpx; color:#557563; background:#edf6ef; font-size:23rpx; line-height:1; }
-.success-done::after { border:0; }
+.dialog-mask {
+  align-items: flex-end;
+  padding: 0 18rpx calc(18rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: rgba(57, 55, 50, 0.24);
+  backdrop-filter: blur(2px);
+}
+.dialog {
+  width: 100%;
+  max-height: 84vh;
+  margin: 0;
+  padding: 18rpx 24rpx calc(22rpx + env(safe-area-inset-bottom));
+  border: 1rpx solid rgba(235, 226, 214, 0.9);
+  border-radius: 30rpx;
+  background: #fffdf9;
+  box-shadow: 0 -12rpx 36rpx rgba(88, 75, 64, 0.14);
+  box-sizing: border-box;
+}
+.dialog-handle {
+  width: 68rpx;
+  height: 7rpx;
+  margin: 0 auto 20rpx;
+  border-radius: 99rpx;
+  background: #e3d9ce;
+}
+.dialog-head {
+  align-items: flex-start;
+}
+.dialog-title {
+  color: #5a5553;
+  font-size: 32rpx;
+  line-height: 1.25;
+}
+.dialog-subtitle {
+  display: block;
+  margin-top: 7rpx;
+  color: #a69a91;
+  font-size: 19rpx;
+}
+.dialog-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 48rpx;
+  padding: 0;
+  border: 1rpx solid #eee5da;
+  border-radius: 50%;
+  color: #a39388;
+  background: #fbf5ed;
+  font-size: 28rpx;
+  line-height: 1;
+}
+.dialog-close::after {
+  border: 0;
+}
+.dialog-hint {
+  margin: 17rpx 0 6rpx;
+  padding: 11rpx 13rpx;
+  border: 1rpx solid #e8eee3;
+  border-radius: 15rpx;
+  color: #849482;
+  background: #f7faf4;
+  font-size: 19rpx;
+}
+.field-block {
+  margin-top: 18rpx;
+}
+.field-label {
+  margin: 0 0 9rpx;
+  color: #6c6560;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+.weight-input-wrap {
+  display: flex;
+  align-items: center;
+  height: 78rpx;
+  padding: 0 19rpx;
+  border: 1rpx solid #e5ddd2;
+  border-radius: 16rpx;
+  background: #fffaf3;
+  box-sizing: border-box;
+}
+.weight-input {
+  flex: 1;
+  width: auto;
+  height: 76rpx;
+  padding: 0;
+  border: 0;
+  color: #514c49;
+  background: transparent;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.input-unit {
+  color: #a38b75;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.date-picker-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72rpx;
+  padding: 0 19rpx;
+  border: 1rpx solid #e5ddd2;
+  border-radius: 16rpx;
+  color: #615a56;
+  background: #fffaf3;
+  font-size: 23rpx;
+  box-sizing: border-box;
+}
+.picker-chevron {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.45;
+}
+.note-input {
+  width: 100%;
+  height: 72rpx;
+  padding: 0 19rpx;
+  border: 1rpx solid #e5ddd2;
+  border-radius: 16rpx;
+  color: #615a56;
+  background: #fffaf3;
+  font-size: 22rpx;
+  box-sizing: border-box;
+}
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 78rpx;
+  margin-top: 23rpx;
+  border: 1rpx solid #d2e2d5;
+  border-radius: 18rpx;
+  color: #557563;
+  background: #edf6ef;
+  box-shadow: 0 8rpx 18rpx rgba(104, 141, 111, 0.1);
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+.save-button::after {
+  border: 0;
+}
+.delete-record-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 58rpx;
+  margin-top: 6rpx;
+  color: #aa8279;
+  background: transparent;
+  font-size: 19rpx;
+  line-height: 1;
+}
+.delete-record-button::after {
+  border: 0;
+}
+.success-sheet {
+  width: 100%;
+  padding: 34rpx 26rpx calc(28rpx + env(safe-area-inset-bottom));
+  border-radius: 30rpx 30rpx 0 0;
+  background: #fffdf9;
+  box-sizing: border-box;
+}
+.success-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 76rpx;
+  margin-top: 25rpx;
+  border: 1rpx solid #d2e2d5;
+  border-radius: 18rpx;
+  color: #557563;
+  background: #edf6ef;
+  font-size: 23rpx;
+  line-height: 1;
+}
+.success-done::after {
+  border: 0;
+}
 </style>
 <style scoped>
 .plan-timeline {
@@ -2429,33 +2619,92 @@ onShow(loadWeightData);
   background: #edf3ee !important;
   box-shadow: 0 12rpx 28rpx rgba(32, 55, 42, 0.08) !important;
 }
-.hero-art { opacity: 1 !important; mix-blend-mode: normal !important; }
-.hero-wash { background: linear-gradient(90deg, rgba(237, 243, 238, .98) 0%, rgba(237, 243, 238, .8) 52%, rgba(237, 243, 238, .18) 100%) !important; }
-.hero-copy { padding: 34rpx 28rpx !important; }
-.hero-kicker { color: #48675a !important; font-size: 20rpx !important; }
-.hero-number { color: #173f30 !important; font-size: 70rpx !important; }
-.hero-unit { color: #1f6b4c !important; font-size: 24rpx !important; }
-.hero-date { color: #748078 !important; }
-.hero-bubble { border-color: #d7e5da !important; border-radius: 12rpx !important; background: #fffdf9 !important; }
-.bubble-title { color: #748078 !important; }
-.bubble-value { color: #1f6b4c !important; }
+.hero-art {
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+}
+.hero-wash {
+  background: linear-gradient(
+    90deg,
+    rgba(237, 243, 238, 0.98) 0%,
+    rgba(237, 243, 238, 0.8) 52%,
+    rgba(237, 243, 238, 0.18) 100%
+  ) !important;
+}
+.hero-copy {
+  padding: 34rpx 28rpx !important;
+}
+.hero-kicker {
+  color: #48675a !important;
+  font-size: 20rpx !important;
+}
+.hero-number {
+  color: #173f30 !important;
+  font-size: 70rpx !important;
+}
+.hero-unit {
+  color: #1f6b4c !important;
+  font-size: 24rpx !important;
+}
+.hero-date {
+  color: #748078 !important;
+}
+.hero-bubble {
+  border-color: #d7e5da !important;
+  border-radius: 12rpx !important;
+  background: #fffdf9 !important;
+}
+.bubble-title {
+  color: #748078 !important;
+}
+.bubble-value {
+  color: #1f6b4c !important;
+}
 .summary-card,
 .trend-card,
-.history-card { border-radius: 18rpx !important; background: #fffdf9 !important; }
+.history-card {
+  border-radius: 18rpx !important;
+  background: #fffdf9 !important;
+}
 .summary-heading-title,
 .section-title,
-.history-heading { color: #173f30 !important; }
+.history-heading {
+  color: #173f30 !important;
+}
 .summary-value,
-.trend-number { color: #1f6b4c !important; }
+.trend-number {
+  color: #1f6b4c !important;
+}
 .range-tab,
-.record-filter { border-radius: 10rpx !important; border-color: #e2e5dc !important; background: #fffdf9 !important; }
+.record-filter {
+  border-radius: 10rpx !important;
+  border-color: #e2e5dc !important;
+  background: #fffdf9 !important;
+}
 .range-tab.active,
-.record-filter.active { border-color: #9fc3ad !important; color: #173f30 !important; background: #e7f0e9 !important; }
+.record-filter.active {
+  border-color: #9fc3ad !important;
+  color: #173f30 !important;
+  background: #e7f0e9 !important;
+}
 .record-button,
-.save-button { height: 88rpx !important; border: 0 !important; border-radius: 14rpx !important; background: #173f30 !important; box-shadow: 0 8rpx 18rpx rgba(23, 63, 48, .16) !important; }
-.dialog { border-radius: 28rpx 28rpx 0 0 !important; background: #fffdf9 !important; }
+.save-button {
+  height: 88rpx !important;
+  border: 0 !important;
+  border-radius: 14rpx !important;
+  background: #173f30 !important;
+  box-shadow: 0 8rpx 18rpx rgba(23, 63, 48, 0.16) !important;
+}
+.dialog {
+  border-radius: 28rpx 28rpx 0 0 !important;
+  background: #fffdf9 !important;
+}
 .weight-input,
-.note-input { border-color: #d8e4da !important; border-radius: 12rpx !important; background: #fbfcf8 !important; }
+.note-input {
+  border-color: #d8e4da !important;
+  border-radius: 12rpx !important;
+  background: #fbfcf8 !important;
+}
 </style>
 
 <style scoped>
@@ -2488,7 +2737,12 @@ onShow(loadWeightData);
   right: 0 !important;
   bottom: 0 !important;
   left: 0 !important;
-  background: linear-gradient(90deg, rgba(248, 251, 247, 0.3) 0%, rgba(248, 251, 247, 0.12) 46%, rgba(248, 251, 247, 0) 78%) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(248, 251, 247, 0.3) 0%,
+    rgba(248, 251, 247, 0.12) 46%,
+    rgba(248, 251, 247, 0) 78%
+  ) !important;
 }
 .hero-copy {
   top: 28rpx !important;
@@ -2500,10 +2754,25 @@ onShow(loadWeightData);
   background: rgba(255, 253, 249, 0.9) !important;
   box-shadow: 0 8rpx 20rpx rgba(29, 58, 42, 0.08) !important;
 }
-.hero-kicker { margin-bottom: 12rpx !important; color: #4d6c59 !important; font-size: 20rpx !important; }
-.hero-number { color: #173f30 !important; font-size: 72rpx !important; letter-spacing: 0 !important; }
-.hero-unit { color: #1f6b4c !important; font-size: 22rpx !important; }
-.hero-date { margin-top: 10rpx !important; color: #6f7e74 !important; font-size: 19rpx !important; }
+.hero-kicker {
+  margin-bottom: 12rpx !important;
+  color: #4d6c59 !important;
+  font-size: 20rpx !important;
+}
+.hero-number {
+  color: #173f30 !important;
+  font-size: 72rpx !important;
+  letter-spacing: 0 !important;
+}
+.hero-unit {
+  color: #1f6b4c !important;
+  font-size: 22rpx !important;
+}
+.hero-date {
+  margin-top: 10rpx !important;
+  color: #6f7e74 !important;
+  font-size: 19rpx !important;
+}
 .hero-bubble {
   z-index: 3 !important;
   top: 20rpx !important;
@@ -2514,8 +2783,15 @@ onShow(loadWeightData);
   background: rgba(255, 253, 249, 0.95) !important;
   box-shadow: 0 6rpx 14rpx rgba(34, 64, 46, 0.08) !important;
 }
-.bubble-title { color: #738178 !important; font-size: 18rpx !important; }
-.bubble-value { color: #1f6b4c !important; font-size: 24rpx !important; font-weight: 750 !important; }
+.bubble-title {
+  color: #738178 !important;
+  font-size: 18rpx !important;
+}
+.bubble-value {
+  color: #1f6b4c !important;
+  font-size: 24rpx !important;
+  font-weight: 750 !important;
+}
 
 .record-button {
   width: 198rpx !important;
@@ -2545,7 +2821,9 @@ onShow(loadWeightData);
   border-radius: 18rpx !important;
   color: #2f5f4a !important;
   background: rgba(237, 247, 240, 0.82) !important;
-  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.92), 0 8rpx 20rpx rgba(54, 104, 78, 0.14) !important;
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.92),
+    0 8rpx 20rpx rgba(54, 104, 78, 0.14) !important;
   backdrop-filter: blur(14rpx) !important;
   font-size: 24rpx !important;
   font-weight: 600 !important;
@@ -2555,31 +2833,192 @@ onShow(loadWeightData);
 .weight-page button.save-button:active,
 .weight-page button.success-done:active {
   background: rgba(214, 235, 221, 0.92) !important;
-  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.8), 0 4rpx 12rpx rgba(54, 104, 78, 0.12) !important;
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8),
+    0 4rpx 12rpx rgba(54, 104, 78, 0.12) !important;
   transform: scale(0.985);
 }
 </style>
 
 <style scoped>
-.dialog-mask { align-items:flex-end !important; padding:0 18rpx calc(18rpx + env(safe-area-inset-bottom)) !important; box-sizing:border-box; background:rgba(57,55,50,.24) !important; backdrop-filter:blur(2px); }
-.dialog { width:100% !important; max-height:84vh !important; margin:0 !important; padding:18rpx 24rpx calc(22rpx + env(safe-area-inset-bottom)) !important; border:1rpx solid rgba(235,226,214,.9) !important; border-radius:30rpx !important; background:#fffdf9 !important; box-shadow:0 -12rpx 36rpx rgba(88,75,64,.14) !important; box-sizing:border-box; }
-.dialog-handle { width:68rpx !important; height:7rpx !important; margin:0 auto 20rpx !important; border-radius:99rpx; background:#e3d9ce !important; }
-.dialog-title { color:#5a5553 !important; font-size:32rpx !important; line-height:1.25; }
-.dialog-subtitle { display:block; margin-top:7rpx; color:#a69a91 !important; font-size:19rpx; }
-.dialog-close { display:flex; align-items:center; justify-content:center; width:48rpx !important; height:48rpx !important; padding:0; border:1rpx solid #eee5da !important; border-radius:50%; color:#a39388 !important; background:#fbf5ed !important; font-size:28rpx; line-height:1; }
-.dialog-close::after { border:0; }
-.dialog-hint { margin:17rpx 0 6rpx !important; padding:11rpx 13rpx; border:1rpx solid #e8eee3; border-radius:15rpx; color:#849482; background:#f7faf4; font-size:19rpx; }
-.field-block { margin-top:18rpx; }
-.field-label { margin:0 0 9rpx; color:#6c6560; font-size:20rpx; font-weight:700; }
-.weight-input-wrap { display:flex; align-items:center; height:78rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; background:#fffaf3; box-sizing:border-box; }
-.weight-input { flex:1; width:auto; height:76rpx; padding:0; border:0; color:#514c49; background:transparent; font-size:34rpx; font-weight:700; }
-.input-unit { color:#a38b75; font-size:22rpx; font-weight:700; }
-.date-picker-value { display:flex; align-items:center; justify-content:space-between; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:23rpx; box-sizing:border-box; }
-.picker-chevron { width:28rpx; height:28rpx; opacity:.45; }
-.note-input { width:100%; height:72rpx; padding:0 19rpx; border:1rpx solid #e5ddd2; border-radius:16rpx; color:#615a56; background:#fffaf3; font-size:22rpx; box-sizing:border-box; }
-.save-button { display:flex; align-items:center; justify-content:center; width:100%; height:78rpx !important; margin-top:23rpx; border:1rpx solid #d2e2d5 !important; border-radius:18rpx; color:#557563 !important; background:#edf6ef !important; box-shadow:0 8rpx 18rpx rgba(104,141,111,.1) !important; font-size:24rpx; font-weight:700; line-height:1 !important; }
-.save-button::after,.delete-record-button::after,.success-done::after { border:0; }
-.delete-record-button { display:flex; align-items:center; justify-content:center; width:100%; height:58rpx; margin-top:6rpx; color:#aa8279; background:transparent; font-size:19rpx; line-height:1; }
-.success-sheet { width:100%; padding:34rpx 26rpx calc(28rpx + env(safe-area-inset-bottom)); border-radius:30rpx 30rpx 0 0; background:#fffdf9; box-sizing:border-box; }
-.success-done { display:flex; align-items:center; justify-content:center; width:100%; height:76rpx; margin-top:25rpx; border:1rpx solid #d2e2d5; border-radius:18rpx; color:#557563; background:#edf6ef; font-size:23rpx; line-height:1; }
+.dialog-mask {
+  align-items: flex-end !important;
+  padding: 0 18rpx calc(18rpx + env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box;
+  background: rgba(57, 55, 50, 0.24) !important;
+  backdrop-filter: blur(2px);
+}
+.dialog {
+  width: 100% !important;
+  max-height: 84vh !important;
+  margin: 0 !important;
+  padding: 18rpx 24rpx calc(22rpx + env(safe-area-inset-bottom)) !important;
+  border: 1rpx solid rgba(235, 226, 214, 0.9) !important;
+  border-radius: 30rpx !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 -12rpx 36rpx rgba(88, 75, 64, 0.14) !important;
+  box-sizing: border-box;
+}
+.dialog-handle {
+  width: 68rpx !important;
+  height: 7rpx !important;
+  margin: 0 auto 20rpx !important;
+  border-radius: 99rpx;
+  background: #e3d9ce !important;
+}
+.dialog-title {
+  color: #5a5553 !important;
+  font-size: 32rpx !important;
+  line-height: 1.25;
+}
+.dialog-subtitle {
+  display: block;
+  margin-top: 7rpx;
+  color: #a69a91 !important;
+  font-size: 19rpx;
+}
+.dialog-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx !important;
+  height: 48rpx !important;
+  padding: 0;
+  border: 1rpx solid #eee5da !important;
+  border-radius: 50%;
+  color: #a39388 !important;
+  background: #fbf5ed !important;
+  font-size: 28rpx;
+  line-height: 1;
+}
+.dialog-close::after {
+  border: 0;
+}
+.dialog-hint {
+  margin: 17rpx 0 6rpx !important;
+  padding: 11rpx 13rpx;
+  border: 1rpx solid #e8eee3;
+  border-radius: 15rpx;
+  color: #849482;
+  background: #f7faf4;
+  font-size: 19rpx;
+}
+.field-block {
+  margin-top: 18rpx;
+}
+.field-label {
+  margin: 0 0 9rpx;
+  color: #6c6560;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+.weight-input-wrap {
+  display: flex;
+  align-items: center;
+  height: 78rpx;
+  padding: 0 19rpx;
+  border: 1rpx solid #e5ddd2;
+  border-radius: 16rpx;
+  background: #fffaf3;
+  box-sizing: border-box;
+}
+.weight-input {
+  flex: 1;
+  width: auto;
+  height: 76rpx;
+  padding: 0;
+  border: 0;
+  color: #514c49;
+  background: transparent;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.input-unit {
+  color: #a38b75;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.date-picker-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72rpx;
+  padding: 0 19rpx;
+  border: 1rpx solid #e5ddd2;
+  border-radius: 16rpx;
+  color: #615a56;
+  background: #fffaf3;
+  font-size: 23rpx;
+  box-sizing: border-box;
+}
+.picker-chevron {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.45;
+}
+.note-input {
+  width: 100%;
+  height: 72rpx;
+  padding: 0 19rpx;
+  border: 1rpx solid #e5ddd2;
+  border-radius: 16rpx;
+  color: #615a56;
+  background: #fffaf3;
+  font-size: 22rpx;
+  box-sizing: border-box;
+}
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 78rpx !important;
+  margin-top: 23rpx;
+  border: 1rpx solid #d2e2d5 !important;
+  border-radius: 18rpx;
+  color: #557563 !important;
+  background: #edf6ef !important;
+  box-shadow: 0 8rpx 18rpx rgba(104, 141, 111, 0.1) !important;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 1 !important;
+}
+.save-button::after,
+.delete-record-button::after,
+.success-done::after {
+  border: 0;
+}
+.delete-record-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 58rpx;
+  margin-top: 6rpx;
+  color: #aa8279;
+  background: transparent;
+  font-size: 19rpx;
+  line-height: 1;
+}
+.success-sheet {
+  width: 100%;
+  padding: 34rpx 26rpx calc(28rpx + env(safe-area-inset-bottom));
+  border-radius: 30rpx 30rpx 0 0;
+  background: #fffdf9;
+  box-sizing: border-box;
+}
+.success-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 76rpx;
+  margin-top: 25rpx;
+  border: 1rpx solid #d2e2d5;
+  border-radius: 18rpx;
+  color: #557563;
+  background: #edf6ef;
+  font-size: 23rpx;
+  line-height: 1;
+}
 </style>

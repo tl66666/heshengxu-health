@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
+import { existsSync, lstatSync, readdirSync, realpathSync, statSync, unlinkSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Plugin } from 'vite';
 
@@ -26,8 +26,7 @@ export function rewriteRemoteBitmapUrls(source: string, baseUrl: string) {
 export function rewriteCachedTemplateBitmapUrls(source: string) {
   return source.replace(
     STATIC_TEMPLATE_BITMAP,
-    (_match, prefix: string, path: string) =>
-      `${prefix}:src="$asset('static/${path}')"`,
+    (_match, prefix: string, path: string) => `${prefix}:src="$asset('static/${path}')"`,
   );
 }
 
@@ -43,25 +42,16 @@ export function remoteMiniAssetsPlugin(value?: string): Plugin {
       if (prunedIcons > 0) {
         console.log(`[heban] removed ${prunedIcons} App-only icons from the Mini Program package`);
       }
-      // App packages are uploaded to HBuilderX as a single archive. Once the
-      // source references point at CloudBase, keeping the same bitmaps locally
-      // only increases the archive size and can make cloud packaging stop at
-      // the 40% upload stage. Restrict cleanup to the generated App directory;
-      // Mini Program output and the repository source assets remain untouched.
       if (!baseUrl) return;
-
-      const appStaticDir = [
-        resolve(process.cwd(), 'dist/build/app/static'),
-        resolve(process.cwd(), 'apps/mini/dist/build/app/static'),
-      ].find((directory) => existsSync(directory));
-      if (!appStaticDir) return;
-
-      const bitmapFiles = collectFiles(appStaticDir).filter((file) =>
-        /\.(?:png|jpe?g|webp|gif)$/iu.test(file),
+      const remoteized = pruneGeneratedRemoteAppBitmaps(
+        process.cwd(),
+        platform,
+        process.env.UNI_OUTPUT_DIR,
       );
-      bitmapFiles.forEach((file) => unlinkSync(file));
-      if (bitmapFiles.length > 0) {
-        console.log(`[heban] remoteized ${bitmapFiles.length} bitmap assets for the App package`);
+      if (remoteized > 0) {
+        console.log(
+          `[heban] remoteized ${remoteized} bitmap assets in current App output; source preserved`,
+        );
       }
     },
     transform(source, id) {
@@ -76,6 +66,23 @@ export function remoteMiniAssetsPlugin(value?: string): Plugin {
       return code === source ? null : { code, map: null };
     },
   };
+}
+
+/** Only the active generated App output can be pruned; HBuilderX uses app-plus. */
+export function pruneGeneratedRemoteAppBitmaps(root: string, platform: string, outputDir?: string) {
+  if (platform !== 'app' && platform !== 'app-plus') return 0;
+  const allowed = ['app', 'app-plus'].map((name) =>
+    resolve(realpathSync(root), 'dist/build', name),
+  );
+  const output = resolve(outputDir || resolve(root, 'dist/build', platform));
+  if (!existsSync(output)) return 0;
+  const actual = realpathSync(output);
+  if (!allowed.includes(actual)) return 0;
+  const staticDir = resolve(output, 'static');
+  if (!existsSync(staticDir) || lstatSync(staticDir).isSymbolicLink()) return 0;
+  const files = collectFiles(staticDir).filter((file) => /\.(?:png|jpe?g|webp|gif)$/iu.test(file));
+  for (const file of files) unlinkSync(file);
+  return files.length;
 }
 
 export function pruneGeneratedAppIcons(root: string, platform: string) {
@@ -101,6 +108,7 @@ function collectFiles(directory: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(directory)) {
     const path = resolve(directory, entry);
+    if (lstatSync(path).isSymbolicLink()) continue;
     if (statSync(path).isDirectory()) files.push(...collectFiles(path));
     else files.push(path);
   }

@@ -6,7 +6,7 @@
       <text class="subtitle">记录真实生活，不需要算得完美。</text>
     </view>
 
-    <view v-if="store.loading" class="status">正在整理今天的记录...</view>
+    <view v-if="loading" class="status">正在整理今天的记录...</view>
     <view v-else-if="loadError && !timeline.length" class="error-state">
       <image src="/static/illustrations/xuxu-record-reminder.png" mode="aspectFit" />
       <text>记录暂时没有加载出来</text>
@@ -82,7 +82,7 @@
         </view>
 
         <template v-if="activeType === 'weight'">
-          <view class="field-label"><text>体重</text><text class="unit">kg</text></view>
+          <view class="field-label"><text>体重</text></view>
           <view class="input-wrap" :class="{ invalid: fieldError('valueKg') }">
             <input v-model="weight" type="digit" placeholder="例如 61.8" @input="clearErrors" />
             <text>kg</text>
@@ -196,6 +196,7 @@
         </button>
       </view>
 
+      <DetailReadingCard v-if="activeType === 'activity'" guide-id="muscle-progress" />
       <view class="timeline-head">
         <text>今天已记录</text>
         <text>{{ timeline.length }} 条</text>
@@ -214,8 +215,6 @@
       </view>
       <view v-else class="empty-line">保存后，记录会出现在这里。</view>
     </template>
-
-    
   </view>
 </template>
 
@@ -239,6 +238,7 @@ import type {
 
 const store = createHealthRecordsStore();
 const timeline = store.timeline;
+const loading = store.loading;
 const saving = store.saving;
 const loadError = store.loadError;
 const saveError = store.saveError;
@@ -359,6 +359,10 @@ async function submit() {
   uni.showToast({ title: '已保存', icon: 'success' });
 }
 function startEdit(item: RecordTimelineItem) {
+  if (item.id.startsWith('lean-')) {
+    uni.navigateTo({ url: `/pages/lean-muscle/TrainingPage?id=${encodeURIComponent(item.id)}` });
+    return;
+  }
   const form = store.edit(item);
   if (!form) return;
   activeType.value = form.type;

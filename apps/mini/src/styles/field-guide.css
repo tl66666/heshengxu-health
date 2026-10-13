@@ -1,0 +1,417 @@
+/* Field guide visual rhythm shared by book shelves, forms and readers. */
+.version-page {
+  background: #f7f2e8;
+}
+.lean-page .nav-bar-wrapper {
+  margin-bottom: 10rpx;
+}
+.lean-page .hero,
+.version-hero {
+  margin-top: 16rpx;
+}
+.version-hero {
+  border-radius: 9rpx 26rpx 26rpx 9rpx;
+  border-left: 4rpx solid #bca171;
+  min-height: 314rpx;
+}
+.version-hero-title {
+  font-size: 43rpx;
+  color: #535c4c;
+  line-height: 1.55;
+}
+.version-hero-copy {
+  font-size: 23rpx;
+  color: #80745f;
+}
+.lean-page .tabs {
+  margin: 24rpx 0 30rpx;
+  border: 0;
+  background: #e9e1d1;
+  border-radius: 16rpx;
+  padding: 8rpx;
+}
+.lean-page .tabs button {
+  border-radius: 12rpx;
+  min-height: 76rpx;
+  font-size: 25rpx;
+}
+.lean-page .tabs .active {
+  border: 0;
+  background: #fffcf5;
+  color: #84603c;
+  box-shadow: 0 4rpx 12rpx #7f65421a;
+}
+.lean-page .section-title {
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  line-height: 1.65;
+}
+.lean-page .muted,
+.lean-page .note {
+  font-size: 24rpx;
+  line-height: 1.85;
+  color: #7c7f70;
+}
+.lean-page .panel {
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 24rpx 0;
+}
+.lean-page .field-label {
+  color: #695d4b;
+  margin-top: 25rpx;
+}
+.lean-page .primary {
+  min-height: 88rpx;
+  box-shadow: 0 6rpx 15rpx #a8784f18;
+}
+.lean-page .selection-grid {
+  gap: 14rpx;
+}
+.lean-page .selection-grid button {
+  min-height: 74rpx;
+  padding: 16rpx 20rpx;
+  border: 1rpx solid #e1d8c6;
+}
+.lean-page .selection-grid .chosen {
+  background: #78886a;
+  border-color: #78886a;
+  box-shadow: inset 0 1rpx #a5b494;
+}
+.lean-page .two-columns {
+  gap: 20rpx;
+}
+.lean-page .score-dimension {
+  padding: 19rpx 0;
+  border-bottom: 1rpx solid #e8dfcd;
+}
+.lean-page .score-dimension:last-child {
+  border-bottom: 0;
+}
+.lean-page .score-detail {
+  font-size: 24rpx;
+  line-height: 1.85;
+  background: #f4eee2;
+  padding: 17rpx 19rpx;
+  border-radius: 13rpx;
+}
+.bookcase {
+  border-left-width: 10rpx;
+  border-right-width: 10rpx;
+  box-shadow:
+    inset 0 12rpx 26rpx #79624620,
+    0 12rpx 24rpx #765f3212;
+}
+.shelf-book-label {
+  font-size: 22rpx;
+  color: #68523b;
+  margin-top: 7rpx;
+}
+.shelf-book-caption {
+  font-size: 17rpx;
+  color: #887859;
+}
+.books-on-shelf {
+  padding-bottom: 17rpx;
+}
+.library-search {
+  min-height: 90rpx;
+  border-radius: 17rpx;
+}
+.library-search input {
+  font-size: 26rpx !important;
+  min-width: 0;
+  flex: 1;
+}
+.library-search button {
+  flex-shrink: 0;
+}
+.filter-track button {
+  min-height: 70rpx;
+  font-size: 22rpx;
+}
+.guide-card {
+  border-radius: 8rpx 21rpx 21rpx 8rpx;
+  border-left: 4rpx solid var(--guide-accent, #b6a17b);
+  box-shadow: 0 5rpx 14rpx #88744706;
+}
+.guide-card-title {
+  font-size: 31rpx;
+  color: #5e503b;
+}
+.guide-card-subtitle {
+  font-size: 24rpx;
+  color: #83775f;
+}
+.guide-card-bottom {
+  font-size: 20rpx;
+  color: #897d67;
+}
+.topic-reading-banner {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  padding: 20rpx 24rpx;
+  background: var(--topic-wash, #efe7d8);
+  border-radius: 18rpx;
+  margin: 23rpx 0 18rpx;
+}
+.topic-reading-copy {
+  min-width: 0;
+  flex: 1;
+}
+.topic-reading-copy > text {
+  display: block;
+}
+.topic-reading-heading {
+  font-size: 30rpx;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+  font-weight: 700;
+  color: #5f563f;
+}
+.topic-reading-summary {
+  font-size: 23rpx;
+  line-height: 1.8;
+  color: #857960;
+  margin: 7rpx 0;
+}
+.topic-reading-source {
+  background: transparent;
+  font-size: 21rpx !important;
+  text-align: left;
+  color: #806844;
+  padding: 8rpx 0 !important;
+}
+.topic-mini-cover {
+  width: 90rpx;
+  height: 130rpx;
+  flex-shrink: 0;
+  filter: drop-shadow(3rpx 5rpx 4rpx #57462c24);
+}
+.reading-toolbar {
+  background: #efe6d3;
+  border-radius: 16rpx;
+  padding: 10rpx 19rpx;
+  margin: 20rpx 0 24rpx;
+}
+.reading-toolbar button {
+  min-height: 64rpx;
+  color: #81623d !important;
+  font-size: 23rpx !important;
+}
+.guide-paper,
+.paper-sheet {
+  background-blend-mode: soft-light;
+  border-radius: 4rpx 18rpx 18rpx 4rpx;
+}
+.guide-paragraph {
+  font-size: 29rpx !important;
+  line-height: 2.05 !important;
+  color: #51442f !important;
+}
+.guide-paper.large-type .guide-paragraph {
+  font-size: 34rpx !important;
+}
+.reader-section-list {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin: 18rpx 0 24rpx;
+}
+.reader-section-list button {
+  font-size: 22rpx !important;
+  color: #82643c;
+  background: #eee0c5;
+  padding: 12rpx 17rpx;
+  border-radius: 12rpx;
+}
+.reading-progress {
+  height: 4rpx;
+  background: #dbcdb1;
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin: 15rpx 0 0;
+}
+.reading-progress-fill {
+  height: 100%;
+  background: #a68555;
+  transition: width 0.3s ease;
+}
+.lean-page .source-panel,
+.lean-page .book-sources {
+  border-radius: 18rpx;
+  background: #f6edda !important;
+}
+.source-panel .section-title,
+.book-sources .section-title {
+  font-size: 27rpx;
+  color: #846a43;
+}
+.source-item {
+  min-height: 100rpx;
+}
+.source-title {
+  font-size: 24rpx !important;
+  color: #7f603b !important;
+}
+.guide-action .section-title {
+  font-size: 29rpx !important;
+  color: #775635 !important;
+}
+.action-card {
+  padding: 25rpx 23rpx;
+  align-items: flex-start;
+}
+.action-copy > text:first-child {
+  font-size: 27rpx;
+  line-height: 1.8;
+  display: block;
+}
+.action-check {
+  width: 56rpx !important;
+  height: 56rpx !important;
+  min-width: 56rpx !important;
+  margin-top: 5rpx !important;
+}
+.library-footer {
+  font-size: 21rpx;
+  color: #928166;
+}
+.field-guide-decor {
+  width: 115rpx;
+  height: 105rpx;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+.field-guide-note-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+@media (max-width: 360px) {
+  .shelf-book-cover {
+    width: 174rpx;
+    height: 261rpx;
+  }
+  .shelf-book-label {
+    font-size: 21rpx;
+  }
+  .shelf-book-caption {
+    font-size: 16rpx;
+  }
+  .lean-page .score-summary {
+    gap: 17rpx;
+  }
+  .lean-page .score-orbit {
+    width: 172rpx;
+    height: 172rpx;
+  }
+  .guide-paper {
+    padding: 26rpx 29rpx !important;
+  }
+}
+
+.version-hero {
+  min-height: 348rpx;
+}
+.version-hero-title {
+  max-width: 78%;
+  font-size: 40rpx;
+}
+.version-hero-copy {
+  max-width: 51%;
+}
+.version-hero-art {
+  width: 240rpx;
+  height: 172rpx;
+  bottom: 5rpx;
+  right: 4rpx;
+}
+.chapter-position {
+  display: block;
+  text-align: center;
+  font-size: 23rpx;
+  color: #8a704d;
+  margin: 27rpx 0 12rpx;
+}
+.reading-progress {
+  margin-bottom: 18rpx;
+}
+/* Journal fields retain their warm surface against the general app input layer. */
+.lean-page input,
+.lean-page textarea,
+.lean-page .picker {
+  background: #f7f2e7 !important;
+  border: 1rpx solid #dfd3bd !important;
+  color: #65533d !important;
+  border-radius: 15rpx !important;
+}
+.lean-page input:focus,
+.lean-page textarea:focus {
+  border-color: #a08660 !important;
+  box-shadow: 0 0 0 3rpx #b4a27d20;
+}
+.lean-page .set-head,
+.lean-page .set-row {
+  grid-template-columns: 64rpx minmax(0, 1fr) minmax(0, 1fr) 44px !important;
+}
+.lean-page .set-row .quiet-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: #f2e5d6;
+  color: #a27454;
+  border-radius: 50%;
+}
+.lean-page .field-label {
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+/* Keep editorial hero and shelf hierarchy above older page-local rules. */
+.version-page .version-hero {
+  min-height: 348rpx;
+  border-radius: 9rpx 26rpx 26rpx 9rpx;
+  border-left: 4rpx solid #bca171;
+}
+.version-page .version-hero-title {
+  max-width: 78%;
+  font-size: 40rpx;
+  line-height: 1.55;
+  color: #535c4c;
+}
+.version-page .version-hero-copy {
+  max-width: 51%;
+  font-size: 23rpx;
+  color: #80745f;
+}
+.version-page .version-hero-art {
+  width: 240rpx;
+  height: 172rpx;
+  bottom: 5rpx;
+  right: 4rpx;
+}
+.version-page .shelf-book-label {
+  font-size: 22rpx;
+  color: #68523b;
+  margin-top: 7rpx;
+}
+.version-page .shelf-book-caption {
+  font-size: 17rpx;
+  color: #887859;
+}
+.version-page .guide-card {
+  border-left: 4rpx solid var(--guide-accent, #b6a17b);
+  border-radius: 8rpx 21rpx 21rpx 8rpx;
+}
+.version-page .guide-card-title {
+  font-size: 31rpx;
+  color: #5e503b;
+}
+.water-page .goal-card {
+  background: linear-gradient(135deg, #e9f2f3, #f8f7ee) !important;
+  border-color: #dbe7e6 !important;
+}
+.water-page .quick-btn {
+  background: #edf4f3 !important;
+  border-color: #dce8e6 !important;
+}

@@ -6,6 +6,7 @@ import type {
   SleepQuality,
 } from '../../../../../packages/contracts/src/health-loop.js';
 import { userStorageKey } from '../auth/user-storage.js';
+import { leanActivityRecords } from '../lean-muscle/store.js';
 
 const PROFILE_KEY = 'heshengxu.local.health-profile';
 const PLAN_KEY = 'heshengxu.local.health-plan';
@@ -25,7 +26,9 @@ export function saveLocalProfile(profile: LocalHealthProfile) {
 }
 
 export function loadLocalProfile(): LocalHealthProfile | null {
-  const value = uni.getStorageSync(userStorageKey(PROFILE_KEY)) as Partial<LocalHealthProfile> | null;
+  const value = uni.getStorageSync(
+    userStorageKey(PROFILE_KEY),
+  ) as Partial<LocalHealthProfile> | null;
   if (!value || !value.heightCm || !value.weightKg || !value.primaryGoal) return null;
   return {
     displayName: value.displayName || '新朋友',
@@ -104,6 +107,10 @@ export function resetLocalDemoData() {
     'pendingFoodSelection',
     'heban.food.daily-target-kcal',
     'heban_home_card_visibility',
+    'heban.home-card-preferences.v2',
+    'heban.lean-muscle.v1',
+    'heban.lean-muscle.signals.v1',
+    'heban.version-answer.v1',
     'heban.user-profile.v1',
   ];
   exactKeys.forEach((key) => {
@@ -115,12 +122,13 @@ export function resetLocalDemoData() {
   try {
     const keys = uni.getStorageInfoSync?.().keys || [];
     keys
-      .filter((key) =>
-        /^water_\d{4}_\d{1,2}_\d{1,2}$/.test(key) ||
-        key.startsWith('heshengxu.daily-home.') ||
-        key.startsWith('heban.local.meal-entries.') ||
-        key.startsWith('heban.local.habit-plans.') ||
-        key.includes('.user.'),
+      .filter(
+        (key) =>
+          /^water_\d{4}_\d{1,2}_\d{1,2}$/.test(key) ||
+          key.startsWith('heshengxu.daily-home.') ||
+          key.startsWith('heban.local.meal-entries.') ||
+          key.startsWith('heban.local.habit-plans.') ||
+          key.includes('.user.'),
       )
       .forEach((key) => uni.removeStorageSync(key));
   } catch {
@@ -247,7 +255,10 @@ function nullableString(value: unknown) {
 function readLocalHealthRecords(): LocalHealthRecord[] {
   try {
     const value = uni.getStorageSync(userStorageKey('heban.health.records.v1'));
-    return Array.isArray(value) ? (value as LocalHealthRecord[]) : [];
+    return [
+      ...(Array.isArray(value) ? (value as LocalHealthRecord[]) : []),
+      ...leanActivityRecords(),
+    ];
   } catch {
     return [];
   }

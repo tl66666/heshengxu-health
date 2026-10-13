@@ -204,7 +204,9 @@ button::after {
   border: 1rpx solid rgba(159, 195, 173, 0.6);
   border-radius: 50%;
   background: linear-gradient(160deg, #ffffff 0%, #eef5ef 100%);
-  box-shadow: 0 10rpx 22rpx rgba(29, 55, 41, 0.12), inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 10rpx 22rpx rgba(29, 55, 41, 0.12),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
 }
 .avatar {
   width: 100%;
@@ -359,7 +361,9 @@ button::after {
   border: 1rpx solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   background: linear-gradient(160deg, #ffffff 0%, #f2f7f1 100%);
-  box-shadow: 0 10rpx 22rpx rgba(47, 107, 77, 0.16), inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 10rpx 22rpx rgba(47, 107, 77, 0.16),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
 }
 .xuxu-avatar {
   width: 100%;
@@ -418,4 +422,10 @@ button::after {
 <style>
 /* 视觉系统最后加载：统一材质、色彩与控件语言 */
 @import './styles/visual-system.css';
+@import './pages/lean-muscle/lean-muscle.css';
+@import './pages/version-answer/version-answer.css';
+@import './styles/field-guide.css';
+@import './styles/experience-motion.css';
+@import './styles/library-experience.css';
+@import './styles/lean-hub.css';
 </style>

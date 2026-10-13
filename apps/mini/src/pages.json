@@ -46,6 +46,30 @@
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "运动记录" }
     },
     {
+      "path": "pages/lean-muscle/LeanMusclePage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "薄肌养成" }
+    },
+    {
+      "path": "pages/version-answer/VersionAnswerPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "版本答案" }
+    },
+    {
+      "path": "pages/version-answer/GuidePage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "版本答案 · 指南" }
+    },
+    {
+      "path": "pages/lean-muscle/TrainingPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "力量训练" }
+    },
+    {
+      "path": "pages/lean-muscle/SettingsPage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "我的薄肌安排" }
+    },
+    {
+      "path": "pages/lean-muscle/BiblePage",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "薄肌圣经" }
+    },
+    {
       "path": "pages/food/FoodDetailPage",
       "style": { "navigationStyle": "custom", "navigationBarTitleText": "饮食记录" }
     },

@@ -7,6 +7,12 @@ node_modules/
 dist/
 coverage/
 apps/mini/src/static/illustrations/
+# Generated preview copies; canonical images live in assets/mini-icons.
+apps/mini/src/static/icons/**/*.png
+apps/mini/src/static/icons/**/*.jpg
+apps/mini/src/static/icons/**/*.jpeg
+apps/mini/src/static/icons/**/*.webp
+apps/mini/src/static/icons/**/*.gif
 docs/assets/
 apps/mini/package-lock.json
 apps/mini/project.private.config.json

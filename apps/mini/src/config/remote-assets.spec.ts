@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, symlinkSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   normalizeRemoteAssetBaseUrl,
   pruneGeneratedAppIcons,
+  pruneGeneratedRemoteAppBitmaps,
   remoteMiniAssetsPlugin,
   rewriteCachedTemplateBitmapUrls,
   rewriteRemoteBitmapUrls,
@@ -68,7 +69,10 @@ describe('remote mini-program assets', () => {
     expect(typeof transform).toBe('function');
     const result =
       typeof transform === 'function'
-        ? Reflect.apply(transform, plugin, [`const asset = '/static/icons/test.png';`, 'remote-assets.spec.ts'])
+        ? Reflect.apply(transform, plugin, [
+            `const asset = '/static/icons/test.png';`,
+            'remote-assets.spec.ts',
+          ])
         : transform
           ? Reflect.apply(transform.handler, plugin, [
               `const asset = '/static/icons/test.png';`,
@@ -88,6 +92,49 @@ describe('mini program package cleanup', () => {
 
     expect(pruneGeneratedAppIcons(root, 'mp-weixin')).toBe(1);
     expect(existsSync(join(icons, 'ios-appstore.png'))).toBe(false);
+    await rm(root, { recursive: true, force: true });
+  });
+});
+
+describe('App output remote assets', () => {
+  it('refuses an output junction that points back to source files', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'heban-app-assets-'));
+    const source = join(root, 'src');
+    mkdirSync(join(source, 'static'), { recursive: true });
+    writeFileSync(join(source, 'static', 'hero.png'), 'source');
+    mkdirSync(join(root, 'dist', 'build'), { recursive: true });
+    symlinkSync(source, join(root, 'dist', 'build', 'app'), 'junction');
+    expect(pruneGeneratedRemoteAppBitmaps(root, 'app')).toBe(0);
+    expect(existsSync(join(source, 'static', 'hero.png'))).toBe(true);
+    await rm(root, { recursive: true, force: true });
+  });
+  it('handles the HBuilderX app-plus output and keeps source and other builds intact', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'heban-app-assets-'));
+    const source = join(root, 'src', 'static', 'icons');
+    const generated = join(root, 'dist', 'build', 'app-plus', 'static', 'icons');
+    const other = join(root, 'dist', 'build', 'app', 'static', 'icons');
+    for (const dir of [source, generated, other]) {
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'hero.png'), 'image');
+    }
+    writeFileSync(join(generated, 'back.svg'), '<svg/>');
+    expect(
+      pruneGeneratedRemoteAppBitmaps(root, 'app', join(root, 'dist', 'build', 'app-plus')),
+    ).toBe(1);
+    expect(existsSync(join(generated, 'hero.png'))).toBe(false);
+    expect(existsSync(join(source, 'hero.png'))).toBe(true);
+    expect(existsSync(join(other, 'hero.png'))).toBe(true);
+    expect(existsSync(join(generated, 'back.svg'))).toBe(true);
+    await rm(root, { recursive: true, force: true });
+  });
+  it('never processes source or App output while building WeChat', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'heban-app-assets-'));
+    const source = join(root, 'src', 'static');
+    mkdirSync(source, { recursive: true });
+    writeFileSync(join(source, 'hero.png'), 'image');
+    expect(pruneGeneratedRemoteAppBitmaps(root, 'app', join(root, 'src'))).toBe(0);
+    expect(pruneGeneratedRemoteAppBitmaps(root, 'mp-weixin', join(root, 'src'))).toBe(0);
+    expect(existsSync(join(source, 'hero.png'))).toBe(true);
     await rm(root, { recursive: true, force: true });
   });
 });

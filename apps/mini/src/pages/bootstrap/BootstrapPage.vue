@@ -39,7 +39,7 @@ import { onShow } from '@dcloudio/uni-app';
 import { createMiniApiClient } from '../../services/mini-api.js';
 import { onboardingState } from '../../stores/onboarding.js';
 import { loadLocalProfile } from '../../features/health-loop/local-demo.js';
-import { ensureAppSession, isSignedIn } from '../../features/auth/auth-store.js';
+import { ensureAppSession, ensureWechatSession, isSignedIn } from '../../features/auth/auth-store.js';
 import { currentUniPlatform, resolveAuthEntry } from '../../features/auth/auth-routing.js';
 import { preloadCriticalAssets } from '../../config/asset-cache.js';
 
@@ -47,7 +47,8 @@ onShow(async () => {
   // Keep the branded loading screen visible until the first-run artwork is
   // either persisted locally or has safely fallen back to the CDN.
   await preloadCriticalAssets();
-  const signedIn = isSignedIn() || (await ensureAppSession());
+  let signedIn = isSignedIn() || (await ensureAppSession());
+  if (!signedIn) signedIn = await ensureWechatSession();
   const authEntry = resolveAuthEntry({ platform: currentUniPlatform(), signedIn });
   if (authEntry) {
     uni.reLaunch({ url: authEntry });

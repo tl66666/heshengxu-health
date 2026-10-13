@@ -12,6 +12,9 @@ export function isTabRoute(url: string) {
 }
 
 export function ordinaryBackTarget(route: string) {
+  if (route.includes('/lean-muscle/')) return '/pages/version-answer/VersionAnswerPage';
+  if (route.includes('/version-answer/GuidePage')) return '/pages/version-answer/VersionAnswerPage';
+  if (route.includes('/version-answer/')) return '/pages/home/HomePage';
   if (route.includes('food-confirm')) return '/pages/food-search/FoodSearchPage';
   if (route.includes('food-candidates')) return '/pages/food-recognition/FoodRecognitionPage';
   if (route.includes('plan-setup') || route.includes('weekly-review')) {

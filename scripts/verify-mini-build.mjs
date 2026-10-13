@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { assertMiniStyles } from './verify-mini-styles.mjs';
 
 // 支持显式传入产物目录（如 dist/dev/mp-weixin），默认按构建目录检查。
 const root = process.argv[2]
@@ -83,6 +84,12 @@ function collectAllFiles(dir) {
 }
 
 const packageBytes = collectAllFiles(root).reduce((total, file) => total + statSync(file).size, 0);
+try {
+  assertMiniStyles(root);
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
 const maximumBytes = 4 * 1024 * 1024;
 if (packageBytes > maximumBytes) {
   console.error(
@@ -92,6 +99,4 @@ if (packageBytes > maximumBytes) {
   process.exit(1);
 }
 
-console.log(
-  `微信小程序构建产物检查通过：${root}（${(packageBytes / 1024 / 1024).toFixed(2)} MB）`,
-);
+console.log(`微信小程序构建产物检查通过：${root}（${(packageBytes / 1024 / 1024).toFixed(2)} MB）`);

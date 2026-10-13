@@ -1,3 +1,6 @@
+import { userStorageKey } from '../../features/auth/user-storage.js';
+export type ProfileSex = 'male' | 'female' | 'unspecified';
+
 export const HOME_CARD_DEFINITIONS = [
   {
     id: 'weight-plan',
@@ -35,6 +38,13 @@ export const HOME_CARD_DEFINITIONS = [
     group: '生活节律',
   },
   {
+    id: 'version-answer',
+    title: '版本答案',
+    description: '薄肌、饮水、AI 实践与生活指南',
+    icon: '/static/illustrations/lean-muscle-v2/training-scene.png',
+    group: '生活节律',
+  },
+  {
     id: 'period',
     title: '经期',
     description: '记录周期并查看下一次预计日期',
@@ -53,20 +63,28 @@ export const HOME_CARD_DEFINITIONS = [
 export type HomeCardId = (typeof HOME_CARD_DEFINITIONS)[number]['id'];
 export type HomeCardVisibility = Record<HomeCardId, boolean>;
 
-const STORAGE_KEY = 'heban_home_card_visibility';
+const STORAGE_KEY = 'heban.home-card-preferences.v2';
 
-export function defaultHomeCardVisibility(): HomeCardVisibility {
-  return Object.fromEntries(
+export function defaultHomeCardVisibility(sex: ProfileSex = 'unspecified'): HomeCardVisibility {
+  const visibility = Object.fromEntries(
     HOME_CARD_DEFINITIONS.map((card) => [card.id, true]),
   ) as HomeCardVisibility;
+  visibility.period = sex === 'female';
+  visibility['version-answer'] = true;
+  return visibility;
 }
 
-export function loadHomeCardVisibility(): HomeCardVisibility {
-  const defaults = defaultHomeCardVisibility();
+export function loadHomeCardVisibility(sex: ProfileSex = 'unspecified'): HomeCardVisibility {
+  const defaults = defaultHomeCardVisibility(sex);
   try {
-    const stored = uni.getStorageSync(STORAGE_KEY);
+    const stored = uni.getStorageSync(userStorageKey(STORAGE_KEY));
     if (!stored) return defaults;
     const parsed = typeof stored === 'string' ? JSON.parse(stored) : stored;
+    if (
+      typeof parsed?.['version-answer'] !== 'boolean' &&
+      typeof parsed?.['lean-muscle'] === 'boolean'
+    )
+      defaults['version-answer'] = parsed['lean-muscle'];
     for (const card of HOME_CARD_DEFINITIONS) {
       if (typeof parsed?.[card.id] === 'boolean') defaults[card.id] = parsed[card.id];
     }
@@ -76,12 +94,23 @@ export function loadHomeCardVisibility(): HomeCardVisibility {
   return defaults;
 }
 
-export function saveHomeCardVisibility(visibility: HomeCardVisibility) {
-  uni.setStorageSync(STORAGE_KEY, JSON.stringify(visibility));
+export function saveHomeCardVisibility(visibility: HomeCardVisibility, changedId?: HomeCardId) {
+  const key = userStorageKey(STORAGE_KEY);
+  let preferences: Partial<HomeCardVisibility> = {};
+  if (changedId) {
+    const raw = uni.getStorageSync(key);
+    try {
+      preferences = typeof raw === 'string' ? JSON.parse(raw) : raw || {};
+    } catch {
+      /* start fresh */
+    }
+    preferences = { ...preferences, [changedId]: visibility[changedId] };
+  } else preferences = visibility;
+  uni.setStorageSync(key, JSON.stringify(preferences));
 }
 
-export function resetHomeCardVisibility() {
-  const defaults = defaultHomeCardVisibility();
-  saveHomeCardVisibility(defaults);
+export function resetHomeCardVisibility(sex: ProfileSex = 'unspecified') {
+  const defaults = defaultHomeCardVisibility(sex);
+  uni.setStorageSync(userStorageKey(STORAGE_KEY), '{}');
   return defaults;
 }

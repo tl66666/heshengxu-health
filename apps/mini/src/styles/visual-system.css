@@ -17,18 +17,18 @@
 
 page {
   /* ---- 画布与空气 ---- */
-  --hz-bg: #fffdf9;                 /* 主画布：暖象牙 */
-  --hz-bg-tint: #f4f8f4;            /* 页面顶部的一口"新鲜空气" */
-  --hz-surface: #ffffff;            /* 实色表面（表单/列表） */
+  --hz-bg: #fffdf9; /* 主画布：暖象牙 */
+  --hz-bg-tint: #f4f8f4; /* 页面顶部的一口"新鲜空气" */
+  --hz-surface: #ffffff; /* 实色表面（表单/列表） */
   --hz-surface-glass: rgba(255, 255, 255, 0.82);
   --hz-surface-glass-strong: rgba(255, 255, 255, 0.88);
-  --hz-surface-soft: #f3f7f3;       /* 分组底、空状态 */
+  --hz-surface-soft: #f3f7f3; /* 分组底、空状态 */
 
   /* ---- 墨色层级 ---- */
-  --hz-ink: #21372c;                /* 标题、关键数字 */
-  --hz-ink-soft: #45604f;           /* 次级正文 */
-  --hz-muted: #7d9085;              /* 说明、时间 */
-  --hz-faint: #a8b6ad;              /* 最弱提示 */
+  --hz-ink: #21372c; /* 标题、关键数字 */
+  --hz-ink-soft: #45604f; /* 次级正文 */
+  --hz-muted: #7d9085; /* 说明、时间 */
+  --hz-faint: #a8b6ad; /* 最弱提示 */
 
   /* ---- 主色：晨雾绿 ---- */
   --hz-green-deep: #173f30;
@@ -61,8 +61,9 @@ page {
 
   background: var(--hz-bg);
   color: var(--hz-ink);
-  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    sans-serif;
   font-size: 28rpx;
   -webkit-font-smoothing: antialiased;
 }
@@ -160,12 +161,17 @@ button.home-weight-save {
   border-radius: var(--hz-radius-control) !important;
   color: #2f5f4a !important;
   background: rgba(237, 247, 240, 0.82) !important;
-  box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(47, 107, 77, 0.12) !important;
+  box-shadow:
+    var(--hz-highlight),
+    0 10rpx 22rpx rgba(47, 107, 77, 0.12) !important;
   font-size: 25rpx !important;
   font-weight: 650 !important;
   -webkit-backdrop-filter: var(--hz-blur);
   backdrop-filter: var(--hz-blur);
-  transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 button.primary-action:active,
 button.primary-button:active,
@@ -179,7 +185,9 @@ button.wellness-save:active,
 button.mood-save:active,
 button.home-weight-save:active {
   background: rgba(216, 232, 220, 0.94) !important;
-  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.75), 0 5rpx 14rpx rgba(47, 107, 77, 0.1) !important;
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.75),
+    0 5rpx 14rpx rgba(47, 107, 77, 0.1) !important;
   transform: scale(0.985);
 }
 
@@ -191,7 +199,9 @@ button.home-weight-save:active {
   border-color: rgba(151, 193, 203, 0.55) !important;
   color: #3f7180 !important;
   background: rgba(230, 246, 249, 0.82) !important;
-  box-shadow: var(--hz-highlight), 0 10rpx 22rpx rgba(84, 143, 161, 0.13) !important;
+  box-shadow:
+    var(--hz-highlight),
+    0 10rpx 22rpx rgba(84, 143, 161, 0.13) !important;
 }
 /* 经期主动作：玫瑰渐变实底（与周期环同源色），不再是漂在页面外的浅粉块 */
 .period-page .primary-button,
@@ -201,7 +211,9 @@ button.home-weight-save:active {
   border-radius: 999rpx !important;
   color: #ffffff !important;
   background: linear-gradient(135deg, #e5a8b8 0%, #cf7f93 100%) !important;
-  box-shadow: 0 12rpx 26rpx rgba(207, 127, 147, 0.32), inset 0 1rpx 0 rgba(255, 255, 255, 0.4) !important;
+  box-shadow:
+    0 12rpx 26rpx rgba(207, 127, 147, 0.32),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.4) !important;
   font-size: 27rpx !important;
   font-weight: 700 !important;
   letter-spacing: 2rpx !important;
@@ -266,7 +278,9 @@ textarea,
   border-color: rgba(125, 178, 148, 0.6) !important;
   color: var(--hz-green) !important;
   background: var(--hz-green-glass) !important;
-  box-shadow: var(--hz-highlight), 0 6rpx 16rpx rgba(70, 130, 96, 0.12) !important;
+  box-shadow:
+    var(--hz-highlight),
+    0 6rpx 16rpx rgba(70, 130, 96, 0.12) !important;
   font-weight: 650 !important;
 }
 
@@ -287,7 +301,6 @@ textarea,
 /* =========================================================
  * 顶栏：磨砂玻璃浮层（内容从其下滑过）
  * ========================================================= */
-.nav-bar-wrapper,
 .page.sleep-page.page .nav,
 .page.activity-page.page .nav,
 .page.mood-page.page .nav,
@@ -298,15 +311,22 @@ textarea,
   -webkit-backdrop-filter: var(--hz-blur) !important;
   backdrop-filter: var(--hz-blur) !important;
 }
+.nav-bar-wrapper {
+  background: var(--app-nav-surface, rgba(255, 253, 249, 0.9)) !important;
+  border-bottom: 1rpx solid var(--app-nav-rule, rgba(90, 105, 89, 0.06)) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+}
 .nav-bar-wrapper .title {
-  color: var(--hz-ink) !important;
+  color: var(--app-nav-ink, var(--hz-ink)) !important;
   font-size: 30rpx !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
 }
 .nav-bar-wrapper .icon-action {
-  border-color: var(--hz-rule-glass) !important;
-  background: rgba(255, 255, 255, 0.76) !important;
-  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.05) !important;
+  border-color: var(--app-nav-rule, var(--hz-rule-glass)) !important;
+  background: var(--app-nav-button, rgba(255, 255, 255, 0.65)) !important;
+  box-shadow: none !important;
 }
 
 /* =========================================================
@@ -315,11 +335,15 @@ textarea,
 .mini-tabbar {
   border-top: 1rpx solid rgba(255, 255, 255, 0.65) !important;
   background: rgba(255, 253, 249, 0.88) !important;
-  box-shadow: 0 -10rpx 30rpx rgba(29, 55, 41, 0.08), inset 0 1rpx 0 rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 -10rpx 30rpx rgba(29, 55, 41, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.9) !important;
   -webkit-backdrop-filter: blur(18px) saturate(1.5) !important;
   backdrop-filter: blur(18px) saturate(1.5) !important;
 }
-.mini-tabbar .tab { color: #8b9a90 !important; }
+.mini-tabbar .tab {
+  color: #8b9a90 !important;
+}
 .mini-tabbar .tab.active:not(.tab--xuxu) {
   color: var(--hz-green) !important;
   font-weight: 650 !important;
@@ -422,14 +446,20 @@ textarea,
   align-items: center !important;
   box-sizing: border-box !important;
   width: 100% !important;
-  min-height: 132rpx !important;
+  min-height: var(--hz-camera-min-height, 132rpx) !important;
   max-height: 168rpx !important;
   padding: 16rpx 20rpx 16rpx 26rpx !important;
   overflow: hidden !important;
   border: 1rpx solid rgba(159, 195, 173, 0.55) !important;
   border-radius: var(--hz-radius-card) !important;
-  background: linear-gradient(120deg, rgba(231, 240, 233, 0.92) 0%, rgba(233, 241, 244, 0.78) 100%) !important;
-  box-shadow: var(--hz-highlight), 0 12rpx 26rpx rgba(47, 107, 77, 0.1) !important;
+  background: linear-gradient(
+    120deg,
+    rgba(231, 240, 233, 0.92) 0%,
+    rgba(233, 241, 244, 0.78) 100%
+  ) !important;
+  box-shadow:
+    var(--hz-highlight),
+    0 12rpx 26rpx rgba(47, 107, 77, 0.1) !important;
   -webkit-backdrop-filter: var(--hz-blur);
   backdrop-filter: var(--hz-blur);
 }
@@ -451,8 +481,8 @@ textarea,
 .home-page .xuxu-camera-card .camera-decoration {
   display: block !important;
   flex: 0 0 auto !important;
-  width: 190rpx !important;
-  height: 132rpx !important;
+  width: var(--hz-camera-art-width, 190rpx) !important;
+  height: var(--hz-camera-art-height, 132rpx) !important;
   margin: 0 0 0 10rpx !important;
   padding: 0 !important;
   border: 0 !important;
@@ -463,7 +493,11 @@ textarea,
 }
 .page .xuxu-camera-card:active,
 .home-page .xuxu-camera-card:active {
-  background: linear-gradient(120deg, rgba(216, 232, 220, 0.95) 0%, rgba(223, 236, 240, 0.85) 100%) !important;
+  background: linear-gradient(
+    120deg,
+    rgba(216, 232, 220, 0.95) 0%,
+    rgba(223, 236, 240, 0.85) 100%
+  ) !important;
   transform: scale(0.988);
 }
 
@@ -476,7 +510,10 @@ textarea,
   color: var(--hz-green) !important;
   font-weight: 600 !important;
 }
-.mode-tag.blue { background: var(--hz-sky-soft) !important; color: #567f90 !important; }
+.mode-tag.blue {
+  background: var(--hz-sky-soft) !important;
+  color: #567f90 !important;
+}
 
 /* =========================================================
  * 自适应：窄屏（安卓小屏/iPhone SE）与宽屏
@@ -485,14 +522,22 @@ textarea,
   page {
     --hz-gutter: 24rpx;
   }
-  .page { padding-right: 24rpx !important; padding-left: 24rpx !important; }
+  .page {
+    padding-right: 24rpx !important;
+    padding-left: 24rpx !important;
+  }
 }
 @media (min-width: 700px) {
-  .page { padding-right: 48rpx !important; padding-left: 48rpx !important; }
+  .page {
+    padding-right: 48rpx !important;
+    padding-left: 48rpx !important;
+  }
 }
 
 /* 图片不塌陷 */
-image { max-width: 100%; }
+image {
+  max-width: 100%;
+}
 
 /* WXSS 不支持通配选择器：动效降级只作用于项目自有元素 */
 @media (prefers-reduced-motion: reduce) {
@@ -533,7 +578,9 @@ image { max-width: 100%; }
   border: 1rpx solid var(--hz-rule-glass) !important;
   border-radius: var(--hz-radius-control) !important;
   background: rgba(255, 255, 255, 0.8) !important;
-  box-shadow: var(--hz-highlight), 0 8rpx 22rpx rgba(29, 55, 41, 0.08) !important;
+  box-shadow:
+    var(--hz-highlight),
+    0 8rpx 22rpx rgba(29, 55, 41, 0.08) !important;
   -webkit-backdrop-filter: var(--hz-blur);
   backdrop-filter: var(--hz-blur);
 }
@@ -545,7 +592,9 @@ image { max-width: 100%; }
   border: 1rpx solid var(--hz-rule-glass) !important;
   border-radius: var(--hz-radius-control) !important;
   background: rgba(255, 255, 255, 0.7) !important;
-  box-shadow: var(--hz-highlight), 0 5rpx 14rpx rgba(29, 55, 41, 0.04) !important;
+  box-shadow:
+    var(--hz-highlight),
+    0 5rpx 14rpx rgba(29, 55, 41, 0.04) !important;
 }
 
 /* ---- 历史行：整条玻璃带 + 发丝分隔 ---- */
@@ -643,11 +692,17 @@ image { max-width: 100%; }
 }
 
 /* 用药时间线：行间发丝线，完成态淡化 */
-.medication-page .med-row { border-bottom: 1rpx solid var(--hz-rule-glass) !important; }
-.medication-page .med-row:last-child { border-bottom: 0 !important; }
+.medication-page .med-row {
+  border-bottom: 1rpx solid var(--hz-rule-glass) !important;
+}
+.medication-page .med-row:last-child {
+  border-bottom: 0 !important;
+}
 
 /* section 内边距统一（部分页 scoped 没给 padding） */
-.page .section { padding: 26rpx 26rpx 28rpx !important; }
+.page .section {
+  padding: 26rpx 26rpx 28rpx !important;
+}
 
 /* =========================================================
  * 详情页固定顶栏（和生序统一导航规范）：
@@ -698,7 +753,9 @@ image { max-width: 100%; }
   border-radius: 50% !important;
   color: var(--hz-green) !important;
   background: rgba(255, 255, 255, 0.85) !important;
-  box-shadow: 0 4rpx 12rpx rgba(29, 55, 41, 0.06), inset 0 1rpx 0 rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 4rpx 12rpx rgba(29, 55, 41, 0.06),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.9) !important;
   font-size: inherit !important;
   line-height: 1 !important;
 }
@@ -706,7 +763,11 @@ image { max-width: 100%; }
   width: 30rpx !important;
   height: 30rpx !important;
 }
-.page .nav .nav-space { width: 64rpx !important; height: 64rpx !important; flex: none !important; }
+.page .nav .nav-space {
+  width: 64rpx !important;
+  height: 64rpx !important;
+  flex: none !important;
+}
 
 /* ---- 章节标题：品牌绿装饰条，建立扫描层级（不只是卡片堆叠） ---- */
 .page .section-title {
@@ -755,10 +816,23 @@ image { max-width: 100%; }
   box-shadow: var(--hz-highlight), var(--hz-shadow-card) !important;
   padding: 22rpx 10rpx !important;
 }
-.water-page .stat-label { color: var(--hz-muted) !important; font-size: 20rpx !important; }
-.water-page .stat-value { color: #3f7180 !important; font-size: 34rpx !important; font-weight: 800 !important; }
-.water-page .stat-value.primary { color: #2e5e6b !important; }
-.water-page .stat-divider { width: 1rpx !important; height: 44rpx !important; background: var(--hz-rule-glass) !important; }
+.water-page .stat-label {
+  color: var(--hz-muted) !important;
+  font-size: 20rpx !important;
+}
+.water-page .stat-value {
+  color: #3f7180 !important;
+  font-size: 34rpx !important;
+  font-weight: 800 !important;
+}
+.water-page .stat-value.primary {
+  color: #2e5e6b !important;
+}
+.water-page .stat-divider {
+  width: 1rpx !important;
+  height: 44rpx !important;
+  background: var(--hz-rule-glass) !important;
+}
 .water-page .personalized-info {
   border: 1rpx solid rgba(159, 195, 173, 0.4) !important;
   border-radius: 999rpx !important;
@@ -776,16 +850,35 @@ image { max-width: 100%; }
   border: 1rpx solid var(--hz-rule-glass) !important;
   border-radius: var(--hz-radius-control) !important;
   background: rgba(255, 255, 255, 0.82) !important;
-  box-shadow: var(--hz-highlight), 0 5rpx 14rpx rgba(29, 55, 41, 0.04) !important;
-  transition: transform 0.16s ease, background-color 0.16s ease;
+  box-shadow:
+    var(--hz-highlight),
+    0 5rpx 14rpx rgba(29, 55, 41, 0.04) !important;
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease;
 }
-.water-page .quick-btn:active { transform: scale(0.96); }
-.water-page .btn-text { color: var(--hz-ink-soft) !important; font-weight: 650 !important; }
-.water-page .history-title { color: var(--hz-ink) !important; }
+.water-page .quick-btn:active {
+  transform: scale(0.96);
+}
+.water-page .btn-text {
+  color: var(--hz-ink-soft) !important;
+  font-weight: 650 !important;
+}
+.water-page .history-title {
+  color: var(--hz-ink) !important;
+}
 .water-page .record-item {
   border-bottom: 1rpx solid var(--hz-rule-glass) !important;
   background: transparent !important;
 }
-.water-page .record-item:last-child { border-bottom: 0 !important; }
-.water-page .record-name { color: var(--hz-ink) !important; font-weight: 650 !important; }
-.water-page .record-amount { color: #3f7180 !important; font-weight: 750 !important; }
+.water-page .record-item:last-child {
+  border-bottom: 0 !important;
+}
+.water-page .record-name {
+  color: var(--hz-ink) !important;
+  font-weight: 650 !important;
+}
+.water-page .record-amount {
+  color: #3f7180 !important;
+  font-weight: 750 !important;
+}

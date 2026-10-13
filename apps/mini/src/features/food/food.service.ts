@@ -419,8 +419,23 @@ LOCAL_FOOD_CATALOG.push(
 function localSearch(options: SearchFoodsOptions = {}): SearchFoodsResult {
   const query = options.query?.trim().toLowerCase();
   const commonOrder = [
-    '米饭', '鸡蛋', '面条', '馒头', '燕麦', '牛奶', '豆浆', '豆腐', '鸡胸肉',
-    '牛肉', '猪里脊', '虾仁', '西兰花', '番茄', '黄瓜', '苹果', '香蕉',
+    '米饭',
+    '鸡蛋',
+    '面条',
+    '馒头',
+    '燕麦',
+    '牛奶',
+    '豆浆',
+    '豆腐',
+    '鸡胸肉',
+    '牛肉',
+    '猪里脊',
+    '虾仁',
+    '西兰花',
+    '番茄',
+    '黄瓜',
+    '苹果',
+    '香蕉',
   ];
   const commonRank = new Map(commonOrder.map((name, index) => [name, index]));
   const filtered = LOCAL_FOOD_CATALOG.filter((food) => {
@@ -517,7 +532,8 @@ export function getCategoryStats() {
   return createMiniApiClient()
     .get<FoodCategory[]>('/foods/categories/stats')
     .then((categories) => {
-      if (!categories.length || categories.every((category) => !category.count)) throw new Error('FOOD_CATALOG_EMPTY');
+      if (!categories.length || categories.every((category) => !category.count))
+        throw new Error('FOOD_CATALOG_EMPTY');
       return categories.map((category) => ({ ...category, source: 'remote' as const }));
     })
     .catch(() => {
@@ -572,10 +588,17 @@ export function createMealEntry(input: CreateMealEntryInput) {
 }
 
 export function loadMealEntries(date: string) {
+  return loadMealEntriesWithSource(date).then((result) => result.entries);
+}
+
+export function loadMealEntriesWithSource(date: string) {
   return createMiniApiClient()
     .get<MealEntry[]>(`/meal-entries?date=${encodeURIComponent(date)}`)
-    .then((remote) => mergeMealEntries(remote, localMealEntries(date)))
-    .catch(() => localMealEntries(date));
+    .then((remote) => ({
+      entries: mergeMealEntries(remote, localMealEntries(date)),
+      complete: true,
+    }))
+    .catch(() => ({ entries: localMealEntries(date), complete: false }));
 }
 
 export function replaceMealEntry(

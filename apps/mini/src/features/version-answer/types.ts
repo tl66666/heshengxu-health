@@ -1,0 +1,20 @@
+export type TopicId = 'muscle' | 'sun' | 'water' | 'codex' | 'life';
+export type GuideSource = { title: string; url: string; kind: string };
+export type Guide = {
+  id: string;
+  topic: TopicId;
+  title: string;
+  subtitle: string;
+  category: string;
+  cost: string;
+  benefit: string;
+  sections: { title: string; paragraphs: string[] }[];
+  action: string;
+  actionSteps?: string[];
+  takeaways?: string[];
+  level?: '起步' | '实践' | '进阶';
+  route?: string;
+  prompt?: string;
+  sources: GuideSource[];
+  attribution?: string;
+};

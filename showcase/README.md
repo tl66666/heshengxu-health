@@ -4,7 +4,7 @@
 
 - 在线地址：<https://tl66666.github.io/heshengxu-health/>
 - GitHub 仓库：<https://github.com/tl66666/heshengxu-health>
-- Android 安装包：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk)
+- Android 安装包：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk?v=20261013)
 - 微信小程序码：[`打开小程序码`](../assets/showcase/mini-program-code.jpg)
 
 展示站同时提供微信小程序入口，扫描项目根目录 `assets/showcase/mini-program-code.jpg` 中的小程序码即可体验。
@@ -42,4 +42,10 @@ npx vite showcase --host 127.0.0.1 --port 4173
 - 微信小程序正式上传目录：`apps/mini/dist/build/mp-weixin`。先执行仓库根目录的 `scripts/build-mini.ps1`，脚本会远程化位图并校验体积；最近一次产物约 0.88 MB。
 - HBuilderX App 源码目录：`D:\heshengxu-mini\apps\mini`。这是仓库源码的英文路径联接，不是构建产物。
 - `dist/dev/mp-weixin` 仅用于开发预览，不能作为正式上传包。
-- Android 测试包：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk)，仓库内文件位于 `assets/showcase/heshengxu-android.apk`。
+- Android 测试包：[`GitHub 直链下载`](https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk?v=20261013)，仓库内文件位于 `assets/showcase/heshengxu-android.apk`。
+
+## 2026-10-13 特色更新
+
+新增版本答案与薄肌养成专章，使用用户提供的五张最新版产品原图。切换书柜、薄肌今日、圣经目录、纸张阅读与首页入口时同步图文，支持键盘操作和原图放大。展示 40 篇指南、八章圣经、阅读到行动的流程及四维评分规则；不把待开启或未记录状态伪装成真实分数。
+
+Android 下载已替换为 2026-10-13 的新包：版本 0.1.0/100、15,745,656 bytes，元数据在 assets/showcase/downloads.json。生产构建后运行 node scripts/verify-public-showcase.mjs --built，核对资源白名单、APK体积和 SHA256。

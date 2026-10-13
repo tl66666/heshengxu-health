@@ -21,7 +21,7 @@
 
 ### Android
 
-- 申请并固定正式包名，例如 `com.example.heshengxu`。包名一旦发布不要随意更改。
+- 本项目 Android 包名为 `com.heshengxu.health`，DCloud AppID 为 `__UNI__FA2E0A8`。继续使用对应应用已有的签名证书。
 - 准备 Android 签名证书（keystore）、证书别名和密码。
 - 准备应用图标、启动图、隐私政策 URL 和相机权限说明。
 - 在真机上验证登录、建档、体重、饮食、序序聊天、序序相机和记录保存。
@@ -40,7 +40,7 @@
 ## 三、HBuilderX 云打包
 
 1. 在 HBuilderX 打开 `apps/mini`。
-2. 在仓库根目录运行 `npm --prefix apps/mini run clean:source-assets`，确认同步给微信开发工具的临时位图已经从源码目录移除。原图仍在 `assets/`，不会降低画质或丢失。
+2. 在仓库根目录运行 `node scripts/verify-hbuilderx-source.mjs --keep-preview-copies`。此检查保留源码、原图和微信预览副本，不再要求清理源目录。生产编译把图片引用转为既有 CloudBase HTTPS 地址，只精简本次生成的 App 资源。
 3. 选择“发行 -> 原生 App-云打包”。
 4. 选择 Android、iOS 或两者。
 5. 填写应用名称、版本号和版本编码，确认应用图标与启动图。
@@ -124,3 +124,11 @@ E:\HBuilderX\cli.exe pack `
 本次验证结果：本地编译成功、资源压缩成功、云端任务已提交，已经越过原来的 40% 阶段；随后通过 `cli.exe pack status` 查询到 Android 云端证书任务“打包成功”，并返回 APK 下载地址。若后续任务报告错误，应在 HBuilderX 的云打包状态中查看具体错误日志；那属于签名、隐私配置或云端构建阶段，和 `manifest false` 是不同问题。
 
 App 目前属于“源码可打包、商店未发布”状态。账号注册/登录代码已完成；要达到可上架状态，还需要准备 Android/iOS 签名资料、完成隐私与权限材料，并完成真机验收。对应清单见 `docs/RELEASE-CHECKLIST.md`。
+
+## 2026-10-13 打包检查更新
+
+用户要求保留所有原图与预览副本。prebuild:app 已移除自动清理源码步骤，改为只读验证与保留副本模式。远程资源插件只处理当前 App 构建的 dist/build/app 或 dist/build/app-plus；微信编译不会处理其他 App 产物。所有源文件与 assets 原图保留。
+
+已验证：完整前端测试 283 项通过、1 项原有跳过，类型检查通过；App 本地资源编译成功、微信开发产物检查通过。Azure /health 与 CloudBase 早餐图标均返回 200。这是本地打包前验证，未提交云打包、未上传发布。
+
+继续使用已有英文联接 D:\heshengxu-health\apps\mini 打开 HBuilderX。微信开发者工具打开 D:\禾伴\heban-ai-health-demo\apps\mini，当前配置指向 dist/dev/mp-weixin。

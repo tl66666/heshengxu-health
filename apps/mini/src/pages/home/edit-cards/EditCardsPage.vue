@@ -21,7 +21,13 @@
       <view class="settings-list">
         <view v-for="card in cardsByGroup(group)" :key="card.id" class="setting-row">
           <view class="row-mark">
-            <image class="row-icon" :src="card.icon" mode="aspectFit" />
+            <image
+              v-if="card.id === 'version-answer'"
+              :src="versionEntryScene"
+              class="row-icon"
+              mode="aspectFit"
+            />
+            <image v-else class="row-icon" :src="card.icon" mode="aspectFit" />
           </view>
           <view class="row-copy">
             <text class="row-title">{{ card.title }}</text>
@@ -44,6 +50,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
+import { userStorageKey } from '../../../features/auth/user-storage.js';
+import { localProfileSex, loadHomeProfileSex } from '../home-profile.js';
+import { versionEntryScene } from '../../../features/version-answer/art.js';
 import AppNavBar from '../../../components/AppNavBar.vue';
 import {
   HOME_CARD_DEFINITIONS,
@@ -55,7 +65,19 @@ import {
 
 const cards = HOME_CARD_DEFINITIONS;
 const groups = [...new Set(cards.map((card) => card.group))];
-const visibility = ref(loadHomeCardVisibility());
+const sex = ref(localProfileSex());
+const visibility = ref(loadHomeCardVisibility(sex.value));
+let profileRequest = 0;
+onShow(async () => {
+  const request = ++profileRequest;
+  const account = userStorageKey('home-profile');
+  sex.value = localProfileSex();
+  visibility.value = loadHomeCardVisibility(sex.value);
+  const loaded = await loadHomeProfileSex();
+  if (request !== profileRequest || account !== userStorageKey('home-profile')) return;
+  sex.value = loaded;
+  visibility.value = loadHomeCardVisibility(loaded);
+});
 const visibleCount = computed(() => Object.values(visibility.value).filter(Boolean).length);
 
 function cardsByGroup(group: string) {
@@ -63,8 +85,13 @@ function cardsByGroup(group: string) {
 }
 
 function toggle(id: HomeCardId, checked: boolean) {
-  visibility.value = { ...visibility.value, [id]: checked };
-  saveHomeCardVisibility(visibility.value);
+  const next = { ...visibility.value, [id]: checked };
+  try {
+    saveHomeCardVisibility(next, id);
+    visibility.value = next;
+  } catch {
+    uni.showToast({ title: '保存失败，请重试', icon: 'none' });
+  }
 }
 
 function toggleFromEvent(id: HomeCardId, event: Event) {
@@ -72,8 +99,12 @@ function toggleFromEvent(id: HomeCardId, event: Event) {
 }
 
 function reset() {
-  visibility.value = resetHomeCardVisibility();
-  uni.showToast({ title: '已恢复默认', icon: 'none' });
+  try {
+    visibility.value = resetHomeCardVisibility(sex.value);
+    uni.showToast({ title: '已恢复默认', icon: 'none' });
+  } catch {
+    uni.showToast({ title: '保存失败，请重试', icon: 'none' });
+  }
 }
 </script>
 
