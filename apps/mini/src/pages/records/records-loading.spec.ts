@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
-import { parse, compileTemplate } from '@vue/compiler-sfc';
+import { parse, compileTemplate } from 'vue/compiler-sfc';
 import ts from 'typescript';
 import { createSSRApp, ref } from 'vue';
 import { renderToString } from 'vue/server-renderer';

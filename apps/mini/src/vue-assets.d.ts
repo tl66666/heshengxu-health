@@ -1,6 +1,6 @@
-import '@vue/runtime-core';
+import 'vue';
 
-declare module '@vue/runtime-core' {
+declare module 'vue' {
   interface ComponentCustomProperties {
     $asset: (path: string) => string;
   }
