@@ -2181,3 +2181,130 @@ section[id] {
     scroll-margin-top: 95px;
   }
 }
+
+/* Keep the everyday product visible before its new reading chapter. */
+.hero-edition-link {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 0;
+  color: #58684e;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.hero-edition-link span {
+  padding: 3px 9px;
+  border: 1px solid #d7bd8b;
+  border-radius: 20px;
+  background: #f9efda;
+  color: #87683a;
+  font-size: 11px;
+}
+.hero-edition-link:hover {
+  color: #2e674f;
+}
+.hero-edition-link b {
+  font-weight: 400;
+}
+.capability-overview {
+  padding-block: 48px 70px;
+}
+.capability-heading {
+  max-width: 740px;
+}
+.capability-heading h2 {
+  font-family: Georgia, 'Songti SC', 'STSong', serif;
+  font-size: clamp(25px, 3vw, 37px);
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+.capability-heading > p:last-child {
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.9;
+}
+.capability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+.capability-grid a {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fafbf7;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.capability-grid a:hover {
+  border-color: #85a38b;
+  background: #eff5ef;
+}
+.capability-grid span {
+  color: #78887c;
+  font-size: 10px;
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+.capability-grid h3 {
+  font-size: 19px;
+  margin: 13px 0 10px;
+  font-weight: 600;
+}
+.capability-grid p {
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.9;
+  margin: 0 0 20px;
+}
+.capability-grid b {
+  font-size: 12px;
+  color: #4a785c;
+  font-weight: 500;
+  margin-top: auto;
+}
+.capability-grid .capability-new {
+  background: #f7f0e1;
+  border-color: #d9c5a1;
+}
+.capability-new i {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0;
+  margin-left: 5px;
+  color: #87683a;
+}
+@media (max-width: 900px) {
+  .capability-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .capability-overview {
+    padding-block: 32px 40px;
+  }
+  .capability-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .capability-grid a {
+    padding: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .capability-grid a {
+    transition: none;
+  }
+}
+
+.capability-overview + .product-section {
+  padding-top: 40px;
+}

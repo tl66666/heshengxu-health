@@ -1156,7 +1156,7 @@ onShow(() => {
   left: 50% !important;
   width: 1200rpx !important;
   height: 1200rpx !important;
-  transform: translate(-49.3%, -50.3%) !important;
+  transform: translate(-49.3%, -50.3%) scale(2.05) !important;
 }
 .cup-display .water-wrapper {
   bottom: 70rpx !important;
