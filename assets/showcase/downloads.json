@@ -3,9 +3,10 @@
     "file": "heshengxu-android.apk",
     "version": "0.1.0",
     "versionCode": 100,
-    "sha256": "DAB7A393BD30D81D82EFD3A4A6BE44D1FC85B0FCF8F1E809E4BC11829F940D40",
-    "updatedAt": "2026-10-13",
+    "sha256": "92CCA36E6FD91B74700F4A6BFC0B51E4CFCE999D4BB5CCC40E9FA7F697FE2766",
+    "updatedAt": "2026-10-16",
     "name": "和生序",
-    "sizeBytes": 15745656
+    "sizeBytes": 15745656,
+    "notes": ["恢复喝水页大杯子与水位的正常比例。"]
   }
 }

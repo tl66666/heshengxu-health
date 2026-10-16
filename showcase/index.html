@@ -39,7 +39,11 @@
           rel="noreferrer"
           >GitHub <span>↗</span></a
         >
-        <a class="nav-download" href="./assets/showcase/heshengxu-android.apk?v=20261013" download
+        <a
+          class="nav-download"
+          data-apk-download
+          href="./assets/showcase/heshengxu-android.apk?v=20261016-92cca36e"
+          download
           >下载 App</a
         >
       </nav>
@@ -741,39 +745,96 @@
         </div>
       </section>
 
-      <section class="mini-program-section section" id="mini-program">
+      <section class="mini-program-section section" id="mini-program" aria-labelledby="try-heading">
         <div class="mini-program-copy reveal">
-          <p class="eyebrow"><span></span>WECHAT MINI PROGRAM · 扫码体验</p>
-          <h2>把和生序<br /><em>带到每天的生活里</em></h2>
+          <p class="eyebrow"><span></span>START YOUR RHYTHM · 开始体验</p>
+          <h2 id="try-heading">选择你的方式，<br /><em>开始使用和生序</em></h2>
           <p>
-            微信扫一扫即可打开小程序，体验饮食记录、序序相机和健康陪伴。小程序与 App
-            共用同一套真实业务服务。
+            记录一餐、一杯水和每天的变化，与序序聊聊日常；也可以翻开版本答案，找到适合自己的下一件小事。微信小程序与
+            App 共用业务服务。
           </p>
-          <p class="apk-release-meta">
-            Android 测试包 · <span data-apk-updated>2026-10-13</span> 更新 · v<span data-apk-version
-              >0.1.0</span
-            >
-            · <span data-apk-size>15.02 MiB</span>
-          </p>
-          <div class="mini-program-actions">
-            <a
-              class="button secondary"
-              href="https://github.com/tl66666/heshengxu-health"
-              target="_blank"
-              rel="noreferrer"
-              >查看 GitHub 仓库 <span>↗</span></a
-            >
-            <a
-              class="button primary"
-              href="./assets/showcase/heshengxu-android.apk?v=20261013"
-              download
-              >下载 Android App <span>↓</span></a
-            >
-          </div>
+          <article class="android-release" aria-labelledby="android-heading">
+            <div class="android-release-heading">
+              <h3 id="android-heading">Android App</h3>
+              <span>测试版</span>
+            </div>
+            <p class="apk-release-meta">
+              <span data-apk-updated>2026-10-16</span> 更新 · v<span data-apk-version>0.1.0</span> ·
+              <span data-apk-size>15.02 MiB</span>
+            </p>
+            <p class="release-note">
+              <b>本次更新</b><span data-apk-note>恢复喝水页大杯子与水位的正常比例。</span>
+            </p>
+            <div class="mini-program-actions">
+              <a
+                class="button primary"
+                href="./assets/showcase/heshengxu-android.apk?v=20261016-92cca36e"
+                download
+                data-apk-download
+                >下载 Android App <span>↓</span></a
+              >
+              <a
+                class="text-button"
+                href="https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/heshengxu-android.apk?v=20261016-92cca36e"
+                target="_blank"
+                rel="noreferrer"
+                data-apk-backup
+                >GitHub 备用下载 ↗</a
+              >
+            </div>
+            <p class="install-hint">
+              用 Android 浏览器下载，保存完成后打开 APK 安装。本次沿用 0.1.0（版本号
+              <span data-apk-code>100</span>），请按更新日期识别新包。
+            </p>
+            <details class="apk-integrity">
+              <summary>查看文件校验信息</summary>
+              <p>下载后可将文件的 SHA256 与下面的值核对。</p>
+              <code data-apk-sha
+                >92CCA36E6FD91B74700F4A6BFC0B51E4CFCE999D4BB5CCC40E9FA7F697FE2766</code
+              >
+            </details>
+          </article>
         </div>
-        <div class="mini-program-code reveal delay-1">
-          <img src="./assets/showcase/mini-program-code.jpg" alt="和生序微信小程序码" />
+        <div class="mini-program-code platform-entry reveal delay-1">
+          <p class="eyebrow">WECHAT MINI PROGRAM</p>
+          <h3>微信小程序</h3>
+          <button
+            type="button"
+            class="mini-code-button"
+            data-lightbox="./assets/showcase/mini-program-code.jpg"
+            data-caption="和生序 · 微信小程序码"
+            aria-label="放大和生序微信小程序码"
+          >
+            <img
+              src="./assets/showcase/mini-program-code.jpg"
+              alt="和生序微信小程序码"
+              loading="lazy"
+            />
+          </button>
           <span>微信扫一扫 · 和生序</span>
+          <p>扫码进入，记录饮食、体重与每天的日常。点击小程序码可以放大查看。</p>
+        </div>
+        <div class="experience-faq" aria-labelledby="experience-faq-heading">
+          <h3 id="experience-faq-heading">开始前，你可能想了解</h3>
+          <details>
+            <summary>版本答案和薄肌养成，与原有功能怎么衔接？</summary>
+            <p>
+              饮食、体重、饮水、睡眠、运动、心情、用药、周期与轻断食等功能继续保留。版本答案提供主题阅读和行动整理，薄肌养成把训练、饮食与恢复接到日常记录；你可以按自己的需要选择使用。
+            </p>
+          </details>
+          <details>
+            <summary>小程序和 App 的记录都会跨设备同步吗？</summary>
+            <p>
+              两端共用业务代码和服务端
+              API。阅读、收藏、行动等本地状态按当前设备保存，部分记录尚不支持跨设备同步；换设备时请保留原设备上的记录。
+            </p>
+          </details>
+          <details>
+            <summary>薄肌评分看什么？</summary>
+            <p>
+              评分回看训练、饮食支持、睡眠恢复与个人进步。记录不完整时保留未知区间，年龄信息未完善时保留待开启；阅读进度独立保存。你也可以先阅读指南、建立安排，再逐步积累记录。
+            </p>
+          </details>
         </div>
       </section>
 

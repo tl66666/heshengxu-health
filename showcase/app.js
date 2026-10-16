@@ -11,6 +11,31 @@ document.querySelectorAll('[data-apk-size]').forEach((el) => {
   el.textContent = `${(downloads.android.sizeBytes / 1048576).toFixed(2)} MiB`;
 });
 
+const apkRevision =
+  downloads.android.updatedAt.replaceAll('-', '') +
+  '-' +
+  downloads.android.sha256.slice(0, 8).toLowerCase();
+const apkPath = './assets/showcase/' + downloads.android.file + '?v=' + apkRevision;
+document.querySelectorAll('[data-apk-download]').forEach((el) => {
+  el.href = apkPath;
+});
+document.querySelectorAll('[data-apk-backup]').forEach((el) => {
+  el.href =
+    'https://github.com/tl66666/heshengxu-health/raw/refs/heads/main/assets/showcase/' +
+    downloads.android.file +
+    '?v=' +
+    apkRevision;
+});
+document.querySelectorAll('[data-apk-code]').forEach((el) => {
+  el.textContent = String(downloads.android.versionCode);
+});
+document.querySelectorAll('[data-apk-sha]').forEach((el) => {
+  el.textContent = downloads.android.sha256;
+});
+document.querySelectorAll('[data-apk-note]').forEach((el) => {
+  el.textContent = downloads.android.notes.join(' ');
+});
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const header = document.querySelector('[data-header]');
 const progress = document.querySelector('[data-scroll-progress]');

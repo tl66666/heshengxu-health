@@ -15,7 +15,9 @@ const shots = ['library', 'lean-hub', 'bible-directory', 'bible-reader', 'home']
   (name) => `assets/showcase/runtime/${name}-20261013.jpg`,
 );
 const html = readFileSync(resolve(root, 'showcase/index.html'), 'utf8');
-if (!html.includes('id="library"') || !html.includes('heshengxu-android.apk?v=20261013'))
+const revision =
+  metadata.updatedAt.replaceAll('-', '') + '-' + metadata.sha256.slice(0, 8).toLowerCase();
+if (!html.includes('id="library"') || !html.includes(metadata.file + '?v=' + revision))
   throw new Error('展示页缺少特色章节或最新下载入口');
 for (const file of [
   ...shots,
@@ -23,7 +25,11 @@ for (const file of [
   'assets/showcase/heshengxu-android.apk',
 ]) {
   if (!existsSync(resolve(root, file))) throw new Error(`缺少公开素材：${file}`);
-  if (process.argv.includes('--built') && !existsSync(resolve(root, 'showcase/dist', file)))
-    throw new Error(`发布产物缺少：${file}`);
+  if (process.argv.includes('--built')) {
+    const built = resolve(root, 'showcase/dist', file);
+    if (!existsSync(built)) throw new Error(`发布产物缺少：${file}`);
+    if (!readFileSync(built).equals(readFileSync(resolve(root, file))))
+      throw new Error(`发布产物与原文件不一致：${file}`);
+  }
 }
 console.log('公开展示资源和 APK 校验通过：五张用户原图、下载体积与 SHA256 一致。');

@@ -2308,3 +2308,177 @@ section[id] {
 .capability-overview + .product-section {
   padding-top: 40px;
 }
+
+/* Clear platform choices and verifiable release information. */
+.android-release {
+  margin-top: 28px;
+  padding: 26px;
+  border: 1px solid #cddfd3;
+  border-radius: 22px;
+  background: #ffffffc9;
+  box-shadow: 0 16px 42px #33563d09;
+}
+.android-release-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.android-release h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+.android-release-heading > span {
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: #e9f2e9;
+  color: #42694c;
+  font-size: 11px;
+}
+.android-release .apk-release-meta {
+  margin: 12px 0 20px;
+  line-height: 1.9;
+}
+.release-note {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px 0;
+  border-block: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.release-note b {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #688273;
+}
+.android-release .mini-program-actions {
+  align-items: center;
+  margin-top: 22px;
+}
+.android-release .text-button {
+  font-size: 12px;
+}
+.install-hint {
+  margin: 18px 0 0;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #677c6d;
+}
+.apk-integrity {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #64786a;
+}
+.apk-integrity summary {
+  padding: 10px 0;
+  cursor: pointer;
+}
+.apk-integrity p {
+  margin: 8px 0;
+}
+.apk-integrity code {
+  display: block;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border-radius: 8px;
+  background: #eff4ec;
+  font-size: 11px;
+}
+.platform-entry {
+  width: 100%;
+  max-width: 360px;
+  padding: 30px;
+  border: 1px solid #dbe2cc;
+  border-radius: 24px;
+  background: #fffdf4;
+}
+.platform-entry h3 {
+  margin: 12px 0 24px;
+  font-size: 26px;
+  font-weight: 600;
+}
+.platform-entry > p:last-child {
+  margin: 18px 0 0;
+  color: #697960;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.mini-code-button {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  cursor: zoom-in;
+}
+.mini-code-button img {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.experience-faq {
+  grid-column: 1 / -1;
+  border-top: 1px solid #d6e1ce;
+  padding-top: 30px;
+}
+.experience-faq h3 {
+  margin: 0 0 22px;
+  font-size: 24px;
+  font-family: Georgia, 'Songti SC', 'STSong', serif;
+  font-weight: 600;
+}
+.experience-faq details {
+  border-bottom: 1px solid #d6e1ce;
+}
+.experience-faq summary {
+  padding: 21px 0;
+  color: #365e46;
+  font-size: 15px;
+  line-height: 1.7;
+  cursor: pointer;
+}
+.experience-faq details[open] summary {
+  color: #24704f;
+}
+.experience-faq details p {
+  max-width: 850px;
+  margin: 0 0 22px;
+  color: #617560;
+  font-size: 14px;
+  line-height: 1.95;
+}
+.experience-faq summary:focus-visible,
+.apk-integrity summary:focus-visible,
+.mini-code-button:focus-visible {
+  outline: 3px solid #6a9573;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+@media (max-width: 760px) {
+  .android-release {
+    padding: 22px 18px;
+  }
+  .android-release .mini-program-actions {
+    align-items: stretch;
+    gap: 16px;
+  }
+  .android-release .text-button {
+    text-align: center;
+    padding: 8px;
+  }
+  .platform-entry {
+    max-width: 360px;
+    padding: 26px;
+  }
+  .experience-faq summary {
+    font-size: 14px;
+  }
+}
